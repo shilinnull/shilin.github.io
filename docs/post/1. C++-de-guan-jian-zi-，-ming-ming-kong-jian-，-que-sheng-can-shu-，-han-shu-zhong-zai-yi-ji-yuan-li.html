@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href="//cdn.staticfile.net/Primer/21.0.7/primer.css" rel="stylesheet" />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="
+# 前言
+
+
+>从今天开始就序列更新C++的文章了，希望大家可以耐心的坚持下去学习，有一个很好的成长~~
+
+
+首先来看一下C++的介绍，百度百科C++ -- >[点我跳转](https://baike.baidu.com/item/C++/99272)
+
+
+>C++是在C的基础之上，容纳进去了面向对象编程思想，并增加了许多有用的库，以及编程范式等。">
+<meta property="og:title" content="1. C++的关键字，命名空间，缺省参数，函数重载以及原理">
+<meta property="og:description" content="
+# 前言
+
+
+>从今天开始就序列更新C++的文章了，希望大家可以耐心的坚持下去学习，有一个很好的成长~~
+
+
+首先来看一下C++的介绍，百度百科C++ -- >[点我跳转](https://baike.baidu.com/item/C++/99272)
+
+
+>C++是在C的基础之上，容纳进去了面向对象编程思想，并增加了许多有用的库，以及编程范式等。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://shilinnull.github.io/shilin.github.io/post/1.%20C%2B%2B-de-guan-jian-zi-%EF%BC%8C-ming-ming-kong-jian-%EF%BC%8C-que-sheng-can-shu-%EF%BC%8C-han-shu-zhong-zai-yi-ji-yuan-li.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>1. C++的关键字，命名空间，缺省参数，函数重载以及原理</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">1. C++的关键字，命名空间，缺省参数，函数重载以及原理</h1>
+<div class="title-right">
+    <a href="https://shilinnull.github.io/shilin.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilin.github.io/issues/3" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h1>前言</h1>
+<blockquote>
+<p>从今天开始就序列更新C++的文章了，希望大家可以耐心的坚持下去学习，有一个很好的成长~~</p>
+</blockquote>
+<p>首先来看一下C++的介绍，百度百科C++ -- &gt;<a href="https://baike.baidu.com/item/C++/99272" rel="nofollow">点我跳转</a></p>
+<blockquote>
+<p>C++是在C的基础之上，容纳进去了面向对象编程思想，并增加了许多有用的库，以及编程范式等。熟悉C语言之后，对C++学习有一定的帮助，本章节主要目标：</p>
+<ol>
+<li>补充C语言语法的不足，以及C++是如何对C语言设计不合理的地方进行优化的，比如：作用域方面、IO方面、函数方面、指针方面、宏方面等。</li>
+<li>为后续类和对象学习打基础。</li>
+</ol>
+</blockquote>
+<ul>
+<li>我们这里不讲和C语言重合的语法，直接<strong>新内容</strong></li>
+</ul>
+<hr>
+<blockquote>
+<p>C语言有关键字，那么C++也有关键字，首先我们来认识一下这些<strong>关键字</strong></p>
+</blockquote>
+<h2>一、C++关键字(C++98)</h2>
+<ul>
+<li>C++总计<strong>63</strong>个关键字，C语言<strong>32</strong>个关键字</li>
+<li>这些关键字我们已经在C语言阶段已经有些见到过了，那些没有见过的关键字我们在后续的练习中会反复用到，所以也不用刻意记住慢慢的就都知道了~~</li>
+</ul>
+<table role="table">
+<thead>
+<tr>
+<th>asm</th>
+<th>do</th>
+<th>if</th>
+<th>return</th>
+<th>try</th>
+<th>continue</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>auto</td>
+<td>double</td>
+<td>inline</td>
+<td>short</td>
+<td>typedef</td>
+<td>for</td>
+</tr>
+<tr>
+<td>bool</td>
+<td>dynamic_cast</td>
+<td>int</td>
+<td>signed</td>
+<td>typeid</td>
+<td>public</td>
+</tr>
+<tr>
+<td>break</td>
+<td>else</td>
+<td>long</td>
+<td>sizeof</td>
+<td>typename</td>
+<td>throw</td>
+</tr>
+<tr>
+<td>case</td>
+<td>enum</td>
+<td>mutable</td>
+<td>static</td>
+<td>union</td>
+<td>wchar_t</td>
+</tr>
+<tr>
+<td>catch</td>
+<td>explicit</td>
+<td>namespace</td>
+<td>static_cast</td>
+<td>unsigned</td>
+<td>default</td>
+</tr>
+<tr>
+<td>char</td>
+<td>export</td>
+<td>new</td>
+<td>struct</td>
+<td>using</td>
+<td>friend</td>
+</tr>
+<tr>
+<td>class</td>
+<td>extern</td>
+<td>operator</td>
+<td>switch</td>
+<td>virtual</td>
+<td>register</td>
+</tr>
+<tr>
+<td>const</td>
+<td>false</td>
+<td>private</td>
+<td>template</td>
+<td>void</td>
+<td>true</td>
+</tr>
+<tr>
+<td>const_cast</td>
+<td>float</td>
+<td>protected</td>
+<td>this</td>
+<td>volatile</td>
+<td>while</td>
+</tr>
+<tr>
+<td>delete</td>
+<td>goto</td>
+<td>reinterpret_cast</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<blockquote>
+<p>第二个我们来认识一个新的概念叫<strong>命名空间</strong></p>
+</blockquote>
+<h2>二、命名空间</h2>
+<h3>命名空间介绍</h3>
+<ul>
+<li>
+<p>C++ 的命名空间（Namespace）是一种用于组织和管理代码标识符（变量、函数、类等）的方法。它可以避免命名冲突，使得在不同的命名空间中可以使用相同的标识符而不会产生命名冲突。</p>
+</li>
+<li>
+<p>使用命名空间可以将一组相关的标识符封装在一起，提供了更好的代码组织和模块化能力。在 C++ 中，可以通过关键字 <code class="notranslate">namespace</code> 定义一个命名空间，并在其中声明相关的标识符。</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>我们来看下面代码，定义了一个<strong>全局变量rand</strong>，而我还引入了头文件<strong>stdlib</strong>，而这个<code class="notranslate">rand</code>是<code class="notranslate">stdlib</code>中的一个库函数，--&gt;<a href="https://legacy.cplusplus.com/reference/cstdlib/rand/?kw=rand" rel="nofollow">rand</a>，这样我想打印这个rand的值就会与库函数里的<strong>rand</strong>产生冲突，产生<strong>重定义</strong>，这个就是C语言中的不足之处了</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>stdio.h<span class="pl-pds">&gt;</span></span>
+#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>stdlib.h<span class="pl-pds">&gt;</span></span>
+<span class="pl-k">int</span> rand = <span class="pl-c1">10</span>;
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>%d<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, <span class="pl-c1">rand</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2c5b794fd01e6322c872fed647e327d12cf9c8380569a7b7a372bbbdc85f0eb4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34646637633563393762366134386536613933303035653065333131343963352e706e67"><img src="https://camo.githubusercontent.com/2c5b794fd01e6322c872fed647e327d12cf9c8380569a7b7a372bbbdc85f0eb4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34646637633563393762366134386536613933303035653065333131343963352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/4df7c5c97b6a48e6a93005e0e31149c5.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>在C++中就可以很好的解决这种问题：</li>
+</ul>
+<blockquote>
+<p>定义命名空间，需要使用到<strong>namespace</strong>关键字，后面跟命名空间的名字，然后接一对{}即可，{}中即为命名空间的成员。</p>
+</blockquote>
+<ul>
+<li>首先第一个正常的命名空间定义，也就是<strong>namespace</strong>后面跟上一个名字【随便起~】，也就相当于是一个域，就好像C语言中的局部域，全局域。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">namespace</span> <span class="pl-en">lsl</span> 
+{
+	<span class="pl-c"><span class="pl-c">//</span> 命名空间中可以定义变量/函数/类型</span>
+	<span class="pl-k">int</span> rand = <span class="pl-c1">10</span>;
+	
+	<span class="pl-k">int</span> <span class="pl-en">Add</span>(<span class="pl-k">int</span> left, <span class="pl-k">int</span> right)
+	{
+		<span class="pl-k">return</span> left + right;
+	}
+
+	<span class="pl-k">struct</span> <span class="pl-en">Node</span>
+	{
+		<span class="pl-k">struct</span> <span class="pl-en">Node</span>* next;
+		<span class="pl-k">int</span> val;
+	};
+}</pre></div>
+<ul>
+<li>第二个就是命名空间可以嵌套</li>
+<li>这个也可以很好的理解，就和函数嵌套一样，一个域是一个域的，互不干扰</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">namespace</span> <span class="pl-en">N1</span>
+{
+	<span class="pl-k">int</span> a;
+	<span class="pl-k">int</span> b;
+	<span class="pl-k">int</span> <span class="pl-en">Add</span>(<span class="pl-k">int</span> left, <span class="pl-k">int</span> right)
+	{
+		<span class="pl-k">return</span> left + right;
+	}
+	<span class="pl-k">namespace</span> <span class="pl-en">N2</span>
+	{
+		<span class="pl-k">int</span> c;
+		<span class="pl-k">int</span> d;
+		<span class="pl-k">int</span> <span class="pl-en">Sub</span>(<span class="pl-k">int</span> left, <span class="pl-k">int</span> right)
+		{
+			<span class="pl-k">return</span> left - right;
+		}
+	}
+}</pre></div>
+<ul>
+<li>第三个就是同一个工程中允许存在多个相同名称的命名空间，编译器最后会合成同一个命名空间中。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7abc8bb7d37fd05a3435fbc8c361dc0871836fa4c052871af6a4e12ac7f8cbd2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61363433386666386439633834653066396630656332613633653463623739662e706e67"><img src="https://camo.githubusercontent.com/7abc8bb7d37fd05a3435fbc8c361dc0871836fa4c052871af6a4e12ac7f8cbd2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61363433386666386439633834653066396630656332613633653463623739662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/a6438ff8d9c84e0f9f0ec2a63e4cb79f.png" style="max-width: 100%;"></a></p>
+<blockquote>
+<p>注意：一个命名空间就定义了一个新的作用域，命名空间中的所有内容都局限于该命名空间中</p>
+</blockquote>
+<hr>
+<ul>
+<li>
+<p>那么我这个<strong>命名空间域</strong>如何使用呢？</p>
+</li>
+<li>
+<p>来看下面这段代码</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">namespace</span> <span class="pl-en">lsl</span>
+{
+	<span class="pl-c"><span class="pl-c">//</span> 命名空间中可以定义变量/函数/类型</span>
+	<span class="pl-k">int</span> a = <span class="pl-c1">0</span>;
+	<span class="pl-k">int</span> b = <span class="pl-c1">1</span>;
+	<span class="pl-k">int</span> <span class="pl-en">Add</span>(<span class="pl-k">int</span> left, <span class="pl-k">int</span> right)
+	{
+		<span class="pl-k">return</span> left + right;
+	}
+	<span class="pl-k">struct</span> <span class="pl-en">Node</span>
+	{
+		<span class="pl-k">struct</span> <span class="pl-en">Node</span>* next;
+		<span class="pl-k">int</span> val;
+	};
+}
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>%d<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, a);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4819631e7ed571ac4d383c43dbaa8dfd6cd1bc006ca8e4a7703df1658d81c7c2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38663639663535396137343134303533623239613966333937323337653631392e706e67"><img src="https://camo.githubusercontent.com/4819631e7ed571ac4d383c43dbaa8dfd6cd1bc006ca8e4a7703df1658d81c7c2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38663639663535396137343134303533623239613966333937323337653631392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/8f69f559a7414053b29a9f397237e619.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>上面图片清晰的展示到，是不能这样用的，已经是在一个域里面了，所以就要使用特定的方法来使用这个域里面变量，函数和类型</li>
+</ul>
+<h3>命名空间的使用</h3>
+<blockquote>
+<p>命名空间的使用有三种方式：</p>
+</blockquote>
+<ul>
+<li>第一种方式<strong>加命名空间名称及作用域限定符【::】也就是两个冒号，也就是域作用限定符</strong></li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>%d<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, lsl::a);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6b3873b32a4987bafdf9195bcf35a6dded2ef0774659ade96bcd266919f448a0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64636231613137383236366534643936623664613532366632383335313961372e706e67"><img src="https://camo.githubusercontent.com/6b3873b32a4987bafdf9195bcf35a6dded2ef0774659ade96bcd266919f448a0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64636231613137383236366534643936623664613532366632383335313961372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/dcb1a178266e4d96b6da526f283519a7.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>第二种方式<strong>使用using将命名空间中某个成员引入</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7e81e7303168e1ab3eb59cdfa7bd584caeb1da8b89f8ec7b4011fe6117196975/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34386530353962343930316634656365383337376136316165323634653263622e706e67"><img src="https://camo.githubusercontent.com/7e81e7303168e1ab3eb59cdfa7bd584caeb1da8b89f8ec7b4011fe6117196975/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34386530353962343930316634656365383337376136316165323634653263622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/48e059b4901f4ece8377a61ae264e2cb.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>第三种方式就是使用<strong>using namespace</strong> 命名空间名称引入，也就是展开，让<strong>指定的命名空间里</strong>的内容在外面都可以访问</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/45ecf84627ca9bd6e1de6e3a08893a76b93553b8bbd94e0c68798715a7927cb7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32396332383338303534396134336237393934333334326632613235363362642e706e67"><img src="https://camo.githubusercontent.com/45ecf84627ca9bd6e1de6e3a08893a76b93553b8bbd94e0c68798715a7927cb7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32396332383338303534396134336237393934333334326632613235363362642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/29c28380549a43b79943342f2a2563bd.png" style="max-width: 100%;"></a></p>
+<blockquote>
+<p>这里的最后一种方式相信大家学c++或多或少也都见到过，平常在使用c++的时候都要有这么一句<strong>using namespace std;</strong>，<code class="notranslate">std</code>是C++标准库的命名空间名，C++将标准库的定义实现都放到这个命名空间中，这里的展开和头文件的展开是不一样的，不要混淆了~~</p>
+</blockquote>
+<blockquote>
+<p>到这里我们也知道了，首先是先从局部域来搜索，然后从全局域再搜索，搜索不到就报错了，然而我们这里新增加了一个域作用限定符【::】，有了这个就是指定域搜索。</p>
+</blockquote>
+<hr>
+<ul>
+<li>编译器搜索原则：</li>
+</ul>
+<blockquote>
+<p><strong>不指定域</strong>：当前局部域，全局域</p>
+<p>指定域：如果指定了，直接去指定域搜索</p>
+</blockquote>
+<hr>
+<h2>三、C++输入【cin】&amp; 输出【cout】</h2>
+<ul>
+<li>在学习一门语言的时候，大部分人都会第一次写下这么一段代码，打印<code class="notranslate">hello world</code>，C++怎么来打印呢？</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">include</span><span class="pl-s"><span class="pl-pds">&lt;</span>iostream<span class="pl-pds">&gt;</span></span>
+<span class="pl-k">using</span> <span class="pl-k">namespace</span> <span class="pl-en">std</span><span class="pl-k">;</span>
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>hello world<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/83a037ee39a9a066b3775b40e1f389cd9bcf51c04e52c8ee7411cdd1e8624873/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31636230313766626632333134663333393530366331343936386230393336332e706e67"><img src="https://camo.githubusercontent.com/83a037ee39a9a066b3775b40e1f389cd9bcf51c04e52c8ee7411cdd1e8624873/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31636230313766626632333134663333393530366331343936386230393336332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/1cb017fbf2314f339506c14968b09363.png" style="max-width: 100%;"></a></p>
+<p>说明：</p>
+<ol>
+<li>使用cout标准输出对象(控制台)和cin标准输入对象(键盘)时，必须包含 &lt; iostream &gt;头文件以及按命名空间使用方法使用<strong>std</strong></li>
+<li><strong>cout</strong>和<strong>cin</strong>是全局的流对象，<strong>endl</strong>是特殊的C++符号，表示<strong>换行输出</strong>，他们都包含在包含头文件中。后面在实际应用中会回用到很多，慢慢都会介绍~~</li>
+<li><code class="notranslate">&lt;&lt;</code>是<strong>流插入运算符</strong>， <code class="notranslate">&gt;&gt;</code>是<strong>流提取运算符</strong>。</li>
+<li>使用C++输入输出更方便，不需要像<strong>printf/scanf</strong>输入输出时那样，需要手动控制格式。<strong>C++的输入输出可以自动识别变量类型</strong>。</li>
+</ol>
+<ul>
+<li>
+<p>注意：<strong>早期标准库将所有功能在全局域中实现，声明在.h后缀的头文件中，使用时只需包含对应头文件即可，后来将其实现在std命名空间下，为了和C头文件区分，也为了正确使用命名空间，规定C++头文件不带.h；旧编译器(vc 6.0)中还支持&lt;iostream.h&gt;格式，后续编译器已不支持，因此推荐使用+std的方式。</strong></p>
+</li>
+<li>
+<p>这里的<strong>cout</strong>【输出】，<strong>cin</strong>【输入】可以自动识别类型</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/fc0b239b781d589b3b3340e55a9be3ddcde41eb62924831389ca64e8c04fb058/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66346432356463323434323634306635383431393962386165623139626366302e706e67"><img src="https://camo.githubusercontent.com/fc0b239b781d589b3b3340e55a9be3ddcde41eb62924831389ca64e8c04fb058/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66346432356463323434323634306635383431393962386165623139626366302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/f4d25dc2442640f584199b8aeb19bcf0.png" style="max-width: 100%;"></a></p>
+<p><strong>std命名空间的使用惯例：</strong></p>
+<blockquote>
+<p>std是C++标准库的命名空间，如何展开std使用更合理呢？</p>
+</blockquote>
+<ol>
+<li>在日常练习中，建议直接<strong>using namespace std</strong>即可，这样就很方便。</li>
+<li><strong>using namespace std</strong>展开，标准库就全部暴露出来了，如果我们定义跟库重名的类型/对象/函数，就存在冲突问题。该问题在日常练习中很少出现，但是项目开发中代码较多、规模大，就很容易出现。所以建议在项目开发中使用，像<strong>std::cout</strong>这样使用时指定命名空间 + <strong>using std::cout</strong>展开常用的库对象/类型等方式。</li>
+</ol>
+<h2>四、缺省参数</h2>
+<h3>缺省参数概念</h3>
+<ul>
+<li>缺省参数是<strong>声明或定义函数时为函数的参数指定一个缺省值。</strong></li>
+<li>在调用该函数时，如果<strong>没有指定实参则采用该形参的缺省值，否则使用指定的实参。</strong></li>
+</ul>
+<p>接下来看一个案例就能明白了：</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">Func</span>(<span class="pl-k">int</span> a = <span class="pl-c1">0</span>)
+{
+	cout &lt;&lt; a &lt;&lt; endl;
+}
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c1">Func</span>(); <span class="pl-c"><span class="pl-c">//</span> 没有传参时，使用参数的默认值</span>
+	<span class="pl-c1">Func</span>(<span class="pl-c1">10</span>); <span class="pl-c"><span class="pl-c">//</span> 传参时，使用指定的实参</span>
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b5b7f568f3187d428ead3e50a10710fab2c324f24e76a3f4dff33d3e313c9c76/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37653334653639393631636234313261393438633534616235613630393763372e706e67"><img src="https://camo.githubusercontent.com/b5b7f568f3187d428ead3e50a10710fab2c324f24e76a3f4dff33d3e313c9c76/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37653334653639393631636234313261393438633534616235613630393763372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/7e34e69961cb412a948c54ab5a6097c7.png" style="max-width: 100%;"></a></p>
+<h3>缺省参数分类</h3>
+<ul>
+<li>全缺省参数【也就是从左到右形参都有默认值】</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">Func</span>(<span class="pl-k">int</span> a = <span class="pl-c1">10</span>, <span class="pl-k">int</span> b = <span class="pl-c1">20</span>, <span class="pl-k">int</span> c = <span class="pl-c1">30</span>)
+{
+	cout&lt;&lt;<span class="pl-s"><span class="pl-pds">"</span>a = <span class="pl-pds">"</span></span>&lt;&lt;a&lt;&lt;endl;
+	cout&lt;&lt;<span class="pl-s"><span class="pl-pds">"</span>b = <span class="pl-pds">"</span></span>&lt;&lt;b&lt;&lt;endl;
+	cout&lt;&lt;<span class="pl-s"><span class="pl-pds">"</span>c = <span class="pl-pds">"</span></span>&lt;&lt;c&lt;&lt;endl;
+}</pre></div>
+<ul>
+<li>半缺省参数【<strong>必须是从右到左赋值</strong>，不可以从左到右】</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">Func</span>(<span class="pl-k">int</span> a, <span class="pl-k">int</span> b = <span class="pl-c1">10</span>, <span class="pl-k">int</span> c = <span class="pl-c1">20</span>)
+{
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>a = <span class="pl-pds">"</span></span> &lt;&lt; a &lt;&lt; endl;
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>b = <span class="pl-pds">"</span></span> &lt;&lt; b &lt;&lt; endl;
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>c = <span class="pl-pds">"</span></span> &lt;&lt; c &lt;&lt; endl;
+}</pre></div>
+<h3>缺省参数的使用</h3>
+<ul>
+<li>我们可以这样使用：</li>
+<li>第一个参数就是匹配的一个形参，依次匹配，<strong>不可跳跃的传参</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f1d366f4a7be36d3613a810b5eb30a214140ba664ade19f7011d44248cb2b0e7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38633564633432646637366134613736393565636161343164353564303831612e706e67"><img src="https://camo.githubusercontent.com/f1d366f4a7be36d3613a810b5eb30a214140ba664ade19f7011d44248cb2b0e7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38633564633432646637366134613736393565636161343164353564303831612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/8c5dc42df76a4a7695ecaa41d55d081a.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>实际上我们是还可以这样用的，比如说我是定义了一个栈，栈在初始化的的时候不知道一开始初始化多少个，这个时候我们就可以使用缺省参数，指定传参。</li>
+<li>比如我知道要插入100个数据，我就直接<strong>指定100的大小就可以</strong>，减少<strong>扩容消耗</strong></li>
+<li>如果不知道多少个就默认4个就可以啦~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4cee15331096d77e3789e7397f308a52621da51e9b5fcd2e777ba00254708a11/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35613438366662303864363634306130616239333031343962633065323961322e706e67"><img src="https://camo.githubusercontent.com/4cee15331096d77e3789e7397f308a52621da51e9b5fcd2e777ba00254708a11/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35613438366662303864363634306130616239333031343962633065323961322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/5a486fb08d6640a0ab930149bc0e29a2.png" style="max-width: 100%;"></a></p>
+<blockquote>
+<p>还有一个重要的点，就是下面这里</p>
+</blockquote>
+<ul>
+<li>我们这里可以分文件写这个栈</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c86d97cfde6192dad03715253d25578640c160207502d9a0fafaf399013d3ee3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32643938633238666233646134386463623264616439313132613233393236352e706e67"><img src="https://camo.githubusercontent.com/c86d97cfde6192dad03715253d25578640c160207502d9a0fafaf399013d3ee3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32643938633238666233646134386463623264616439313132613233393236352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/2d98c28fb3da48dcb2dad9112a239265.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们这里的<strong>声明</strong>和<strong>定义</strong>可以同时写吗？</li>
+</ul>
+<blockquote>
+<p>我们有人写代码的时候就有可能写成这样的操作，声明的参数和定义的参数不一样，那么是依谁的为准呢？</p>
+</blockquote>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/15d71a76076218e9943ea73cda5c499e57c38f52a8b628f10a2777857ec14d60/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62316439643335306238616334323462623736393434643665363439366639352e706e67"><img src="https://camo.githubusercontent.com/15d71a76076218e9943ea73cda5c499e57c38f52a8b628f10a2777857ec14d60/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62316439643335306238616334323462623736393434643665363439366639352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/b1d9d350b8ac424bb76944d6e6496f95.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们这里直接给出结论，是必须在<strong>声明</strong>给，为什么呢？
+<ul>
+<li>这就需要了解代码的<strong>编译原理</strong>了，可以看一下C语言的<strong>编译程序环境和预处理，程序编译+链接全过程</strong></li>
+<li>在同一文件下，缺省值<strong>在函数的声明与定义中同时定义</strong>，在编译阶段的语法检查时，直接报错了~</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3>小结一下</h3>
+<ol>
+<li>
+<p><strong>半缺省参数必须从右往左依次来给出，不能间隔着给</strong></p>
+</li>
+<li>
+<p><strong>缺省参数不能在函数声明和定义中同时出现</strong></p>
+</li>
+<li>
+<p><strong>缺省值必须是常量或者全局变量</strong></p>
+</li>
+<li>
+<p><strong>C语言不支持（编译器不支持）</strong></p>
+</li>
+</ol>
+<hr>
+<h2>五、函数重载</h2>
+<h3>函数重载介绍</h3>
+<ul>
+<li><strong>函数重载</strong>：是函数的一种特殊情况，C++允许在同一作用域中声明几个功能类似的同名函数，这些同名函数的形参列表（<code class="notranslate">参数个数</code>或<code class="notranslate">类型</code>或<code class="notranslate">类型顺序</code>）不同，常用来处理实现功能类似数据类型不同的问题。</li>
+</ul>
+<h3>函数重载类型</h3>
+<blockquote>
+<p>函数重载有3个类型，我们分别来看一下：</p>
+</blockquote>
+<ul>
+<li>第一个就是<strong>参数类型不同</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5530bbf8df856f5ea90838d82aa1aca0069c3b4518791e3521498dd8ff9daf50/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61346332666261666230323734306335396364373436316432373430316334382e706e67"><img src="https://camo.githubusercontent.com/5530bbf8df856f5ea90838d82aa1aca0069c3b4518791e3521498dd8ff9daf50/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61346332666261666230323734306335396364373436316432373430316334382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/a4c2fbafb02740c59cd7461d27401c48.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>第二个是<strong>参数个数不同</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f16e533b2692e058290f82c926ac65daf99a3a78d1e707bd412a995abeac69eb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39613830363131333134393234393737386634656666633833666339613362612e706e67"><img src="https://camo.githubusercontent.com/f16e533b2692e058290f82c926ac65daf99a3a78d1e707bd412a995abeac69eb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39613830363131333134393234393737386634656666633833666339613362612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/9a806113149249778f4effc83fc9a3ba.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>第三个就是<strong>参数类型顺序不同</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/28e10f492892eeb873fb679093886192adae3748a9989f3192f3b7705113c831/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65383736363537653033333234383838623736313235623731366162653039302e706e67"><img src="https://camo.githubusercontent.com/28e10f492892eeb873fb679093886192adae3748a9989f3192f3b7705113c831/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65383736363537653033333234383838623736313235623731366162653039302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/e876657e03324888b76125b716abe090.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>最后这里要注意：<strong>构成函数重载的条件是<code class="notranslate">函数名相同</code>，<code class="notranslate">参数不同</code>，构成函数重载</strong>【非常重要】</li>
+</ul>
+<p>下面我们来看一道题【自己先做一下】来巩固一下：</p>
+<blockquote>
+<p>以下不是double compare(int,int)的重载函数的是( )</p>
+</blockquote>
+<blockquote>
+<p><strong>A. int compare(double,double)<br>
+B. double compare(double,double)<br>
+C. double compare(double,int)<br>
+D. int compare(int,int)</strong></p>
+</blockquote>
+<p><strong>解析：</strong></p>
+<blockquote>
+<p>A.重载必须是参数列表有所不同(包括个数和类型)，所以参数类型不同，构成重载<br>
+B.参数类型不同，构成重载<br>
+C.参数类型不同，构成重载<br>
+D.函数重载不能依靠返回值的不同来构成重载，因为调用时无法根据参数列表确定调用哪个重载函数，故错误</p>
+</blockquote>
+<hr>
+<h2>六、C++支持函数重载的原理--名字修饰(name Mangling)【重点】</h2>
+<blockquote>
+<p>那么为什么C++支持<strong>函数重载</strong>呢？而C语言不支持呢？</p>
+</blockquote>
+<ul>
+<li>靠的就是<strong>名字修饰</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/530ec2b5bef8ebc852a785af34889f58dc79ef4d11d82c7fa949b6b9d83a15de/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34393137653663663931633834633037613933373437626536663264393665662e706e67"><img src="https://camo.githubusercontent.com/530ec2b5bef8ebc852a785af34889f58dc79ef4d11d82c7fa949b6b9d83a15de/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34393137653663663931633834633037613933373437626536663264393665662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/4917e6cf91c84c07a93747be6f2d96ef.png" style="max-width: 100%;"></a></p>
+<ol>
+<li>实际项目通常是由多个头文件和多个源文件构成，而通过C语言阶段学习的编译链接，我们可以知道，【当前a.cpp中调用了b.cpp中定义的Add函数时】，编译后链接前，<code class="notranslate">a.o</code>的目标文件中没有Add的函数地址，因为Add是在<code class="notranslate">b.cpp</code>中定义的，所以Add的地址在<code class="notranslate">b.o</code>中。那么怎么办呢？</li>
+<li>所以链接阶段就是专门处理这种问题，链接器看到<code class="notranslate">a.o</code>调用Add，但是没有Add的地址，就会到<code class="notranslate">b.o</code>的符号表中找Add的地址，然后链接到一起。</li>
+<li>那么链接时，面对Add函数，链接接器会使用哪个名字去找呢？这里每个编译器都有自己的函数名修饰规则。</li>
+<li>由于Windows下vs的修饰规则过于复杂，而Linux下g++的修饰规则简单易懂，下面我们使用了g++演示了这个修饰后的名字。</li>
+<li>通过下面我们可以看出gcc的函数修饰后名字不变。而g++的函数修饰后变成【_Z+函数长度+函数名+类型首字母】。</li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3b5a78ffa3c33dc9ae726643fb383677f2779f9c88bb5f6bd3d29c840eac5a98/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32613064383033363262663234326430396464383165303666366236633763342e706e67"><img src="https://camo.githubusercontent.com/3b5a78ffa3c33dc9ae726643fb383677f2779f9c88bb5f6bd3d29c840eac5a98/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32613064383033363262663234326430396464383165303666366236633763342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/2a0d80362bf242d09dd81e06f6b6c7c4.png" style="max-width: 100%;"></a></p>
+<ul>
+<li><code class="notranslate">gcc</code>编译后的结果：</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/60d432e294c2f334078448156fd2720a6399246e0afc6a426893ad4cb23bf9d7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62353231336635383166656534363061396261646264643939326262626435662e706e67"><img src="https://camo.githubusercontent.com/60d432e294c2f334078448156fd2720a6399246e0afc6a426893ad4cb23bf9d7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62353231336635383166656534363061396261646264643939326262626435662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/b5213f581fee460a9badbdd992bbbd5f.png" style="max-width: 100%;"></a></p>
+<p>结论：<strong>在linux下，采用gcc编译完成后，函数名字的修饰没有发生改变，之所以就函数名不能相同</strong></p>
+<ul>
+<li>采用<strong>g++编译器</strong>编译后结果：</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/a7b838ea37504d7a256c3e8cd87b8e9c1618cd0e4ceb61021609d59756a30c10/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31346638613361623263323334373861626235653361633837666432303038612e706e67"><img src="https://camo.githubusercontent.com/a7b838ea37504d7a256c3e8cd87b8e9c1618cd0e4ceb61021609d59756a30c10/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31346638613361623263323334373861626235653361633837666432303038612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/14f8a3ab2c23478abb5e3ac87fd2008a.png" style="max-width: 100%;"></a></p>
+<p>结论：<strong>在<code class="notranslate">linux</code>下，采用<code class="notranslate">g++</code>编译完成后，函数名字的修饰发生改变，编译器将函数参数类型信息添加到修改后的名字中，所以就支持函数重载</strong></p>
+<hr>
+<ul>
+<li>Windows下<strong>名字修饰规则</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/87c1d4faca397a649f76671c1ab4a75e5fb0858c5ec34eb83b14e5696d31d6ac/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31313335636630383931316234626363616664333437373262333232623438642e706e67"><img src="https://camo.githubusercontent.com/87c1d4faca397a649f76671c1ab4a75e5fb0858c5ec34eb83b14e5696d31d6ac/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31313335636630383931316234626363616664333437373262333232623438642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/1135cf08911b4bccafd34772b322b48d.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>对比Linux会发现，windows下vs编译器对函数名字修饰规则相对复杂难懂，但道理都是类似的，我们就不做细致的研究了。</p>
+</li>
+<li>
+<p>【<strong>扩展学习：C/C++函数调用约定和名字修饰规则，里面有对vs下函数名修饰规则讲解</strong>】</p>
+</li>
+<li>
+<p>通过这里就理解了<strong>C语言没办法支持重载</strong>，因为<strong>同名函数没办法区分</strong>。而C++是通过<strong>函数修饰规则来区分</strong>，<strong>只要参数不同</strong>，<strong>修饰出来的名字就不一样，就支持了重载。</strong></p>
+</li>
+<li>
+<p>如果两个函数函数名和参数是一样的，返回值不同是不构成重载的，因为调用时编译器没办法区分。</p>
+</li>
+</ul>
+<blockquote>
+<p>最后，本章简单的介绍了C++的关键字，介绍了命名空间的作用和使用，知道了C++的输出和出入，会用缺省参数，以及函数重载~~</p>
+</blockquote></div>
+<div style="font-size:small;margin-top:8px;float:right;"></div>
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://shilinnull.github.io/shilin.github.io"> 仕林的博客 </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if(""!=""){
+    var now=new Date();
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilin.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

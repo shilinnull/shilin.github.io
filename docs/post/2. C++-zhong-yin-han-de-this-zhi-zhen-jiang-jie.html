@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href="//cdn.staticfile.net/Primer/21.0.7/primer.css" rel="stylesheet" />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="
+## 一、this指针的引出
+
+
+- 我们先来定义一个日期类`Date`，下面这段代码执行的结果是什么呢？
+
+
+```cpp
+class Date
+{
+public:
+	void Init(int year, int month, int day)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+	}
+	void print()
+	{
+		cout << _year << '-' << _month << '-' << _day << endl;
+		
+	}
+private:
+	int _year; 
+	int _month; 
+	int _day; 
+};
+int main()
+{
+	Date d1, d2;
+	
+	d1.Init(2022, 5, 11);
+	d2.Init(2022, 5, 12);
+
+	d1.print();
+	d2.print();
+	return 0;
+}
+```
+
+- 可以看到分别打印出了**两个日期**，它是怎么知道改打印哪个的？
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/6069c982dacd4e20840ca421e99ce0d1.png)
+
+
+- 我们来分析一下，先看一下**汇编代码，看一看**
+
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/dba395b3dc58423b92fa5d0b44abdfcb.png)
+
+
+----
+
+- 我们看到上面的代码是调用的**同一个函数**，那么编译器是如何知道那两个日期的？
+
+- 其实C++里有一个**隐含**的**this指针**，在[微软的官方文档](https://learn.microsoft.com/zh-cn/cpp/cpp/this-pointer?view=msvc-170)也有说明
+
+- 在使用函数的时候其实里面**传了一个地址，然后有一个隐的this指针来接收**
+
+---
+
+>原形是这样：
+
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/fcc3f5a320bb4692a65474ddce4eba88.png)
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/da0b81f7cab34af0898930cb25b289a0.png)
+
+
+- 那为什么这里**报错**了呢？
+- 因为不必要写，这个是**隐含**的~~，我们可以**直接在类里面使用**
+
+
+
+## 二、this指针的特性
+
+- 刚刚上面也给你看了原形，细心的烙铁已经发现了，这个this指针是有一个**const修饰**的，而且这个const是在`*`的右边
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/d561f02819e2498f9f842af479520663.png)
+
+
+- 这里的`const`修饰，在`const`的右边
+
+- 下面我们回忆一下~
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/221ab0d8a51540be90c5c7d5ff12f0a7.png)
+
+- 到这里就得出的**this本身是不被修改的，但是做指向的值是可以被修改**
+
+- 我们可以在类中打印一下`this`指针的地址，再打印一下`d1`和`d2`的地址，我们来看一下：
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/26696d96afce46419aeca6760ef18445.png)
+
+- 得到结果就是this指针指向一个指向**当前对象**的指针
+
+---
+
+- 我们还可以下面这样，是不会报错的，但是不能向上面直接在形参就写上
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/f76630adebed4fdcbd84da92faaf531c.png)
+
+特点：
+
+**1、形参和实参的位置，我们不能显示写
+2、函数内部可以使用**
+
+---
+
+- **最后总结一下：**
+
+1. this指针的类型：类型 **\*const**，即成员函数中，**不能给this指针赋值**。">
+<meta property="og:title" content="2. C++中隐含的this指针讲解">
+<meta property="og:description" content="
+## 一、this指针的引出
+
+
+- 我们先来定义一个日期类`Date`，下面这段代码执行的结果是什么呢？
+
+
+```cpp
+class Date
+{
+public:
+	void Init(int year, int month, int day)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+	}
+	void print()
+	{
+		cout << _year << '-' << _month << '-' << _day << endl;
+		
+	}
+private:
+	int _year; 
+	int _month; 
+	int _day; 
+};
+int main()
+{
+	Date d1, d2;
+	
+	d1.Init(2022, 5, 11);
+	d2.Init(2022, 5, 12);
+
+	d1.print();
+	d2.print();
+	return 0;
+}
+```
+
+- 可以看到分别打印出了**两个日期**，它是怎么知道改打印哪个的？
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/6069c982dacd4e20840ca421e99ce0d1.png)
+
+
+- 我们来分析一下，先看一下**汇编代码，看一看**
+
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/dba395b3dc58423b92fa5d0b44abdfcb.png)
+
+
+----
+
+- 我们看到上面的代码是调用的**同一个函数**，那么编译器是如何知道那两个日期的？
+
+- 其实C++里有一个**隐含**的**this指针**，在[微软的官方文档](https://learn.microsoft.com/zh-cn/cpp/cpp/this-pointer?view=msvc-170)也有说明
+
+- 在使用函数的时候其实里面**传了一个地址，然后有一个隐的this指针来接收**
+
+---
+
+>原形是这样：
+
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/fcc3f5a320bb4692a65474ddce4eba88.png)
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/da0b81f7cab34af0898930cb25b289a0.png)
+
+
+- 那为什么这里**报错**了呢？
+- 因为不必要写，这个是**隐含**的~~，我们可以**直接在类里面使用**
+
+
+
+## 二、this指针的特性
+
+- 刚刚上面也给你看了原形，细心的烙铁已经发现了，这个this指针是有一个**const修饰**的，而且这个const是在`*`的右边
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/d561f02819e2498f9f842af479520663.png)
+
+
+- 这里的`const`修饰，在`const`的右边
+
+- 下面我们回忆一下~
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/221ab0d8a51540be90c5c7d5ff12f0a7.png)
+
+- 到这里就得出的**this本身是不被修改的，但是做指向的值是可以被修改**
+
+- 我们可以在类中打印一下`this`指针的地址，再打印一下`d1`和`d2`的地址，我们来看一下：
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/26696d96afce46419aeca6760ef18445.png)
+
+- 得到结果就是this指针指向一个指向**当前对象**的指针
+
+---
+
+- 我们还可以下面这样，是不会报错的，但是不能向上面直接在形参就写上
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/f76630adebed4fdcbd84da92faaf531c.png)
+
+特点：
+
+**1、形参和实参的位置，我们不能显示写
+2、函数内部可以使用**
+
+---
+
+- **最后总结一下：**
+
+1. this指针的类型：类型 **\*const**，即成员函数中，**不能给this指针赋值**。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://shilinnull.github.io/shilin.github.io/post/2.%20C%2B%2B-zhong-yin-han-de-this-zhi-zhen-jiang-jie.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>2. C++中隐含的this指针讲解</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">2. C++中隐含的this指针讲解</h1>
+<div class="title-right">
+    <a href="https://shilinnull.github.io/shilin.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilin.github.io/issues/4" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>一、this指针的引出</h2>
+<ul>
+<li>我们先来定义一个日期类<code class="notranslate">Date</code>，下面这段代码执行的结果是什么呢？</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">void</span> <span class="pl-en">Init</span>(<span class="pl-k">int</span> year, <span class="pl-k">int</span> month, <span class="pl-k">int</span> day)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+	}
+	<span class="pl-k">void</span> <span class="pl-en">print</span>()
+	{
+		cout &lt;&lt; _year &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>-<span class="pl-pds">"</span></span> &lt;&lt; _month &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>-<span class="pl-pds">"</span></span> &lt;&lt; _day &lt;&lt; endl;
+		
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _year; 
+	<span class="pl-k">int</span> _month; 
+	<span class="pl-k">int</span> _day; 
+};
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Date d1, d2;
+	
+	d1.<span class="pl-c1">Init</span>(<span class="pl-c1">2022</span>, <span class="pl-c1">5</span>, <span class="pl-c1">11</span>);
+	d2.<span class="pl-c1">Init</span>(<span class="pl-c1">2022</span>, <span class="pl-c1">5</span>, <span class="pl-c1">12</span>);
+
+	d1.<span class="pl-c1">print</span>();
+	d2.<span class="pl-c1">print</span>();
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>可以看到分别打印出了<strong>两个日期</strong>，它是怎么知道改打印哪个的？</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1438ef69fba50ffcc9ef090c80a181cb9386544d001d269a790636fae5caa387/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36303639633938326461636434653230383430636134323165393963653064312e706e67"><img src="https://camo.githubusercontent.com/1438ef69fba50ffcc9ef090c80a181cb9386544d001d269a790636fae5caa387/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36303639633938326461636434653230383430636134323165393963653064312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/6069c982dacd4e20840ca421e99ce0d1.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们来分析一下，先看一下<strong>汇编代码，看一看</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/45151d4aac1867848010b23d8bc8a6be6cfc761200b7f0db8595ebf96f2570a0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64626133393562336463353834323362393266613564306234346162646663622e706e67"><img src="https://camo.githubusercontent.com/45151d4aac1867848010b23d8bc8a6be6cfc761200b7f0db8595ebf96f2570a0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64626133393562336463353834323362393266613564306234346162646663622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/dba395b3dc58423b92fa5d0b44abdfcb.png" style="max-width: 100%;"></a></p>
+<hr>
+<ul>
+<li>
+<p>我们看到上面的代码是调用的<strong>同一个函数</strong>，那么编译器是如何知道那两个日期的？</p>
+</li>
+<li>
+<p>其实C++里有一个<strong>隐含</strong>的<strong>this指针</strong>，在<a href="https://learn.microsoft.com/zh-cn/cpp/cpp/this-pointer?view=msvc-170" rel="nofollow">微软的官方文档</a>也有说明</p>
+</li>
+<li>
+<p>在使用函数的时候其实里面<strong>传了一个地址，然后有一个隐的this指针来接收</strong></p>
+</li>
+</ul>
+<hr>
+<blockquote>
+<p>原形是这样：</p>
+</blockquote>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f8a9841f8fdcc4ce1c9c300d6562ca74bf4c7d8543721fa59b9cefff83313d92/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66636333663561333230626234363932613635343734646463653465626138382e706e67"><img src="https://camo.githubusercontent.com/f8a9841f8fdcc4ce1c9c300d6562ca74bf4c7d8543721fa59b9cefff83313d92/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66636333663561333230626234363932613635343734646463653465626138382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/fcc3f5a320bb4692a65474ddce4eba88.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f754b078b69a3366c8fb5fd81e91b8c2264afa636d72d7b4170e16d8e5242be2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64613062383166376361623334616630383938393330636232356232383961302e706e67"><img src="https://camo.githubusercontent.com/f754b078b69a3366c8fb5fd81e91b8c2264afa636d72d7b4170e16d8e5242be2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64613062383166376361623334616630383938393330636232356232383961302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/da0b81f7cab34af0898930cb25b289a0.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>那为什么这里<strong>报错</strong>了呢？</li>
+<li>因为不必要写，这个是<strong>隐含</strong>的~~，我们可以<strong>直接在类里面使用</strong></li>
+</ul>
+<h2>二、this指针的特性</h2>
+<ul>
+<li>刚刚上面也给你看了原形，细心的烙铁已经发现了，这个this指针是有一个<strong>const修饰</strong>的，而且这个const是在<code class="notranslate">*</code>的右边</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/68b94ab12152e012afabe8d435c5ac2fe29fca30f192cb3616aec0609840825c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64353631663032383139653234393866396638343261663437393532303636332e706e67"><img src="https://camo.githubusercontent.com/68b94ab12152e012afabe8d435c5ac2fe29fca30f192cb3616aec0609840825c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64353631663032383139653234393866396638343261663437393532303636332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/d561f02819e2498f9f842af479520663.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>这里的<code class="notranslate">const</code>修饰，在<code class="notranslate">const</code>的右边</p>
+</li>
+<li>
+<p>下面我们回忆一下~</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9f9d61d72bbbb5695725c634fae4171cbb0519154faeaf96a9977189e21640f7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32323161623064386135313534306265393063356337643566663132663061372e706e67"><img src="https://camo.githubusercontent.com/9f9d61d72bbbb5695725c634fae4171cbb0519154faeaf96a9977189e21640f7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32323161623064386135313534306265393063356337643566663132663061372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/221ab0d8a51540be90c5c7d5ff12f0a7.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>到这里就得出的<strong>this本身是不被修改的，但是做指向的值是可以被修改</strong></p>
+</li>
+<li>
+<p>我们可以在类中打印一下<code class="notranslate">this</code>指针的地址，再打印一下<code class="notranslate">d1</code>和<code class="notranslate">d2</code>的地址，我们来看一下：</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0145a9bdf2e67daf03994e8b5fd5395fc3d58ec3fd4666f32fe0e83728dadd9e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32363639366439366166636534363431396165636136373630656631383434352e706e67"><img src="https://camo.githubusercontent.com/0145a9bdf2e67daf03994e8b5fd5395fc3d58ec3fd4666f32fe0e83728dadd9e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32363639366439366166636534363431396165636136373630656631383434352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/26696d96afce46419aeca6760ef18445.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>得到结果就是this指针指向一个指向<strong>当前对象</strong>的指针</li>
+</ul>
+<hr>
+<ul>
+<li>我们还可以下面这样，是不会报错的，但是不能向上面直接在形参就写上</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3f2ba0abeb26b08a8b6d1bdb252d4ef61bac983152ef0eaa9e2e95783bcfea92/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66373636333061646562656434666463626438346461393266616166353331632e706e67"><img src="https://camo.githubusercontent.com/3f2ba0abeb26b08a8b6d1bdb252d4ef61bac983152ef0eaa9e2e95783bcfea92/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66373636333061646562656434666463626438346461393266616166353331632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/f76630adebed4fdcbd84da92faaf531c.png" style="max-width: 100%;"></a></p>
+<p>特点：</p>
+<p><strong>1、形参和实参的位置，我们不能显示写<br>
+2、函数内部可以使用</strong></p>
+<hr>
+<ul>
+<li><strong>最后总结一下：</strong></li>
+</ul>
+<ol>
+<li>this指针的类型：类型 <strong>*const</strong>，即成员函数中，<strong>不能给this指针赋值</strong>。</li>
+<li>只能在“<strong>成员函数</strong>”的内部使用</li>
+<li>this指针本质上是“<strong>成员函数</strong>”的形参，当对象调用成员函数时，<strong>将对象地址作为实参传递给this形参。所以对象中不存储this指针。</strong></li>
+<li>this指针是<strong>成员函数</strong>第一个<strong>隐含的指针形参</strong>，一般情况由编译器通过**<code class="notranslate">ecx</code>寄存器**自动传递，不需要用户传递</li>
+</ol>
+<h3>【面试题】</h3>
+<ol>
+<li>this指针存在哪里？</li>
+</ol>
+<blockquote>
+<p>a、堆    b、栈    c、静态区    d、常量区    e、对象里面</p>
+</blockquote>
+<ul>
+<li>首先排除<code class="notranslate">e</code>，因为我们知道，在算类里的<strong>对象</strong>的时候是没有算<strong>this指针</strong>的大小，所以<strong>排除<code class="notranslate">e</code></strong></li>
+<li>C++的<strong>const</strong>变量不是在常量区，可以看到这两个地址是挨着的</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/fad3c6934cf3e9b63660103e37c1aa3a7732503a1ee497be4c99bd57165caa64/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37643764643530663337383434653237623562303731656431373038333462372e706e67"><img src="https://camo.githubusercontent.com/fad3c6934cf3e9b63660103e37c1aa3a7732503a1ee497be4c99bd57165caa64/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37643764643530663337383434653237623562303731656431373038333462372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/7d7dd50f37844e27b5b071ed170834b7.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>那么什么在常量区呢？是<code class="notranslate">const</code>修饰的值在常量区，这个指针变量在<strong>栈区</strong>，指向了这个<strong>常量区的字符串的首字符</strong>，所以<code class="notranslate">d</code>也就排除</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/56b2bc5cd60b84c5b2aaa79dc5821cef62caa7e03a40457fa1e3c676e452c447/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35623636663139376232363634363535386337663639326633383636326237392e706e67"><img src="https://camo.githubusercontent.com/56b2bc5cd60b84c5b2aaa79dc5821cef62caa7e03a40457fa1e3c676e452c447/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35623636663139376232363634363535386337663639326633383636326237392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/5b66f197b26646558c7f692f38662b79.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p><strong>c就更不可能了</strong>，static和全局的才在静态区</p>
+</li>
+<li>
+<p><strong>a也可以排除</strong>，因为malloc的才在堆，这里不是malloc，所以排除</p>
+</li>
+<li>
+<p>最后就是在栈上，因为<strong>是一个形参</strong>（有些编译比如vs可能会用寄存器存储）。不同的编译器放在不同的位置，可能是栈，也可能是寄存器，(VC++编译器是放在ECX中，其它编译器有可能不同，也就是成员函数的其它参数正常都是存放在栈中。而this指针参数则是存放在寄存器中。)</p>
+</li>
+<li>
+<p>打开汇编我们也可以看到这里的lea就是<strong>load effective address</strong>【加载有效地址】，是存在<code class="notranslate">ecx</code>的值加载到 <strong>[d1]</strong> 里</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/173aff948c44fb0375c6d1e13efeebb613d2634f7ac4918b54c1109de71bf216/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30613662376530646137353434353161383436386633313138313464656433612e706e67"><img src="https://camo.githubusercontent.com/173aff948c44fb0375c6d1e13efeebb613d2634f7ac4918b54c1109de71bf216/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30613662376530646137353434353161383436386633313138313464656433612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/0a6b7e0da754451a8468f311814ded3a.png" style="max-width: 100%;"></a></p>
+<ol start="2">
+<li>this指针可以为空吗？</li>
+</ol>
+<blockquote>
+<p>下面我们来看两道题来解决这个问题的答案~</p>
+</blockquote>
+<hr>
+<blockquote>
+<p>第一道：下面程序编译运行结果是？ A、编译报错 B、运行崩溃 C、正常运行</p>
+</blockquote>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">A</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">void</span> <span class="pl-en">Print</span>()
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Print()<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _a;
+};
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	A* p = <span class="pl-c1">nullptr</span>;
+	p-&gt;<span class="pl-c1">Print</span>();
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>已经<strong>完美运行</strong>了，因为我这里没有访问类里的对象，所以可以正常运行</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4d2da91c8b47edf121bd2ad3bd09b439a3c2c13ccd16551ff79a17d80c3271d0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35303730623839643536306634613066383531646631616432663063636237662e706e67"><img src="https://camo.githubusercontent.com/4d2da91c8b47edf121bd2ad3bd09b439a3c2c13ccd16551ff79a17d80c3271d0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35303730623839643536306634613066383531646631616432663063636237662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/5070b89d560f4a0f851df1ad2f0ccb7f.png" style="max-width: 100%;"></a></p>
+<hr>
+<blockquote>
+<p>第二道：下面程序编译运行结果是？ A、编译报错 B、运行崩溃 C、正常运行</p>
+</blockquote>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">A</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">void</span> <span class="pl-en">PrintA</span>()
+	{
+		cout &lt;&lt; _a &lt;&lt; endl;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _a;
+};
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	A* p = <span class="pl-c1">nullptr</span>;
+	p-&gt;<span class="pl-c1">PrintA</span>();
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>这里引发了<strong>空指针</strong>，因为我需要打印这里的<code class="notranslate">_a</code>，就要找到那块空间</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3cce76be8dc1f3d95a5429d99011265c968b87eb28efffe5a708dd3ca60228f4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32666130626538633138393534623161383036353661646439643330336530342e706e67"><img src="https://camo.githubusercontent.com/3cce76be8dc1f3d95a5429d99011265c968b87eb28efffe5a708dd3ca60228f4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32666130626538633138393534623161383036353661646439643330336530342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/2fa0be8c18954b1a80656add9d303e04.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>也就可以写成这样，<strong>this指针是空指针</strong>，解引用就会报错</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/cbb838f8483ea839ac1f498e57062a95beb84392758e3eaf8e72167294dfcf02/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35343730363237353730646334356438383165623234613362383137333738612e706e67"><img src="https://camo.githubusercontent.com/cbb838f8483ea839ac1f498e57062a95beb84392758e3eaf8e72167294dfcf02/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35343730363237353730646334356438383165623234613362383137333738612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/5470627570dc45d881eb24a3b817378a.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>所以<strong>this指针</strong>是可以为空的，<strong>只要在成员函数内部不访问其内容</strong>，程序可以正常执行的。</li>
+</ul></div>
+<div style="font-size:small;margin-top:8px;float:right;"></div>
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://shilinnull.github.io/shilin.github.io"> 仕林的博客 </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if(""!=""){
+    var now=new Date();
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilin.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

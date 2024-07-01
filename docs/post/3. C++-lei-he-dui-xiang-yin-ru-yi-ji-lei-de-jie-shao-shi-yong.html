@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href="//cdn.staticfile.net/Primer/21.0.7/primer.css" rel="stylesheet" />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## 一、面向过程和面向对象的初步认识
+
+>C语言是面向过程的，关注的是过程，分析出求解问题的步骤，通过函数调用逐步解决问题。">
+<meta property="og:title" content="3. C++类和对象引入以及类的介绍使用">
+<meta property="og:description" content="## 一、面向过程和面向对象的初步认识
+
+>C语言是面向过程的，关注的是过程，分析出求解问题的步骤，通过函数调用逐步解决问题。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://shilinnull.github.io/shilin.github.io/post/3.%20C%2B%2B-lei-he-dui-xiang-yin-ru-yi-ji-lei-de-jie-shao-shi-yong.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>3. C++类和对象引入以及类的介绍使用</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">3. C++类和对象引入以及类的介绍使用</h1>
+<div class="title-right">
+    <a href="https://shilinnull.github.io/shilin.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilin.github.io/issues/5" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>一、面向过程和面向对象的初步认识</h2>
+<blockquote>
+<p>C语言是面向过程的，关注的是过程，分析出求解问题的步骤，通过函数调用逐步解决问题。</p>
+</blockquote>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ee361d341076b6651785e17f03b70b4be174c489fd37287e904458398ee331a4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37623131653065666539663934393634396232386137663534666265343837632e706e67"><img src="https://camo.githubusercontent.com/ee361d341076b6651785e17f03b70b4be174c489fd37287e904458398ee331a4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37623131653065666539663934393634396232386137663534666265343837632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/7b11e0efe9f949649b28a7f54fbe487c.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>C++是基于面向对象的，关注的是对象，将一件事情拆分成<strong>不同的对象</strong>，靠<strong>对象</strong>之间的交互完成。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/65b6821c4563893a1c1ae31b76425149e5707d0f12a150c6045c6ff123d55c67/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38373635363338663565643234656565623565346133396531636630633333342e706e67"><img src="https://camo.githubusercontent.com/65b6821c4563893a1c1ae31b76425149e5707d0f12a150c6045c6ff123d55c67/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38373635363338663565643234656565623565346133396531636630633333342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/8765638f5ed24eeeb5e4a39e1cf0c334.png" style="max-width: 100%;"></a></p>
+<h2>二、类的引入</h2>
+<ul>
+<li>
+<p>C语言<strong>结构体中只能定义变量</strong>，在C++中，<strong>结构体内不仅可以定义变量，也可以定义函数</strong>。比如：之前在数据结构初阶中，用C语言方式实现的<strong>栈</strong>，<strong>结构体中只能定义变量</strong>；<strong>现在以C++方式实现，会发现struct中也可以定义函数。</strong></p>
+</li>
+<li>
+<p>这里就不介绍C语言的用法了</p>
+</li>
+<li>
+<p>C++兼容C，<strong>之前写的结构体，升级成了类</strong>，我们来看下面的代码：</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">typedef</span> <span class="pl-k">int</span> DataType;
+
+<span class="pl-k">struct</span> <span class="pl-en">Stack</span>
+{
+	<span class="pl-c"><span class="pl-c">//</span> 成员函数</span>
+	<span class="pl-k">void</span> <span class="pl-en">Init</span>(<span class="pl-c1">size_t</span> capacity = <span class="pl-c1">4</span>)
+	{
+		_array = (DataType*)<span class="pl-c1">malloc</span>(<span class="pl-k">sizeof</span>(DataType) * capacity);
+		<span class="pl-k">if</span> (<span class="pl-c1">nullptr</span> == _array)
+		{
+			<span class="pl-c1">perror</span>(<span class="pl-s"><span class="pl-pds">"</span>malloc申请空间失败<span class="pl-pds">"</span></span>);
+			<span class="pl-k">return</span>;
+		}
+		_capacity = capacity;
+		_size = <span class="pl-c1">0</span>;
+	}
+	<span class="pl-k">void</span> <span class="pl-en">Push</span>(<span class="pl-k">const</span> DataType&amp; data)
+	{
+		<span class="pl-c"><span class="pl-c">//</span> 扩容</span>
+		_array[_size] = data;
+		++_size;
+	}
+	DataType <span class="pl-en">Top</span>()
+	{
+		<span class="pl-k">return</span> _array[_size - <span class="pl-c1">1</span>];
+	}
+	<span class="pl-k">void</span> <span class="pl-en">Destroy</span>()
+	{
+		<span class="pl-k">if</span> (_array)
+		{
+			<span class="pl-c1">free</span>(_array);
+			_array = <span class="pl-c1">nullptr</span>;
+			_capacity = <span class="pl-c1">0</span>;
+			_size = <span class="pl-c1">0</span>;
+		}
+	}
+	<span class="pl-c"><span class="pl-c">//</span> 成员变量</span>
+	DataType* _array;
+	<span class="pl-c1">size_t</span> _capacity;
+	<span class="pl-c1">size_t</span> _size;
+};
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Stack s;
+	s.<span class="pl-c1">Init</span>(<span class="pl-c1">10</span>);
+	s.<span class="pl-c1">Push</span>(<span class="pl-c1">1</span>);
+	s.<span class="pl-c1">Push</span>(<span class="pl-c1">2</span>);
+	s.<span class="pl-c1">Push</span>(<span class="pl-c1">3</span>);
+	cout &lt;&lt; s.<span class="pl-c1">Top</span>() &lt;&lt; endl;
+	s.<span class="pl-c1">Destroy</span>();
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>上面结构体的定义，在<code class="notranslate">C++</code>中更喜欢用<strong>class</strong>关键字来代替。</li>
+</ul>
+<blockquote>
+<p>下面就有类的定义以及使用了</p>
+</blockquote>
+<h3>类的定义</h3>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">className</span>
+{
+	<span class="pl-c"><span class="pl-c">//</span> 类体：由成员函数和成员变量组成</span>
+}; <span class="pl-c"><span class="pl-c">//</span> 一定要注意后面的分号</span></pre></div>
+<ul>
+<li>
+<p><strong>class</strong>为定义类的关键字，<code class="notranslate">ClassName</code>为类的名字，**{}**中为类的主体，注意类定义结束时后面分号不能省略。</p>
+</li>
+<li>
+<p>类体中内容称为类的成员：<strong>类中的变量称为类的属性或成员变量; 类中的函数称为类的方法或者成员函数。</strong></p>
+</li>
+</ul>
+<blockquote>
+<p>如何写呢？</p>
+</blockquote>
+<ul>
+<li>我们可以这样定义，定义一个<strong>日期类</strong>，但是我们这里推荐名字加上一个<code class="notranslate">_</code>，便于区分，为什么呢？</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+	<span class="pl-k">int</span> year;
+	<span class="pl-k">int</span> month;
+	<span class="pl-k">int</span> day;
+};</pre></div>
+<ul>
+<li>再来看下面的代码，是不是就分不清楚了~~</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+	<span class="pl-k">void</span> <span class="pl-en">Init</span>(<span class="pl-k">int</span> year,<span class="pl-k">int</span> month,<span class="pl-k">int</span> day)
+	{
+		year = year;
+		month = month;
+		day = day;
+	}
+	<span class="pl-k">int</span> year;
+	<span class="pl-k">int</span> month;
+	<span class="pl-k">int</span> day;
+};</pre></div>
+<ul>
+<li>所以就要这样写才可以，</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+	<span class="pl-k">void</span> <span class="pl-en">Init</span>(<span class="pl-k">int</span> year,<span class="pl-k">int</span> month,<span class="pl-k">int</span> day)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+	}
+	<span class="pl-k">int</span> _year;
+	<span class="pl-k">int</span> _month;
+	<span class="pl-k">int</span> _day;
+};</pre></div>
+<ul>
+<li>这个时候我们是不是可以使用这个类里的函数了~~</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Date d1;
+	d1.<span class="pl-c1">Init</span>(<span class="pl-c1">2024</span>, <span class="pl-c1">1</span>, <span class="pl-c1">26</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>我们使用发现是报错了，这提示的是啥啊~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/30bebfab7f50e1a2444932c8707990b2d360e2405b0a52ec6de945bf3e85d2e8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36326664323163646431373534306561396532306533613061636164653263322e706e67"><img src="https://camo.githubusercontent.com/30bebfab7f50e1a2444932c8707990b2d360e2405b0a52ec6de945bf3e85d2e8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36326664323163646431373534306561396532306533613061636164653263322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/62fd21cdd17540ea9e20e3a0acade2c2.png" style="max-width: 100%;"></a></p>
+<blockquote>
+<p>C++提出了三种访问限定符，接下来我们再来看一下：</p>
+</blockquote>
+<h2>三、类的访问限定符及封装</h2>
+<h3>访问限定符</h3>
+<ul>
+<li>C++实现封装的方式：<strong>用类将对象的属性与方法结合在一块，让对象更加完善，通过访问权限选择性的将其接口提供给外部的用户使用。</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/68278d70fa9fb4c51ae2a8fd9c7bd37b2ca66c3cc2182762898312aeba36b0fa/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66393034383130633561623934633164393034306635623861643465666266392e706e67"><img src="https://camo.githubusercontent.com/68278d70fa9fb4c51ae2a8fd9c7bd37b2ca66c3cc2182762898312aeba36b0fa/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66393034383130633561623934633164393034306635623861643465666266392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/f904810c5ab94c1d9040f5b8ad4efbf9.png" style="max-width: 100%;"></a></p>
+<p>【访问限定符说明】</p>
+<ol>
+<li>
+<p><strong>public修饰的成员在类外可以直接被访问</strong></p>
+</li>
+<li>
+<p><strong>protected和private修饰的成员在类外不能直接被访问(此处protected和private是类似的)</strong></p>
+</li>
+<li>
+<p><strong>访问权限作用域从该访问限定符出现的位置开始直到下一个访问限定符出现时为止</strong></p>
+</li>
+<li>
+<p><strong>如果后面没有访问限定符，作用域就到 } 即类结束。</strong></p>
+</li>
+<li>
+<p><strong>class的默认访问权限为private，struct为public(因为struct要兼容C)</strong></p>
+</li>
+</ol>
+<p>注意：访问限定符只在编译时有用，当数据映射到内存后，没有任何访问限定符上的区别</p>
+<blockquote>
+<p>上面的代码就可以这样写了：</p>
+</blockquote>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+	<span class="pl-c"><span class="pl-c">//</span> public公有,会一直修饰到结束或者遇到下一个限定符</span>
+<span class="pl-k">public:</span>
+	<span class="pl-k">void</span> <span class="pl-en">Init</span>(<span class="pl-k">int</span> year,<span class="pl-k">int</span> month,<span class="pl-k">int</span> day)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+	}
+	<span class="pl-k">int</span> _year;
+	<span class="pl-k">int</span> _month;
+	<span class="pl-k">int</span> _day;
+};
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Date d1;
+	<span class="pl-k">class</span> <span class="pl-en">Date</span> d2; <span class="pl-c"><span class="pl-c">//</span> 这样也是可以的</span>
+	d1.<span class="pl-c1">Init</span>(<span class="pl-c1">2024</span>, <span class="pl-c1">1</span>, <span class="pl-c1">26</span>);
+	d2.<span class="pl-smi">_day</span>++;
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>或者来看这个：
+<ul>
+<li>就算是改成<code class="notranslate">struct</code>也是一样的</li>
+</ul>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/25e6a8a35e9e920212b7a9ef41904936a804044d673f628f1f23e57aba785b6a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66663631326335373737313334656564613438356562373061656233626633312e706e67"><img src="https://camo.githubusercontent.com/25e6a8a35e9e920212b7a9ef41904936a804044d673f628f1f23e57aba785b6a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66663631326335373737313334656564613438356562373061656233626633312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/ff612c5777134eeda485eb70aeb3bf31.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>那我再添加一个函数，放到最上面上面，他可以访问吗？
+<ul>
+<li>很显然是可以的，因为没有访问限定符限制，是定义的struct默认是公开的，如果是class就是私有的</li>
+</ul>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/421a6d70891f0572bae01b82a4e80a79005603340231b4793f981acc266d9aaf/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63653037663033336635663934643233616164363033323861303633353065372e706e67"><img src="https://camo.githubusercontent.com/421a6d70891f0572bae01b82a4e80a79005603340231b4793f981acc266d9aaf/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63653037663033336635663934643233616164363033323861303633353065372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/ce07f033f5f94d23aad60328a06350e7.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>class就无法访问，不多介绍~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/11399ab55fea8dce192222791f224c63a66b25397b9095e12b9e5f5e07195041/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63303963656136363739653334356338616237653431663039333339616465332e706e67"><img src="https://camo.githubusercontent.com/11399ab55fea8dce192222791f224c63a66b25397b9095e12b9e5f5e07195041/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63303963656136363739653334356338616237653431663039333339616465332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/c09cea6679e345c8ab7e41f09339ade3.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>假设一个类比较大，需要进行声明和定义分离，怎么办？</li>
+<li>这里可以看到报错了，原因是编译器搜索的时候是在默认和全局里搜索，默认不会在类里面搜索，搜索不到就报错了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2b2d81d220c7e46d0ec2a1fee9c5cc809d3993c610b8c0b4fae98302819646dc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30646564336164376232613834613332626532393937623861663339333235622e706e67"><img src="https://camo.githubusercontent.com/2b2d81d220c7e46d0ec2a1fee9c5cc809d3993c610b8c0b4fae98302819646dc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30646564336164376232613834613332626532393937623861663339333235622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/0ded3ad7b2a84a32be2997b8af39325b.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这个时候加上一个<code class="notranslate">::</code>，这里就好像命名空间域一样，指定搜索</li>
+<li>这个时候加上了又报了一个错误，我们之前讲过的，<strong>缺省参数不能在声明和定义里同时给</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/8fd98bd7671b4f21bcaa867125e28d3dde63ac3659aab65ea281380199a11271/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38373734616464613133616534353265393531323131666266656562376530662e706e67"><img src="https://camo.githubusercontent.com/8fd98bd7671b4f21bcaa867125e28d3dde63ac3659aab65ea281380199a11271/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38373734616464613133616534353265393531323131666266656562376530662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/8774adda13ae452e951211fbfeeb7e0f.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>再次改进后：</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/cbb53bcea4b2ccd98751ba98efe12b5083c5eadafa768111e4e111688d74b829/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35353537663537343532383134663465383432376535613363613434623639302e706e67"><img src="https://camo.githubusercontent.com/cbb53bcea4b2ccd98751ba98efe12b5083c5eadafa768111e4e111688d74b829/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35353537663537343532383134663465383432376535613363613434623639302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/5557f57452814f4e8427e5a3ca44b690.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>优先会在指定域里面找，找不到然后再从局部里找，然后再从全局里找~~</li>
+</ul>
+<hr>
+<h3>【面试题】C++中struct和class的区别</h3>
+<p>问题：<strong>C++中struct和class的区别是什么？</strong></p>
+<ul>
+<li>解答： <strong>C++需要兼容C语言，所以C++中struct可以当成结构体使用。另外C++中struct还可以用来定义类。和class定义类是一样的，区别是<code class="notranslate">struct定义的类默认访问权限是public</code>，<code class="notranslate">class定义的类默认访问权限是private</code>。注意：在继承和模板参数列表位置，struct和class也有区别，后序给大家介绍。</strong></li>
+</ul>
+<h3>3.5 类的两种定义方式</h3>
+<ol>
+<li>声明和定义全部放在类体中，需注意：<strong>成员函数如果在类中定义，编译器可能会将其当成内联函数处理。</strong></li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c61d8084b0c88c3dc867e0c767c34aa808e4d09a800df9e098b18014d26c8d10/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64333230613233303632366534353764386365323235303338663234343565312e706e67"><img src="https://camo.githubusercontent.com/c61d8084b0c88c3dc867e0c767c34aa808e4d09a800df9e098b18014d26c8d10/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64333230613233303632366534353764386365323235303338663234343565312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/d320a230626e457d8ce225038f2445e1.png" style="max-width: 100%;"></a></p>
+<ol start="2">
+<li>类声明放在 <strong>.h</strong>文件中，成员函数定义放在 <strong>.cpp</strong>文件中，注意： <strong>成员函数名前需要加类名<code class="notranslate">::</code></strong></li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7568b47509d1cd5e5f7ad182565dbe45b96f3f70f079fa73aabc7e681a00be03/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36613662303762613233303834626438613037343664306633353034653362312e706e67"><img src="https://camo.githubusercontent.com/7568b47509d1cd5e5f7ad182565dbe45b96f3f70f079fa73aabc7e681a00be03/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36613662303762613233303834626438613037343664306633353034653362312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/6a6b07ba23084bd8a0746d0f3504e3b1.png" style="max-width: 100%;"></a></p>
+<ul>
+<li><strong>一般情况下，更期望采用第二种方式</strong></li>
+</ul>
+<h2>四、封装</h2>
+<h3>【面试题】面向对象的三大特性</h3>
+<ul>
+<li>面向对象的三大特性：<strong>封装、继承、多态。</strong></li>
+</ul>
+<ol>
+<li>C++<strong>数据</strong>和<strong>方法</strong>都放到类里面</li>
+<li>C++访问限定符去对成员进行限制，想给你访问是公有，不想给你访问是私有</li>
+</ol>
+<blockquote>
+<p>在类和对象阶段，主要是研究类的封装特性，那什么是封装呢？</p>
+</blockquote>
+<p><strong>封装：将数据和操作数据的方法进行有机结合，隐藏对象的属性和实现细节，仅对外公开接口来和对象进行交互。</strong></p>
+<ul>
+<li>
+<p><strong>封装本质上是一种管理，让用户更方便使用类</strong>。比如：对于电脑这样一个复杂的设备，提供给用户的就只有开关机键、通过键盘输入，显示器，USB插孔等，让用户和计算机进行交互，完成日常事务。但实际上电脑真正工作的却是CPU、显卡、内存等一些硬件元件。</p>
+</li>
+<li>
+<p>对于计算机使用者而言，不用关心内部核心部件，比如主板上线路是如何布局的，CPU内部是如何设计的等，用户只需要知道，怎么开机、怎么通过键盘和鼠标与计算机进行交互即可。因此计算机厂商在出厂时，在外部套上壳子，将内部实现细节隐藏起来，仅仅对外提供开关机、鼠标以及键盘插孔等，让用户可以与计算机进行交互即可。</p>
+</li>
+</ul>
+<p><strong>在C++语言中实现封装，可以通过类将数据以及操作数据的方法进行隐藏对象内部实现细节，控制哪些方法可以在类外部直接被使用</strong></p>
+<h2>五、类的作用域</h2>
+<ul>
+<li>类定义了一个新的作用域，类的所有成员都在类的作用域中。在类体外定义成员时，需要使用 ::作用域操作符指明成员属于哪个类域。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Person</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">void</span> <span class="pl-en">PrintPersonInfo</span>();
+<span class="pl-k">private:</span>
+	<span class="pl-c"><span class="pl-c">//</span> 这个是声明</span>
+	<span class="pl-k">char</span> _name[<span class="pl-c1">20</span>];
+	<span class="pl-k">char</span> _gender[<span class="pl-c1">3</span>];
+	<span class="pl-k">int</span> _age;
+};
+<span class="pl-c"><span class="pl-c">//</span> 这里需要指定PrintPersonInfo是属于Person这个类域</span>
+<span class="pl-k">void</span> <span class="pl-en">Person::PrintPersonInfo</span>()
+{
+	cout &lt;&lt; _name &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span> &lt;&lt; _gender &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span> &lt;&lt; _age &lt;&lt; endl;
+}</pre></div>
+<h2>六、类的实例化</h2>
+<p><strong>用类类型创建对象的过程，称为类的实例化</strong></p>
+<ol>
+<li>类是对对象进行描述的，是一个模型一样的东西，限定了类有哪些成员，定义出一个类并没有分配实际的内存空间来存储它；比如：入学时填写的学生信息表，表格就可以看成是一个类，来描述具体学生信息。</li>
+<li>一个类可以实例化出多个对象，实例化出的对象 占用实际的物理空间，存储类成员变量</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Person.<span class="pl-smi">_age</span> = <span class="pl-c1">100</span>; <span class="pl-c"><span class="pl-c">//</span> 编译失败：error C2059: 语法错误:“.”</span>
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>
+<p>类里面定义的成员是声明，是没有空间的</p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/eae1a0aa72482a00a96a15af3e80ff2962b0c78478b0465ef8e4d5b7a68dbeae/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31653332666264356230353434653437626565666638326631336339363063652e706e67"><img src="https://camo.githubusercontent.com/eae1a0aa72482a00a96a15af3e80ff2962b0c78478b0465ef8e4d5b7a68dbeae/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31653332666264356230353434653437626565666638326631336339363063652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/1e32fbd5b0544e47beeff82f13c960ce.png" style="max-width: 100%;"></a></p>
+</li>
+<li>
+<p>写成这样，实例化就可以了</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/beaf0114bdd4f7bc8802ddcc47713a6077c5c35f8d0c3f32ce2469476d9412fb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35393963303365643464383734313361623761643832626165383739333163312e706e67"><img src="https://camo.githubusercontent.com/beaf0114bdd4f7bc8802ddcc47713a6077c5c35f8d0c3f32ce2469476d9412fb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35393963303365643464383734313361623761643832626165383739333163312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/599c03ed4d87413ab7ad82bae87931c1.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>Person类是没有空间的，只有Person类实例化出的对象才有具体的年龄。</li>
+</ul>
+<ol start="3">
+<li>做个比方。类实例化出对象就像现实中使用建筑设计图建造出房子，类就像是设计图，只设计出需要什么东西，但是并没有实体的建筑存在，同样类也只是一个设计，实例化出的对象才能实际存储数据，占用物理空间</li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/22d93cf025d798b129258fd56e3c2787f518e624c422c5ccc49cb28c4776867c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33643566383936346235393734386633393031373631633635336361366461662e706e67"><img src="https://camo.githubusercontent.com/22d93cf025d798b129258fd56e3c2787f518e624c422c5ccc49cb28c4776867c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33643566383936346235393734386633393031373631633635336361366461662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/3d5f8964b59748f3901761c653ca6daf.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9e5cbcfa63256e042cf9805304824c0bbb93da4dfcfbc87f27a2ca4b11a8cbea/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66646466656139383462356534396362393462363766306233613633343766342e706e67"><img src="https://camo.githubusercontent.com/9e5cbcfa63256e042cf9805304824c0bbb93da4dfcfbc87f27a2ca4b11a8cbea/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66646466656139383462356534396362393462363766306233613633343766342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/fddfea984b5e49cb94b67f0b3a6347f4.png" style="max-width: 100%;"></a></p>
+<h2>七、类对象模型</h2>
+<blockquote>
+<p>问题：类中既可以有成员变量，又可以有成员函数，那么一个类的对象中包含了什么？如何计算一个类的大小？</p>
+</blockquote>
+<h3>类对象的存储方式猜测</h3>
+<ul>
+<li>对象中包含类的各个成员</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3761e73d218d825faf1dc0731033667a72b17c91b4f7b0b31d9b09d9bf49b169/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64306166323666396466373134656339616231303139366234666663353931342e706e67"><img src="https://camo.githubusercontent.com/3761e73d218d825faf1dc0731033667a72b17c91b4f7b0b31d9b09d9bf49b169/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64306166323666396466373134656339616231303139366234666663353931342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/d0af26f9df714ec9ab10196b4ffc5914.png" style="max-width: 100%;"></a></p>
+<p><strong>缺陷</strong>：每个对象中成员变量是不同的，但是调用同一份函数，如果按照此种方式存储，当一个类创建多个对象时，每个对象中都会保存一份代码，相同代码保存多次，浪费空间。那么如何解决呢？</p>
+<ul>
+<li>代码只保存一份，在对象中保存存放代码的地址</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1ad7a016d21c012ce45899b6461655ecb6dd456726f08290f8a5c8520c4e1d6e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64663462323432343938626134386431383665346663356436653630333536372e706e67"><img src="https://camo.githubusercontent.com/1ad7a016d21c012ce45899b6461655ecb6dd456726f08290f8a5c8520c4e1d6e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64663462323432343938626134386431383665346663356436653630333536372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/df4b242498ba48d186e4fc5d6e603567.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>只保存成员变量，成员函数存放在公共的代码段</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5dc145b5be4259b5c803036803ea35a09cc57ac658cbc0dde5ab3996e38348f3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63383963663261346438363534666235623631633736323335326633323434632e706e67"><img src="https://camo.githubusercontent.com/5dc145b5be4259b5c803036803ea35a09cc57ac658cbc0dde5ab3996e38348f3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63383963663261346438363534666235623631633736323335326633323434632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/c89cf2a4d8654fb5b61c762352f3244c.png" style="max-width: 100%;"></a><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/47c7b7e57675a6e06b70055aa22941446489a3bd7cd72879478936bd25ca1fe8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36373961363861666231396434353164393066656639626538343030633330652e706e67"><img src="https://camo.githubusercontent.com/47c7b7e57675a6e06b70055aa22941446489a3bd7cd72879478936bd25ca1fe8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36373961363861666231396434353164393066656639626538343030633330652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/679a68afb19d451d90fef9be8400c30e.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>问题：对于上述三种存储方式，那计算机到底是按照那种方式来存储的？</li>
+</ul>
+<p>我们再通过对下面的不同对象分别获取大小来分析看下：</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+	<span class="pl-k">void</span> <span class="pl-en">Init</span>(<span class="pl-k">int</span> year, <span class="pl-k">int</span> month, <span class="pl-k">int</span> day)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+	}
+	<span class="pl-k">int</span> _year;
+	<span class="pl-k">int</span> _month;
+	<span class="pl-k">int</span> _day;
+};
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Date d1;
+	cout &lt;&lt; <span class="pl-k">sizeof</span>(d1) &lt;&lt; endl;
+}</pre></div>
+<ul>
+<li>可以清楚的看到，这就是三个成员的大小，而函数是没有算进去的</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1b981b4592c3723d434df6a6620d5f15f4540f99212e1ecd1929f07bceade628/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33316265383237303930336434336463396163653063323063316161666135642e706e67"><img src="https://camo.githubusercontent.com/1b981b4592c3723d434df6a6620d5f15f4540f99212e1ecd1929f07bceade628/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33316265383237303930336434336463396163653063323063316161666135642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/31be8270903d43dc9ace0c20c1aafa5d.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>结论：<strong>一个类的大小，实际就是该类中”成员变量”之和，当然要注意内存对齐注意空类的大小【与C语言一样】，空类比较特殊，编译器给了空类一个字节来唯一标识这个类的对象。</strong></li>
+</ul>
+<blockquote>
+<p>我们再次回忆一下</p>
+</blockquote>
+<h3>结构体内存对齐规则</h3>
+<ol>
+<li>第一个成员在与结构体<strong>偏移量为0</strong>的地址处。</li>
+<li>其他成员变量要对齐到某个数字（对齐数）的整数倍的地址处。</li>
+</ol>
+<ul>
+<li>注意：对齐数 = 编译器默认的一个对齐数与该成员大小的较小值。VS中<strong>默认的对齐数为8</strong></li>
+</ul>
+<ol start="3">
+<li>结构体总大小为：<strong>最大对齐数</strong>（所有变量类型最大者与默认对齐参数取最小）的整数倍。</li>
+<li>如果嵌套了结构体的情况，嵌套的结构体对齐到自己的最大对齐数的整数倍处，结构体的整体大小就是所有最大对齐数（含嵌套结构体的对齐数）的整数倍。</li>
+</ol>
+<h3>【面试题】</h3>
+<ol>
+<li>结构体怎么对齐？ 为什么要进行内存对齐？</li>
+<li>如何让结构体按照指定的对齐参数进行对齐？能否按照3、4、5即任意字节对齐？</li>
+<li>什么是大小端？如何测试某台机器是大端还是小端，有没有遇到过要考虑大小端的场景</li>
+</ol></div>
+<div style="font-size:small;margin-top:8px;float:right;"></div>
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://shilinnull.github.io/shilin.github.io"> 仕林的博客 </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if(""!=""){
+    var now=new Date();
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilin.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## 一、引用
+### 1.1 引用概念
+
+>C++是C语言的继承，它可进行过程化程序设计，又可以进行以抽象数据类型为特点的基于对象的程序设计，还可以进行以继承和多态为特点的面向对象的程序设计。">
+<meta property="og:title" content="4. C++引用、内联函数、auto关键字介绍以及C++中无法使用NULL的原因">
+<meta property="og:description" content="## 一、引用
+### 1.1 引用概念
+
+>C++是C语言的继承，它可进行过程化程序设计，又可以进行以抽象数据类型为特点的基于对象的程序设计，还可以进行以继承和多态为特点的面向对象的程序设计。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://shilinnull.github.io/shilin.github.io/post/4.%20C%2B%2B-yin-yong-%E3%80%81-nei-lian-han-shu-%E3%80%81auto-guan-jian-zi-jie-shao-yi-ji-C%2B%2B-zhong-wu-fa-shi-yong-NULL-de-yuan-yin.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>4. C++引用、内联函数、auto关键字介绍以及C++中无法使用NULL的原因</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">4. C++引用、内联函数、auto关键字介绍以及C++中无法使用NULL的原因</h1>
+<div class="title-right">
+    <a href="https://shilinnull.github.io/shilin.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilin.github.io/issues/6" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>一、引用</h2>
+<h3>1.1 引用概念</h3>
+<blockquote>
+<p>C++是C语言的继承，它可进行过程化程序设计，又可以进行以抽象数据类型为特点的基于对象的程序设计，还可以进行以继承和多态为特点的面向对象的程序设计。引用（reference）就是C++对C语言的重要扩充。引用就是某一变量（目标）的一个别名，对引用的操作与对变量直接操作完全一样。引用的声明方法：<strong>类型标识符 &amp;引用名=目标变量名；</strong> --&gt;<a href="https://baike.baidu.com/item/C++%E5%BC%95%E7%94%A8/463646" rel="nofollow">百度百科</a></p>
+</blockquote>
+<ul>
+<li>这个引用就相当于是<strong>别名</strong></li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">TestRef</span>()
+{
+	<span class="pl-k">int</span> a = <span class="pl-c1">10</span>;
+	<span class="pl-k">int</span>&amp; ra = a;<span class="pl-c"><span class="pl-c">//</span>&lt;====定义引用类型</span>
+	<span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>%p<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, &amp;a);
+	<span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>%p<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, &amp;ra);
+}</pre></div>
+<ul>
+<li><strong>类型&amp; 引用变量名(对象名) = 引用实体；</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b3273d2927fe7080c5f2b71386d2c28f67731bfa5e70a597036215dcdcad1ab7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61663161393337383331656434383964616564336263303732636536643564612e706e67"><img src="https://camo.githubusercontent.com/b3273d2927fe7080c5f2b71386d2c28f67731bfa5e70a597036215dcdcad1ab7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61663161393337383331656434383964616564336263303732636536643564612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/af1a937831ed489daed3bc072ce6d5da.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们通过调试来看一下：</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/83e4edda19d19e429048912bd393a5461f3d8842b112a207212e262c6eb8c28f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32636134663830316236363034656535623965623666386164356164643432642e706e67"><img src="https://camo.githubusercontent.com/83e4edda19d19e429048912bd393a5461f3d8842b112a207212e262c6eb8c28f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32636134663830316236363034656535623965623666386164356164643432642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/2ca4f801b6604ee5b9eb6f8ad5add42d.png" style="max-width: 100%;"></a></p>
+<h3>1.2 引用特性</h3>
+<ol>
+<li>引用在定义时<strong>必须初始化</strong></li>
+<li>一个变量可以有<strong>多个引用</strong></li>
+<li>引用一旦<strong>引用一个实体</strong>，<strong>再不能引用其他实体</strong></li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">int</span> a = <span class="pl-c1">10</span>;
+	<span class="pl-c"><span class="pl-c">//</span> int&amp; ra; // 该条语句编译时会出错,必须要初始化</span>
+	<span class="pl-k">int</span>&amp; ra = a;
+	<span class="pl-k">int</span>&amp; rra = a;
+
+	<span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>%p %p %p<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, &amp;a, &amp;ra, &amp;rra);
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/834de41e65deeb881f405ebe16137b3141553a8a3dfcaa019a550c6162675c3b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65646237333435356535346434363263623836366432376464353734393666372e706e67"><img src="https://camo.githubusercontent.com/834de41e65deeb881f405ebe16137b3141553a8a3dfcaa019a550c6162675c3b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65646237333435356535346434363263623836366432376464353734393666372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/edb73455e54d462cb866d27dd57496f7.png" style="max-width: 100%;"></a></p>
+<h3>1.3 常引用</h3>
+<ul>
+<li>取别名不能放大权限</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">int</span> a = <span class="pl-c1">0</span>;
+	<span class="pl-c"><span class="pl-c">//</span> 权限的缩小</span>
+	<span class="pl-k">const</span> <span class="pl-k">int</span>&amp; c = a;
+	
+	<span class="pl-k">const</span> <span class="pl-k">int</span> x = <span class="pl-c1">10</span>;
+	<span class="pl-c"><span class="pl-c">//</span> 权限的放大</span>
+	<span class="pl-k">int</span>&amp; y = x;
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c2915c7038315fea6f8895b33990156594d0aa270ad2c5ded4a28cde971595a5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33353635373338326332613734626637383737643232643361376633326131342e706e67"><img src="https://camo.githubusercontent.com/c2915c7038315fea6f8895b33990156594d0aa270ad2c5ded4a28cde971595a5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33353635373338326332613734626637383737643232643361376633326131342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/35657382c2a74bf7877d22d3a7f32a14.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以这样写，相等的就可以</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">const</span> <span class="pl-k">int</span> x = <span class="pl-c1">10</span>;
+<span class="pl-k">const</span> <span class="pl-k">int</span> y = x; </pre></div>
+<ul>
+<li><code class="notranslate">a + x</code>的结果是一个临时变量，临时变量具有常性，<code class="notranslate">const</code>引用就可以</li>
+<li><code class="notranslate">int&amp; n = a + x;</code>的返回值是临时变量，<strong>临时对象具有常性</strong>，是一个权限放大</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span> a = <span class="pl-c1">0</span>;
+<span class="pl-k">const</span> <span class="pl-k">int</span> x = <span class="pl-c1">10</span>;
+<span class="pl-k">const</span> <span class="pl-k">int</span>&amp; z = <span class="pl-c1">10</span>;
+<span class="pl-k">const</span> <span class="pl-k">int</span>&amp; m = a + x; <span class="pl-c"><span class="pl-c">//</span>这样写也可以</span>
+<span class="pl-k">int</span>&amp; n = a + x; <span class="pl-c"><span class="pl-c">//</span> 这样写不可以</span></pre></div>
+<ul>
+<li>这里<strong>const加上</strong>就可以将不同类型取别名</li>
+<li>类型转换的时候会出现一个临时变量**，临时变量具有常性，所以就可以~**</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">double</span> d = <span class="pl-c1">1.1</span>;
+<span class="pl-k">int</span> i = d; <span class="pl-c"><span class="pl-c">//</span> 强制类型转换</span>
+<span class="pl-k">int</span>&amp; ri = d; <span class="pl-c"><span class="pl-c">//</span> 无法赋予，类型不同</span>
+<span class="pl-k">const</span> <span class="pl-k">int</span>&amp; ri = d; <span class="pl-c"><span class="pl-c">//</span> 加上const就可以了</span></pre></div>
+<blockquote>
+<ul>
+<li><strong>被引用的实体不能是常量</strong></li>
+<li><strong>引用的类型必须相同</strong></li>
+</ul>
+</blockquote>
+<h3>1.4 使用场景</h3>
+<blockquote>
+<p>引用有两个场景分别是做参数和做返回值</p>
+</blockquote>
+<h4>1.4.1 做参数</h4>
+<ul>
+<li>做参数【在我们C语言阶段的时候使用函数交换两个变量的值就需要<strong>传地址</strong>过去，否则的话，形参只是实参的一份临时拷贝】</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">Swap</span>(<span class="pl-k">int</span>* a, <span class="pl-k">int</span>* b)
+{
+	<span class="pl-k">int</span> tmp = *a;
+	*a = *b;
+	*b = tmp;
+}
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">int</span> x = <span class="pl-c1">0</span>, y = <span class="pl-c1">1</span>;
+	
+	<span class="pl-c1">Swap</span>(&amp;x, &amp;y);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>而我们学了<strong>引用</strong>，这个时候就可以把指针替换下去了，使用引用作为参数</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">Swap</span>(<span class="pl-k">int</span>&amp; a, <span class="pl-k">int</span>&amp; b)
+{
+	<span class="pl-k">int</span> tmp = a;
+	a = b;
+	b = tmp;
+}
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">int</span> x = <span class="pl-c1">0</span>, y = <span class="pl-c1">1</span>;
+	
+	<span class="pl-c1">Swap</span>(x, y);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/fb53152eb2f662182af56257359a3278ec0b944673f5cdcd8edd7d2060350c16/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65376663376534623632613234356337613333646539623765353833306561302e706e67"><img src="https://camo.githubusercontent.com/fb53152eb2f662182af56257359a3278ec0b944673f5cdcd8edd7d2060350c16/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65376663376534623632613234356337613333646539623765353833306561302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/e7fc7e4b62a245c7a33de9b7e5830ea0.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/df9fc3117f473c12a44b28429ff8c7388d8886cf94e398f622872fd3bb838de9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36383935366332663035313334333061623563356465626133373433633362312e706e67"><img src="https://camo.githubusercontent.com/df9fc3117f473c12a44b28429ff8c7388d8886cf94e398f622872fd3bb838de9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36383935366332663035313334333061623563356465626133373433633362312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/68956c2f0513430ab5c5deba3743c3b1.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>那么引用可以代替指针吗？【不可以！】</li>
+</ul>
+<blockquote>
+<p>指针和引用的功能是类似的，有重叠的<br>
+C++的引用，<strong>对指针使用比较复杂的场景进行一些替换</strong>，让代码更简单易懂，但是不能完全替代指针</p>
+</blockquote>
+<ul>
+<li>针引用不能完全替代指针原因：<strong>引用定义后，不能改变指向</strong></li>
+</ul>
+<blockquote>
+<p>就比如说在数据结构中学的链表，指针需要改变指向，引用不能改变指向，这就是引用不能代替指针的原因</p>
+</blockquote>
+<ul>
+<li>那<code class="notranslate">java</code>和<code class="notranslate">python</code>等其他语言有没有指针？--&gt;<strong>没有</strong></li>
+<li>那他们的链表是怎么实现的呢？--&gt;<strong>引用</strong></li>
+<li>本质上就是<strong>引用可以改变指向</strong></li>
+</ul>
+<hr>
+<ul>
+<li>我们再来看一个案例，在我们学数据结构的时候单链表学习阶段</li>
+<li>有这这么一段代码，这里的<code class="notranslate">pphead</code>必须要传二级指针，有点不好理解</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">PushBack</span>(<span class="pl-k">struct</span> <span class="pl-en">Node</span>** pphead, <span class="pl-k">int</span> x)
+{
+	 *pphead = newnode;
+}
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">struct</span> <span class="pl-en">Node</span>* plist = <span class="pl-c1">NULL</span>;
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>而我们学了引用就可以这样写了，加上一个引用，也就是<strong>phead是plist的一份临时拷贝</strong></li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">PushBack</span>(<span class="pl-k">struct</span> <span class="pl-en">Node</span>*&amp; phead, <span class="pl-k">int</span> x)
+{
+	phead = newnode;
+}
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">struct</span> <span class="pl-en">Node</span>* plist = <span class="pl-c1">NULL</span>;
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<hr>
+<ul>
+<li>
+<p>传值、传引用效率比较</p>
+</li>
+<li>
+<p>我们这里可以测试一下性能，对比一下<strong>传值、传引用</strong></p>
+</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>time.h<span class="pl-pds">&gt;</span></span>
+
+<span class="pl-k">struct</span> <span class="pl-en">A</span> { <span class="pl-k">int</span> a[<span class="pl-c1">10000</span>]; };
+<span class="pl-k">void</span> <span class="pl-en">TestFunc1</span>(A a) {}
+<span class="pl-k">void</span> <span class="pl-en">TestFunc2</span>(A&amp; a) {}
+
+<span class="pl-k">void</span> <span class="pl-en">main</span>()
+{
+	A a;
+	<span class="pl-c"><span class="pl-c">//</span> 以值作为函数参数</span>
+	<span class="pl-c1">size_t</span> begin1 = <span class="pl-c1">clock</span>();
+	<span class="pl-k">for</span> (<span class="pl-c1">size_t</span> i = <span class="pl-c1">0</span>; i &lt; <span class="pl-c1">10000</span>; ++i)
+		<span class="pl-c1">TestFunc1</span>(a);
+	
+    <span class="pl-c1">size_t</span> end1 = <span class="pl-c1">clock</span>();
+
+	<span class="pl-c"><span class="pl-c">//</span> 以引用作为函数参数</span>
+	<span class="pl-c1">size_t</span> begin2 = <span class="pl-c1">clock</span>();
+	<span class="pl-k">for</span> (<span class="pl-c1">size_t</span> i = <span class="pl-c1">0</span>; i &lt; <span class="pl-c1">10000</span>; ++i)
+		<span class="pl-c1">TestFunc2</span>(a);
+	
+    <span class="pl-c1">size_t</span> end2 = <span class="pl-c1">clock</span>();
+
+	<span class="pl-c"><span class="pl-c">//</span> 分别计算两个函数运行结束后的时间</span>
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>TestFunc1(A)-time:<span class="pl-pds">"</span></span> &lt;&lt; end1 - begin1 &lt;&lt; endl;
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>TestFunc2(A&amp;)-time:<span class="pl-pds">"</span></span> &lt;&lt; end2 - begin2 &lt;&lt; endl;
+}
+</pre></div>
+<ul>
+<li>可以看到<strong>传值需要8毫秒</strong>，而传<strong>引用小于0毫秒</strong>，小于0毫秒这里显示不出来，所以显示的0</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/aa3183a75e29604f2c32eeede455a66bcd7e61f7c5bc8911fa77063e2c85f8fd/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36366337633934333830663434333764386437393765316338316564353865342e706e67"><img src="https://camo.githubusercontent.com/aa3183a75e29604f2c32eeede455a66bcd7e61f7c5bc8911fa77063e2c85f8fd/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36366337633934333830663434333764386437393765316338316564353865342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/66c7c94380f4437d8d797e1c81ed58e4.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>那我再次测试一下<strong>以引用作为函数的返回值类型</strong>和<strong>以值作为函数的返回值类型</strong>的性能</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>time.h<span class="pl-pds">&gt;</span></span>
+<span class="pl-k">struct</span> <span class="pl-en">A</span> { <span class="pl-k">int</span> a[<span class="pl-c1">10000</span>]; };
+A a;
+<span class="pl-c"><span class="pl-c">//</span> 值返回</span>
+A <span class="pl-en">TestFunc1</span>() { <span class="pl-k">return</span> a; }
+<span class="pl-c"><span class="pl-c">//</span> 引用返回</span>
+A&amp; <span class="pl-en">TestFunc2</span>() { <span class="pl-k">return</span> a; }
+<span class="pl-k">void</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c"><span class="pl-c">//</span> 以值作为函数的返回值类型</span>
+	<span class="pl-c1">size_t</span> begin1 = <span class="pl-c1">clock</span>();
+	<span class="pl-k">for</span> (<span class="pl-c1">size_t</span> i = <span class="pl-c1">0</span>; i &lt; <span class="pl-c1">100000</span>; ++i)
+		<span class="pl-c1">TestFunc1</span>();
+	<span class="pl-c1">size_t</span> end1 = <span class="pl-c1">clock</span>();
+	<span class="pl-c"><span class="pl-c">//</span> 以引用作为函数的返回值类型</span>
+	<span class="pl-c1">size_t</span> begin2 = <span class="pl-c1">clock</span>();
+	<span class="pl-k">for</span> (<span class="pl-c1">size_t</span> i = <span class="pl-c1">0</span>; i &lt; <span class="pl-c1">100000</span>; ++i)
+		<span class="pl-c1">TestFunc2</span>();
+	<span class="pl-c1">size_t</span> end2 = <span class="pl-c1">clock</span>();
+	<span class="pl-c"><span class="pl-c">//</span> 计算两个函数运算完成之后的时间</span>
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>TestFunc1 time:<span class="pl-pds">"</span></span> &lt;&lt; end1 - begin1 &lt;&lt; endl;
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>TestFunc2 time:<span class="pl-pds">"</span></span> &lt;&lt; end2 - begin2 &lt;&lt; endl;
+}</pre></div>
+<ul>
+<li>这就不用我说了吧~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/8241c2101bf42fa1e1336bd62ca07ceb4b41d9899a968636a07f124c2c865ae8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62636366306336326231666234303634396238623739643539333565343537632e706e67"><img src="https://camo.githubusercontent.com/8241c2101bf42fa1e1336bd62ca07ceb4b41d9899a968636a07f124c2c865ae8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62636366306336326231666234303634396238623739643539333565343537632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/bccf0c62b1fb40649b8b79d5935e457c.png" style="max-width: 100%;"></a></p>
+<ul>
+<li><strong>以值作为参数或者返回值类型，在传参和返回期间，函数不会直接传递实参或者将变量本身直接返回，而是传递实参或者返回变量的一份临时的拷贝，因此用值作为参数或者返回值类型，效率是非常低下的，尤其是当参数或者返回值类型非常大时，效率就更低</strong></li>
+</ul>
+<hr>
+<h4>1.4.2做返回值</h4>
+<ul>
+<li>首先来看这段代码，这段代码是将a的值返回，然后ret接收，没有什么问题</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span> <span class="pl-en">func</span>()
+{
+	<span class="pl-k">int</span> a = <span class="pl-c1">0</span>;
+	<span class="pl-k">return</span> a;
+}
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">int</span> ret = <span class="pl-c1">func</span>();
+	cout &lt;&lt; ret &lt;&lt; endl;
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>学了引用后，我们是不是可以这样</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span>&amp; <span class="pl-en">func</span>()
+{
+	<span class="pl-k">int</span> a = <span class="pl-c1">0</span>;
+	<span class="pl-k">return</span> a;
+}
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">int</span> ret = <span class="pl-c1">func</span>();
+	cout &lt;&lt; ret &lt;&lt; endl;
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>这里是报了一个<strong>警告</strong>，<strong>返回局部变量或临时变量的地址</strong>，那么这个程序的结果是什么？</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1184d716414ea15a62a2079b0185ddad7d7cf331e76446cfd9fef91438156e04/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61656263633532323530323734653434613139356339366563326364646330362e706e67"><img src="https://camo.githubusercontent.com/1184d716414ea15a62a2079b0185ddad7d7cf331e76446cfd9fef91438156e04/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61656263633532323530323734653434613139356339366563326364646330362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/aebcc52250274e44a195c96ec2cddc06.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们以前说指针有野指针，那么引用也有<strong>野引用</strong></li>
+<li>上面的代码在<code class="notranslate">func</code>函数里是将a的别名返回了，函数调用完会销毁，<strong>这里与函数的栈帧的创建与销毁有关</strong></li>
+<li><strong>在调用完函数后，那块空间会被销毁，然后再访问被销毁的地址，会造成野引用</strong></li>
+<li>栈帧销毁的时候可能被清理，结果可能是<strong>随机值</strong>，但是在<code class="notranslate">vs</code>上是不清理的</li>
+</ul>
+<p>我们可以证明一下：</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span>&amp; <span class="pl-en">func</span>()
+{
+	<span class="pl-k">int</span> a = <span class="pl-c1">0</span>;
+	<span class="pl-k">return</span> a;
+}
+
+<span class="pl-k">int</span>&amp; <span class="pl-en">fx</span>()
+{
+	<span class="pl-k">int</span> b = <span class="pl-c1">1</span>;
+	<span class="pl-k">return</span> b;
+}
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">int</span>&amp; ret = <span class="pl-c1">func</span>();
+	cout &lt;&lt; ret &lt;&lt; endl;
+
+	<span class="pl-c1">fx</span>();
+	cout &lt;&lt; ret &lt;&lt; endl;
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>在调用完一次后再次调用，栈帧大小是一样的，<strong>会复用前面的空间</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/a120840dff463aa7e84d98918536a1eae4268a97e5ed1b6c6494703c6a276eb7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38646231656231616136316434396230393439323764333633396332643864622e706e67"><img src="https://camo.githubusercontent.com/a120840dff463aa7e84d98918536a1eae4268a97e5ed1b6c6494703c6a276eb7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38646231656231616136316434396230393439323764333633396332643864622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/8db1eb1aa61d49b094927d3639c2d8db.png" style="max-width: 100%;"></a></p>
+<p>结论：<strong>返回变量出了函数作用域生命周期就销毁了，不能用引用返回</strong></p>
+<ul>
+<li>那什么情况下可以用引用返回呢？</li>
+</ul>
+<blockquote>
+<p><strong>全局变量</strong>/<strong>静态变量</strong>/<strong>堆</strong>上的变量等就可以用引用返回</p>
+</blockquote>
+<hr>
+<p>那么我这里举例用一个现实中的场景：</p>
+<p>首先来看一下：</p>
+<ul>
+<li>这里已经<code class="notranslate">c</code>和<code class="notranslate">c++</code>混着写了</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">include</span><span class="pl-s"><span class="pl-pds">&lt;</span>assert.h<span class="pl-pds">&gt;</span></span>
+<span class="pl-c"><span class="pl-c">//</span> 升级成类了，直接就可以使用名字，不用typedef了</span>
+<span class="pl-k">struct</span> <span class="pl-en">SeqList</span>
+{
+	<span class="pl-k">int</span>* a;
+	<span class="pl-k">int</span> size;
+	<span class="pl-k">int</span> capacity;
+};
+
+<span class="pl-k">void</span> <span class="pl-en">SLInit</span>(SeqList&amp; sl)
+{
+	sl.<span class="pl-smi">a</span> = (<span class="pl-k">int</span>*)<span class="pl-c1">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-k">int</span>) * <span class="pl-c1">4</span>);
+	<span class="pl-c"><span class="pl-c">//</span> ..</span>
+	sl.<span class="pl-smi">size</span> = <span class="pl-c1">0</span>;
+	sl.<span class="pl-smi">capacity</span> = <span class="pl-c1">4</span>;
+}
+
+<span class="pl-k">void</span> <span class="pl-en">SLPushBack</span>(SeqList&amp; sl, <span class="pl-k">int</span> x)
+{
+	<span class="pl-c"><span class="pl-c">//</span>...扩容</span>
+	sl.<span class="pl-smi">a</span>[sl.<span class="pl-smi">size</span>++] = x;
+}
+
+<span class="pl-c"><span class="pl-c">//</span> 修改</span>
+<span class="pl-k">void</span> <span class="pl-en">SLModity</span>(SeqList&amp; sl, <span class="pl-k">int</span> pos, <span class="pl-k">int</span> x)
+{
+	<span class="pl-c1">assert</span>(pos &gt;= <span class="pl-c1">0</span>);
+	<span class="pl-c1">assert</span>(pos &lt; sl.<span class="pl-smi">size</span>);
+
+	sl.<span class="pl-smi">a</span>[pos] = x;
+}
+
+<span class="pl-k">int</span> <span class="pl-en">SLGet</span>(SeqList&amp; sl, <span class="pl-k">int</span> pos)
+{
+	<span class="pl-c1">assert</span>(pos &gt;= <span class="pl-c1">0</span>);
+	<span class="pl-c1">assert</span>(pos &lt; sl.<span class="pl-smi">size</span>);
+
+	<span class="pl-k">return</span> sl.<span class="pl-smi">a</span>[pos];
+}
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	SeqList s;
+	<span class="pl-c1">SLInit</span>(s);
+	<span class="pl-c"><span class="pl-c">//</span> 这里接收的是引用，所以我们就不需要取地址了</span>
+	<span class="pl-c1">SLPushBack</span>(s, <span class="pl-c1">1</span>);
+	<span class="pl-c1">SLPushBack</span>(s, <span class="pl-c1">2</span>);
+	<span class="pl-c1">SLPushBack</span>(s, <span class="pl-c1">3</span>);
+	<span class="pl-c1">SLPushBack</span>(s, <span class="pl-c1">4</span>);
+
+	<span class="pl-k">for</span> (<span class="pl-k">int</span> i = <span class="pl-c1">0</span>; i &lt; s.<span class="pl-smi">size</span>; i++)
+	{
+		cout &lt;&lt; <span class="pl-c1">SLGet</span>(s, i) &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>;
+	}
+	cout &lt;&lt; endl;
+	
+	<span class="pl-c"><span class="pl-c">//</span> 获取每偶数进行*2</span>
+	<span class="pl-k">for</span> (<span class="pl-k">int</span> i = <span class="pl-c1">0</span>; i &lt; s.<span class="pl-smi">size</span>; i++)
+	{
+		<span class="pl-k">int</span> val = <span class="pl-c1">SLGet</span>(s, i);
+		<span class="pl-k">if</span> (val % <span class="pl-c1">2</span> == <span class="pl-c1">0</span>)
+		{
+			<span class="pl-c1">SLModity</span>(s, i, val * <span class="pl-c1">2</span>);
+		}
+	}
+	cout &lt;&lt; endl;
+	
+	<span class="pl-k">for</span> (<span class="pl-k">int</span> i = <span class="pl-c1">0</span>; i &lt; s.<span class="pl-smi">size</span>; i++)
+	{
+		cout &lt;&lt; <span class="pl-c1">SLGet</span>(s, i) &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>;
+	}
+	cout &lt;&lt; endl;
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>首先这里C++写有变化：</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">struct</span> <span class="pl-en">SeqList</span>
+{
+	<span class="pl-c"><span class="pl-c">//</span> 成员变量</span>
+	<span class="pl-k">int</span>* a;
+	<span class="pl-k">int</span> size;
+	<span class="pl-k">int</span> capacity;
+
+	<span class="pl-c"><span class="pl-c">//</span> 成员函数</span>
+	<span class="pl-k">void</span> <span class="pl-en">Init</span>()
+	{
+		a = (<span class="pl-k">int</span>*)<span class="pl-c1">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-k">int</span>) * <span class="pl-c1">4</span>);
+		<span class="pl-c"><span class="pl-c">//</span> ...</span>
+		size = <span class="pl-c1">0</span>;
+		capacity = <span class="pl-c1">4</span>;
+	}
+
+	<span class="pl-k">void</span> <span class="pl-en">PushBack</span>(<span class="pl-k">int</span> x)
+	{
+		<span class="pl-c"><span class="pl-c">//</span> ... 扩容</span>
+		a[size++] = x;
+	}
+	<span class="pl-c"><span class="pl-c">//</span> 读写返回变量</span>
+	<span class="pl-c"><span class="pl-c">//</span> 临时变量具有常性</span>
+	<span class="pl-c"><span class="pl-c">//</span> 所以必须返回引用，引用中间没有产生临时变量，是一个别名</span>
+	<span class="pl-k">int</span>&amp; <span class="pl-en">Get</span>(<span class="pl-k">int</span> pos)
+	{
+		<span class="pl-c1">assert</span>(pos &gt;= <span class="pl-c1">0</span>);
+		<span class="pl-c1">assert</span>(pos &lt; size);
+	
+		<span class="pl-k">return</span> a[pos];
+	}
+};
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	SeqList s;
+	s.<span class="pl-c1">Init</span>();
+	s.<span class="pl-c1">PushBack</span>(<span class="pl-c1">1</span>);
+	s.<span class="pl-c1">PushBack</span>(<span class="pl-c1">2</span>);
+	s.<span class="pl-c1">PushBack</span>(<span class="pl-c1">3</span>);
+	s.<span class="pl-c1">PushBack</span>(<span class="pl-c1">4</span>);
+
+	<span class="pl-k">for</span> (<span class="pl-k">int</span> i = <span class="pl-c1">0</span>; i &lt; s.<span class="pl-smi">size</span>; i++)
+	{
+		cout &lt;&lt; s.<span class="pl-c1">Get</span>(i)&lt;&lt; <span class="pl-s"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>;
+	}
+	cout &lt;&lt; endl;
+
+	<span class="pl-k">for</span> (<span class="pl-k">int</span> i = <span class="pl-c1">0</span>; i &lt; s.<span class="pl-smi">size</span>; i++)
+	{
+		<span class="pl-k">if</span> (s.<span class="pl-c1">Get</span>(i) % <span class="pl-c1">2</span> == <span class="pl-c1">0</span>)
+		{
+			s.<span class="pl-c1">Get</span>(i) *= <span class="pl-c1">2</span>;
+		}
+	}
+	cout &lt;&lt; endl;
+
+	<span class="pl-k">for</span> (<span class="pl-k">int</span> i = <span class="pl-c1">0</span>; i &lt; s.<span class="pl-smi">size</span>; i++)
+	{
+		cout &lt;&lt; s.<span class="pl-c1">Get</span>(i) &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>;
+	}
+	cout &lt;&lt; endl;
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>上面的代码C++首先将C语言的结构体升级成了类了，然后函数可以定义到类里面了，在使用的时候获取值就要注意一个点：必须返回引用，之前不是说不能用引用返回吗？这里就不一样了，这个<code class="notranslate">malloc</code>出来的空间，是在堆上的，所以可以返回，返回别名后，修改，修改别名也就是修改原来的地址...end</li>
+</ul>
+<h3>1.5 引用和指针的区别</h3>
+<ul>
+<li>对比区别的话，要从两个维度来对比，一个是<strong>语法</strong>，一个是<strong>底层</strong>，这两个不要混在一起了</li>
+</ul>
+<blockquote>
+<p>语法层面理解：</p>
+</blockquote>
+<ul>
+<li>来看下面的这段代码：</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">int</span> a = <span class="pl-c1">10</span>;
+	<span class="pl-k">int</span>&amp; ra = a;  <span class="pl-c"><span class="pl-c">//</span> 语法不开空间，</span>
+	ra = <span class="pl-c1">20</span>;
+
+	<span class="pl-k">int</span>* pa = &amp;a; <span class="pl-c"><span class="pl-c">//</span> 语法上开空间</span>
+	*pa = <span class="pl-c1">20</span>;
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>引用是别名，不开空间，指针是地址，需要开空间</li>
+<li>这里我们上面都已经知道了~</li>
+</ul>
+<h4>1.5.1 底层理解：</h4>
+<ul>
+<li>我们来看一下<strong>汇编代码</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/90cbb57daca3d1b3d79a96501e84300e96f88708bf0d6a6b0527b47d1cc37ef9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31653562336531653963633034396663383164623339366634316139663364332e706e67"><img src="https://camo.githubusercontent.com/90cbb57daca3d1b3d79a96501e84300e96f88708bf0d6a6b0527b47d1cc37ef9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31653562336531653963633034396663383164623339366634316139663364332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/1e5b3e1e9cc049fc81db396f41a9f3d3.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>看到在底层是开空间的，<strong>引用底层是指针实现的</strong></li>
+<li>语法含义和底层实现是背离的</li>
+</ul>
+<h3>1.6 小结一下</h3>
+<p><strong>语法层面上：</strong></p>
+<ol>
+<li>引用是别名，不开空间，指针是地址，需要开空间</li>
+<li>引用必须初始化，指针可以初始化也可以不初始化</li>
+<li>引用不能改变指向，指针可以</li>
+<li>引用相对更安全，没有空引用，但是有空指针，容易出现野指针，但是不容易出现野引用</li>
+<li><code class="notranslate">sizeof</code> 、<code class="notranslate">++</code>、<code class="notranslate">解引用</code>访问等方面的区别</li>
+</ol>
+<p><strong>底层层面上：【汇编】</strong><br>
+汇编层面上，没有引用，都是指针，引用编译后也转换成指针了</p>
+<h2>二、内联函数</h2>
+<h3>2.1 内联的概念</h3>
+<blockquote>
+<p>以inline修饰的函数叫做内联函数，编译时C++编译器会在调用内联函数的地方展开，没有函数调用建立栈帧的开销，内联函数提升程序运行的效率。</p>
+</blockquote>
+<ul>
+<li>假设我要频繁调用100w次，建立100w个栈帧</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span> <span class="pl-en">Add</span>(<span class="pl-k">int</span> a, <span class="pl-k">int</span> b)
+{
+	<span class="pl-k">return</span> a + b;
+}</pre></div>
+<ul>
+<li>c语言如何解决这个问题的？宏函数</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">define</span> <span class="pl-en">ADD</span>(<span class="pl-v">a, b</span>) ((a)+(b))</pre></div>
+<ul>
+<li>核心点：<strong>宏是预处理阶段进行替换</strong></li>
+</ul>
+<p><strong>宏的缺点：</strong><br>
+1、语法复杂，坑很多，不容易控制<br>
+2、不能调试<br>
+3、没有类型安全的检查</p>
+<ul>
+<li>这个时候C++就引入了一个概念<strong>inline</strong>，就是把函数的运算逻辑放到里面来，不进行建立栈帧</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">inline</span> <span class="pl-k">int</span> <span class="pl-en">Add</span>(<span class="pl-k">int</span> a, <span class="pl-k">int</span> b)
+{
+	<span class="pl-k">return</span> a + b;
+}
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">int</span> ret1 = <span class="pl-c1">Add</span>(<span class="pl-c1">1</span>, <span class="pl-c1">2</span>) * <span class="pl-c1">3</span>;
+
+	<span class="pl-k">int</span> x = <span class="pl-c1">1</span>, y = <span class="pl-c1">2</span>;
+	<span class="pl-k">int</span> ret2 = <span class="pl-c1">Add</span>(x | y, x &amp; y);
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>如果在上述函数前增加<code class="notranslate">inline</code>关键字将其改成内联函数，在编译期间编译器会用函数体替换函数的调用</li>
+</ul>
+<p>查看方式：</p>
+<ol>
+<li>在release模式下，查看编译器生成的汇编代码中是否存在<code class="notranslate">call Add</code></li>
+<li>在debug模式下，需要对编译器进行设置，否则不会展开(因为debug模式下，编译器默认不会对代码进行优化，下面是vs2022的设置)</li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e4a4d8e5f7dde44b7afda6521f32a3e10f3ecd5197d3957a1e2a37b12ae2cb37/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34393965306435633939306534373364383063313035636536646266653333642e706e67"><img src="https://camo.githubusercontent.com/e4a4d8e5f7dde44b7afda6521f32a3e10f3ecd5197d3957a1e2a37b12ae2cb37/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34393965306435633939306534373364383063313035636536646266653333642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/499e0d5c990e473d80c105ce6dbfe33d.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c54099c694f7797df885c8b9a51f868ceda0f75cb43a1de3111f6796e0bfff65/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35346135616162386131616434386438613339393438343739623434383236302e706e67"><img src="https://camo.githubusercontent.com/c54099c694f7797df885c8b9a51f868ceda0f75cb43a1de3111f6796e0bfff65/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35346135616162386131616434386438613339393438343739623434383236302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/54a5aab8a1ad48d8a39948479b448260.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>在不加内联的情况下</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b97c2012493a9be65cea6a3bad80cc997f6d07acdf280a1553fafc49e3631ec4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34323538633333646630633634333761616561613835393335666438343462622e706e67"><img src="https://camo.githubusercontent.com/b97c2012493a9be65cea6a3bad80cc997f6d07acdf280a1553fafc49e3631ec4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34323538633333646630633634333761616561613835393335666438343462622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/4258c33df0c6437aaeaa85935fd844bb.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>添加了内联后，可以看到有很大的特别</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d63d9b7762a7fa71e80484a02affc825cd7b2a600264ef484ad5adb8455011f0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63373330613030313632356134643363396364316666336635333263313465322e706e67"><img src="https://camo.githubusercontent.com/d63d9b7762a7fa71e80484a02affc825cd7b2a600264ef484ad5adb8455011f0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63373330613030313632356134643363396364316666336635333263313465322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/c730a001625a4d3c9cd1ff3f532c14e2.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们再来看一个场景</li>
+<li>就是分文件定义的时候，我就想在.h文件中定义一个函数</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/cf4f72029fb22c3c4a991cd045ad1d15bf2b65cce2a408e1703394cf71622caf/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38656663623937643933383934306236386166366534373464666339323636332e706e67"><img src="https://camo.githubusercontent.com/cf4f72029fb22c3c4a991cd045ad1d15bf2b65cce2a408e1703394cf71622caf/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38656663623937643933383934306236386166366534373464666339323636332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/8efcb97d938940b68af6e474dfc92663.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>然而我在使用的时候两个文件都包含了这个头文件，在编译阶段链接的时候就会报链接错误，冲突的原因就是两个文件都会生成符号表，进行链接，有同名，会冲突因为是同一个函数，这咋办啊~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/42e6007d26dea95480d33da1efa8ad758e1c0304cf580dd13245cd823ba346d4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38393839613762623334373234383930383265376234646338396231646565662e706e67"><img src="https://camo.githubusercontent.com/42e6007d26dea95480d33da1efa8ad758e1c0304cf580dd13245cd823ba346d4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38393839613762623334373234383930383265376234646338396231646565662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/8989a7bb3472489082e7b4dc89b1deef.png" style="max-width: 100%;"></a></p>
+<blockquote>
+<p>我们有三种解决方案：</p>
+</blockquote>
+<p><strong>第一种就是声明和定义分离</strong></p>
+<ul>
+<li>这个不多说，基本都会，之前我们用的都是这样的方法</li>
+</ul>
+<p><strong>第二种方式就是static修饰函数，链接属性，只在当前文件可见</strong></p>
+<ul>
+<li>在C语言阶段详细大家知道滴~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/338ae50bffb3cb0feb2165b22390d425e6b98de3a081e6610e46482203421d5b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66626463326234333462623134363466616466346231636162396632313463662e706e67"><img src="https://camo.githubusercontent.com/338ae50bffb3cb0feb2165b22390d425e6b98de3a081e6610e46482203421d5b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66626463326234333462623134363466616466346231636162396632313463662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/fbdc2b434bb1464fadf4b1cab9f214cf.png" style="max-width: 100%;"></a></p>
+<p><strong>第三种方式就是加入内联函数</strong></p>
+<ul>
+<li>这里的内联函数相当于也就是<strong>static</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/21c2fac09e26b720ee6b2a0751bdc96a245280744ecb91067453131e16d2dc91/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39376433333431613664373434363835386563393430353933643339623238322e706e67"><img src="https://camo.githubusercontent.com/21c2fac09e26b720ee6b2a0751bdc96a245280744ecb91067453131e16d2dc91/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39376433333431613664373434363835386563393430353933643339623238322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/97d3341a6d7446858ec940593d39b282.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这里要注意，内联修饰的函数比较大，他是不会展开的，小函数就会展开，所以<strong>小函数使用内联，大函数使用静态</strong></li>
+</ul>
+<hr>
+<h3>2.2 内联的特性</h3>
+<ol>
+<li>inline是一种以空间换时间的做法，如果编译器将函数当成内联函数处理，在编译阶段，会用函数体替换函数调用，缺陷：可能会使目标文件变大，优势：少了调用开销，提高程序运行效率。</li>
+<li>inline对于编译器而言只是一个建议，不同编译器关于inline实现机制可能不同，一般建议：将函数规模较小(即函数不是很长，具体没有准确的说法，取决于编译器内部实现)、不是递归、且频繁调用的函数采用inline修饰，否则编译器会忽略inline特性。下图为《C++prime》第五版关于inline的建议：<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9a83e6abb500b0c8a2517eae61d05299e331f974a78e2e02540dffcb7318c5a5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30356434363835336135326534333131383635356339313261373933613037652e706e67"><img src="https://camo.githubusercontent.com/9a83e6abb500b0c8a2517eae61d05299e331f974a78e2e02540dffcb7318c5a5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30356434363835336135326534333131383635356339313261373933613037652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/05d46853a52e43118655c912a793a07e.png" style="max-width: 100%;"></a></li>
+<li>inline <strong>不建议声明和定义分离</strong>，分离会导致链接错误。因为<strong>inline被展开</strong>，就没有函数地址了，链接就会找不到。</li>
+</ol>
+<hr>
+<h3>2.3 【面试题】</h3>
+<p><strong>宏的优缺点？</strong></p>
+<p><strong>优点：</strong></p>
+<ol>
+<li>增强代码的复用性。</li>
+<li>提高性能。</li>
+</ol>
+<p><strong>缺点：</strong></p>
+<ol>
+<li>不方便调试宏。（因为预编译阶段进行了替换）</li>
+<li>导致代码可读性差，可维护性差，容易误用。</li>
+<li>没有类型安全的检查 。</li>
+</ol>
+<hr>
+<p><strong>C++有哪些技术替代宏？</strong></p>
+<ol>
+<li>常量定义 换用<code class="notranslate">const</code> <code class="notranslate">enum</code></li>
+<li>短小函数定义换用<strong>内联函数</strong></li>
+</ol>
+<hr>
+<h2>三、auto关键字(C++11)</h2>
+<h3>3.1 类型别名思考</h3>
+<ul>
+<li>随着程序越来越复杂，程序中用到的类型也越来越复杂，经常体现在：</li>
+</ul>
+<ol>
+<li>类型难于拼写</li>
+<li>含义不明确导致容易出错</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	std::map&lt;std::string, std::string&gt; m{ { <span class="pl-s"><span class="pl-pds">"</span>apple<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>苹果<span class="pl-pds">"</span></span> }, { <span class="pl-s"><span class="pl-pds">"</span>orange<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>橙子<span class="pl-pds">"</span></span> },{<span class="pl-s"><span class="pl-pds">"</span>pear<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>梨<span class="pl-pds">"</span></span>} };
+	std::map&lt;std::string, std::string&gt;::iterator it = m.<span class="pl-c1">begin</span>();
+	<span class="pl-k">while</span> (it != m.<span class="pl-c1">end</span>())
+	{
+		<span class="pl-c"><span class="pl-c">//</span>....</span>
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>大家来上面的一个代码，有可能看不懂，但是我们只需要知道<code class="notranslate">std::map&lt;std::string, std::string&gt;::iterator</code>是一个类型但是该类型太长了，特别容易写错。聪明的同学可能已经想到：可以通过typedef给类型取别名，比如：</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">typedef</span> std::map&lt;std::string, std::string&gt; Map;</pre></div>
+<p>使用typedef给类型取别名确实可以简化代码，但是typedef有会遇到新的难题：</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">typedef</span> <span class="pl-k">char</span>* pstring;
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">const</span> pstring p1; 
+	<span class="pl-k">const</span> pstring* p2; 
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c2edee6cc9b8b77a2529c9a9dc018653a4660a2403ff3f02a76fa271d80cc8a8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35356163616266623635326234646562623137366564633135616339643137372e706e67"><img src="https://camo.githubusercontent.com/c2edee6cc9b8b77a2529c9a9dc018653a4660a2403ff3f02a76fa271d80cc8a8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35356163616266623635326234646562623137366564633135616339643137372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/55acabfb652b4debb176edc15ac9d177.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>在编程时，常常需要把表达式的值赋值给变量，这就要求在声明变量的时候清楚地知道表达式的<br>
+类型。然而有时候要做到这点并非那么容易，因此C++11给auto赋予了新的含义。</p>
+</li>
+<li>
+<p>这个时候auto就有作用了</p>
+</li>
+</ul>
+<hr>
+<h3>3.2 auto简介</h3>
+<ul>
+<li>
+<p>在早期C/C++中auto的含义是：使用auto修饰的变量，是具有自动存储器的局部变量，但遗憾的是一直没有人去使用它，大家可思考下为什么？</p>
+</li>
+<li>
+<p>C++11中，标准委员会赋予了auto全新的含义即：auto不再是一个存储类型指示符，而是作为一个新的类型指示符来指示编译器，auto声明的变量必须由编译器在编译时期推导而得。</p>
+</li>
+</ul>
+<p>如下所示：</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span> <span class="pl-en">TestAuto</span>()
+{
+	<span class="pl-k">return</span> <span class="pl-c1">10</span>;
+}
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">int</span> a = <span class="pl-c1">10</span>;
+	<span class="pl-k">auto</span> b = a; <span class="pl-c"><span class="pl-c">//</span> 整形</span>
+	<span class="pl-k">auto</span> c = <span class="pl-s"><span class="pl-pds">'</span>a<span class="pl-pds">'</span></span>; <span class="pl-c"><span class="pl-c">//</span> 字符类型</span>
+	<span class="pl-k">auto</span> f = &amp;a; <span class="pl-c"><span class="pl-c">//</span>指针类型</span>
+	<span class="pl-k">auto</span> d = <span class="pl-c1">TestAuto</span>(); <span class="pl-c"><span class="pl-c">//</span> 函数指针类型</span>
+	<span class="pl-c"><span class="pl-c">//</span> auto e;  error 必须要对其进行初始化</span>
+
+	cout &lt;&lt; <span class="pl-c1">typeid</span>(b).<span class="pl-c1">name</span>() &lt;&lt; endl;
+	cout &lt;&lt; <span class="pl-c1">typeid</span>(c).<span class="pl-c1">name</span>() &lt;&lt; endl;
+	cout &lt;&lt; <span class="pl-c1">typeid</span>(d).<span class="pl-c1">name</span>() &lt;&lt; endl;
+	cout &lt;&lt; <span class="pl-c1">typeid</span>(f).<span class="pl-c1">name</span>() &lt;&lt; endl;
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>这里的<strong>typeid(函数名).name()</strong>，就是打印类型</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c105b521b9d94623590cb3b26363a8dbb25e0993ffb8194756bb19b4ca0771bf/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32613934656664643539383034393437383936363138343564613733313533302e706e67"><img src="https://camo.githubusercontent.com/c105b521b9d94623590cb3b26363a8dbb25e0993ffb8194756bb19b4ca0771bf/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32613934656664643539383034393437383936363138343564613733313533302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/2a94efdd5980494789661845da731530.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>就刚刚上面的代码就可以这样写了</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>string<span class="pl-pds">&gt;</span></span>
+#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>map<span class="pl-pds">&gt;</span></span>
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	std::map&lt;std::string, std::string&gt; m{ { <span class="pl-s"><span class="pl-pds">"</span>apple<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>苹果<span class="pl-pds">"</span></span> }, { <span class="pl-s"><span class="pl-pds">"</span>orange<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>橙子<span class="pl-pds">"</span></span> },{<span class="pl-s"><span class="pl-pds">"</span>pear<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>梨<span class="pl-pds">"</span></span>} };
+	<span class="pl-k">auto</span> it = m.<span class="pl-c1">begin</span>();
+	<span class="pl-k">while</span> (it != m.<span class="pl-c1">end</span>())
+	{
+		<span class="pl-c"><span class="pl-c">//</span>....</span>
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>类型就可以写成auto自动识别了~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/8e78fb6c003635ba7c4af901a4f46ab0d08c9b1a9e2a64e1cccb4917dcc32c20/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62393636343662666664653234643037616166393833373736356163646630392e706e67"><img src="https://camo.githubusercontent.com/8e78fb6c003635ba7c4af901a4f46ab0d08c9b1a9e2a64e1cccb4917dcc32c20/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62393636343662666664653234643037616166393833373736356163646630392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/b96646bffde24d07aaf9837765acdf09.png" style="max-width: 100%;"></a></p>
+<p>【注意】</p>
+<ul>
+<li><strong>使用auto定义变量时必须对其进行初始化，在编译阶段编译器需要根据初始化表达式来推导auto的实际类型。因此auto并非是一种“类型”的声明，而是一个类型声明时的“占位符”，编译器在编译期会将auto替换为变量实际的类型。</strong></li>
+</ul>
+<h2>四、auto的使用细则</h2>
+<ol>
+<li>auto与指针和引用结合起来使用</li>
+</ol>
+<p>用auto声明指针类型时，用<strong>auto</strong>和<strong>auto</strong>*没有任何区别，但用 <strong>auto</strong> 声明引用类型时则必须加 <strong>&amp;</strong></p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">int</span> x = <span class="pl-c1">10</span>;
+	<span class="pl-k">auto</span> a = &amp;x;
+	<span class="pl-k">auto</span>* b = &amp;x;
+	<span class="pl-k">auto</span>&amp; c = x;
+
+	cout &lt;&lt; <span class="pl-c1">typeid</span>(a).<span class="pl-c1">name</span>() &lt;&lt; endl;
+	cout &lt;&lt; <span class="pl-c1">typeid</span>(b).<span class="pl-c1">name</span>() &lt;&lt; endl;
+	cout &lt;&lt; <span class="pl-c1">typeid</span>(c).<span class="pl-c1">name</span>() &lt;&lt; endl;
+	
+	*a = <span class="pl-c1">20</span>;
+	*b = <span class="pl-c1">30</span>;
+	c = <span class="pl-c1">40</span>;
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/526dc8b5479f2e9d3dab190b27a73fc9e372bc3bd34793701d88a456252b60fb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33313062373833396239356334616366626165626464306238623665666335332e706e67"><img src="https://camo.githubusercontent.com/526dc8b5479f2e9d3dab190b27a73fc9e372bc3bd34793701d88a456252b60fb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33313062373833396239356334616366626165626464306238623665666335332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/310b7839b95c4acfbaebdd0b8b6efc53.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4cd34bac03ca13e51f91b5aa2da61e505c6fa3dfff6a0d889916387c5e3c9221/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32313565626562653862313334363439613466396462366238313538633632362e706e67"><img src="https://camo.githubusercontent.com/4cd34bac03ca13e51f91b5aa2da61e505c6fa3dfff6a0d889916387c5e3c9221/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32313565626562653862313334363439613466396462366238313538633632362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/215ebebe8b134649a4f9db6b8158c626.png" style="max-width: 100%;"></a></p>
+<ol start="2">
+<li>在同一行定义多个变量</li>
+</ol>
+<p>当在同一行声明多个变量时，这些变量<strong>必须是相同的类型</strong>，否则编译器将会报错，因为编译器实际只对第一个类型进行推导，然后用推导出来的类型定义其他变量。</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">TestAuto</span>()
+{
+	<span class="pl-k">auto</span> a = <span class="pl-c1">1</span>, b = <span class="pl-c1">2</span>;
+	<span class="pl-k">auto</span> c = <span class="pl-c1">3</span>, d = <span class="pl-c1">4.0</span>; 
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/49dbd19d84ab32e0bc9a09aa0b4878ad1d149fa0d565a44aee1bdfd0d291197b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64323539316632393736333434643130393837633931303162623431333061662e706e67"><img src="https://camo.githubusercontent.com/49dbd19d84ab32e0bc9a09aa0b4878ad1d149fa0d565a44aee1bdfd0d291197b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64323539316632393736333434643130393837633931303162623431333061662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/d2591f2976344d10987c9101bb4130af.png" style="max-width: 100%;"></a></p>
+<ol start="3">
+<li>auto不能推导的场景</li>
+</ol>
+<ul>
+<li>auto不能作为函数的参数</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span> 此处代码编译失败，auto不能作为形参类型，因为编译器无法对a的实际类型进行推导</span>
+<span class="pl-k">void</span> <span class="pl-en">TestAuto</span>(<span class="pl-k">auto</span> a)
+{}</pre></div>
+<ul>
+<li>auto不能直接用来声明数组</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">TestAuto</span>()
+{
+	<span class="pl-k">int</span> a[] = {<span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>};
+	<span class="pl-k">auto</span> b[] = {<span class="pl-c1">4</span>，<span class="pl-c1">5</span>，<span class="pl-c1">6</span>};
+}</pre></div>
+<ul>
+<li>为了避免与C++98中的auto发生混淆，C++11只保留了auto作为类型指示符的用法</li>
+<li>auto在实际中最常见的优势用法就是跟以后会讲到的C++11提供的新式for循环，还有<code class="notranslate">lambda</code>表达式等进行配合使用。</li>
+</ul>
+<h3>4.1 基于范围的for循环(C++11)</h3>
+<blockquote>
+<p>范围for的语法</p>
+</blockquote>
+<ul>
+<li>在C++98中如果要遍历一个数组，可以按照以下方式进行：</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">TestFor</span>()
+{
+	<span class="pl-k">int</span> array[] = { <span class="pl-c1">1</span>, <span class="pl-c1">2</span>, <span class="pl-c1">3</span>, <span class="pl-c1">4</span>, <span class="pl-c1">5</span> };
+	
+	<span class="pl-k">for</span> (<span class="pl-k">int</span> i = <span class="pl-c1">0</span>; i &lt; <span class="pl-k">sizeof</span>(array) / <span class="pl-k">sizeof</span>(array[<span class="pl-c1">0</span>]); ++i)
+		array[i] *= <span class="pl-c1">2</span>;
+		
+	<span class="pl-k">for</span> (<span class="pl-k">int</span>* p = array; p &lt; array + <span class="pl-k">sizeof</span>(array)/ <span class="pl-k">sizeof</span>(array[<span class="pl-c1">0</span>]); ++p)
+		cout &lt;&lt; *p &lt;&lt; endl;
+}</pre></div>
+<ul>
+<li>对于一个<strong>有范围的集合</strong>而言，由程序员来说明循环的范围是多余的，有时候还会容易犯错误。因此C++11中引入了基于范围的for循环。<strong>for循环后的括号由冒号“ ：”分为两部分：第一部分是范围内用于迭代的变量，第二部分则表示被迭代的范围。</strong></li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">TestFor</span>()
+{
+	<span class="pl-k">int</span> array[] = { <span class="pl-c1">1</span>, <span class="pl-c1">2</span>, <span class="pl-c1">3</span>, <span class="pl-c1">4</span>, <span class="pl-c1">5</span> };
+	<span class="pl-k">for</span> (<span class="pl-k">auto</span>&amp; e : array)
+		e *= <span class="pl-c1">2</span>;
+	<span class="pl-k">for</span> (<span class="pl-k">auto</span> e : array)
+		cout &lt;&lt; e &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>;
+}</pre></div>
+<ul>
+<li>注意：<strong>与普通循环类似，可以用continue来结束本次循环，也可以用break来跳出整个循环。9.2 范围for的使用条件</strong></li>
+</ul>
+<h3>4.2 范围for的使用条件</h3>
+<ul>
+<li>
+<p>for循环迭代的范围必须是确定的</p>
+</li>
+<li>
+<p>对于数组而言，就是数组中第一个元素和最后一个元素的范围；对于类而言，应该提供begin和end的方法，begin和end就是for循环迭代的范围。</p>
+</li>
+</ul>
+<p>注意：以下代码就有问题，因为for的范围不确定</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">TestFor</span>(<span class="pl-k">int</span> array[])
+{
+	<span class="pl-k">for</span>(<span class="pl-k">auto</span>&amp; e : array)
+	cout&lt;&lt; e &lt;&lt;endl;
+}</pre></div>
+<ul>
+<li>迭代的对象要实现++和==的操作。</li>
+</ul>
+<h2>五、指针空值nullptr(C++11)</h2>
+<ul>
+<li>在良好的C/C++编程习惯中，声明一个变量时最好给该变量一个合适的初始值，否则可能会出现不可预料的错误，比如未初始化的指针。如果一个指针没有合法的指向，我们基本都是按照如下方式对其进行初始化：</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">TestPtr</span>()
+{
+	<span class="pl-k">int</span>* p1 = <span class="pl-c1">NULL</span>;
+	<span class="pl-k">int</span>* p2 = <span class="pl-c1">0</span>;
+	<span class="pl-c"><span class="pl-c">//</span> ……</span>
+}</pre></div>
+<ul>
+<li>NULL实际是一个宏，在传统的C头文件(stddef.h)中，可以看到如下代码：</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">ifndef</span> NULL
+	#<span class="pl-k">ifdef</span> __cplusplus
+		#<span class="pl-k">define</span> <span class="pl-en">NULL</span> <span class="pl-c1">0</span>
+	#<span class="pl-k">else</span>
+		#<span class="pl-k">define</span> <span class="pl-en">NULL</span> ((<span class="pl-k">void</span> *)<span class="pl-c1">0</span>)
+	#<span class="pl-k">endif</span>
+#<span class="pl-k">endif</span></pre></div>
+<ul>
+<li>或者我们右键转到定义就可以看到：</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/729fbcc308594c27c8a803e797cd041b81293c5f6a8542101e1a459e103f9b28/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32303639636137613264303234336664616430653336323761376232633833312e706e67"><img src="https://camo.githubusercontent.com/729fbcc308594c27c8a803e797cd041b81293c5f6a8542101e1a459e103f9b28/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32303639636137613264303234336664616430653336323761376232633833312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/2069ca7a2d0243fdad0e3627a7b2c831.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5d8f9a695bb0c5e985b3128f0d1d7a1507e222696155f05eab549334b3d6f110/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66633637363862653135633734643566613333303839653263383666643363362e706e67"><img src="https://camo.githubusercontent.com/5d8f9a695bb0c5e985b3128f0d1d7a1507e222696155f05eab549334b3d6f110/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66633637363862653135633734643566613333303839653263383666643363362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/fc6768be15c74d5fa33089e2c86fd3c6.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以看到，NULL可能被定义为字面常量0，或者被定义为无类型指针(void*)的常量。不论采取何种定义，在使用空值的指针时，都不可避免的会遇到一些麻烦，比如：</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">f</span>(<span class="pl-k">int</span>)
+{
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>f(int)<span class="pl-pds">"</span></span> &lt;&lt; endl;
+}
+<span class="pl-k">void</span> <span class="pl-en">f</span>(<span class="pl-k">int</span>*)
+{
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>f(int*)<span class="pl-pds">"</span></span> &lt;&lt; endl;
+}
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c1">f</span>(<span class="pl-c1">0</span>);
+	<span class="pl-c1">f</span>(<span class="pl-c1">NULL</span>);
+	<span class="pl-c1">f</span>((<span class="pl-k">int</span>*)<span class="pl-c1">NULL</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7ab9caf48b80d339f622082af08ef4e6d7ce5be1a7a0b0d03ee6b49b76a3799d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63643236663337646438393034646433616264316539636136306436346235372e706e67"><img src="https://camo.githubusercontent.com/7ab9caf48b80d339f622082af08ef4e6d7ce5be1a7a0b0d03ee6b49b76a3799d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63643236663337646438393034646433616264316539636136306436346235372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/cd26f37dd8904dd3abd1e9ca60d64b57.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>程序本意是想通过f(NULL)调用指针版本的<code class="notranslate">f(int*)</code>函数，但是由于NULL被定义成0，因此与程序的初衷相悖。</p>
+</li>
+<li>
+<p>在C++98中，字面常量0既可以是一个整形数字，也可以是无类型的指针<code class="notranslate">(void*)</code>常量，但是编译器默认情况下将其看成是一个整形常量，如果要将其按照指针方式来使用，必须对其进行强转<code class="notranslate">(void*)0</code>。</p>
+</li>
+</ul>
+<p>注意：</p>
+<ol>
+<li>在使用<code class="notranslate">nullptr</code>表示指针空值时，不需要包含头文件，因为<code class="notranslate">nullptr</code>是C++11作为新关键字引入的。</li>
+<li>在C++11中，<code class="notranslate">sizeof(nullptr)</code> 与 <code class="notranslate">sizeof((void*)0)</code>所占的字节数相同。</li>
+<li>为了提高代码的健壮性，在后续表示指针空值时建议最好使用<code class="notranslate">nullptr</code>。</li>
+</ol></div>
+<div style="font-size:small;margin-top:8px;float:right;"></div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://shilinnull.github.io/shilin.github.io"> 仕林的博客 </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if(""!=""){
+    var now=new Date();
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilin.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

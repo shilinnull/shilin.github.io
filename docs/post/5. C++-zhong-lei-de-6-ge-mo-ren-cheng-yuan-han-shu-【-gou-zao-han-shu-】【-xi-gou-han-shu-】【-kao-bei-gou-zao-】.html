@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## 前言
+
+>在学习C++我们必须要掌握的6个默认成员函数，接下来我们挨个学习：
+
+## 构造函数
+
+
+- 如果一个类中什么成员都没有，简称为空类。">
+<meta property="og:title" content="5. C++中类的6个默认成员函数【构造函数】【析构函数】【拷贝构造】">
+<meta property="og:description" content="## 前言
+
+>在学习C++我们必须要掌握的6个默认成员函数，接下来我们挨个学习：
+
+## 构造函数
+
+
+- 如果一个类中什么成员都没有，简称为空类。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://shilinnull.github.io/shilin.github.io/post/5.%20C%2B%2B-zhong-lei-de-6-ge-mo-ren-cheng-yuan-han-shu-%E3%80%90-gou-zao-han-shu-%E3%80%91%E3%80%90-xi-gou-han-shu-%E3%80%91%E3%80%90-kao-bei-gou-zao-%E3%80%91.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>5. C++中类的6个默认成员函数【构造函数】【析构函数】【拷贝构造】</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">5. C++中类的6个默认成员函数【构造函数】【析构函数】【拷贝构造】</h1>
+<div class="title-right">
+    <a href="https://shilinnull.github.io/shilin.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilin.github.io/issues/7" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>前言</h2>
+<blockquote>
+<p>在学习C++我们必须要掌握的6个默认成员函数，接下来我们挨个学习：</p>
+</blockquote>
+<h2>构造函数</h2>
+<ul>
+<li>
+<p>如果一个类中什么成员都没有，简称为空类。</p>
+</li>
+<li>
+<p>空类中真的什么都没有吗？并不是，任何类在什么都不写时，编译器会自动生成以下6个默认成员函数。</p>
+</li>
+<li>
+<p>默认成员函数：用户没有显式实现，编译器会生成的成员函数称为<strong>默认成员函数</strong>。</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Date</span> {};</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2dd1988da455873cc8a612305b9862718f552cfd23c7660092f3343202964f57/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33613035353666643135366434346538393637343036646266666436323265392e706e67"><img src="https://camo.githubusercontent.com/2dd1988da455873cc8a612305b9862718f552cfd23c7660092f3343202964f57/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33613035353666643135366434346538393637343036646266666436323265392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/3a0556fd156d44e8967406dbffd622e9.png" style="max-width: 100%;"></a></p>
+<h3>构造函数的概念</h3>
+<ul>
+<li>首先我们看下面的代码来引入一下<strong>构造函数</strong>：</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">void</span> <span class="pl-en">Init</span>(<span class="pl-k">int</span> year, <span class="pl-k">int</span> month, <span class="pl-k">int</span> day)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+	}
+	<span class="pl-k">void</span> <span class="pl-en">Print</span>()
+	{
+		cout &lt;&lt; _year &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>-<span class="pl-pds">"</span></span> &lt;&lt; _month &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>-<span class="pl-pds">"</span></span> &lt;&lt; _day &lt;&lt; endl;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _year;
+	<span class="pl-k">int</span> _month;
+	<span class="pl-k">int</span> _day;
+};
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Date d1;
+	d1.<span class="pl-c1">Init</span>(<span class="pl-c1">2022</span>, <span class="pl-c1">7</span>, <span class="pl-c1">5</span>);
+	d1.<span class="pl-c1">Print</span>();
+	Date d2;
+	d2.<span class="pl-c1">Init</span>(<span class="pl-c1">2022</span>, <span class="pl-c1">7</span>, <span class="pl-c1">6</span>);
+	d2.<span class="pl-c1">Print</span>();
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>
+<p>对于Date类，可以通过 <code class="notranslate">Init()</code> 公有方法给对象设置日期，但如果每次创建对象时都调用该方法设置信息，未免有点麻烦，那能否在对象创建时，就将信息设置进去呢？</p>
+</li>
+<li>
+<p>在C++中就有这么一个方法解决此问题-------&gt;<strong>构造函数</strong></p>
+</li>
+<li>
+<p><strong>构造函数是一个特殊的成员函数</strong>，<strong>名字与类名相同</strong>，创建类类型对象时由编译器<strong>自动调用</strong>，以<strong>保证每个数据成员都有一个合适的初始值</strong>，并且在<strong>对象整个生命周期内只调用一次</strong>。</p>
+</li>
+</ul>
+<h3>构造函数的特性</h3>
+<ul>
+<li>构造函数是特殊的成员函数，需要注意的是，构造函数虽然名称叫构造，但是构造函数的主要任务并不是开空间创建对象，而是<strong>初始化对象</strong>。</li>
+</ul>
+<p>特性：</p>
+<ol>
+<li>函数名与类名相同。</li>
+<li>无返回值。</li>
+<li>对象实例化时编译器自动调用对应的构造函数。</li>
+<li>构造函数可以重载。</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-c"><span class="pl-c">//</span> 1.无参构造函数</span>
+	<span class="pl-en">Date</span>()
+	{
+		_year = <span class="pl-c1">1</span>;
+		_month = <span class="pl-c1">1</span>;
+		_day = <span class="pl-c1">1</span>;
+	}
+	<span class="pl-c"><span class="pl-c">//</span> 2.带参构造函数</span>
+	<span class="pl-en">Date</span>(<span class="pl-k">int</span> year, <span class="pl-k">int</span> month, <span class="pl-k">int</span> day)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _year;
+	<span class="pl-k">int</span> _month;
+	<span class="pl-k">int</span> _day;
+};
+<span class="pl-k">void</span> <span class="pl-en">TestDate</span>()
+{
+	Date d1; <span class="pl-c"><span class="pl-c">//</span> 调用无参构造函数</span>
+	Date <span class="pl-smi">d2</span>(<span class="pl-c1">2015</span>, <span class="pl-c1">1</span>, <span class="pl-c1">1</span>); <span class="pl-c"><span class="pl-c">//</span> 调用带参的构造函数</span>
+	Date <span class="pl-smi">d3</span>();
+}</pre></div>
+<ul>
+<li>可以看到正常运行了：</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ba35aa5ed7f3e5a58f0d0e81c94d6b37a0fe4ad24b32ce6cf737c42275a85652/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33316435366639333662363034343935383936346638633836393535376136652e706e67"><img src="https://camo.githubusercontent.com/ba35aa5ed7f3e5a58f0d0e81c94d6b37a0fe4ad24b32ce6cf737c42275a85652/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33316435366639333662363034343935383936346638633836393535376136652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/31d56f936b6044958964f8c869557a6e.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>上面在创建对象的时候跟上了要初始化的数据，那么我想使用默认构造函数，直接创建对象的时候什么都不写就可以直接使用，那么可以带上括号吗？</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">Date <span class="pl-en">d3</span>();</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/bd2b8d6d15edc77a61def11933b865910d4436454e53d1202ae3f15cab652bd6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32333938653931353631393134626236623030363530333432316634396237642e706e67"><img src="https://camo.githubusercontent.com/bd2b8d6d15edc77a61def11933b865910d4436454e53d1202ae3f15cab652bd6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32333938653931353631393134626236623030363530333432316634396237642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/2398e91561914bb6b006503421f49b7d.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>可以看到结论，是不可以的~</p>
+<ul>
+<li>主要的是无法和函数的声明区分开</li>
+</ul>
+</li>
+<li>
+<p>上面的代码的函数：声明了<code class="notranslate">d3</code>函数，该函数无参，返回一个日期类型的对象</p>
+</li>
+<li>
+<p>注意：如果通过无参构造函数创建对象时，对象后面不用跟括号，否则就成了函数声明</p>
+</li>
+</ul>
+<hr>
+<p>实际上我们可以这样写：</p>
+<ul>
+<li>直接给一个<strong>全缺省</strong>，是不是很很好~</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">Date</span>(<span class="pl-k">int</span> year = <span class="pl-c1">1</span>, <span class="pl-k">int</span> month = <span class="pl-c1">1</span>, <span class="pl-k">int</span> day = <span class="pl-c1">1</span>)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+	}
+	<span class="pl-k">void</span> <span class="pl-en">print</span>()
+	{
+		cout &lt;&lt;  _year &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>/<span class="pl-pds">"</span></span> &lt;&lt; _month &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>/<span class="pl-pds">"</span></span> &lt;&lt; _day &lt;&lt; endl;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _year;
+	<span class="pl-k">int</span> _month;
+	<span class="pl-k">int</span> _day;
+};</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e05078cda969b0fb74111f7e53c7cd7db3508192f2a3750cb92959b52d52b7b3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61353739323139613032393134313931383535623265323831393162376363362e706e67"><img src="https://camo.githubusercontent.com/e05078cda969b0fb74111f7e53c7cd7db3508192f2a3750cb92959b52d52b7b3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61353739323139613032393134313931383535623265323831393162376363362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/a579219a02914191855b2e28191b7cc6.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>那么这两个函数可以同时存在吗？</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-en">Date</span>()
+{
+	_year = <span class="pl-c1">1</span>;
+	_month = <span class="pl-c1">1</span>;
+	_day = <span class="pl-c1">1</span>;
+}
+<span class="pl-en">Date</span>(<span class="pl-k">int</span> year = <span class="pl-c1">1</span>, <span class="pl-k">int</span> month = <span class="pl-c1">1</span>, <span class="pl-k">int</span> day = <span class="pl-c1">1</span>)
+{
+	_year = year;
+	_month = month;
+	_day = day;
+}</pre></div>
+<ul>
+<li>语法上可以，但是调用的时候会存在歧义，就是到底要调用谁</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b0d6ab7882b2f5afe9e6311ca5b7cdbcd03a4e6c1fd76315942848203fcd626e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39326663663736333435366234306637613564653938383264343136303432352e706e67"><img src="https://camo.githubusercontent.com/b0d6ab7882b2f5afe9e6311ca5b7cdbcd03a4e6c1fd76315942848203fcd626e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39326663663736333435366234306637613564653938383264343136303432352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/92fcf763456b40f7a5de9882d4160425.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>显而易见是不可以的，接下来再看：</li>
+</ul>
+<ol start="5">
+<li>如果类中没有显式定义构造函数，则C++编译器会自动生成一个无参的默认构造函数，一旦用户显式定义编译器将不再生成。</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">void</span> <span class="pl-en">Print</span>()
+	{
+		cout &lt;&lt; _year &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>/<span class="pl-pds">"</span></span> &lt;&lt; _month &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>/<span class="pl-pds">"</span></span> &lt;&lt; _day &lt;&lt; endl;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _year;
+	<span class="pl-k">int</span> _month;
+	<span class="pl-k">int</span> _day;
+};
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Date d1;
+	d1.<span class="pl-c1">Print</span>();
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>如果我们不指定默认构造函数，它会自动生成一个，但是生成的这个默认构造函数它又什么都没做</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2f164abf81459e60c79e3502bd731cd5ba7a5d52d2f6aa98c6363c458e2b9c93/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62653438343334396666613534663165626530643264333162616532326665622e706e67"><img src="https://camo.githubusercontent.com/2f164abf81459e60c79e3502bd731cd5ba7a5d52d2f6aa98c6363c458e2b9c93/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62653438343334396666613534663165626530643264333162616532326665622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/be484349ffa54f1ebe0d2d31bae22feb.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>到这里我们先得出一个结论：<strong>内置类型/基本类型不做处理</strong></p>
+</li>
+<li>
+<p>我们这里还有一个点，就是<strong>内置类型</strong>呢？</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">A</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">A</span>()
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>A()<span class="pl-pds">"</span></span> &lt;&lt; endl;
+		_a = <span class="pl-c1">0</span>;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _a;
+};
+<span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">void</span> <span class="pl-en">Print</span>()
+	{
+		cout &lt;&lt; _year &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>/<span class="pl-pds">"</span></span> &lt;&lt; _month &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>/<span class="pl-pds">"</span></span> &lt;&lt; _day &lt;&lt; endl;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _year;
+	<span class="pl-k">int</span> _month;
+	<span class="pl-k">int</span> _day;
+
+	A _aa;
+};
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Date d1;
+	d1.<span class="pl-c1">Print</span>();
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3220798555ba962374c932030a7a298cc58b341e9efeccec58ce4bd784988cd9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62323862336665663031653934653561623635356631343237303131636434642e706e67"><img src="https://camo.githubusercontent.com/3220798555ba962374c932030a7a298cc58b341e9efeccec58ce4bd784988cd9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62323862336665663031653934653561623635356631343237303131636434642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/b28b3fef01e94e5ab655f1427011cd4d.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>再得出一个结论：<strong>对自定义类型，自定义类型回去调用它的默认构造函数</strong></p>
+</li>
+<li>
+<p>C++11委员会对这个语法进行打了补丁，在<strong>内置类型成员变量在类中声明时可以给默认值</strong>,有一个值不给就还是随机值</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">A</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">A</span>()
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>A()<span class="pl-pds">"</span></span> &lt;&lt; endl;
+		_a = <span class="pl-c1">0</span>;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _a;
+};
+<span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">void</span> <span class="pl-en">Print</span>()
+	{
+		cout &lt;&lt; _year &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>/<span class="pl-pds">"</span></span> &lt;&lt; _month &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>/<span class="pl-pds">"</span></span> &lt;&lt; _day &lt;&lt; endl;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-c"><span class="pl-c">//</span> 声明给缺省值</span>
+	<span class="pl-k">int</span> _year = <span class="pl-c1">1</span>;
+	<span class="pl-k">int</span> _month = <span class="pl-c1">1</span>;
+	<span class="pl-k">int</span> _day = <span class="pl-c1">1</span>;
+
+	A _aa;
+};
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Date d1;
+	d1.<span class="pl-c1">Print</span>();
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f6a865756c87a70e764fea5c305356e3a89f65db7a2a5562c2f62d6de0c49d96/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35613734343430393233333434323061393138393030613230623366363134362e706e67"><img src="https://camo.githubusercontent.com/f6a865756c87a70e764fea5c305356e3a89f65db7a2a5562c2f62d6de0c49d96/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35613734343430393233333434323061393138393030613230623366363134362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/5a7444092334420a918900a20b3f6146.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>如果用户<strong>显式定义了构造函数，编译器将不再生成</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/bed1288084b983ce45e42632be92422810b7c9d499f1ffae5549153034a655b4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64396266376561663364336434646533616361366132333865653365356630612e706e67"><img src="https://camo.githubusercontent.com/bed1288084b983ce45e42632be92422810b7c9d499f1ffae5549153034a655b4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64396266376561663364336434646533616361366132333865653365356630612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/d9bf7eaf3d3d4de3aca6a238ee3e5f0a.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>将Date类中构造函数屏蔽后，代码可以通过编译，因为编译器生成了一个无参的默认构造函数</li>
+<li>将Date类中构造函数放开，代码编译失败，因为一旦显式定义任何构造函数，编译器将不再生成</li>
+<li>无参构造函数，放开后报错：<code class="notranslate">error C2512: “Date”: 没有合适的默认构造函数可用</code></li>
+</ul>
+<p>否则这样用用就不会报错：</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate">Date <span class="pl-en">d1</span>(<span class="pl-c1">2024</span>,<span class="pl-c1">1</span>,<span class="pl-c1">31</span>);</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/949cdc30c224fe00ae103e2708140110f931d4419f7e2bbc789a155d0d71edf0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63393962316137613564383734376430613837386531633539323537343536392e706e67"><img src="https://camo.githubusercontent.com/949cdc30c224fe00ae103e2708140110f931d4419f7e2bbc789a155d0d71edf0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63393962316137613564383734376430613837386531633539323537343536392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/c99b1a7a5d8747d0a878e1c592574569.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>或者再提供一个<strong>默认构造</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5eb4f83864054d745aaea6485a3c3bda3f89399e39a4ef109dfeb2ef07e40783/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36323936396430633364613534313432613739633364356131623565313439362e706e67"><img src="https://camo.githubusercontent.com/5eb4f83864054d745aaea6485a3c3bda3f89399e39a4ef109dfeb2ef07e40783/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36323936396430633364613534313432613739633364356131623565313439362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/62969d0c3da54142a79c3d5a1b5e1496.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>在或者提供一个<strong>全缺省</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4f094f09cd2a8de9d64516444c3863557cc87416d86b5e281a2cc292585b28b0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64623861663635646633333934373732396535366565633265393230306239622e706e67"><img src="https://camo.githubusercontent.com/4f094f09cd2a8de9d64516444c3863557cc87416d86b5e281a2cc292585b28b0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64623861663635646633333934373732396535366565633265393230306239622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/db8af65df33947729e56eec2e9200b9b.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>无参的构造函数和全缺省的构造函数都称为默认构造函数，并且默认构造函数只能有一个。注意：<strong>无参构造函数、全缺省构造函数、我们没写编译器默认生成的构造函数，都可以认为是默认构造函数。</strong></li>
+</ul>
+<hr>
+<ul>
+<li><strong>那么默认生成的构造函数还有意义吗？</strong></li>
+<li>我们再来看这个代码：</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Stack</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">Stack</span>()
+	{
+		<span class="pl-c"><span class="pl-c">//</span>....</span>
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Stack()<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	}
+};
+
+<span class="pl-c"><span class="pl-c">//</span> 两个栈实现队列</span>
+<span class="pl-k">class</span> <span class="pl-en">MyQueue</span>
+{
+<span class="pl-k">private:</span>
+	Stack st1;
+	Stack st2;
+};
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	MyQueue q;
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>这里的<code class="notranslate">MyQueue</code>就不用写默认构造函数</li>
+<li>所以还是有意义的，分析一个类型成员和初始化要求，需要写构造函数就我们自己写，不需要的时候用编译器自己生成。结论：<strong>绝大多数场景下都需要自己实现构造函数</strong>，不要老想着编译器自己生成~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7c0effc0f1f9e5c0832333fb6c2a054f065dfd731376c96d5ad72b065468d29e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36373764303935623138666434613937613965633438303531653536653734312e706e67"><img src="https://camo.githubusercontent.com/7c0effc0f1f9e5c0832333fb6c2a054f065dfd731376c96d5ad72b065468d29e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36373764303935623138666434613937613965633438303531653536653734312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/677d095b18fd4a97a9ec48051e56e741.png" style="max-width: 100%;"></a></p>
+<h2>析构函数</h2>
+<ul>
+<li>
+<p>通过前面构造函数的学习，我们知道一个对象是怎么来的，那一个对象又是怎么没呢的？</p>
+</li>
+<li>
+<p>析构函数：与构造函数功能相反，析构函数不是完成对对象本身的销毁，局部对象销毁工作是由编译器完成的。而对象在销毁时会自动调用析构函数，完成对象中资源的清理工作。</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>析构函数是特殊的成员函数，其特征如下：</li>
+</ul>
+<ol>
+<li>
+<p><strong>析构函数名是在类名前加上字符 ~。</strong></p>
+</li>
+<li>
+<p><strong>无参数无返回值类型。</strong></p>
+</li>
+<li>
+<p><strong>一个类只能有一个析构函数。若未显式定义，系统会自动生成默认的析构函数。注意：<code class="notranslate">析构函数不能重载</code></strong></p>
+</li>
+<li>
+<p><strong>对象生命周期结束时，C++编译系统系统自动调用析构函数。</strong></p>
+</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">typedef</span> <span class="pl-k">int</span> DataType;
+<span class="pl-k">class</span> <span class="pl-en">Stack</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">Stack</span>(<span class="pl-c1">size_t</span> capacity = <span class="pl-c1">3</span>)
+	{
+		_array = (DataType*)<span class="pl-c1">malloc</span>(<span class="pl-k">sizeof</span>(DataType) * capacity);
+		<span class="pl-k">if</span> (<span class="pl-c1">nullptr</span> == _array)
+		{
+			<span class="pl-c1">perror</span>(<span class="pl-s"><span class="pl-pds">"</span>malloc申请空间失败!!!<span class="pl-pds">"</span></span>);
+			<span class="pl-k">return</span>;
+		}
+		_capacity = capacity;
+		_size = <span class="pl-c1">0</span>;
+	}
+	<span class="pl-k">void</span> <span class="pl-en">Push</span>(DataType data)
+	{
+		<span class="pl-c"><span class="pl-c">//</span> CheckCapacity();</span>
+		_array[_size] = data;
+		_size++;
+	}
+
+<span class="pl-k">private:</span>
+	DataType* _array;
+	<span class="pl-k">int</span> _capacity;
+	<span class="pl-k">int</span> _size;
+};
+<span class="pl-k">void</span> <span class="pl-en">TestStack</span>()
+{
+	Stack s;
+	s.<span class="pl-c1">Push</span>(<span class="pl-c1">1</span>);
+	s.<span class="pl-c1">Push</span>(<span class="pl-c1">2</span>);
+}</pre></div>
+<ul>
+<li>在我们上面的代码，我们一般在<code class="notranslate">C语言阶段</code>都要在写完后要调用一个销毁函数，如果上面的代码不写析构函数，他是会发生<strong>内存泄漏</strong>的【如果程序不结束的话】</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">typedef</span> <span class="pl-k">int</span> DataType;
+<span class="pl-k">class</span> <span class="pl-en">Stack</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">Stack</span>(<span class="pl-c1">size_t</span> capacity = <span class="pl-c1">4</span>)
+	{
+		_array = (DataType*)<span class="pl-c1">malloc</span>(<span class="pl-k">sizeof</span>(DataType) * capacity);
+		<span class="pl-k">if</span> (<span class="pl-c1">nullptr</span> == _array)
+		{
+			<span class="pl-c1">perror</span>(<span class="pl-s"><span class="pl-pds">"</span>malloc申请空间失败!!!<span class="pl-pds">"</span></span>);
+			<span class="pl-k">return</span>;
+		}
+		_capacity = capacity;
+		_size = <span class="pl-c1">0</span>;
+	}
+	<span class="pl-k">void</span> <span class="pl-en">Push</span>(DataType data)
+	{
+		<span class="pl-c"><span class="pl-c">//</span> CheckCapacity();</span>
+		_array[_size] = data;
+		_size++;
+	}
+	<span class="pl-c"><span class="pl-c">//</span> 其他方法...</span>
+	<span class="pl-en">~Stack</span>()
+	{
+		<span class="pl-k">if</span> (_array)
+		{
+			<span class="pl-c1">free</span>(_array);
+			_array = <span class="pl-c1">nullptr</span>;
+			_capacity = <span class="pl-c1">0</span>;
+			_size = <span class="pl-c1">0</span>;
+		}
+	}
+<span class="pl-k">private:</span>
+	DataType* _array;
+	<span class="pl-k">int</span> _capacity;
+	<span class="pl-k">int</span> _size;
+};
+<span class="pl-k">void</span> <span class="pl-en">TestStack</span>()
+{
+	Stack s;
+	s.<span class="pl-c1">Push</span>(<span class="pl-c1">1</span>);
+	s.<span class="pl-c1">Push</span>(<span class="pl-c1">2</span>);
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/142df7dc80c3b57758427bedc810841e2e159be40e3d38e79c58ac51ff88b8c4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66383162313164323637616634643865616638323335633262376161383835312e706e67"><img src="https://camo.githubusercontent.com/142df7dc80c3b57758427bedc810841e2e159be40e3d38e79c58ac51ff88b8c4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66383162313164323637616634643865616638323335633262376161383835312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/f81b11d267af4d8eaf8235c2b7aa8851.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>再次定义一个，我们观察到和栈一样的，</li>
+<li><strong>先定义的先构造，后定义的后构造</strong></li>
+<li><strong>但是析构是反过来的，后定义的先析构，要满足先进后出的性质</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/90faec679e6535a5eeb9e5fda3ad4320d0a5a6e9fc6b31881e80af265d1b6c89/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62356331613363656334653334663236383437616362313137333638616132302e706e67"><img src="https://camo.githubusercontent.com/90faec679e6535a5eeb9e5fda3ad4320d0a5a6e9fc6b31881e80af265d1b6c89/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62356331613363656334653334663236383437616362313137333638616132302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/b5c1a3cec4e34f26847acb117368aa20.png" style="max-width: 100%;"></a></p>
+<ol start="5">
+<li>关于编译器自动生成的析构函数，是否会完成一些事情呢？下面的程序我们会看到，<strong>编译器生成的默认析构函数，对自定类型成员调用它的析构函数</strong>。</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Time</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">~Time</span>()
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>~Time()<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _hour;
+	<span class="pl-k">int</span> _minute;
+	<span class="pl-k">int</span> _second;
+};
+<span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+<span class="pl-k">private:</span>
+	<span class="pl-c"><span class="pl-c">//</span> 基本类型(内置类型)</span>
+	<span class="pl-k">int</span> _year = <span class="pl-c1">1970</span>;
+	<span class="pl-k">int</span> _month = <span class="pl-c1">1</span>;
+	<span class="pl-k">int</span> _day = <span class="pl-c1">1</span>;
+	<span class="pl-c"><span class="pl-c">//</span> 自定义类型</span>
+	Time _t;
+};
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Date d;
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>下图中程序运行结束后输出：<code class="notranslate">~Time()</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/feab32201cac100085e2850c7e40510a77ec1b7cbb6e3021bee6ca6199cf113d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31653030613231346634313134353434383738626333343163303464656631632e706e67"><img src="https://camo.githubusercontent.com/feab32201cac100085e2850c7e40510a77ec1b7cbb6e3021bee6ca6199cf113d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31653030613231346634313134353434383738626333343163303464656631632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/1e00a214f4114544878bc341c04def1c.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>在<code class="notranslate">main</code>方法中根本没有直接创建<code class="notranslate">Time</code>类的对象，为什么最后会调用<code class="notranslate">Time</code>类的析构函数？</p>
+<ul>
+<li><strong>因为</strong>：main方法中创建了Date对象d，而d中包含<strong>4</strong>个成员变量，其中 <strong>_year, _month,_day</strong> 三个是内置类型成员，<strong>销毁时不需要资源清理</strong>，最后系统直接将其内存回收即可；而 <strong>_<code class="notranslate">tTime</code>类对象</strong> ，所以在d销毁时，要将其内部包含的Time类的_t对象销毁，所以要<strong>调用Time类的析构函数</strong> 。但是：main函数中<strong>不能直接调用Time类的析构函数，实际要释放的是Date类对象</strong>，所以编译器会调用<strong>Date类的析构函数</strong>，而Date没有显式提供，则编译器会给Date类<strong>生成一个默认的析构函数</strong>，目的是在其内部调用<code class="notranslate">Time</code>。</li>
+</ul>
+</li>
+<li>
+<p>类的析构函数，即当Date对象销毁时，要<strong>保证其内部每个自定义对象都可以正确销毁</strong></p>
+</li>
+<li>
+<p>main函数中并<strong>没有直接调用Time类析构函数</strong>，而是<strong>显式调用编译器为Date类生成的默认析<br>
+构函数</strong></p>
+</li>
+<li>
+<p>注意：<strong>创建哪个类的对象则调用该类的析构函数，销毁那个类的对象则调用该类的析构函数</strong></p>
+</li>
+<li>
+<p><strong>默认生成的析构函数跟构造函数类似，内置类型不做处理，自定义类型区调用它的析构</strong></p>
+</li>
+</ul>
+<ol start="6">
+<li>如果类中没有申请资源时，<strong>析构函数可以不写</strong>，直接使用编译器生成的默认析构函数，比如Date类；<strong>有资源申请时，一定要写</strong>，否则会造成资源泄漏，比如Stack类。</li>
+</ol>
+<h2>拷贝构造</h2>
+<ul>
+<li>
+<p>在学习的时候，我们有的时候需要一个与已存在对象一某一样的新对象</p>
+</li>
+<li>
+<p>那在创建对象时，可否创建一个与已存在对象一某一样的新对象呢？</p>
+</li>
+<li>
+<p>拷贝构造函数：只有单个形参，该形参是对本类类型对象的引用(一般常用<code class="notranslate">const</code>修饰)，在用已存在的类类型对象创建新对象时由编译器自动调用。</p>
+</li>
+</ul>
+<p>拷贝构造函数也是特殊的成员函数，其<strong>特征</strong>如下：</p>
+<ol>
+<li>拷贝构造函数是构造函数的一个<strong>重载形式</strong>。</li>
+<li>拷贝构造函数的参数只有一个且必须是<strong>类类型对象的引用</strong>，使用传值方式编译器直接报错，因为<strong>会引发无穷递归调用</strong>。</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">Date</span>(<span class="pl-k">int</span> year = <span class="pl-c1">1900</span>, <span class="pl-k">int</span> month = <span class="pl-c1">1</span>, <span class="pl-k">int</span> day = <span class="pl-c1">1</span>)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span>Date(const Date d) // 错误写法：编译报错，会引发无穷递归</span>
+	<span class="pl-en">Date</span>(<span class="pl-k">const</span> Date&amp; d) <span class="pl-c"><span class="pl-c">//</span> 必须传引用</span>
+	{
+		_year = d.<span class="pl-smi">_year</span>;
+		_month = d.<span class="pl-smi">_month</span>;
+		_day = d.<span class="pl-smi">_day</span>;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _year;
+	<span class="pl-k">int</span> _month;
+	<span class="pl-k">int</span> _day;
+};
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Date <span class="pl-smi">d1</span>(<span class="pl-c1">2024</span>,<span class="pl-c1">2</span>,<span class="pl-c1">1</span>);
+	Date <span class="pl-smi">d2</span>(d1);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3cc1f73f9c4e06b49a8c45de0603e61cce3f442ed285ba15682d41884e1b2c16/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62633636333161646234323434656162613439316561306164316163376135392e706e67"><img src="https://camo.githubusercontent.com/3cc1f73f9c4e06b49a8c45de0603e61cce3f442ed285ba15682d41884e1b2c16/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62633636333161646234323434656162613439316561306164316163376135392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/bc6631adb4244eaba491ea0ad1ac7a59.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>下面我们解释一下：</li>
+<li>这里的<code class="notranslate">const</code>可加可不加，但是建议加上</li>
+<li>有些人就写这个写昏头了，写反了，不加<code class="notranslate">const</code>的话不会提示</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/bac64952d64636102c9b9c7bdc9e6a03446acb90809ed0532d147051695900ed/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66656633323066643262613834663137613236613339316666326365303366642e706e67"><img src="https://camo.githubusercontent.com/bac64952d64636102c9b9c7bdc9e6a03446acb90809ed0532d147051695900ed/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66656633323066643262613834663137613236613339316666326365303366642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/fef320fd2ba84f17a26a391ff2ce03fd.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>加上了就知道哪里错了，所以还是加上较好</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/a8f7d629c5ecbb4db36b6c32f1841fe9263eccd95fe065c66b2bb87a41dc6602/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65316231356663323934386334613631383561633666653436303634373532392e706e67"><img src="https://camo.githubusercontent.com/a8f7d629c5ecbb4db36b6c32f1841fe9263eccd95fe065c66b2bb87a41dc6602/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65316231356663323934386334613631383561633666653436303634373532392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/e1b15fc2948c4a6185ac6fe460647529.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这里的拷贝构造<strong>必须传引用</strong>，要不然会引发无穷递归【反正编译会报错~】</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c7ce1976848ca0e8a37166f73bda28e1a563f76fd2bf346653fd5584d97c1ccf/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62316137666238643335626434383532626534643234653365353232363435632e706e67"><img src="https://camo.githubusercontent.com/c7ce1976848ca0e8a37166f73bda28e1a563f76fd2bf346653fd5584d97c1ccf/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62316137666238643335626434383532626534643234653365353232363435632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/b1a7fb8d35bd4852be4d24e3e522645c.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>再看下面代码，我是没有写拷贝构造的，但是这里自动拷贝了，毕竟这个是默认成员函数，这里生成的还和之前几个的默认成员函数还不一样，之前的对默认成员函数对内置类型不处理，而这个拷贝构造对内置类型处理了，如果没有处理，这里就拷贝不出来</li>
+<li>说明这里会自动生成一个拷贝构造函数，将值拷贝回去</li>
+</ul>
+<ol start="4">
+<li>若未显式定义，编译器会生成默认的拷贝构造函数。 默认的拷贝构造函数对象按内存存储按字节序完成拷贝，这种拷贝叫做<strong>浅拷贝</strong>，或者<strong>值拷贝</strong>。</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-c"><span class="pl-c">//</span> 构造函数</span>
+	<span class="pl-en">Date</span>(<span class="pl-k">int</span> year = <span class="pl-c1">2024</span>, <span class="pl-k">int</span> month = <span class="pl-c1">2</span>, <span class="pl-k">int</span> day = <span class="pl-c1">1</span>)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+	}
+	<span class="pl-k">void</span> <span class="pl-en">Print</span>()
+	{
+		cout &lt;&lt; _year &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>/<span class="pl-pds">"</span></span> &lt;&lt; _month &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>/<span class="pl-pds">"</span></span> &lt;&lt; _day &lt;&lt; endl;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _year;
+	<span class="pl-k">int</span> _month;
+	<span class="pl-k">int</span> _day;
+};
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Date <span class="pl-smi">d1</span>(<span class="pl-c1">2024</span>, <span class="pl-c1">2</span>, <span class="pl-c1">1</span>);
+	Date <span class="pl-smi">d2</span>(d1);
+	
+	d1.<span class="pl-c1">Print</span>();
+	d2.<span class="pl-c1">Print</span>();
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/33c92cece9cfb7c2f7cc0be7b0fc42201906857686f049460ffd36d4b5dc73ee/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63666661616431323438323634376630393732376464613635343034396135342e706e67"><img src="https://camo.githubusercontent.com/33c92cece9cfb7c2f7cc0be7b0fc42201906857686f049460ffd36d4b5dc73ee/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63666661616431323438323634376630393732376464613635343034396135342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/cffaad12482647f09727dda654049a54.png" style="max-width: 100%;"></a></p>
+<h3>拷贝构造对于自定义类型【浅拷贝】</h3>
+<ul>
+<li>对于自定义类型：</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Time</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">Time</span>(<span class="pl-k">const</span> Time&amp; t)
+	{
+		_hour = t.<span class="pl-smi">_hour</span>;
+		_minute = t.<span class="pl-smi">_minute</span>;
+		_second = t.<span class="pl-smi">_second</span>;
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Time::Time(const Time&amp;)<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _hour;
+	<span class="pl-k">int</span> _minute;
+	<span class="pl-k">int</span> _second;
+};
+
+<span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">Date</span>(<span class="pl-k">int</span> year = <span class="pl-c1">2024</span>, <span class="pl-k">int</span> month = <span class="pl-c1">2</span>, <span class="pl-k">int</span> day = <span class="pl-c1">1</span>)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+	}
+
+	<span class="pl-k">void</span> <span class="pl-en">Print</span>()
+	{
+		cout &lt;&lt; _year &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>/<span class="pl-pds">"</span></span> &lt;&lt; _month &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>/<span class="pl-pds">"</span></span> &lt;&lt; _day &lt;&lt; endl;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _year;
+	<span class="pl-k">int</span> _month;
+	<span class="pl-k">int</span> _day;
+
+	<span class="pl-c"><span class="pl-c">//</span> 自定义类型</span>
+	Time _t;
+};
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Date <span class="pl-smi">d1</span>(<span class="pl-c1">2024</span>,<span class="pl-c1">2</span>,<span class="pl-c1">1</span>);
+	Date <span class="pl-smi">d2</span>(d1);
+	
+	d1.<span class="pl-c1">Print</span>();
+	d2.<span class="pl-c1">Print</span>();
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5d513c615a3d884c3f6a8706a4e9ad71d4164bbb2701c0d55c876e61401f1a7b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30373062363366306461386534306462613939336564643161383665313133612e706e67"><img src="https://camo.githubusercontent.com/5d513c615a3d884c3f6a8706a4e9ad71d4164bbb2701c0d55c876e61401f1a7b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30373062363366306461386534306462613939336564643161383665313133612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/070b63f0da8e40dba993edd1a86e113a.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>我们有一个方法就是<strong>强制让编译器生成</strong></p>
+</li>
+<li>
+<p>加上这一条：</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-en">Time</span>() = default;</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ce6332ad71122a6009d59df8bd060f4a6a1092f45a37bab2fe1e2b8ac90e0d69/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39613463323261373331363234343562393963353261323637343331303036332e706e67"><img src="https://camo.githubusercontent.com/ce6332ad71122a6009d59df8bd060f4a6a1092f45a37bab2fe1e2b8ac90e0d69/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39613463323261373331363234343562393963353261323637343331303036332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/9a4c22a73162445b99c52a2674310063.png" style="max-width: 100%;"></a></p>
+<h3>深拷贝</h3>
+<ul>
+<li>
+<p>刚刚上面的一种场景叫做浅拷贝，还有一个场景就是<strong>深拷贝</strong></p>
+</li>
+<li>
+<p>编译器生成的默认拷贝构造函数已经可以完成字节序的值拷贝了，还需要自己显式实现吗？当然像日期类这样的类是没必要的。那么下面的类呢？验证一下试试？</p>
+</li>
+<li>
+<p>下面我这个代码没有写拷贝构造，它会自动生成一个<strong>默认的值拷贝</strong>，我们来运行一下</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">typedef</span> <span class="pl-k">int</span> DataType;
+<span class="pl-k">class</span> <span class="pl-en">Stack</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">Stack</span>(<span class="pl-c1">size_t</span> capacity = <span class="pl-c1">10</span>)
+	{
+		_array = (DataType*)<span class="pl-c1">malloc</span>(capacity * <span class="pl-k">sizeof</span>(DataType));
+		<span class="pl-k">if</span> (<span class="pl-c1">nullptr</span> == _array)
+		{
+			<span class="pl-c1">perror</span>(<span class="pl-s"><span class="pl-pds">"</span>malloc申请空间失败<span class="pl-pds">"</span></span>);
+			<span class="pl-k">return</span>;
+		}
+		_size = <span class="pl-c1">0</span>;
+		_capacity = capacity;
+	}
+	<span class="pl-k">void</span> <span class="pl-en">Push</span>(<span class="pl-k">const</span> DataType&amp; data)
+	{
+		<span class="pl-c"><span class="pl-c">//</span> CheckCapacity();</span>
+		_array[_size] = data;
+		_size++;
+	}
+	<span class="pl-en">~Stack</span>()
+	{
+		<span class="pl-k">if</span> (_array)
+		{
+			<span class="pl-c1">free</span>(_array);
+			_array = <span class="pl-c1">nullptr</span>;
+			_capacity = <span class="pl-c1">0</span>;
+			_size = <span class="pl-c1">0</span>;
+		}
+	}
+<span class="pl-k">private:</span>
+	DataType* _array;
+	<span class="pl-c1">size_t</span> _size;
+	<span class="pl-c1">size_t</span> _capacity;
+};
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Stack s1;
+	s1.<span class="pl-c1">Push</span>(<span class="pl-c1">1</span>);
+	s1.<span class="pl-c1">Push</span>(<span class="pl-c1">2</span>);
+	s1.<span class="pl-c1">Push</span>(<span class="pl-c1">3</span>);
+	s1.<span class="pl-c1">Push</span>(<span class="pl-c1">4</span>);
+	Stack <span class="pl-smi">s2</span>(s1);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>我们看到程序崩溃了~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/91b48dd92cdf3aab17e8c4a6fa84990dd2c4f9fdfb61c20b95c9ce12d63fa9b4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65313633353138316532313334333866383461616633666232373365363239342e706e67"><img src="https://camo.githubusercontent.com/91b48dd92cdf3aab17e8c4a6fa84990dd2c4f9fdfb61c20b95c9ce12d63fa9b4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65313633353138316532313334333866383461616633666232373365363239342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/e1635181e213438f84aaf3fb273e6294.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>也就是在一些场景下，默认生成的拷贝构造是会出事的</p>
+</li>
+<li>
+<p>再调试看一下：</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/81565bf86cd2c27769a872bf904be7b33dbbc70d2290c9da4a52e7906204ccc2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30333265643164326132626334393765386231633034353866646465323165332e706e67"><img src="https://camo.githubusercontent.com/81565bf86cd2c27769a872bf904be7b33dbbc70d2290c9da4a52e7906204ccc2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30333265643164326132626334393765386231633034353866646465323165332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/032ed1d2a2bc497e8b1c0458fdde21e3.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这会导致<strong>两个对象指向同一块空间</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2f141f730fef33cf52659b31f9ae1841697dd0551b210110d82a4c789185c367/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36613137383834636132353334393664393435626639333962343538396235662e706e67"><img src="https://camo.githubusercontent.com/2f141f730fef33cf52659b31f9ae1841697dd0551b210110d82a4c789185c367/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36613137383834636132353334393664393435626639333962343538396235662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/6a17884ca253496d945bf939b4589b5f.png" style="max-width: 100%;"></a></p>
+<ul>
+<li><strong>在结束的时候会调用析构函数，会把那块空间给释放了</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d51e78f3da8e112cf4cf40c25607403105bfed53a4ae7f0b2a0185f64a6ec0b7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39336538643166386466323834323235626161333634313030363162383337612e706e67"><img src="https://camo.githubusercontent.com/d51e78f3da8e112cf4cf40c25607403105bfed53a4ae7f0b2a0185f64a6ec0b7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39336538643166386466323834323235626161333634313030363162383337612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/93e8d1f8df284225baa36410061b837a.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>再次释放的时候会出现错误</li>
+<li>同一块空间被释放了两次【所以是绝对不能的】</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/bf099f749d8f67fa5b0d26688cb6d912d875e4168c8cfb638aaac57f200bb05e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66363962336362623635623334353839626631326633396337653730633935322e706e67"><img src="https://camo.githubusercontent.com/bf099f749d8f67fa5b0d26688cb6d912d875e4168c8cfb638aaac57f200bb05e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66363962336362623635623334353839626631326633396337653730633935322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/f69b3cbb65b34589bf12f39c7e70c952.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>正确的我们这样写</li>
+<li>需要引入一个叫做<strong>深拷贝</strong></li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-en">Stack</span>(<span class="pl-k">const</span> Stack&amp; s)
+{
+	<span class="pl-c"><span class="pl-c">//</span> 深拷贝</span>
+	DataType* tmp = (DataType*)<span class="pl-c1">malloc</span>(s.<span class="pl-smi">_capacity</span> * <span class="pl-k">sizeof</span>(DataType));
+	<span class="pl-k">if</span> (<span class="pl-c1">nullptr</span> == tmp)
+	{
+		<span class="pl-c1">perror</span>(<span class="pl-s"><span class="pl-pds">"</span>malloc fail<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>);
+		<span class="pl-c1">exit</span>(-<span class="pl-c1">1</span>);
+	}
+	<span class="pl-c1">memcpy</span>(tmp, s.<span class="pl-smi">_array</span>, <span class="pl-k">sizeof</span>(DataType) * s.<span class="pl-smi">_size</span>);
+	_array = tmp;
+	<span class="pl-c"><span class="pl-c">//</span> 浅拷贝</span>
+	_size = s.<span class="pl-smi">_size</span>;
+	_capacity = s.<span class="pl-smi">_capacity</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f67940c92212e970fc9b5662eb4b5fd3645fe43706ba8016e3e6fd0ca0727eec/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33393834326165393832396334366337626130336431376533316437313864332e706e67"><img src="https://camo.githubusercontent.com/f67940c92212e970fc9b5662eb4b5fd3645fe43706ba8016e3e6fd0ca0727eec/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33393834326165393832396334366337626130336431376533316437313864332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/39842ae9829c46c7ba03d17e31d718d3.png" style="max-width: 100%;"></a></p>
+<p><strong>注意</strong>：类中如果没有涉及资源申请时，拷贝构造函数是否写都可以；一旦涉及到资源申请时，则拷贝构造函数是一定要写的，否则就是浅拷贝</p>
+<h3>拷贝构造函数典型调用场景</h3>
+<ul>
+<li>使用已存在对象创建新对象</li>
+<li>函数参数类型为类类型对象</li>
+<li>函数返回值类型为类类型对象</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">Date</span>(<span class="pl-k">int</span> year, <span class="pl-k">int</span> minute, <span class="pl-k">int</span> day)
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Date(int,int,int):<span class="pl-pds">"</span></span> &lt;&lt; <span class="pl-c1">this</span> &lt;&lt; endl;
+	}
+	<span class="pl-en">Date</span>(<span class="pl-k">const</span> Date&amp; d)
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Date(const Date&amp; d):<span class="pl-pds">"</span></span> &lt;&lt; <span class="pl-c1">this</span> &lt;&lt; endl;
+	}
+	<span class="pl-en">~Date</span>()
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>~Date():<span class="pl-pds">"</span></span> &lt;&lt; <span class="pl-c1">this</span> &lt;&lt; endl;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _year;
+	<span class="pl-k">int</span> _month;
+	<span class="pl-k">int</span> _day;
+};
+Date <span class="pl-en">Test</span>(Date d)
+{
+	Date <span class="pl-smi">temp</span>(d);
+	<span class="pl-k">return</span> temp;
+}
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Date <span class="pl-smi">d1</span>(<span class="pl-c1">2022</span>, <span class="pl-c1">1</span>, <span class="pl-c1">13</span>);
+	<span class="pl-c1">Test</span>(d1);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e3ec07fb83e1e14a686c1e3017788adf953acc1efddf99ac349696671230e40d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39303962333066383435333434616236616134616133633732376137383435302e706e67"><img src="https://camo.githubusercontent.com/e3ec07fb83e1e14a686c1e3017788adf953acc1efddf99ac349696671230e40d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39303962333066383435333434616236616134616133633732376137383435302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/909b30f845344ab6aa4aa3c727a78450.png" style="max-width: 100%;"></a></p>
+<p>为了提高程序效率，<strong>一般对象传参时，尽量使用引用类型</strong>，返回时根据实际场景，能用引用尽量使用引用。</p></div>
+<div style="font-size:small;margin-top:8px;float:right;"></div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://shilinnull.github.io/shilin.github.io"> 仕林的博客 </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if(""!=""){
+    var now=new Date();
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilin.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

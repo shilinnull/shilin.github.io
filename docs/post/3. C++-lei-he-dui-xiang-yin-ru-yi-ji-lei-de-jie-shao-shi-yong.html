@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
 <head>
     <meta content="text/html; charset=utf-8" http-equiv="content-type" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -17,7 +17,7 @@
 
 >C语言是面向过程的，关注的是过程，分析出求解问题的步骤，通过函数调用逐步解决问题。">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://shilinnull.github.io/shilin.github.io/post/3.%20C%2B%2B-lei-he-dui-xiang-yin-ru-yi-ji-lei-de-jie-shao-shi-yong.html">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/3.%20C%2B%2B-lei-he-dui-xiang-yin-ru-yi-ji-lei-de-jie-shao-shi-yong.html">
 <meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
 <title>3. C++类和对象引入以及类的介绍使用</title>
 <link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
@@ -52,13 +52,13 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
     <div id="header">
 <h1 class="postTitle">3. C++类和对象引入以及类的介绍使用</h1>
 <div class="title-right">
-    <a href="https://shilinnull.github.io/shilin.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
         <svg class="octicon" width="16" height="16">
             <path id="pathHome" fill-rule="evenodd"></path>
         </svg>
     </a>
     
-    <a href="https://github.com/shilinnull/shilin.github.io/issues/5" target="_blank" class="btn btn-invisible circle" title="Issue">
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/5" target="_blank" class="btn btn-invisible circle" title="Issue">
         <svg class="octicon" width="16" height="16">
             <path id="pathIssue" fill-rule="evenodd"></path>
         </svg>
@@ -471,21 +471,21 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <li>如何让结构体按照指定的对齐参数进行对齐？能否按照3、4、5即任意字节对齐？</li>
 <li>什么是大小端？如何测试某台机器是大端还是小端，有没有遇到过要考虑大小端的场景</li>
 </ol></div>
-<div style="font-size:small;margin-top:8px;float:right;"></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
 <div class="comments" id="comments"></div>
 
 </div>
-    <div id="footer">Copyright © <span id="year"></span><a href="https://shilinnull.github.io/shilin.github.io"> 仕林的博客 </a>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
 <p>
 <span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
 </p>
 
 <script>
-if(""!=""){
+if("06/29/2024"!=""){
     var now=new Date();
-    var startSite=new Date("");
+    var startSite=new Date("06/29/2024");
     var diff=now.getTime()-startSite.getTime();
     var diffDay=Math.floor(diff/(1000*60*60*24));
     document.getElementById("year").innerHTML=now.getFullYear();
@@ -543,7 +543,7 @@ function openComments(){
 
     script=document.createElement("script");
     script.setAttribute("src","https://utteranc.es/client.js");
-    script.setAttribute("repo","shilinnull/shilin.github.io");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
     script.setAttribute("issue-term","title");
     
     if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}

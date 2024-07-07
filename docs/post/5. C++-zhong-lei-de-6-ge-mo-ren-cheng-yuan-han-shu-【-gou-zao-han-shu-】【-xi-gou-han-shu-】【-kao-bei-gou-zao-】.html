@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
 <head>
     <meta content="text/html; charset=utf-8" http-equiv="content-type" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -27,7 +27,7 @@
 
 - 如果一个类中什么成员都没有，简称为空类。">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://shilinnull.github.io/shilin.github.io/post/5.%20C%2B%2B-zhong-lei-de-6-ge-mo-ren-cheng-yuan-han-shu-%E3%80%90-gou-zao-han-shu-%E3%80%91%E3%80%90-xi-gou-han-shu-%E3%80%91%E3%80%90-kao-bei-gou-zao-%E3%80%91.html">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/5.%20C%2B%2B-zhong-lei-de-6-ge-mo-ren-cheng-yuan-han-shu-%E3%80%90-gou-zao-han-shu-%E3%80%91%E3%80%90-xi-gou-han-shu-%E3%80%91%E3%80%90-kao-bei-gou-zao-%E3%80%91.html">
 <meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
 <title>5. C++中类的6个默认成员函数【构造函数】【析构函数】【拷贝构造】</title>
 <link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
@@ -62,13 +62,13 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
     <div id="header">
 <h1 class="postTitle">5. C++中类的6个默认成员函数【构造函数】【析构函数】【拷贝构造】</h1>
 <div class="title-right">
-    <a href="https://shilinnull.github.io/shilin.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
         <svg class="octicon" width="16" height="16">
             <path id="pathHome" fill-rule="evenodd"></path>
         </svg>
     </a>
     
-    <a href="https://github.com/shilinnull/shilin.github.io/issues/7" target="_blank" class="btn btn-invisible circle" title="Issue">
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/7" target="_blank" class="btn btn-invisible circle" title="Issue">
         <svg class="octicon" width="16" height="16">
             <path id="pathIssue" fill-rule="evenodd"></path>
         </svg>
@@ -889,21 +889,21 @@ Date <span class="pl-en">Test</span>(Date d)
 }</pre></div>
 <p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e3ec07fb83e1e14a686c1e3017788adf953acc1efddf99ac349696671230e40d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39303962333066383435333434616236616134616133633732376137383435302e706e67"><img src="https://camo.githubusercontent.com/e3ec07fb83e1e14a686c1e3017788adf953acc1efddf99ac349696671230e40d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39303962333066383435333434616236616134616133633732376137383435302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/909b30f845344ab6aa4aa3c727a78450.png" style="max-width: 100%;"></a></p>
 <p>为了提高程序效率，<strong>一般对象传参时，尽量使用引用类型</strong>，返回时根据实际场景，能用引用尽量使用引用。</p></div>
-<div style="font-size:small;margin-top:8px;float:right;"></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
 <div class="comments" id="comments"></div>
 
 </div>
-    <div id="footer">Copyright © <span id="year"></span><a href="https://shilinnull.github.io/shilin.github.io"> 仕林的博客 </a>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
 <p>
 <span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
 </p>
 
 <script>
-if(""!=""){
+if("06/29/2024"!=""){
     var now=new Date();
-    var startSite=new Date("");
+    var startSite=new Date("06/29/2024");
     var diff=now.getTime()-startSite.getTime();
     var diffDay=Math.floor(diff/(1000*60*60*24));
     document.getElementById("year").innerHTML=now.getFullYear();
@@ -961,7 +961,7 @@ function openComments(){
 
     script=document.createElement("script");
     script.setAttribute("src","https://utteranc.es/client.js");
-    script.setAttribute("repo","shilinnull/shilin.github.io");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
     script.setAttribute("issue-term","title");
     
     if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}

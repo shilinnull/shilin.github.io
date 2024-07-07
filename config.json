@@ -1,6 +1,19 @@
 {
-    "title":"仕林的博客",
-    "subTitle":"Shilin Blog",
+    "title":"Shilin' Blog",
+    "displayTitle":"Shilin' Blog",
+    "subTitle":"珍惜每一天~",
+    "homeUrl":"https://xiaolinzi.eu.org",
     "avatarUrl":"https://avatars.githubusercontent.com/u/108561949?v=4&size=64",
+    "faviconUrl":"https://avatars.githubusercontent.com/u/108561949?v=4&size=64",
+    "singlePage":["link","about"],
+    "email":"intshanxi@163.com",
+    "startSite":"06/29/2024",
+    "onePageListNum":15,
+    "commentLabelColor":"#006b75",
+    "yearColorList":["#bc4c00", "#0969da", "#1f883d", "#A333D0"],
+    "i18n":"CN",
+    "nightTheme":"dark_colorblind",
+    "bottomText":"❤️ 转载文章请注明出处，谢谢！❤️",
+    "primerCSS":"<link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />",
     "GMEEK_VERSION":"last"
 }

@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## 一、【C++】赋值运算符重载
+
+
+### 1.1 运算符重载【引入】
+
+- C++为了增强代码的可读性引入了**运算符重载**，运算符重载是具有特殊函数名的函数，也具有其返回值类型，函数名字以及参数列表，其返回值类型与参数列表与普通的函数类似。">
+<meta property="og:title" content="6. C++中默认成员函数【取地址重载】【const成员函数】 【运算符重载】【实现一个日期类】">
+<meta property="og:description" content="## 一、【C++】赋值运算符重载
+
+
+### 1.1 运算符重载【引入】
+
+- C++为了增强代码的可读性引入了**运算符重载**，运算符重载是具有特殊函数名的函数，也具有其返回值类型，函数名字以及参数列表，其返回值类型与参数列表与普通的函数类似。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/6.%20C%2B%2B-zhong-mo-ren-cheng-yuan-han-shu-%E3%80%90-qu-di-zhi-zhong-zai-%E3%80%91%E3%80%90const-cheng-yuan-han-shu-%E3%80%91%20%E3%80%90-yun-suan-fu-zhong-zai-%E3%80%91%E3%80%90-shi-xian-yi-ge-ri-qi-lei-%E3%80%91.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>6. C++中默认成员函数【取地址重载】【const成员函数】 【运算符重载】【实现一个日期类】</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">6. C++中默认成员函数【取地址重载】【const成员函数】 【运算符重载】【实现一个日期类】</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/8" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>一、【C++】赋值运算符重载</h2>
+<h3>1.1 运算符重载【引入】</h3>
+<ul>
+<li>C++为了增强代码的可读性引入了<strong>运算符重载</strong>，运算符重载是具有特殊函数名的函数，也具有其返回值类型，函数名字以及参数列表，其返回值类型与参数列表与普通的函数类似。</li>
+<li>函数名字为：<strong>关键字operator后面接需要重载的运算符符号。</strong></li>
+<li>函数原型：<strong>返回值类型 operator操作符(参数列表)</strong></li>
+</ul>
+<p>注意：</p>
+<ul>
+<li>
+<p>不能通过连接其他符号来创建新的操作符：比如<code class="notranslate">operator@</code></p>
+</li>
+<li>
+<p>重载操作符必须有一个类型参数【不能去重载运算符改变内置类型的行为】</p>
+</li>
+<li>
+<p>用于内置类型的运算符，其含义不能改变，例如：内置的整型+，不 能改变其含义</p>
+</li>
+<li>
+<p><strong>作为类成员函数重载时，其形参看起来比操作数数目少1个</strong>，因为成员函数的第一个参数为隐藏的<code class="notranslate">this</code></p>
+</li>
+<li>
+<p><code class="notranslate">.* :: sizeof ?: . </code>注意以上5个运算符不能重载。这里的是<code class="notranslate">.*</code>，不是<code class="notranslate">*</code>，这里经常在笔试选择题中出现。</p>
+</li>
+</ul>
+<hr>
+<p>当我们写了一个<strong>日期类</strong>，有没有可能要比较比较呢？</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">Date</span>(<span class="pl-k">int</span> year = <span class="pl-c1">1900</span>, <span class="pl-k">int</span> month = <span class="pl-c1">1</span>, <span class="pl-k">int</span> day = <span class="pl-c1">1</span>)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+	}
+	<span class="pl-c"><span class="pl-c">//</span>private: // 一会有解决方法</span>
+	<span class="pl-k">int</span> _year;
+	<span class="pl-k">int</span> _month;
+	<span class="pl-k">int</span> _day;
+};</pre></div>
+<ul>
+<li>我们写了一个比较相等的函数，如果是传值的话没有必要，我们形参直接写成<code class="notranslate">&amp;</code>，而且也不需要修改，所以再加上<code class="notranslate">const</code></li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">bool</span> <span class="pl-en">DateEquel</span>(<span class="pl-k">const</span> Date&amp; x, Date&amp; y)
+{
+	<span class="pl-k">return</span> x.<span class="pl-smi">_year</span> == y.<span class="pl-smi">_year</span>
+		&amp;&amp; x.<span class="pl-smi">_month</span> == y.<span class="pl-smi">_month</span>
+		&amp;&amp; x.<span class="pl-smi">_day</span> == y.<span class="pl-smi">_day</span>;
+}</pre></div>
+<ul>
+<li>下面再实现一个函数【比较小于】</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">bool</span> <span class="pl-en">DateLess</span>(<span class="pl-k">const</span> Date&amp; x, Date&amp; y)
+{
+	<span class="pl-k">if</span> (x.<span class="pl-smi">_year</span> &lt; y.<span class="pl-smi">_year</span>)
+	{
+		<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+	}
+	<span class="pl-k">else</span> <span class="pl-k">if</span>(x.<span class="pl-smi">_year</span> == y.<span class="pl-smi">_year</span>)
+	{
+		<span class="pl-k">if</span> (x.<span class="pl-smi">_month</span> &lt; y.<span class="pl-smi">_month</span>)
+		{
+			<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span>(x.<span class="pl-smi">_month</span> == y.<span class="pl-smi">_month</span>)
+		{
+			<span class="pl-k">if</span> (x.<span class="pl-smi">_day</span> &lt; y.<span class="pl-smi">_day</span>)
+			{
+				<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+			}
+		}
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+}</pre></div>
+<ul>
+<li>上面有一些不好的地方，取名字的问题，取得很乱就不知道这个函数是干什么的</li>
+</ul>
+<hr>
+<blockquote>
+<p>下面我就要用一个新的符号：</p>
+</blockquote>
+<h3>1.2 运算符重载</h3>
+<ul>
+<li>这里的<strong>运算符重载</strong> 和<strong>函数重载</strong>的重载不是一个意思</li>
+<li>对运算符的行为重新定义</li>
+</ul>
+<blockquote>
+<p><code class="notranslate">operator+</code>运算符做函数名</p>
+</blockquote>
+<ul>
+<li>刚刚上面写的代码就可以写成下面这样</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span> 比较等于</span>
+<span class="pl-k">bool</span> <span class="pl-k">operator</span>==(<span class="pl-k">const</span> Date&amp; x, Date&amp; y)
+{
+	<span class="pl-k">return</span> x.<span class="pl-smi">_year</span> == y.<span class="pl-smi">_year</span>
+		&amp;&amp; x.<span class="pl-smi">_month</span> == y.<span class="pl-smi">_month</span>
+		&amp;&amp; x.<span class="pl-smi">_day</span> == y.<span class="pl-smi">_day</span>;
+} 
+<span class="pl-c"><span class="pl-c">//</span> 比较小于</span>
+<span class="pl-k">bool</span> <span class="pl-k">operator</span>&lt;(<span class="pl-k">const</span> Date&amp; x, Date&amp; y)
+{
+	<span class="pl-k">if</span> (x.<span class="pl-smi">_year</span> &lt; y.<span class="pl-smi">_year</span>)
+	{
+		<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+	}
+	<span class="pl-k">else</span> <span class="pl-k">if</span>(x.<span class="pl-smi">_year</span> == y.<span class="pl-smi">_year</span>)
+	{
+		<span class="pl-k">if</span> (x.<span class="pl-smi">_month</span> &lt; y.<span class="pl-smi">_month</span>)
+		{
+			<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span>(x.<span class="pl-smi">_month</span> == y.<span class="pl-smi">_month</span>)
+		{
+			<span class="pl-k">if</span> (x.<span class="pl-smi">_day</span> &lt; y.<span class="pl-smi">_day</span>)
+			{
+				<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+			}
+		}
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+}</pre></div>
+<ul>
+<li>就可以这样使用了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/bb9d5a5baa528221d96ad59f1d3d887f9915ead569b82c6745e4489b34bf7f52/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64623964373966656561303834313965616139626230626333396234626136362e706e67"><img src="https://camo.githubusercontent.com/bb9d5a5baa528221d96ad59f1d3d887f9915ead569b82c6745e4489b34bf7f52/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64623964373966656561303834313965616139626230626333396234626136362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/db9d79feea08419eaa9bb0bc39b4ba66.png" style="max-width: 100%;"></a></p>
+<p>还可以这样做：</p>
+<ul>
+<li>这里必须要加括号，因为流插入的优先级很高</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b1a8dea55f8751439cd109b8a222119908d82ec6c3bfbf6d98757c589ce02e7d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37616236396332313732666534636362383063313935623364316531316463322e706e67"><img src="https://camo.githubusercontent.com/b1a8dea55f8751439cd109b8a222119908d82ec6c3bfbf6d98757c589ce02e7d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37616236396332313732666534636362383063313935623364316531316463322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/7ab69c2172fe4ccb80c195b3d1e11dc2.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>注意：<strong>参数不能反，左边的操作数对应的是左边</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1e1792797dde6ed2f79c60ad62fd23e0ff95fda49b7a085bb0e6e581720a5e3e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33616266626138336137626634376337616539326430623539613766666337382e706e67"><img src="https://camo.githubusercontent.com/1e1792797dde6ed2f79c60ad62fd23e0ff95fda49b7a085bb0e6e581720a5e3e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33616266626138336137626634376337616539326430623539613766666337382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/3abfba83a7bf47c7ae92d0b59a7ffc78.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们再次回到上面，我们一开始是将内置类型放开的</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e9a6c55a815b138c3c64a4523c5849a4066b0ea9956c11fc4bc17386d22e97e3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64613763396538323863336334663862623035393162353565636462316530342e706e67"><img src="https://camo.githubusercontent.com/e9a6c55a815b138c3c64a4523c5849a4066b0ea9956c11fc4bc17386d22e97e3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64613763396538323863336334663862623035393162353565636462316530342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/da7c9e828c3c4f8bb0591b55ecdb1e04.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>如果将他设置成私有，类外面就不能访问了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/db499b9e78ee883fa2a685214d56d84bb646083518ccd1b443bd803aa12836a8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61393430383634396534646434303962623463633639616665393932313931322e706e67"><img src="https://camo.githubusercontent.com/db499b9e78ee883fa2a685214d56d84bb646083518ccd1b443bd803aa12836a8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61393430383634396534646434303962623463633639616665393932313931322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/a9408649e4dd409bb4cc69afe9921912.png" style="max-width: 100%;"></a></p>
+<p>我们这里有三种解决方法：</p>
+<ul>
+<li>第一种就是在类里面搞一个Get函数，这样获取【Java就是这样做的】</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">Date</span>(<span class="pl-k">int</span> year = <span class="pl-c1">1900</span>, <span class="pl-k">int</span> month = <span class="pl-c1">1</span>, <span class="pl-k">int</span> day = <span class="pl-c1">1</span>)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+	}
+
+	<span class="pl-k">int</span> <span class="pl-en">GetYear</span>()
+	{
+		<span class="pl-k">return</span> _year;
+	}
+
+<span class="pl-k">private:</span>	
+	<span class="pl-k">int</span> _year;
+	<span class="pl-k">int</span> _month;
+	<span class="pl-k">int</span> _day;
+};</pre></div>
+<ul>
+<li>第二种方法就是将函数放到类里面</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">Date</span>(<span class="pl-k">int</span> year = <span class="pl-c1">1900</span>, <span class="pl-k">int</span> month = <span class="pl-c1">1</span>, <span class="pl-k">int</span> day = <span class="pl-c1">1</span>)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+	}
+
+	<span class="pl-k">bool</span> <span class="pl-k">operator</span>==(<span class="pl-k">const</span> Date&amp; x, Date&amp; y)
+	{
+		<span class="pl-k">return</span> x.<span class="pl-smi">_year</span> == y.<span class="pl-smi">_year</span>
+			&amp;&amp; x.<span class="pl-smi">_month</span> == y.<span class="pl-smi">_month</span>
+			&amp;&amp; x.<span class="pl-smi">_day</span> == y.<span class="pl-smi">_day</span>;
+	}
+
+	<span class="pl-k">bool</span> <span class="pl-k">operator</span>&lt;(<span class="pl-k">const</span> Date&amp; x, Date&amp; y)
+	{
+		<span class="pl-k">if</span> (x.<span class="pl-smi">_year</span> &lt; y.<span class="pl-smi">_year</span>)
+		{
+			<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (x.<span class="pl-smi">_year</span> == y.<span class="pl-smi">_year</span>)
+		{
+			<span class="pl-k">if</span> (x.<span class="pl-smi">_month</span> &lt; y.<span class="pl-smi">_month</span>)
+			{
+				<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+			}
+			<span class="pl-k">else</span> <span class="pl-k">if</span> (x.<span class="pl-smi">_month</span> == y.<span class="pl-smi">_month</span>)
+			{
+				<span class="pl-k">if</span> (x.<span class="pl-smi">_day</span> &lt; y.<span class="pl-smi">_day</span>)
+				{
+					<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+				}
+			}
+		}
+		<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+	}
+
+<span class="pl-k">private:</span>	
+	<span class="pl-k">int</span> _year;
+	<span class="pl-k">int</span> _month;
+	<span class="pl-k">int</span> _day;
+};</pre></div>
+<ul>
+<li>然后我们又发现，函数的参数太多了，因为成员函数有一个隐含的<code class="notranslate">this</code>指针</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f216db1443d61ce784e4a9a57bbedf054e1b4bd3f0a01b6d031f9bdfc69cdeef/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32653765356565303832313034633363613361393336376666356361663631342e706e67"><img src="https://camo.githubusercontent.com/f216db1443d61ce784e4a9a57bbedf054e1b4bd3f0a01b6d031f9bdfc69cdeef/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32653765356565303832313034633363613361393336376666356361663631342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/2e7e5ee082104c3ca3a9367ff5caf614.png" style="max-width: 100%;"></a></p>
+<p>下面进行修改：</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">Date</span>(<span class="pl-k">int</span> year = <span class="pl-c1">1900</span>, <span class="pl-k">int</span> month = <span class="pl-c1">1</span>, <span class="pl-k">int</span> day = <span class="pl-c1">1</span>)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+	}
+
+	<span class="pl-k">bool</span> <span class="pl-k">operator</span>==(Date&amp; y)
+	{
+		<span class="pl-k">return</span> _year == y.<span class="pl-smi">_year</span>
+			&amp;&amp; _month == y.<span class="pl-smi">_month</span>
+			&amp;&amp; _day == y.<span class="pl-smi">_day</span>;
+	}
+
+	<span class="pl-k">bool</span> <span class="pl-k">operator</span>&lt;(Date&amp; y)
+	{
+		<span class="pl-k">if</span> (_year &lt; y.<span class="pl-smi">_year</span>)
+		{
+			<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (_year == y.<span class="pl-smi">_year</span>)
+		{
+			<span class="pl-k">if</span> (_month &lt; y.<span class="pl-smi">_month</span>)
+			{
+				<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+			}
+			<span class="pl-k">else</span> <span class="pl-k">if</span> (_month == y.<span class="pl-smi">_month</span>)
+			{
+				<span class="pl-k">if</span> (_day &lt; y.<span class="pl-smi">_day</span>)
+				{
+					<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+				}
+			}
+		}
+		<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+	}
+
+<span class="pl-k">private:</span>	
+	<span class="pl-k">int</span> _year;
+	<span class="pl-k">int</span> _month;
+	<span class="pl-k">int</span> _day;
+};</pre></div>
+<ul>
+<li>我们使用就可以这样使用了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/926ff65b11c2560bb6161b8e7527d1a8bddf45a6654aa4c9f4ac283ddc42a665/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61386537613564386133316434316164626134343132316236656339386535332e706e67"><img src="https://camo.githubusercontent.com/926ff65b11c2560bb6161b8e7527d1a8bddf45a6654aa4c9f4ac283ddc42a665/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61386537613564386133316434316164626134343132316236656339386535332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/a8e7a5d8a31d41adba44121b6ec98e53.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>我们通过查看反汇编再来了解一下</p>
+</li>
+<li>
+<p>首先看一下内置类型的比较，是通过指令集的支持</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3861da7ac60b425fcc7eedcb52083521dc106fb12b5d3a2208cd972a66ca374d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61663566313831353263333634386463393239333938383465613437333630652e706e67"><img src="https://camo.githubusercontent.com/3861da7ac60b425fcc7eedcb52083521dc106fb12b5d3a2208cd972a66ca374d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61663566313831353263333634386463393239333938383465613437333630652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/af5f18152c3648dc92939884ea47360e.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>再来看自定义类型</li>
+<li>可以看到两种写法的汇编代码是一样的，编译器会先转化，会一步到位的</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9ecd7f4f15252f2530be38b1ad40eb9338b1fc5c9d506612914f282629686761/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64396434633631353030336134366261386266366263373766643735313836302e706e67"><img src="https://camo.githubusercontent.com/9ecd7f4f15252f2530be38b1ad40eb9338b1fc5c9d506612914f282629686761/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64396434633631353030336134366261386266366263373766643735313836302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/d9d4c615003a46ba8bf6bc77fd751860.png" style="max-width: 100%;"></a></p>
+<h3>1.3 赋值运算符重载</h3>
+<ul>
+<li>我们接着写日期类，下面写一个赋值运算符</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-k">operator</span>=(<span class="pl-k">const</span> Date&amp; d)
+{
+	_year = d.<span class="pl-smi">_year</span>;
+	_month = d.<span class="pl-smi">_month</span>;
+	_day = d.<span class="pl-smi">_day</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e6eea05bd9dd8eba83f9a3c52519d6533de6cbc68b3698dfd168b9c72192a58a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34643733346237363863323034386535626230306438303362373031663932362e706e67"><img src="https://camo.githubusercontent.com/e6eea05bd9dd8eba83f9a3c52519d6533de6cbc68b3698dfd168b9c72192a58a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34643733346237363863323034386535626230306438303362373031663932362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/4d734b768c2048e5bb00d803b701f926.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>但是我们写的这个又遇到新的问题了，就是连续赋值是无法完成的</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5ff268d02e28ca5dc7cd75e7c15a76ec64ddcf105c339ae3f00acca574cf1761/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64636465363033343361396534393035386134356362336330313938656662362e706e67"><img src="https://camo.githubusercontent.com/5ff268d02e28ca5dc7cd75e7c15a76ec64ddcf105c339ae3f00acca574cf1761/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64636465363033343361396534393035386134356362336330313938656662362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/dcde60343a9e49058a45cb3c0198efb6.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>其实连续赋值就是右操作的返回值，做操作的值再进行赋值</li>
+<li>返回类型用传引用返回，类型用引用，效率会提高<code class="notranslate">Date&amp;</code>，返回的就是<code class="notranslate">*this</code>，不是<code class="notranslate">this</code>，这是个指针</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">Date&amp; <span class="pl-k">operator</span>=(<span class="pl-k">const</span> Date&amp; d)
+{
+	_year = d.<span class="pl-smi">_year</span>;
+	_month = d.<span class="pl-smi">_month</span>;
+	_day = d.<span class="pl-smi">_day</span>;
+
+	<span class="pl-k">return</span> *<span class="pl-c1">this</span>;
+}</pre></div>
+<ul>
+<li>但是有可能有人这样写代码：<code class="notranslate">d1 = d1</code></li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">d1 = d1</pre></div>
+<ul>
+<li>这里我们就可以加上一个判断，两个相等的话直接返回即可</li>
+</ul>
+<h3>1.4 赋值</h3>
+<div class="highlight highlight-source-c++"><pre class="notranslate">Date&amp; <span class="pl-k">operator</span>=(<span class="pl-k">const</span> Date&amp; d)
+{
+	<span class="pl-k">if</span> (<span class="pl-c1">this</span> != &amp;d)
+	{
+		_year = d.<span class="pl-smi">_year</span>;
+		_month = d.<span class="pl-smi">_month</span>;
+		_day = d.<span class="pl-smi">_day</span>;
+	}
+	<span class="pl-k">return</span> *<span class="pl-c1">this</span>;
+}</pre></div>
+<hr>
+<ul>
+<li>
+<p>那么我们不写这个赋值，编译器不会不会自动生成一个呢？---&gt;<code class="notranslate">会的！</code></p>
+</li>
+<li>
+<p>因为这个是那6个默认成员函数之一</p>
+</li>
+<li>
+<p>内置类型会值拷贝，自定义类型会调用它的拷贝</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/27d5b5930de85ff30d75f4db7a0910c811dbd80356a4dc48d47efa02457d5a02/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63646334623038643165613934643331393530626231396632303362616333302e706e67"><img src="https://camo.githubusercontent.com/27d5b5930de85ff30d75f4db7a0910c811dbd80356a4dc48d47efa02457d5a02/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63646334623038643165613934643331393530626231396632303362616333302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/cdc4b08d1ea94d31950bb19f203bac30.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d7ff9dabbe10a1eda62a466cc04249fd05b448c9f08e020aef1ed0feedd7b760/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30646538393265396535613934363339393031393530646230393438643361372e706e67"><img src="https://camo.githubusercontent.com/d7ff9dabbe10a1eda62a466cc04249fd05b448c9f08e020aef1ed0feedd7b760/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30646538393265396535613934363339393031393530646230393438643361372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/0de892e9e5a94639901950db0948d3a7.png" style="max-width: 100%;"></a></p>
+<p>总结：</p>
+<ol>
+<li>
+<p>赋值运算符重载格式</p>
+<ul>
+<li>
+<p>参数类型：<strong>const T&amp;</strong>，传递引用可以提高传参效率</p>
+</li>
+<li>
+<p>返回值类型：T&amp;，返回引用可以提高返回的效率，有返回值目的是为了支持连续赋值</p>
+</li>
+<li>
+<p>检测<strong>是否自己给自己赋值</strong></p>
+</li>
+<li>
+<p>返回*<strong>this</strong> ：要复合连续赋值的含义</p>
+</li>
+</ul>
+</li>
+</ol>
+<hr>
+<ol start="2">
+<li>
+<p>赋值运算符只能重载成类的成员函数不能重载成全局函数</p>
+<ul>
+<li>赋值运算符重载成全局函数，注意重载成全局函数时没有this指针了，需要给两个参数</li>
+</ul>
+</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate">Date&amp; <span class="pl-k">operator</span>=(Date&amp; left, <span class="pl-k">const</span> Date&amp; right)
+{
+	<span class="pl-k">if</span> (&amp;left != &amp;right)
+	{
+		left.<span class="pl-smi">_year</span> = right.<span class="pl-smi">_year</span>;
+		left.<span class="pl-smi">_month</span> = right.<span class="pl-smi">_month</span>;
+		left.<span class="pl-smi">_day</span> = right.<span class="pl-smi">_day</span>;
+	}
+	<span class="pl-k">return</span> left;
+}</pre></div>
+<p>原因：赋值运算符如果不显式实现，编译器会生成一个默认的。此时用户再在类外自己实现一个全局的赋值运算符重载，就和编译器在类中生成的默认赋值运算符重载冲突了，故赋值运算符重载只能是类的成员函数。</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/27b8dfed08f14f6b8f1915058068be981bff9c08ba232c702c9a4a5a8c0ff102/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33613765356239633063363934656631383333663231373939653963346165362e706e67"><img src="https://camo.githubusercontent.com/27b8dfed08f14f6b8f1915058068be981bff9c08ba232c702c9a4a5a8c0ff102/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33613765356239633063363934656631383333663231373939653963346165362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/3a7e5b9c0c694ef1833f21799e9c4ae6.png" style="max-width: 100%;"></a></p>
+<h2>二、日期类的实现</h2>
+<ul>
+<li>前面实现了一些逻辑，接下来我们就实现剩下的</li>
+<li>所有代码在最后~~</li>
+</ul>
+<hr>
+<h3>2.1 判断小于</h3>
+<ul>
+<li>在上面已经说明了，这里就直接写出来了</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">bool</span> <span class="pl-k">operator</span>&lt;(<span class="pl-k">const</span> Date&amp; d)
+{
+	<span class="pl-k">if</span> (_year &lt; d.<span class="pl-smi">_year</span>)
+	{
+		<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+	}
+	<span class="pl-k">else</span> <span class="pl-k">if</span> (_year == d.<span class="pl-smi">_year</span>)
+	{
+		<span class="pl-k">if</span> (_month &lt; d.<span class="pl-smi">_month</span>)
+		{
+			<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (_month == d.<span class="pl-smi">_month</span>)
+		{
+			<span class="pl-k">if</span> (_day &lt; d.<span class="pl-smi">_day</span>)
+			{
+				<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+			}
+		}
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+}
+</pre></div>
+<h3>2.2 判断等于</h3>
+<ul>
+<li><strong>直接判断相不相等</strong></li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">bool</span> <span class="pl-k">operator</span>==(<span class="pl-k">const</span> Date&amp; d)
+{
+	<span class="pl-k">return</span> _year == d.<span class="pl-smi">_year</span>
+		&amp;&amp; _month == d.<span class="pl-smi">_month</span>
+		&amp;&amp; _day == d.<span class="pl-smi">_day</span>;
+}
+</pre></div>
+<h3>2.3 判断小于等于</h3>
+<ul>
+<li>上面实现了<strong>小于</strong>，下面我们来实现一下<strong>小于等于</strong></li>
+<li>既然上面都写了小于和等于了，我们这里就可以<strong>直接复用</strong></li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">bool</span> <span class="pl-k">operator</span>&lt;=(<span class="pl-k">const</span> Date&amp; d)
+{
+	<span class="pl-k">return</span> *<span class="pl-c1">this</span> &lt;= d || *<span class="pl-c1">this</span> == d;
+}</pre></div>
+<h3>2.4 判断大于</h3>
+<ul>
+<li>这里的大于不就是小于<strong>等于的取反</strong></li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">bool</span> <span class="pl-k">operator</span>&gt;(<span class="pl-k">const</span> Date&amp; d)
+{
+	<span class="pl-k">return</span> !(*<span class="pl-c1">this</span> &lt;= d);
+}</pre></div>
+<h3>2.5 判断大于等于</h3>
+<ul>
+<li>大于等于就是<strong>小于取反</strong></li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">bool</span> <span class="pl-k">operator</span>&gt;=(<span class="pl-k">const</span> Date&amp; d)
+{
+	<span class="pl-k">return</span> !(*<span class="pl-c1">this</span> &lt; d);
+}</pre></div>
+<h3>2.6 判断不等于</h3>
+<ul>
+<li>不等于就是<strong>等于的取反</strong></li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">bool</span> <span class="pl-k">operator</span>!=(<span class="pl-k">const</span> Date&amp; d)
+{
+	<span class="pl-k">return</span> !(*<span class="pl-c1">this</span> == d);
+}</pre></div>
+<h3>2.7 日期加等天数</h3>
+<h4>首先要获取月份天数</h4>
+<ul>
+<li>在实现日期加天数的时候我们需要再先实现一个获取月份天数</li>
+<li>因为这里的获取月份天数需要被频繁调用，我们这里使用<code class="notranslate">inline</code>，可以不写【在类内声明同时定义的成员函数自动转化为内联函数】</li>
+<li>我们还将数组使用<code class="notranslate">static</code>修饰，避免了频繁开辟空间</li>
+<li>然后再判断闰年的时候我们把判断月份放到了前面，首先判断月份是否为2，为真就继续判断下面的，否则每次都要执行那么一长串的判断闰年</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">inline</span> <span class="pl-k">int</span> <span class="pl-en">GetMonthDay</span>(<span class="pl-k">int</span> year,<span class="pl-k">int</span> month)
+{
+	<span class="pl-c1">assert</span>(month &lt; <span class="pl-c1">13</span> &amp;&amp; month &gt; <span class="pl-c1">0</span>);
+	<span class="pl-c"><span class="pl-c">//</span> 放到静态区</span>
+	<span class="pl-k">static</span> <span class="pl-k">int</span> MonthDays[<span class="pl-c1">13</span>] = { <span class="pl-c1">0</span>,<span class="pl-c1">31</span>,<span class="pl-c1">28</span>,<span class="pl-c1">31</span>,<span class="pl-c1">30</span>,<span class="pl-c1">31</span>,<span class="pl-c1">30</span>,<span class="pl-c1">31</span>,<span class="pl-c1">31</span>,<span class="pl-c1">30</span>,<span class="pl-c1">31</span>,<span class="pl-c1">30</span>,<span class="pl-c1">31</span> };
+	<span class="pl-c"><span class="pl-c">//</span> 先判断月份</span>
+	<span class="pl-k">if</span> (month == <span class="pl-c1">2</span> &amp;&amp; (((year % <span class="pl-c1">100</span> == <span class="pl-c1">0</span>) &amp;&amp; (year % <span class="pl-c1">4</span> == <span class="pl-c1">0</span>)) || (year % <span class="pl-c1">400</span> != <span class="pl-c1">0</span>)))
+		<span class="pl-k">return</span> <span class="pl-c1">29</span>;
+	<span class="pl-k">return</span> MonthDays[month];
+}</pre></div>
+<p>然后继续实现：</p>
+<ul>
+<li>首先加上天数，然后判断当前月的天数和加上的天数</li>
+<li>然后进行减掉天数，月份+1，如果月份等于了13，年就+1，月份赋值为1</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">Date&amp; <span class="pl-k">operator</span>+=(<span class="pl-k">int</span> day)
+{
+	<span class="pl-c"><span class="pl-c">//</span> 这里就直接修改了</span>
+	_day += day;
+	<span class="pl-k">while</span> (_day &gt; <span class="pl-c1">GetMonthDay</span>(_year, _month))
+	{
+		_day -= <span class="pl-c1">GetMonthDay</span>(_year, _month);
+		++_month;
+		<span class="pl-k">if</span> (_month == <span class="pl-c1">13</span>)
+		{
+			++_year;
+			_month = <span class="pl-c1">1</span>;
+		}
+	}
+	<span class="pl-k">return</span> *<span class="pl-c1">this</span>;
+}</pre></div>
+<h3>2.8 日期加天数</h3>
+<ul>
+<li>上面是实现了+=，+也就很好实现了，这里只需要另外开一块空间，修改别的空间就不会影响我这里的值</li>
+<li>这里<strong>不可以用引用返回</strong>，<code class="notranslate">tmp</code>是一个临时对象，必须用传值返回</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">Date <span class="pl-k">operator</span>+(<span class="pl-k">int</span> day)
+{
+	Date <span class="pl-smi">tmp</span>(*<span class="pl-c1">this</span>);
+	tmp.<span class="pl-smi">_day</span> += day;
+	<span class="pl-k">while</span> (tmp.<span class="pl-smi">_day</span> &gt; <span class="pl-c1">GetMonthDay</span>(tmp.<span class="pl-smi">_year</span>, tmp.<span class="pl-smi">_month</span>))
+	{
+		tmp.<span class="pl-smi">_day</span> -= <span class="pl-c1">GetMonthDay</span>(tmp.<span class="pl-smi">_year</span>, tmp.<span class="pl-smi">_month</span>);
+		++tmp.<span class="pl-smi">_month</span>;
+		<span class="pl-k">if</span> (tmp.<span class="pl-smi">_month</span> == <span class="pl-c1">13</span>)
+		{
+			++tmp.<span class="pl-smi">_year</span>;
+			tmp.<span class="pl-smi">_month</span> = <span class="pl-c1">1</span>;
+		}
+	}
+	<span class="pl-k">return</span> tmp;
+}</pre></div>
+<ul>
+<li>上面那个+和+=的代码相似，我们也可以复用一下</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">Date <span class="pl-k">operator</span>+(<span class="pl-k">int</span> day)
+{
+	Date <span class="pl-smi">tmp</span>(*<span class="pl-c1">this</span>);
+	tmp += day;
+	<span class="pl-k">return</span> tmp;
+}</pre></div>
+<hr>
+<ul>
+<li>上面的代码是+复用+=，那么我们也可以用+=复用+</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">Date&amp; <span class="pl-k">operator</span>+=(<span class="pl-k">int</span> day)
+{
+	*<span class="pl-c1">this</span> = *<span class="pl-c1">this</span> + day;
+	<span class="pl-k">return</span> *<span class="pl-c1">this</span>;
+}</pre></div>
+<hr>
+<ul>
+<li>那么这两种写法哪一种比较好呢？</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/99be59cffbfa5a1bccc4e39918de0d1a47f4b00462ccf059a4c75ab7ce1d9c75/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65613963363464353664306234333333616536663230613230333365363731612e706e67"><img src="https://camo.githubusercontent.com/99be59cffbfa5a1bccc4e39918de0d1a47f4b00462ccf059a4c75ab7ce1d9c75/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65613963363464353664306234333333616536663230613230333365363731612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/ea9c64d56d0b4333ae6f20a2033e671a.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这里左边的更好，右边的会复用+，而+里面会创建临时对象</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c227810d8f8b7c4aa71a233778763534002c0a58c4ce9b320b8a15e9ff782d9e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32343465626265343137336434393830613330646337323737353736333037372e706e67"><img src="https://camo.githubusercontent.com/c227810d8f8b7c4aa71a233778763534002c0a58c4ce9b320b8a15e9ff782d9e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32343465626265343137336434393830613330646337323737353736333037372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/244ebbe4173d4980a30dc72775763077.png" style="max-width: 100%;"></a></p>
+<h3>2.9 日期减等天数</h3>
+<ul>
+<li>经过上面的思考，我们先实现<strong>减等</strong></li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">Date&amp; <span class="pl-k">operator</span>-=(<span class="pl-k">int</span> day)
+{
+	_day -= day;
+	<span class="pl-k">while</span> (_day &lt;= <span class="pl-c1">0</span>)
+	{
+		--_month;
+		<span class="pl-k">if</span> (_month == <span class="pl-c1">0</span>)
+		{
+			--_year;
+			_month = <span class="pl-c1">12</span>;
+		}
+		_day += <span class="pl-c1">GetMonthDay</span>(_year, _month);
+	}
+	<span class="pl-k">return</span> *<span class="pl-c1">this</span>;
+}</pre></div>
+<h3>2.10 日期减天数</h3>
+<div class="highlight highlight-source-c++"><pre class="notranslate">Date <span class="pl-k">operator</span>-(<span class="pl-k">int</span> day)
+{
+	Date tmp = *<span class="pl-c1">this</span>;
+	tmp -= day;
+
+	<span class="pl-k">return</span> tmp;
+}</pre></div>
+<h2>三、前置++ &amp;&amp; 后置++</h2>
+<ul>
+<li>前置++很简单</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">Date&amp; <span class="pl-k">operator</span>++()
+{
+	*<span class="pl-c1">this</span> += <span class="pl-c1">1</span>;
+	<span class="pl-k">return</span> *<span class="pl-c1">this</span>;
+}</pre></div>
+<ul>
+<li>后置++要返回++后的值【这里要注意，后置++的操作符是有一个**<code class="notranslate">int</code>区分的**</li>
+<li>后置++相比前置++的效率是低一些的</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">Date <span class="pl-k">operator</span>++(<span class="pl-k">int</span>)
+{
+	Date tmp = *<span class="pl-c1">this</span>;
+	*<span class="pl-c1">this</span> += <span class="pl-c1">1</span>;
+	<span class="pl-k">return</span> tmp;
+}</pre></div>
+<h3>3.1 日期减日期【返回天数】</h3>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span> <span class="pl-k">operator</span>-(<span class="pl-k">const</span> Date&amp; d)
+{
+	<span class="pl-k">int</span> flag = <span class="pl-c1">1</span>;
+	Date max = *<span class="pl-c1">this</span>;
+	Date min = d;
+	<span class="pl-k">if</span> (*<span class="pl-c1">this</span> &lt; d)
+	{
+		<span class="pl-k">int</span> flag = -<span class="pl-c1">1</span>;
+		max = d;
+		min = *<span class="pl-c1">this</span>;
+	}
+	<span class="pl-c"><span class="pl-c">//</span> 相差天数</span>
+	<span class="pl-k">int</span> n = <span class="pl-c1">0</span>;
+	<span class="pl-k">while</span> (min != max)
+	{
+		++min;
+		++n;
+	}
+	<span class="pl-k">return</span> n * flag;
+}</pre></div>
+<h3>3.2 流插入</h3>
+<ul>
+<li>
+<p>对于内置类型可以流插入，那么内置类型也可以流插入</p>
+</li>
+<li>
+<p>对于流插入<code class="notranslate">cout</code>，对于库里面全局的<code class="notranslate">ostream</code>类型的对象 --&gt;<a href="https://cplusplus.com/reference/" rel="nofollow">cplusplus.com</a></p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6bf6cdfe3363b82e9a16f802cc45ce7f71599b9f34a807e00f975606d9e9b007/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37613935623734313533613034623163626533303165303439333436663965352e706e67"><img src="https://camo.githubusercontent.com/6bf6cdfe3363b82e9a16f802cc45ce7f71599b9f34a807e00f975606d9e9b007/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37613935623734313533613034623163626533303165303439333436663965352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/7a95b74153a04b1cbe301e049346f9e5.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这里我们在使用的时候就反了，第一个被this占用了</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-k">operator</span>&lt;&lt;(ostream&amp; out)
+{
+	out &lt;&lt; _year &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>年<span class="pl-pds">"</span></span> &lt;&lt; _month &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>月<span class="pl-pds">"</span></span> &lt;&lt; _day &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>日<span class="pl-pds">"</span></span> &lt;&lt; endl;
+}</pre></div>
+<ul>
+<li>作为成员函数重载，this指针占据第一个参数，Date必须是在操作数</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1422a98a62bf5b55c31ffcbc787e98e4c36793a7fa60af510bacbecf97806cae/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35323338343331356435346234646564623532396231626164343962343033612e706e67"><img src="https://camo.githubusercontent.com/1422a98a62bf5b55c31ffcbc787e98e4c36793a7fa60af510bacbecf97806cae/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35323338343331356435346234646564623532396231626164343962343033612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/52384315d54b4dedb529b1bad49b403a.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>所以我们就必须让<code class="notranslate">ostream</code>占据第一个位置</p>
+</li>
+<li>
+<p>想要占据第一个参数，就不能写成成员函数，就要写成全局函数</p>
+</li>
+<li>
+<p>当我们写成全局函数的时候，不能访问类的私有了，这里也要后面的<strong>友元</strong></p>
+</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-k">operator</span>&lt;&lt;(ostream&amp; out, <span class="pl-k">const</span> Date&amp; d)
+{
+	out &lt;&lt; d.<span class="pl-smi">_year</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>年<span class="pl-pds">"</span></span> &lt;&lt; d.<span class="pl-smi">_month</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>月<span class="pl-pds">"</span></span> &lt;&lt; d.<span class="pl-smi">_day</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>日<span class="pl-pds">"</span></span> &lt;&lt; endl;
+}</pre></div>
+<ul>
+<li>这里想要改成多个插入，我们返回值就要改一下</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">ostream&amp; <span class="pl-k">operator</span>&lt;&lt;(ostream&amp; out, <span class="pl-k">const</span> Date&amp; d)
+{
+	out &lt;&lt; d.<span class="pl-smi">_year</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>年<span class="pl-pds">"</span></span> &lt;&lt; d.<span class="pl-smi">_month</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>月<span class="pl-pds">"</span></span> &lt;&lt; d.<span class="pl-smi">_day</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>日<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	<span class="pl-k">return</span> out;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d693a50d26cab763d9d46935697615bbce1abbeffe319bd2a849638caf4f4849/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65376638333834636466356334313133616631663036313838333061353331372e706e67"><img src="https://camo.githubusercontent.com/d693a50d26cab763d9d46935697615bbce1abbeffe319bd2a849638caf4f4849/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65376638333834636466356334313133616631663036313838333061353331372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/e7f8384cdf5c4113af1f0618830a5317.png" style="max-width: 100%;"></a></p>
+<h3>3.3 流提取</h3>
+<ul>
+<li>流提取是<code class="notranslate">cin</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d0d141315dbba431c2c482507a7805a9dc80cdc69be5da598b70a7c980df858b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32346262313966396565663534623961396636646266626530666666373931612e706e67"><img src="https://camo.githubusercontent.com/d0d141315dbba431c2c482507a7805a9dc80cdc69be5da598b70a7c980df858b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32346262313966396565663534623961396636646266626530666666373931612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/24bb19f9eef54b9a9f6dbfbe0fff791a.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这里就不能使用<code class="notranslate">const</code>了</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">istream&amp; <span class="pl-k">operator</span>&gt;&gt;(istream&amp; in, Date&amp; d)
+{
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>请依次输入年月日:&gt;<span class="pl-pds">"</span></span>;
+	in &gt;&gt; d.<span class="pl-smi">_year</span> &gt;&gt; d.<span class="pl-smi">_month</span> &gt;&gt; d.<span class="pl-smi">_day</span>;
+	<span class="pl-k">return</span> in;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/28e4f818c806feb0ed91bc511f46f8363bffa4d632aa51d77689507df8aa49e5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62316332363430653063363134316363396133353736666166363866343733312e706e67"><img src="https://camo.githubusercontent.com/28e4f818c806feb0ed91bc511f46f8363bffa4d632aa51d77689507df8aa49e5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62316332363430653063363134316363396133353736666166363866343733312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/b1c2640e0c6141cc9a3576faf68f4731.png" style="max-width: 100%;"></a></p>
+<h3>3.4 检查输入日期是否合法</h3>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">bool</span> <span class="pl-en">CheckInvalid</span>()
+{
+	<span class="pl-k">if</span> (_year &lt;= <span class="pl-c1">0</span>
+		|| _month &lt; <span class="pl-c1">1</span>
+		|| _month &gt; <span class="pl-c1">12</span>
+		|| _day &lt; <span class="pl-c1">1</span>
+		|| _day &gt; <span class="pl-c1">GetMonthDay</span>(_year,_month))
+	{
+		<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+	}
+	<span class="pl-k">else</span>
+	{
+		<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+	}
+}</pre></div>
+<ul>
+<li>这个时候把可以该检查的地方就检查一下</li>
+</ul>
+<h2>四、日期类的实现【源码】</h2>
+<div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>iostream<span class="pl-pds">&gt;</span></span>
+#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>assert.h<span class="pl-pds">&gt;</span></span>
+<span class="pl-k">using</span> <span class="pl-k">namespace</span> <span class="pl-en">std</span><span class="pl-k">;</span>
+
+<span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-c"><span class="pl-c">//</span> 构造函数</span>
+	<span class="pl-en">Date</span>(<span class="pl-k">int</span> year = <span class="pl-c1">1900</span>, <span class="pl-k">int</span> month = <span class="pl-c1">1</span>, <span class="pl-k">int</span> day = <span class="pl-c1">1</span>)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+
+		<span class="pl-k">if</span> (!<span class="pl-c1">CheckInvalid</span>())
+		{
+			cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>构造日期非法<span class="pl-pds">"</span></span> &lt;&lt; endl;
+		}
+	}
+	<span class="pl-c"><span class="pl-c">//</span> 判断等于</span>
+	<span class="pl-k">bool</span> <span class="pl-k">operator</span>==(<span class="pl-k">const</span> Date&amp; d)
+	{
+		<span class="pl-k">return</span> _year == d.<span class="pl-smi">_year</span>
+			&amp;&amp; _month == d.<span class="pl-smi">_month</span>
+			&amp;&amp; _day == d.<span class="pl-smi">_day</span>;
+	}
+	<span class="pl-c"><span class="pl-c">//</span> 判断小于</span>
+	<span class="pl-k">bool</span> <span class="pl-k">operator</span>&lt;(<span class="pl-k">const</span> Date&amp; d)
+	{
+		<span class="pl-k">if</span> (_year &lt; d.<span class="pl-smi">_year</span>)
+		{
+			<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (_year == d.<span class="pl-smi">_year</span>)
+		{
+			<span class="pl-k">if</span> (_month &lt; d.<span class="pl-smi">_month</span>)
+			{
+				<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+			}
+			<span class="pl-k">else</span> <span class="pl-k">if</span> (_month == d.<span class="pl-smi">_month</span>)
+			{
+				<span class="pl-k">if</span> (_day &lt; d.<span class="pl-smi">_day</span>)
+				{
+					<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+				}
+			}
+		}
+		<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+	}
+	<span class="pl-c"><span class="pl-c">//</span> 判断小于等于</span>
+	<span class="pl-k">bool</span> <span class="pl-k">operator</span>&lt;=(<span class="pl-k">const</span> Date&amp; d)
+	{
+		<span class="pl-k">return</span> *<span class="pl-c1">this</span> &lt;= d || *<span class="pl-c1">this</span> == d;
+	}
+	<span class="pl-c"><span class="pl-c">//</span> 判断大于</span>
+	<span class="pl-k">bool</span> <span class="pl-k">operator</span>&gt;(<span class="pl-k">const</span> Date&amp; d)
+	{
+		<span class="pl-k">return</span> !(*<span class="pl-c1">this</span> &lt;= d);
+	}
+	<span class="pl-c"><span class="pl-c">//</span> 判断大于等于</span>
+	<span class="pl-k">bool</span> <span class="pl-k">operator</span>&gt;=(<span class="pl-k">const</span> Date&amp; d)
+	{
+		<span class="pl-k">return</span> !(*<span class="pl-c1">this</span> &lt; d);
+	}
+	<span class="pl-c"><span class="pl-c">//</span> 判断不等于</span>
+	<span class="pl-k">bool</span> <span class="pl-k">operator</span>!=(<span class="pl-k">const</span> Date&amp; d)
+	{
+		<span class="pl-k">return</span> !(*<span class="pl-c1">this</span> == d);
+	}
+	<span class="pl-c"><span class="pl-c">//</span> 日期加等天数</span>
+
+	Date&amp; <span class="pl-k">operator</span>+=(<span class="pl-k">int</span> day)
+	{
+		_day += day;
+		<span class="pl-k">while</span> (_day &gt; <span class="pl-c1">GetMonthDay</span>(_year, _month))
+		{
+			_day -= <span class="pl-c1">GetMonthDay</span>(_year, _month);
+			++_month;
+			<span class="pl-k">if</span> (_month == <span class="pl-c1">13</span>)
+			{
+				++_year;
+				_month = <span class="pl-c1">1</span>;
+			}
+		}
+		<span class="pl-k">return</span> *<span class="pl-c1">this</span>;
+	}
+
+	Date <span class="pl-k">operator</span>+(<span class="pl-k">int</span> day)
+	{
+		Date <span class="pl-smi">tmp</span>(*<span class="pl-c1">this</span>);
+		<span class="pl-c"><span class="pl-c">//</span>Date tmp = *this;</span>
+		tmp += day;
+		<span class="pl-k">return</span> tmp;
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span> 日期加天数</span>
+	Date <span class="pl-k">operator</span>+(<span class="pl-k">const</span> Date&amp; d)
+	{
+		Date <span class="pl-smi">tmp</span>(*<span class="pl-c1">this</span>);
+		tmp.<span class="pl-smi">_day</span> += d.<span class="pl-smi">_day</span>;
+		<span class="pl-k">while</span> (d.<span class="pl-smi">_day</span> &gt; <span class="pl-c1">GetMonthDay</span>(tmp.<span class="pl-smi">_year</span>, tmp.<span class="pl-smi">_month</span>))
+		{
+			tmp.<span class="pl-smi">_day</span> -= <span class="pl-c1">GetMonthDay</span>(tmp.<span class="pl-smi">_year</span>, tmp.<span class="pl-smi">_month</span>);
+			++tmp.<span class="pl-smi">_month</span>;
+			<span class="pl-k">if</span> (tmp.<span class="pl-smi">_month</span> == <span class="pl-c1">13</span>)
+			{
+				++tmp.<span class="pl-smi">_year</span>;
+				tmp.<span class="pl-smi">_month</span> = <span class="pl-c1">1</span>;
+			}
+		}
+		<span class="pl-k">return</span> tmp;
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span> 日期-=天数</span>
+	Date&amp; <span class="pl-k">operator</span>-=(<span class="pl-k">int</span> day)
+	{
+		_day -= day;
+		<span class="pl-k">while</span> (_day &lt;= <span class="pl-c1">0</span>)
+		{
+			--_month;
+			<span class="pl-k">if</span> (_month == <span class="pl-c1">0</span>)
+			{
+				--_year;
+				_month = <span class="pl-c1">12</span>;
+			}
+			_day += <span class="pl-c1">GetMonthDay</span>(_year, _month);
+		}
+		<span class="pl-k">return</span> *<span class="pl-c1">this</span>;
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span> 日期减天数</span>
+	Date <span class="pl-k">operator</span>-(<span class="pl-k">int</span> day)
+	{
+		Date tmp = *<span class="pl-c1">this</span>;
+		tmp -= day;
+
+		<span class="pl-k">return</span> tmp;
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span> 前置++</span>
+	Date&amp; <span class="pl-k">operator</span>++()
+	{
+		*<span class="pl-c1">this</span> += <span class="pl-c1">1</span>;
+		<span class="pl-k">return</span> *<span class="pl-c1">this</span>;
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span> 后置++</span>
+	Date <span class="pl-k">operator</span>++(<span class="pl-k">int</span>)
+	{
+		Date tmp = *<span class="pl-c1">this</span>;
+		*<span class="pl-c1">this</span> += <span class="pl-c1">1</span>;
+
+		<span class="pl-k">return</span> tmp;
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span> 日期-日期</span>
+	<span class="pl-k">int</span> <span class="pl-k">operator</span>-(<span class="pl-k">const</span> Date&amp; d)
+	{
+		<span class="pl-k">int</span> flag = <span class="pl-c1">1</span>;
+		Date max = *<span class="pl-c1">this</span>;
+		Date min = d;
+
+		<span class="pl-k">if</span> (*<span class="pl-c1">this</span> &lt; d)
+		{
+			<span class="pl-k">int</span> flag = -<span class="pl-c1">1</span>;
+			max = d;
+			min = *<span class="pl-c1">this</span>;
+		}
+
+		<span class="pl-k">int</span> n = <span class="pl-c1">0</span>;
+		<span class="pl-k">while</span> (min != max)
+		{
+			++min;
+			++n;
+		}
+		<span class="pl-k">return</span> n * flag;
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span> 获取月份天数[可以不写inline，类里默认就是]</span>
+	<span class="pl-k">inline</span> <span class="pl-k">int</span> <span class="pl-en">GetMonthDay</span>(<span class="pl-k">int</span> year, <span class="pl-k">int</span> month)
+	{
+		<span class="pl-c1">assert</span>(month &lt; <span class="pl-c1">13</span> &amp;&amp; month &gt; <span class="pl-c1">0</span>);
+		<span class="pl-c"><span class="pl-c">//</span> 放到静态区</span>
+		<span class="pl-k">static</span> <span class="pl-k">int</span> MonthDays[<span class="pl-c1">13</span>] = { <span class="pl-c1">0</span>,<span class="pl-c1">31</span>,<span class="pl-c1">28</span>,<span class="pl-c1">31</span>,<span class="pl-c1">30</span>,<span class="pl-c1">31</span>,<span class="pl-c1">30</span>,<span class="pl-c1">31</span>,<span class="pl-c1">31</span>,<span class="pl-c1">30</span>,<span class="pl-c1">31</span>,<span class="pl-c1">30</span>,<span class="pl-c1">31</span> };
+		<span class="pl-c"><span class="pl-c">//</span> 先判断月份</span>
+		<span class="pl-k">if</span> (month == <span class="pl-c1">2</span> &amp;&amp; (((year % <span class="pl-c1">100</span> == <span class="pl-c1">0</span>) &amp;&amp; (year % <span class="pl-c1">4</span> == <span class="pl-c1">0</span>)) || (year % <span class="pl-c1">400</span> != <span class="pl-c1">0</span>)))
+			<span class="pl-k">return</span> <span class="pl-c1">29</span>;
+		<span class="pl-k">return</span> MonthDays[month];
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span> 拷贝构造</span>
+	Date&amp; <span class="pl-k">operator</span>=(<span class="pl-k">const</span> Date&amp; d)
+	{
+		<span class="pl-k">if</span> (<span class="pl-c1">this</span> != &amp;d)
+		{
+			_year = d.<span class="pl-smi">_year</span>;
+			_month = d.<span class="pl-smi">_month</span>;
+			_day = d.<span class="pl-smi">_day</span>;
+		}
+		<span class="pl-k">return</span> *<span class="pl-c1">this</span>;
+	}
+	<span class="pl-k">friend</span> ostream&amp; <span class="pl-k">operator</span>&lt;&lt;(ostream&amp; out, <span class="pl-k">const</span> Date&amp; d);
+	<span class="pl-k">friend</span> istream&amp; <span class="pl-k">operator</span>&gt;&gt;(istream&amp; in, Date&amp; d);
+
+	<span class="pl-k">bool</span> <span class="pl-en">CheckInvalid</span>()
+	{
+		<span class="pl-k">if</span> (_year &lt;= <span class="pl-c1">0</span>
+			|| _month &lt; <span class="pl-c1">1</span>
+			|| _month &gt; <span class="pl-c1">12</span>
+			|| _day &lt; <span class="pl-c1">1</span>
+			|| _day &gt; <span class="pl-c1">GetMonthDay</span>(_year,_month))
+		{
+			<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+		}
+		<span class="pl-k">else</span>
+		{
+			<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+		}
+	}
+
+	<span class="pl-k">void</span> <span class="pl-en">Print</span>()
+	{
+		cout &lt;&lt; _year &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>/<span class="pl-pds">"</span></span> &lt;&lt; _month &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>/<span class="pl-pds">"</span></span> &lt;&lt; _day &lt;&lt; endl;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _year;
+	<span class="pl-k">int</span> _month;
+	<span class="pl-k">int</span> _day;
+};
+
+ostream&amp; <span class="pl-k">operator</span>&lt;&lt;(ostream&amp; out, <span class="pl-k">const</span> Date&amp; d)
+{
+	out &lt;&lt; d.<span class="pl-smi">_year</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>年<span class="pl-pds">"</span></span> &lt;&lt; d.<span class="pl-smi">_month</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>月<span class="pl-pds">"</span></span> &lt;&lt; d.<span class="pl-smi">_day</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>日<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	<span class="pl-k">return</span> out;
+}
+
+istream&amp; <span class="pl-k">operator</span>&gt;&gt;(istream&amp; in, Date&amp; d)
+{
+	<span class="pl-k">while</span> (<span class="pl-c1">1</span>)
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>请依次输入年月日:&gt;<span class="pl-pds">"</span></span>;
+		in &gt;&gt; d.<span class="pl-smi">_year</span> &gt;&gt; d.<span class="pl-smi">_month</span> &gt;&gt; d.<span class="pl-smi">_day</span>;
+
+		<span class="pl-k">if</span> (!d.<span class="pl-c1">CheckInvalid</span>())
+		{
+			cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>输入非法日期，请重新输入<span class="pl-pds">"</span></span> &lt;&lt; endl;
+		}
+		<span class="pl-k">else</span>
+		{
+			<span class="pl-k">break</span>;
+		}
+	}
+	<span class="pl-k">return</span> in;
+}</pre></div>
+<h2>五、const修饰</h2>
+<h3>5.1 const成员函数</h3>
+<ul>
+<li>将<code class="notranslate">const</code>修饰的“成员函数”称之为<code class="notranslate">const</code>成员函数，<code class="notranslate">const</code>修饰类成员函数，实际修饰该成员函数隐含的<code class="notranslate">this指针</code>，表明在该成员函数中不能对类的任何成员进行修改。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/53ff0d6e4e9a196cf5ce17464865383448a759996e711f1216a06e01d143ac7a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39396234366435363866633934663739626563366161656562633534303838382e706e67"><img src="https://camo.githubusercontent.com/53ff0d6e4e9a196cf5ce17464865383448a759996e711f1216a06e01d143ac7a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39396234366435363866633934663739626563366161656562633534303838382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/99b46d568fc94f79bec6aaeebc540888.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们看下面这段代码</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">Date</span>(<span class="pl-k">int</span> year, <span class="pl-k">int</span> month, <span class="pl-k">int</span> day)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+	}
+	<span class="pl-k">void</span> <span class="pl-en">Print</span>()
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Print()<span class="pl-pds">"</span></span> &lt;&lt; endl;
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>year:<span class="pl-pds">"</span></span> &lt;&lt; _year &lt;&lt; endl;
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>month:<span class="pl-pds">"</span></span> &lt;&lt; _month &lt;&lt; endl;
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>day:<span class="pl-pds">"</span></span> &lt;&lt; _day &lt;&lt; endl &lt;&lt; endl;
+	}
+	<span class="pl-k">void</span> <span class="pl-en">Print</span>()
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Print()const<span class="pl-pds">"</span></span> &lt;&lt; endl;
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>year:<span class="pl-pds">"</span></span> &lt;&lt; _year &lt;&lt; endl;
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>month:<span class="pl-pds">"</span></span> &lt;&lt; _month &lt;&lt; endl;
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>day:<span class="pl-pds">"</span></span> &lt;&lt; _day &lt;&lt; endl &lt;&lt; endl;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _year; <span class="pl-c"><span class="pl-c">//</span> 年</span>
+	<span class="pl-k">int</span> _month; <span class="pl-c"><span class="pl-c">//</span> 月</span>
+	<span class="pl-k">int</span> _day; <span class="pl-c"><span class="pl-c">//</span> 日</span>
+};</pre></div>
+<ul>
+<li>这里会出现一个权限放大的问题</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9e41d0d49e4fcf1ab1bbd51e9a0c3b1afa629f9fe83f713590d0359ee7d8c358/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63333131363364303666373434323339383836353661326466333262383435652e706e67"><img src="https://camo.githubusercontent.com/9e41d0d49e4fcf1ab1bbd51e9a0c3b1afa629f9fe83f713590d0359ee7d8c358/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63333131363364303666373434323339383836353661326466333262383435652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/c31163d06f74423988656a2df32b845e.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>那么在参数就需要改成<code class="notranslate">const Date*</code></p>
+</li>
+<li>
+<p>为了解决这个问题，我们就要在函数后面的位置加上一个<code class="notranslate">const</code></p>
+</li>
+<li>
+<p>修饰的是<strong>this指针</strong>指向的内容</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/56dd7f0951c64bada211c9f1712555b73855077379d8f0fb9e14cde6d50dc2d4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35383735653834366130636534383464623538393561386337303333353535662e706e67"><img src="https://camo.githubusercontent.com/56dd7f0951c64bada211c9f1712555b73855077379d8f0fb9e14cde6d50dc2d4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35383735653834366130636534383464623538393561386337303333353535662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/5875e846a0ce484db5895a8c7033555f.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>那么不是下面方法调用也是可以的，因为这个是权限的缩小</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1091bb3375442dc8ead1d259f06fd1f9312dabb1763443abcababf2ddd3db70c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30346137613134303863633634343135613139613337313562373364306664652e706e67"><img src="https://camo.githubusercontent.com/1091bb3375442dc8ead1d259f06fd1f9312dabb1763443abcababf2ddd3db70c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30346137613134303863633634343135613139613337313562373364306664652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/04a7a1408cc64415a19a3715b73d0fde.png" style="max-width: 100%;"></a></p>
+<ul>
+<li><code class="notranslate">const</code>对象可以调用，非<code class="notranslate">const</code>对象也可以调用</li>
+</ul>
+<hr>
+<ul>
+<li>那么全部函数都可以加上<code class="notranslate">const</code>吗？---&gt;不可以！</li>
+<li>如果函数内部要被修改，那肯定是不能加的</li>
+<li><em>上面写的日期类的部分函数也可以加上~~</em></li>
+</ul>
+<hr>
+<h3>5.2 小结一下：</h3>
+<ul>
+<li>
+<p><strong>成员函数</strong>如果是一个对成员变量只进行<strong>读</strong>访问的函数，<strong>建议加上<code class="notranslate">const</code></strong>，这样const对象和<code class="notranslate">非const</code>对象都可以访问</p>
+</li>
+<li>
+<p><strong>成员函数</strong>如果是一个对成员变量进行<strong>读写</strong>访问的函数，<strong>不可以加上const</strong>，否则不能修改成员变量</p>
+</li>
+</ul>
+<ol>
+<li><code class="notranslate">const</code>对象可以调用<code class="notranslate">非const</code>成员函数吗？ --&gt; 不可以！【权限放大】</li>
+<li><code class="notranslate">非const</code>对象可以调用<code class="notranslate">const</code>成员函数吗？--&gt; 可以！【权限缩小】</li>
+<li><code class="notranslate">const</code>成员函数内可以调用其它的<code class="notranslate">非const</code>成员函数吗？--&gt; 不可以！【权限放大】</li>
+<li><code class="notranslate">非const</code>成员函数内可以调用其它的<code class="notranslate">const</code>成员函数吗？--&gt; 可以！【权限缩小】</li>
+</ol>
+<h3>5.3 默认成员函数【取地址及const取地址操作符重载】</h3>
+<ul>
+<li>前面章节学习了4个默认成员函数了，剩下两个再看一下</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c64689abb4596414313244c79bb5fd6c6058845a0e969c6702a219b27f7f3509/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63623461643463303066626134386337613030653139623432626261393036312e706e67"><img src="https://camo.githubusercontent.com/c64689abb4596414313244c79bb5fd6c6058845a0e969c6702a219b27f7f3509/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63623461643463303066626134386337613030653139623432626261393036312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/cb4ad4c00fba48c7a00e19b42bba9061.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这两个默认成员函数一般不用重新定义 ，编译器默认会生成。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+<span class="pl-k">public:</span>
+	Date* <span class="pl-k">operator</span>&amp;()
+	{
+		<span class="pl-k">return</span> <span class="pl-c1">this</span>;
+	}
+	<span class="pl-k">const</span> Date* <span class="pl-k">operator</span>&amp;()<span class="pl-k">const</span>
+	{
+		<span class="pl-k">return</span> <span class="pl-c1">this</span>;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _year; <span class="pl-c"><span class="pl-c">//</span> 年</span>
+	<span class="pl-k">int</span> _month; <span class="pl-c"><span class="pl-c">//</span> 月</span>
+	<span class="pl-k">int</span> _day; <span class="pl-c"><span class="pl-c">//</span> 日</span>
+};</pre></div>
+<ul>
+<li>比如说不想让别人拿到我的地址，<strong>普通对象返回空，<code class="notranslate">const</code>对象返回假地址</strong></li>
+<li>就可以这样写：</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">Date* <span class="pl-k">operator</span>&amp;()
+{
+	<span class="pl-k">return</span> <span class="pl-c1">nullptr</span>;
+}
+<span class="pl-k">const</span> Date* <span class="pl-k">operator</span>&amp;()<span class="pl-k">const</span>
+{
+	<span class="pl-k">int</span> i = <span class="pl-c1">0</span>;
+	<span class="pl-k">return</span> (<span class="pl-k">const</span> A*)&amp;i;
+}</pre></div>
+<ul>
+<li>这两个运算符一般不需要重载，使用编译器生成的默认取地址的重载即可，只有特殊情况，才需要重载，比如想让别人获取到指定的内容！</li>
+</ul></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## 前言
+
+- 如何实现一个通用的交换函数呢？
+
+
+```cpp
+void Swap(int& left, int& right)
+{
+	int temp = left;
+	left = right;
+	right = temp;
+}
+void Swap(double& left, double& right)
+{
+	double temp = left;
+	left = right;
+	right = temp;
+}
+void Swap(char& left, char& right)
+{
+	char temp = left;
+	left = right;
+	right = temp;
+}
+// ......
+```
+
+
+使用函数重载虽然可以实现，但是有一下几个不好的地方：
+1. 重载的函数仅仅是类型不同，代码复用率比较低，只要有新类型出现时，就需要用户自己增加对应的函数
+2. 代码的可维护性比较低，一个出错可能所有的重载均出错
+
+
+那能否告诉编译器一个模子，让编译器根据不同的类型利用该模子来生成代码呢？
+
+
+- 如果在C++中，也能够存在这样一个模具，通过给这个模具中填充不同材料(类型)，来获得不同材料的铸件(即生成具体类型的代码），那将会节省许多头发。">
+<meta property="og:title" content="9. C++模板【函数模板与类模板】【非类型模板参数、模板特化和模板分离编译】">
+<meta property="og:description" content="## 前言
+
+- 如何实现一个通用的交换函数呢？
+
+
+```cpp
+void Swap(int& left, int& right)
+{
+	int temp = left;
+	left = right;
+	right = temp;
+}
+void Swap(double& left, double& right)
+{
+	double temp = left;
+	left = right;
+	right = temp;
+}
+void Swap(char& left, char& right)
+{
+	char temp = left;
+	left = right;
+	right = temp;
+}
+// ......
+```
+
+
+使用函数重载虽然可以实现，但是有一下几个不好的地方：
+1. 重载的函数仅仅是类型不同，代码复用率比较低，只要有新类型出现时，就需要用户自己增加对应的函数
+2. 代码的可维护性比较低，一个出错可能所有的重载均出错
+
+
+那能否告诉编译器一个模子，让编译器根据不同的类型利用该模子来生成代码呢？
+
+
+- 如果在C++中，也能够存在这样一个模具，通过给这个模具中填充不同材料(类型)，来获得不同材料的铸件(即生成具体类型的代码），那将会节省许多头发。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/9.%20C%2B%2B-mo-ban-%E3%80%90-han-shu-mo-ban-yu-lei-mo-ban-%E3%80%91%E3%80%90-fei-lei-xing-mo-ban-can-shu-%E3%80%81-mo-ban-te-hua-he-mo-ban-fen-li-bian-yi-%E3%80%91.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>9. C++模板【函数模板与类模板】【非类型模板参数、模板特化和模板分离编译】</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">9. C++模板【函数模板与类模板】【非类型模板参数、模板特化和模板分离编译】</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/11" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>前言</h2>
+<ul>
+<li>如何实现一个通用的交换函数呢？</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">Swap</span>(<span class="pl-k">int</span>&amp; left, <span class="pl-k">int</span>&amp; right)
+{
+	<span class="pl-k">int</span> temp = left;
+	left = right;
+	right = temp;
+}
+<span class="pl-k">void</span> <span class="pl-en">Swap</span>(<span class="pl-k">double</span>&amp; left, <span class="pl-k">double</span>&amp; right)
+{
+	<span class="pl-k">double</span> temp = left;
+	left = right;
+	right = temp;
+}
+<span class="pl-k">void</span> <span class="pl-en">Swap</span>(<span class="pl-k">char</span>&amp; left, <span class="pl-k">char</span>&amp; right)
+{
+	<span class="pl-k">char</span> temp = left;
+	left = right;
+	right = temp;
+}
+<span class="pl-c"><span class="pl-c">//</span> ......</span></pre></div>
+<p>使用函数重载虽然可以实现，但是有一下几个不好的地方：</p>
+<ol>
+<li>重载的函数仅仅是类型不同，代码复用率比较低，只要有新类型出现时，就需要用户自己增加对应的函数</li>
+<li>代码的可维护性比较低，一个出错可能所有的重载均出错</li>
+</ol>
+<p>那能否告诉编译器一个模子，让编译器根据不同的类型利用该模子来生成代码呢？</p>
+<ul>
+<li>
+<p>如果在C++中，也能够存在这样一个模具，通过给这个模具中填充不同材料(类型)，来获得不同材料的铸件(即生成具体类型的代码），那将会节省许多头发。巧的是前人早已将树栽好，我们只需在此乘凉。</p>
+</li>
+<li>
+<p>泛型编程：编写与类型无关的通用代码，是代码复用的一种手段。模板是<strong>泛型编程</strong>的基础。</p>
+</li>
+</ul>
+<p>下面介绍两个模板：<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1f2c7ec8537ffb3ef008aad1ddc811984eb621962691749c8150fed5fc1ec89e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65656432353630306433316234313364623237306638343836346666306166652e706e67"><img src="https://camo.githubusercontent.com/1f2c7ec8537ffb3ef008aad1ddc811984eb621962691749c8150fed5fc1ec89e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65656432353630306433316234313364623237306638343836346666306166652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/eed25600d31b413db270f84864ff0afe.png" style="max-width: 100%;"></a></p>
+<h2>函数模板</h2>
+<h4>函数模板概念</h4>
+<ul>
+<li>函数模板代表了一个函数家族，该函数模板与类型无关，在使用时被参数化，根据实参类型产生函数的特定类型版本。</li>
+</ul>
+<p>函数模板格式：</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">template</span>&lt;<span class="pl-k">typename</span> T1, <span class="pl-k">typename</span> T2,......,<span class="pl-k">typename</span> Tn&gt;</pre></div>
+<p><code class="notranslate">返回值类型 函数名(参数列表){}</code></p>
+<ul>
+<li>这个时候我们就可以写成</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">template</span>&lt;<span class="pl-k">typename</span> T&gt;
+
+<span class="pl-k">void</span> <span class="pl-en">Swap</span>(T&amp; left, T&amp; right)
+{
+	T tmp = left;
+	left = right;
+	right = tmp;
+}</pre></div>
+<p>注意：<code class="notranslate">typename</code>是用来定义模板参数关键字，也可以使用<code class="notranslate">class</code>(切记：不能使用struct代替class)</p>
+<h2>函数模板的原理</h2>
+<ul>
+<li>
+<p>那么如何解决上面的问题呢？大家都知道，瓦特改良蒸汽机，人类开始了工业革命，解放了生产力。机器生产淘汰掉了很多手工产品。本质是什么，重复的工作交给了机器去完成。有人给出了论调：懒人创造世界。</p>
+</li>
+<li>
+<p>函数模板是一个蓝图，它本身并不是函数，是编译器用使用方式产生特定具体类型函数的模具。所以其实模板就是将本来应该我们做的重复的事情交给了编译器</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b662b45459fc6e5c6dc8f59555865f0c9e162c015f6e1130cc575c25e0938320/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38336134303764623939633534326533386131333439343938613133666338612e706e67"><img src="https://camo.githubusercontent.com/b662b45459fc6e5c6dc8f59555865f0c9e162c015f6e1130cc575c25e0938320/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38336134303764623939633534326533386131333439343938613133666338612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/83a407db99c542e38a1349498a13fc8a.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>在编译器编译阶段，对于模板函数的使用，编译器需要根据传入的实参类型来推演生成对应类型的函数以供调用。比如：当用double类型使用函数模板时，编译器通过对实参类型的推演，将T确定为double类型，然后产生一份专门处理double类型的代码，对于字符类型也是如此。</li>
+</ul>
+<h2>函数模板的实例化</h2>
+<ul>
+<li>
+<p>用不同类型的参数使用函数模板时，称为函数模板的实例化。模板参数实例化分为：隐式实例化和显式实例化</p>
+</li>
+<li>
+<p>隐式实例化：让编译器根据实参推演模板参数的实际类型</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">T</span>&gt;
+T <span class="pl-en">Add</span>(<span class="pl-k">const</span> T&amp; left, <span class="pl-k">const</span> T&amp; right)
+{
+	<span class="pl-k">return</span> left + right;
+}
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">int</span> a1 = <span class="pl-c1">10</span>, a2 = <span class="pl-c1">20</span>;
+	<span class="pl-k">double</span> d1 = <span class="pl-c1">10.0</span>, d2 = <span class="pl-c1">20.0</span>;
+	<span class="pl-c1">Add</span>(a1, a2);
+	<span class="pl-c1">Add</span>(d1, d2);
+
+	<span class="pl-c1">Add</span>(a1, d1); <span class="pl-c"><span class="pl-c">//</span> 无法通过编译</span>
+	
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d8ae8c70c1b27fdfa003c1f703bcf3f034f90d5118ed5e9cf083a8c322df24f1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32396461333333393133656634366434396465333330663033303130393864352e706e67"><img src="https://camo.githubusercontent.com/d8ae8c70c1b27fdfa003c1f703bcf3f034f90d5118ed5e9cf083a8c322df24f1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32396461333333393133656634366434396465333330663033303130393864352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/29da333913ef46d49de330f0301098d5.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p><code class="notranslate">Add(a1, d1);</code>该语句不能通过编译，因为在编译期间，当编译器看到该实例化时，需要推演其实参类型通过实参a1将T推演为int，通过实参d1将T推演为double类型，但模板参数列表中只有一个T，编译器无法确定此处到底该将T确定为int 或者 double类型而报错</p>
+</li>
+<li>
+<p>注意：在模板中，编译器一般不会进行类型转换操作，因为一旦转化出问题，编译器就需要背黑锅</p>
+</li>
+</ul>
+<p>此时有两种处理方式：<strong>1. 用户自己来强制转化 2. 使用显式实例化</strong></p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-en">Add</span>(a1, (<span class="pl-k">int</span>)d1);</pre></div>
+<h2>显式实例化</h2>
+<ul>
+<li>显式实例化：在函数名后的&lt;&gt;中指定模板参数的实际类型</li>
+<li>就是直接在函数名的后面加上尖括号【&lt;类型&gt;】</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span> a = <span class="pl-c1">10</span>;
+<span class="pl-k">double</span> b = <span class="pl-c1">20.0</span>;
+ 
+<span class="pl-c"><span class="pl-c">//</span> 显式实例化</span>
+Add&lt;<span class="pl-k">int</span>&gt;(a, b);</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/dae552b63734b9467b0b8239a34553cc7e844d2c83823be486a121bdbc7aec3a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65303064333563336465336434343236616265386331333364383261656164632e706e67"><img src="https://camo.githubusercontent.com/dae552b63734b9467b0b8239a34553cc7e844d2c83823be486a121bdbc7aec3a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65303064333563336465336434343236616265386331333364383261656164632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/e00d35c3de3d4426abe8c133d82aeadc.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>如果类型不匹配，编译器会尝试进行隐式类型转换，如果无法转换成功编译器将会报错。</li>
+</ul>
+<h2>模板参数的匹配原则</h2>
+<ol>
+<li>一个非模板函数可以和一个同名的函数模板同时存在，而且该函数模板还可以被实例化为这个非模板函数。</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span> 专门处理int的加法函数</span>
+<span class="pl-k">int</span> <span class="pl-en">Add</span>(<span class="pl-k">int</span> left, <span class="pl-k">int</span> right)
+{
+	<span class="pl-k">return</span> left + right;
+}
+<span class="pl-c"><span class="pl-c">//</span> 通用加法函数</span>
+<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">T</span>&gt;
+T <span class="pl-en">Add</span>(T left, T right)
+{
+	<span class="pl-k">return</span> left + right;
+}
+<span class="pl-k">void</span> <span class="pl-en">Test</span>()
+{
+	<span class="pl-c1">Add</span>(<span class="pl-c1">1</span>, <span class="pl-c1">2</span>); <span class="pl-c"><span class="pl-c">//</span> 与非模板函数匹配，编译器不需要特化</span>
+	Add&lt;<span class="pl-k">int</span>&gt;(<span class="pl-c1">1</span>, <span class="pl-c1">2</span>); <span class="pl-c"><span class="pl-c">//</span> 调用编译器特化的Add版本</span>
+}</pre></div>
+<ol start="2">
+<li>对于非模板函数和同名函数模板，如果其他条件都相同，在调动时会优先调用非模板函数而不会从该模板产生出一个实例。如果模板可以产生一个具有更好匹配的函数， 那么将选择模板。</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span> 专门处理int的加法函数</span>
+<span class="pl-k">int</span> <span class="pl-en">Add</span>(<span class="pl-k">int</span> left, <span class="pl-k">int</span> right)
+{
+	<span class="pl-k">return</span> left + right;
+}
+<span class="pl-c"><span class="pl-c">//</span> 通用加法函数</span>
+<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">T</span>&gt;
+T <span class="pl-en">Add</span>(T left, T right)
+{
+	<span class="pl-k">return</span> left + right;
+}
+<span class="pl-k">void</span> <span class="pl-en">Test</span>()
+{
+	<span class="pl-c1">Add</span>(<span class="pl-c1">1</span>, <span class="pl-c1">2</span>); <span class="pl-c"><span class="pl-c">//</span> 与非函数模板类型完全匹配，不需要函数模板实例化</span>
+	<span class="pl-c1">Add</span>(<span class="pl-c1">1</span>, <span class="pl-c1">2.0</span>); <span class="pl-c"><span class="pl-c">//</span> 模板函数可以生成更加匹配的版本，编译器根据实参生成更加匹配的Add函数</span>
+}</pre></div>
+<ol start="3">
+<li>模板函数不允许自动类型转换，但普通函数可以进行自动类型转换。</li>
+</ol>
+<h2>类模板</h2>
+<ul>
+<li>定义</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">T1</span>, <span class="pl-k">class</span> <span class="pl-en">T2</span>, ..., <span class="pl-k">class</span> <span class="pl-en">Tn</span>&gt;
+<span class="pl-k">class</span> 类模板名
+{
+	<span class="pl-c"><span class="pl-c">//</span> 类内成员定义</span>
+};</pre></div>
+<ul>
+<li>使用</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">T</span>&gt;
+
+<span class="pl-k">class</span> <span class="pl-en">Vector</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">Vector</span>(<span class="pl-c1">size_t</span> capacity = <span class="pl-c1">10</span>)
+		: _pData(<span class="pl-k">new</span> T[capacity])
+		, _size(<span class="pl-c1">0</span>)
+		, _capacity(capacity)
+	{}
+	<span class="pl-c"><span class="pl-c">//</span> 使用析构函数演示：在类中声明，在类外定义。</span>
+	<span class="pl-en">~Vector</span>();
+	<span class="pl-k">void</span> <span class="pl-en">PushBack</span>(<span class="pl-k">const</span> T&amp; data)；
+		void PopBack()；
+		<span class="pl-c"><span class="pl-c">//</span> ...</span>
+		size_t Size() { <span class="pl-k">return</span> _size; }
+	T&amp; <span class="pl-k">operator</span>[](<span class="pl-c1">size_t</span> pos)
+	{
+		<span class="pl-c1">assert</span>(pos &lt; _size);
+		<span class="pl-k">return</span> _pData[pos];
+	}
+<span class="pl-k">private:</span>
+	T* _pData;
+	<span class="pl-c1">size_t</span> _size;
+	<span class="pl-c1">size_t</span> _capacity;
+};
+<span class="pl-c"><span class="pl-c">//</span> 注意：类模板中函数放在类外进行定义时，需要加模板参数列表</span>
+<span class="pl-k">template </span>&lt;<span class="pl-k">class</span> <span class="pl-en">T</span>&gt;
+Vector&lt;T&gt;::<span class="pl-en">~Vector</span>()
+{
+	<span class="pl-k">if</span> (_pData)
+		<span class="pl-k">delete[]</span> _pData;
+	_size = _capacity = <span class="pl-c1">0</span>;
+}</pre></div>
+<h4>类模板的实例化</h4>
+<ul>
+<li>类模板实例化与函数模板实例化不同，类模板实例化需要在类模板名字后跟&lt;&gt;，然后将实例化的类型放在&lt;&gt;中即可，类模板名字不是真正的类，而实例化的结果才是真正的类。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span> Vector类名，Vector&lt;int&gt;才是类型</span>
+Vector&lt;<span class="pl-k">int</span>&gt; s1;
+Vector&lt;<span class="pl-k">double</span>&gt; s2;</pre></div>
+<h2>非类型模板参数</h2>
+<ul>
+<li>模板参数可分为<strong>类型形参</strong>和<strong>非类型形参</strong>。</li>
+<li><strong>类型形参</strong>： 出现在模板参数列表中，跟在<code class="notranslate">class</code>或<code class="notranslate">typename</code>关键字之后的参数类型名称。</li>
+<li><strong>非类型形参</strong>： 用一个常量作为类（函数）模板的一个参数，在类（函数）模板中可将该参数当成常量来使用。</li>
+</ul>
+<p>例如：我们要实现一个<strong>静态数组的类</strong>，就需要用到非类型模板参数。</p>
+<ul>
+<li>这里的<code class="notranslate">array</code>和<code class="notranslate">std</code>标准库里面冲突了，所以我们需要用命名空间</li>
+</ul>
+<p><strong>非类型模板参数   类型  常量</strong></p>
+<ul>
+<li>这里编译器帮我实例化了两个类，编译器帮我做了，只需要自己手动控制一下需要实例化的数组大小，<strong>计算机擅长干重复的事情。</strong></li>
+<li>模板也<strong>支持缺省参数</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">namespace</span> <span class="pl-s1">lsl</span>
+{
+	<span class="pl-c">// 定义一个模板类型的静态数组</span>
+	<span class="pl-c">// 非类型模板参数   类型  常量</span>
+	<span class="pl-s1">template</span><span class="pl-c1">&lt;</span><span class="pl-s1">class</span> <span class="pl-c1">T</span>, <span class="pl-s1">size_t</span> <span class="pl-c1">N</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span><span class="pl-c1">&gt;</span>
+	<span class="pl-s1">class</span> <span class="pl-s1">array</span>
+	{
+	public:
+		<span class="pl-c1">T</span><span class="pl-c1">&amp;</span> <span class="pl-s1">operator</span>[<span class="pl-s1"></span>](<span class="pl-s1">size_t</span> <span class="pl-s1">index</span>) { <span class="pl-k">return</span> <span class="pl-s1">_array</span>[<span class="pl-s1">index</span>]; }
+		<span class="pl-k">const</span> <span class="pl-smi">T</span><span class="pl-c1">&amp;</span> <span class="pl-s1">operator</span>[](<span class="pl-smi">size_t</span> <span class="pl-s1">index</span>)<span class="pl-s1">const</span> { <span class="pl-k">return</span> <span class="pl-s1">_array</span>[<span class="pl-s1">index</span>]; }
+		<span class="pl-smi">size_t</span> <span class="pl-en">size</span>()<span class="pl-s1">const</span> { <span class="pl-k">return</span> <span class="pl-s1">_size</span>; }
+		<span class="pl-smi">bool</span> <span class="pl-en">empty</span>()<span class="pl-s1">const</span> { <span class="pl-k">return</span> <span class="pl-c1">0</span> <span class="pl-c1">==</span> <span class="pl-s1">_size</span>; }
+	private:
+		<span class="pl-c1">T</span> <span class="pl-s1">_array</span>[<span class="pl-c1">N</span>];
+		<span class="pl-smi">size_t</span> <span class="pl-s1">_size</span>;
+	};
+}
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>() 
+{
+	<span class="pl-c">// 默认为数组为10</span>
+	lsl::<span class="pl-s1">array</span><span class="pl-c1">&lt;</span><span class="pl-s1">int</span><span class="pl-c1">&gt;</span> <span class="pl-s1">arr1</span>;
+
+	<span class="pl-c">// 指定大小</span>
+	lsl::<span class="pl-s1">array</span><span class="pl-c1">&lt;</span><span class="pl-s1">int</span>, <span class="pl-c1">1000</span><span class="pl-c1">&gt;</span> <span class="pl-s1">arr2</span>;
+	
+	<span class="pl-s1">cout</span> &lt;&lt; <span class="pl-k">sizeof</span>(<span class="pl-smi">arr1</span>) &lt;&lt; <span class="pl-s1">endl</span>;
+	<span class="pl-s1">cout</span> &lt;&lt; <span class="pl-k">sizeof</span>(<span class="pl-smi">arr2</span>) &lt;&lt; <span class="pl-s1">endl</span>;
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>这样就可以要多少给多少</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/a5989f0e1673a5cfc39bf2629d372c44464210808bce1702cd6f345221c10f78/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38643731313465343936306434323530623661653062643161356331313835372e706e67"><img src="https://camo.githubusercontent.com/a5989f0e1673a5cfc39bf2629d372c44464210808bce1702cd6f345221c10f78/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38643731313465343936306434323530623661653062643161356331313835372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/8d7114e4960d4250b6ae0bd1a5c11857.png" style="max-width: 100%;"></a></p>
+<p><strong>注意：</strong></p>
+<ol>
+<li>浮点数、类对象以及字符串是不允许作为非类型模板参数的。</li>
+<li>非类型的模板参数必须在编译期就能确认结果。</li>
+</ol>
+<hr>
+<h3>C++11中的array</h3>
+<ul>
+<li>C++11中新增加了<code class="notranslate">array</code></li>
+<li>越界读写都会检查</li>
+<li>这里的数组是在<strong>栈上开辟的，开辟过大还会导致栈溢出</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span><span class="pl-s">&lt;array&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c">// C++11中的array</span>
+	std::<span class="pl-s1">array</span><span class="pl-c1">&lt;</span><span class="pl-s1">int</span>, <span class="pl-c1">10</span><span class="pl-c1">&gt;</span> <span class="pl-s1">arr1</span>; <span class="pl-c">// 默认不会初始化</span>
+	<span class="pl-c">// 普通数组</span>
+	<span class="pl-smi">int</span> <span class="pl-s1">arr2</span>[<span class="pl-c1">10</span>];<span class="pl-c">// 默认不会初始化</span>
+
+	<span class="pl-c">// C++11中的array越界都会检查</span>
+	<span class="pl-s1">arr1</span>[<span class="pl-c1">10</span>];
+	<span class="pl-s1">arr1</span>[<span class="pl-c1">15</span>] <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+
+	<span class="pl-c">// 普通数组越界写是抽查，读检查不出来</span>
+	<span class="pl-s1">arr2</span>[<span class="pl-c1">10</span>];
+	<span class="pl-s1">arr2</span>[<span class="pl-c1">15</span>] <span class="pl-c1">=</span> <span class="pl-c1">1</span>; <span class="pl-c">// 不会报错</span>
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>其实我们有更好的<code class="notranslate">vector</code></li>
+<li>既会检查，又不会溢出</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span><span class="pl-s">&lt;vector&gt;</span>
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	std::<span class="pl-s1">vector</span><span class="pl-c1">&lt;</span><span class="pl-s1">int</span><span class="pl-c1">&gt;</span> <span class="pl-en">a1</span>(<span class="pl-c1">10</span>, <span class="pl-c1">0</span>); <span class="pl-c">// 可以初始化</span>
+	<span class="pl-k">for</span> (auto <span class="pl-c1">&amp;</span><span class="pl-smi">e</span> : <span class="pl-s1">a1</span>) {
+		<span class="pl-s1">cout</span> &lt;&lt; <span class="pl-s1">e</span> &lt;&lt; " ";
+	}
+
+	<span class="pl-c">// 都会检查</span>
+	<span class="pl-s1">a1</span>[<span class="pl-c1">10</span>];
+	<span class="pl-s1">a1</span>[<span class="pl-c1">15</span>] <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+
+	<span class="pl-s1">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/04fee617c839ad033d9c4245b97e5ff36efe185555e6548c8c2115e64c16558d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32363865653831363833656634656339623935333039303062363363313164652e706e67"><img src="https://camo.githubusercontent.com/04fee617c839ad033d9c4245b97e5ff36efe185555e6548c8c2115e64c16558d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32363865653831363833656634656339623935333039303062363363313164652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/268ee81683ef4ec9b9530900b63c11de.png" style="max-width: 100%;"></a></p>
+<hr>
+<h3>按需实例化</h3>
+<ul>
+<li>我们这里明显是一个语法错误，但是编译器检查不出来</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3f9e08e8335e772de5672a04f888f4156993b8aa96ef008fb1e081f69d47334d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39386562663133623434336134306565383665373665303461396337363666612e706e67"><img src="https://camo.githubusercontent.com/3f9e08e8335e772de5672a04f888f4156993b8aa96ef008fb1e081f69d47334d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39386562663133623434336134306565383665373665303461396337363666612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/98ebf13b443a40ee86e76e04a9c766fa.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>这里是因为<strong>实例化这个类的时候，会按需实例化（调用哪个成员函数就实例化哪个）</strong></p>
+</li>
+<li>
+<p><code class="notranslate">根据模板实例化--&gt;半成品模板--&gt;实例化成具体的类/函数--&gt;语法编译</code></p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/8af34446138df1afd783015bd5f95013c71bf2d4012182c6e1d85e2076693780/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33386632306132396464636534383763616633386630306234323666613062612e706e67"><img src="https://camo.githubusercontent.com/8af34446138df1afd783015bd5f95013c71bf2d4012182c6e1d85e2076693780/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33386632306132396464636534383763616633386630306234323666613062612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/38f20a29ddce487caf38f00b426fa0ba.png" style="max-width: 100%;"></a></p>
+<hr>
+<h2>模板的特化</h2>
+<h3>概念</h3>
+<ul>
+<li>通常情况下，使用模板可以实现一些与类型无关的代码，但对于一些特殊类型的可能会得到一些错误的结果，需要特殊处理，<strong>比如：实现了一个专门用来进行小于比较的函数模板</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">// 函数模板 -- 参数匹配</span>
+<span class="pl-s1">template</span><span class="pl-c1">&lt;</span><span class="pl-s1">class</span> <span class="pl-c1">T</span><span class="pl-c1">&gt;</span>
+<span class="pl-s1">bool</span> <span class="pl-en">Less</span>(<span class="pl-c1">T</span> <span class="pl-s1">left</span>, <span class="pl-c1">T</span> <span class="pl-s1">right</span>)
+{
+	<span class="pl-k">return</span> <span class="pl-s1">left</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">right</span>;
+}
+
+<span class="pl-smi">class</span> <span class="pl-s1">Date</span>
+{
+public:
+	<span class="pl-s1">friend</span> <span class="pl-s1">ostream</span><span class="pl-c1">&amp;</span> <span class="pl-s1">operator</span>&lt;&lt;(<span class="pl-s1">ostream</span><span class="pl-c1">&amp;</span> <span class="pl-s1">_cout</span>, <span class="pl-s1">const</span> <span class="pl-s1">Date</span><span class="pl-c1">&amp;</span> <span class="pl-s1">d</span>);
+
+	<span class="pl-s1">Date</span>(<span class="pl-smi">int</span> <span class="pl-s1">year</span> <span class="pl-c1">=</span> <span class="pl-c1">1900</span>, <span class="pl-s1">int</span> <span class="pl-s1">month</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>, <span class="pl-s1">int</span> <span class="pl-s1">day</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>)
+		: <span class="pl-en">_year</span>(<span class="pl-s1">year</span>)
+		, <span class="pl-en">_month</span>(<span class="pl-smi">month</span>)
+		, <span class="pl-en">_day</span>(<span class="pl-smi">day</span>)
+	{}
+
+	<span class="pl-smi">bool</span> <span class="pl-s1">operator</span><span class="pl-c1">&lt;</span>(<span class="pl-k">const</span> <span class="pl-s1">Date</span><span class="pl-c1">&amp;</span> <span class="pl-s1">d</span>)<span class="pl-k">const</span>
+	{
+		<span class="pl-k">return</span> (<span class="pl-s1">_year</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">d</span>.<span class="pl-c1">_year</span>) <span class="pl-c1">||</span>
+			(<span class="pl-s1">_year</span> <span class="pl-c1">==</span> <span class="pl-s1">d</span>.<span class="pl-c1">_year</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">_month</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">d</span>.<span class="pl-c1">_month</span>) <span class="pl-c1">||</span> 
+			(<span class="pl-s1">_year</span> <span class="pl-c1">==</span> <span class="pl-s1">d</span>.<span class="pl-c1">_year</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">_month</span> <span class="pl-c1">==</span> <span class="pl-s1">d</span>.<span class="pl-c1">_month</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">_day</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">d</span>.<span class="pl-c1">_day</span>);
+	}
+
+	<span class="pl-smi">bool</span> <span class="pl-s1">operator</span><span class="pl-c1">&gt;</span>(<span class="pl-k">const</span> <span class="pl-s1">Date</span><span class="pl-c1">&amp;</span> <span class="pl-s1">d</span>)<span class="pl-k">const</span>
+	{
+		<span class="pl-k">return</span> (<span class="pl-s1">_year</span> <span class="pl-c1">&gt;</span> <span class="pl-s1">d</span>.<span class="pl-c1">_year</span>) <span class="pl-c1">||</span> 
+			(<span class="pl-s1">_year</span> <span class="pl-c1">==</span> <span class="pl-s1">d</span>.<span class="pl-c1">_year</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">_month</span> <span class="pl-c1">&gt;</span> <span class="pl-s1">d</span>.<span class="pl-c1">_month</span>) <span class="pl-c1">||</span> 
+			(<span class="pl-s1">_year</span> <span class="pl-c1">==</span> <span class="pl-s1">d</span>.<span class="pl-c1">_year</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">_month</span> <span class="pl-c1">==</span> <span class="pl-s1">d</span>.<span class="pl-c1">_month</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">_day</span> <span class="pl-c1">&gt;</span> <span class="pl-s1">d</span>.<span class="pl-c1">_day</span>);
+	}
+private:
+	<span class="pl-s1">int</span> <span class="pl-s1">_year</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">_month</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">_day</span>;
+};
+
+<span class="pl-s1">ostream</span><span class="pl-c1">&amp;</span> <span class="pl-s1">operator</span>&lt;&lt;(<span class="pl-s1">ostream</span><span class="pl-c1">&amp;</span> <span class="pl-s1">_cout</span>, <span class="pl-s1">const</span> <span class="pl-s1">Date</span><span class="pl-c1">&amp;</span> <span class="pl-s1">d</span>)
+{
+	<span class="pl-s1">_cout</span> &lt;&lt; <span class="pl-s1">d</span>.<span class="pl-c1">_year</span> &lt;&lt; <span class="pl-s">"-"</span> &lt;&lt; <span class="pl-s1">d</span>.<span class="pl-c1">_month</span> &lt;&lt; <span class="pl-s">"-"</span> &lt;&lt; <span class="pl-s1">d</span>.<span class="pl-c1">_day</span>;
+	<span class="pl-k">return</span> <span class="pl-s1">_cout</span>;
+}
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-s1">cout</span> &lt;&lt; <span class="pl-en">Less</span>(<span class="pl-c1">1</span>, <span class="pl-c1">2</span>) &lt;&lt; <span class="pl-s1">endl</span>; <span class="pl-c">// 可以比较，结果正确</span>
+
+	<span class="pl-smi">Date</span> <span class="pl-s1">d1</span>(<span class="pl-c1">2024</span>, <span class="pl-c1">4</span>, <span class="pl-c1">10</span>);
+	<span class="pl-smi">Date</span> <span class="pl-s1">d2</span>(<span class="pl-c1">2024</span>, <span class="pl-c1">4</span>, <span class="pl-c1">11</span>);
+	
+	<span class="pl-s1">cout</span> &lt;&lt; <span class="pl-en">Less</span>(<span class="pl-s1">d1</span>, <span class="pl-s1">d2</span>) &lt;&lt; <span class="pl-s1">endl</span>; <span class="pl-c">// 可以比较，结果正确</span>
+	<span class="pl-smi">Date</span><span class="pl-c1">*</span> <span class="pl-s1">p1</span> <span class="pl-c1">=</span> <span class="pl-c1">&amp;</span><span class="pl-s1">d1</span>;
+	<span class="pl-smi">Date</span><span class="pl-c1">*</span> <span class="pl-s1">p2</span> <span class="pl-c1">=</span> <span class="pl-c1">&amp;</span><span class="pl-s1">d2</span>;
+
+	<span class="pl-s1">cout</span> &lt;&lt; <span class="pl-en">Less</span>(<span class="pl-s1">p1</span>, <span class="pl-s1">p2</span>) &lt;&lt; <span class="pl-s1">endl</span>; <span class="pl-c">// 可以比较，结果错误</span>
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>
+<p>可以看到，Less绝对多数情况下都可以正常比较，但是在特殊场景下就得到错误的结果。上述示例中，<strong>p1指向的d1显然小于p2指向的d2对象</strong>，但是<strong>Less内部并没有比较p1和p2指向的对象内容，而比较的是p1和p2指针的<code class="notranslate">地址</code></strong> ，这就无法达到预期而错误。</p>
+</li>
+<li>
+<p>此时，就需要对模板进行<strong>特化</strong>。即：在原模板类的基础上，针对特殊类型所进行特殊化的实现方式。模板特化中分<strong>为函数模板特化与类模板特化</strong>。</p>
+</li>
+</ul>
+<hr>
+<h2>函数模板特化</h2>
+<blockquote>
+<p>函数模板的特化步骤：</p>
+</blockquote>
+<ol>
+<li>必须要先有一个基础的函数模板</li>
+<li>关键字template后面接一对空的尖括号&lt;&gt;</li>
+<li>函数名后跟一对尖括号，尖括号中指定需要特化的类型</li>
+<li>函数形参表: 必须要和模板函数的基础参数类型完全相同，如果不同编译器可能会报一些奇怪的错误。</li>
+</ol>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">// 函数模板 -- 参数匹配</span>
+<span class="pl-s1">template</span><span class="pl-c1">&lt;</span><span class="pl-s1">class</span> <span class="pl-c1">T</span><span class="pl-c1">&gt;</span>
+<span class="pl-s1">bool</span> <span class="pl-en">Less</span>(<span class="pl-c1">T</span> <span class="pl-s1">left</span>, <span class="pl-c1">T</span> <span class="pl-s1">right</span>)
+{
+	<span class="pl-k">return</span> <span class="pl-s1">left</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">right</span>;
+}
+
+<span class="pl-c">// 模板特化</span>
+<span class="pl-s1">template</span><span class="pl-c1">&lt;</span><span class="pl-c1">&gt;</span>
+<span class="pl-smi">bool</span> <span class="pl-s1">Less</span><span class="pl-c1">&lt;</span><span class="pl-s1">Date</span><span class="pl-c1">*</span><span class="pl-c1">&gt;</span>(<span class="pl-s1">Date</span><span class="pl-c1">*</span> <span class="pl-s1">left</span>, <span class="pl-s1">Date</span><span class="pl-c1">*</span> <span class="pl-s1">right</span>)
+{
+	<span class="pl-k">return</span> <span class="pl-c1">*</span><span class="pl-s1">left</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">*</span><span class="pl-s1">right</span>;
+}
+
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">Date</span> <span class="pl-s1">d1</span>(<span class="pl-c1">2022</span>, <span class="pl-c1">7</span>, <span class="pl-c1">7</span>);
+	<span class="pl-smi">Date</span> <span class="pl-s1">d2</span>(<span class="pl-c1">2022</span>, <span class="pl-c1">7</span>, <span class="pl-c1">8</span>);
+
+	<span class="pl-s1">cout</span> &lt;&lt; <span class="pl-en">Less</span>(<span class="pl-s1">d1</span>, <span class="pl-s1">d2</span>) &lt;&lt; <span class="pl-s1">endl</span>; <span class="pl-c">// 走的普通模板</span>
+	<span class="pl-smi">Date</span><span class="pl-c1">*</span> <span class="pl-s1">p1</span> <span class="pl-c1">=</span> <span class="pl-c1">&amp;</span><span class="pl-s1">d1</span>;
+	<span class="pl-smi">Date</span><span class="pl-c1">*</span> <span class="pl-s1">p2</span> <span class="pl-c1">=</span> <span class="pl-c1">&amp;</span><span class="pl-s1">d2</span>;
+
+	<span class="pl-s1">cout</span> &lt;&lt; <span class="pl-en">Less</span>(<span class="pl-s1">p1</span>, <span class="pl-s1">p2</span>) &lt;&lt; <span class="pl-s1">endl</span>; <span class="pl-c">// 走的是模板特化</span>
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0f6e0265ccad5c9540b8fd7641aaf0385a527ebf788dc5fdc9f4bb96f64d3db9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62653239663736666633663634353533613031633331323537643334666235322e706e67"><img src="https://camo.githubusercontent.com/0f6e0265ccad5c9540b8fd7641aaf0385a527ebf788dc5fdc9f4bb96f64d3db9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62653239663736666633663634353533613031633331323537643334666235322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/be29f76ff3f64553a01c31257d34fb52.png" style="max-width: 100%;"></a></p>
+<p><strong>注意</strong>：一般情况下如果函数模板遇到不能处理或者处理有误的类型，为了实现简单通常都是将该函数直接给出。</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">// 直接使用函数进行</span>
+<span class="pl-smi">bool</span> <span class="pl-en">Less</span>(<span class="pl-smi">Date</span><span class="pl-c1">*</span> <span class="pl-s1">left</span>, <span class="pl-smi">Date</span><span class="pl-c1">*</span> <span class="pl-s1">right</span>)
+{
+	<span class="pl-k">return</span> <span class="pl-c1">*</span><span class="pl-s1">left</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">*</span><span class="pl-s1">right</span>;
+}</pre></div>
+<ul>
+<li>有现成的直接走现成的了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6726ff457a9490cfa5204ff5126bfdf417a75fb55588b8b14f20389726089519/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31643832313930333261376134343135383962626632616161633139323730302e706e67"><img src="https://camo.githubusercontent.com/6726ff457a9490cfa5204ff5126bfdf417a75fb55588b8b14f20389726089519/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31643832313930333261376134343135383962626632616161633139323730302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/1d8219032a7a441589bbf2aaac192700.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>上面那种实现简单明了，<strong>本质是一种重载</strong>，代码的可读性高，容易书写，因为对于一些参数类型复杂的函数模板，特化时特别给出，因此<strong>函数模板不建议特化</strong>。</li>
+</ul>
+<hr>
+<h2>类模板特化</h2>
+<h3>全特化</h3>
+<blockquote>
+<p>全特化即是将模板参数列表中所有的参数都确定化。</p>
+</blockquote>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-s1">template</span><span class="pl-c1">&lt;</span><span class="pl-s1">class</span> <span class="pl-c1">T1</span>, <span class="pl-s1">class</span> <span class="pl-c1">T2</span><span class="pl-c1">&gt;</span>
+<span class="pl-s1">class</span> <span class="pl-s1">Data</span>
+{
+public:
+	<span class="pl-en">Data</span>() { 
+		<span class="pl-s1">cout</span> &lt;&lt; <span class="pl-s">"Data&lt;T1, T2&gt;"</span> &lt;&lt; <span class="pl-s1">endl</span>; 
+	}
+private:
+	<span class="pl-c1">T1</span> <span class="pl-s1">_d1</span>;
+	<span class="pl-smi">T2</span> <span class="pl-s1">_d2</span>;
+};
+
+<span class="pl-c">// 模板特化</span>
+<span class="pl-s1">template</span><span class="pl-c1">&lt;</span><span class="pl-c1">&gt;</span>
+<span class="pl-s1">class</span> <span class="pl-s1">Data</span><span class="pl-c1">&lt;</span><span class="pl-s1">int</span>, <span class="pl-s1">char</span><span class="pl-c1">&gt;</span> <span class="pl-c">// 全特化</span>
+{
+<span class="pl-s1">public</span>:
+	<span class="pl-en">Data</span>() { 
+		<span class="pl-s1">cout</span> &lt;&lt; <span class="pl-s">"Data&lt;int, char&gt;"</span> &lt;&lt; <span class="pl-s1">endl</span>; 
+	}
+private:
+	<span class="pl-s1">int</span> <span class="pl-s1">_d1</span>;
+	<span class="pl-smi">char</span> <span class="pl-s1">_d2</span>;
+};
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>() 
+{
+	<span class="pl-s1">Data</span><span class="pl-c1">&lt;</span><span class="pl-s1">int</span>, <span class="pl-s1">int</span><span class="pl-c1">&gt;</span> <span class="pl-s1">d1</span>; <span class="pl-c">// 匹配的是普通模板</span>
+	<span class="pl-s1">Data</span><span class="pl-c1">&lt;</span><span class="pl-s1">int</span>, <span class="pl-s1">char</span><span class="pl-c1">&gt;</span> <span class="pl-s1">d2</span>; <span class="pl-c">// 匹配的是模板特化</span>
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/8de941850d0dd0b3495e1aa22e56196ff6652e84a83aafeea2cc763958d040e6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38363161343064633935376434306532386131366338656466356339646563632e706e67"><img src="https://camo.githubusercontent.com/8de941850d0dd0b3495e1aa22e56196ff6652e84a83aafeea2cc763958d040e6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38363161343064633935376434306532386131366338656466356339646563632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/861a40dc957d40e28a16c8edf5c9decc.png" style="max-width: 100%;"></a></p>
+<h3>偏特化（半特化）</h3>
+<ul>
+<li>这里的半特化不是指的只一半</li>
+</ul>
+<p>偏特化：<strong>任何针对模版参数进一步进行条件限制设计的特化版本</strong>。比如对于以下模板类：</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-s1">template</span><span class="pl-c1">&lt;</span><span class="pl-s1">class</span> <span class="pl-c1">T1</span>, <span class="pl-s1">class</span> <span class="pl-c1">T2</span><span class="pl-c1">&gt;</span>
+<span class="pl-s1">class</span> <span class="pl-s1">Data</span>
+{
+public:
+	<span class="pl-en">Data</span>() {
+		<span class="pl-s1">cout</span> &lt;&lt; <span class="pl-s">"Data&lt;T1, T2&gt;"</span> &lt;&lt; <span class="pl-s1">endl</span>;
+	}
+private:
+	<span class="pl-c1">T1</span> <span class="pl-s1">_d1</span>;
+	<span class="pl-smi">T2</span> <span class="pl-s1">_d2</span>;
+};</pre></div>
+<ul>
+<li>偏特化有以下两种表现方式：</li>
+</ul>
+<h4>部分特化</h4>
+<ul>
+<li>将模板参数类表中的一部分参数特化。</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-s1">template</span> <span class="pl-c1">&lt;</span><span class="pl-s1">class</span> <span class="pl-c1">T1</span><span class="pl-c1">&gt;</span>
+<span class="pl-s1">class</span> <span class="pl-s1">Data</span><span class="pl-c1">&lt;</span><span class="pl-c1">T1</span>, <span class="pl-s1">int</span><span class="pl-c1">&gt;</span>
+{
+<span class="pl-s1">public</span>:
+	<span class="pl-en">Data</span>() { 
+		<span class="pl-s1">cout</span> &lt;&lt; <span class="pl-s">"Data&lt;T1, int&gt;"</span> &lt;&lt; <span class="pl-s1">endl</span>; 
+	}
+private:
+	<span class="pl-c1">T1</span> <span class="pl-s1">_d1</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">_d2</span>;
+};</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6ac523fbf4769d57ee3bea96b1d20a06d5bd78a597d413fd6bf59abe540899cb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63646130633930633235653034333234393830636564393266303633343638632e706e67"><img src="https://camo.githubusercontent.com/6ac523fbf4769d57ee3bea96b1d20a06d5bd78a597d413fd6bf59abe540899cb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63646130633930633235653034333234393830636564393266303633343638632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/cda0c90c25e04324980ced92f063468c.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>参数更进一步的限制</li>
+</ul>
+<p>偏特化并不仅仅是指特化部分参数，而是针对模板参数更进一步的条件限制所设计出来的一个特化版本。</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">// 普通模板</span>
+<span class="pl-s1">template</span><span class="pl-c1">&lt;</span><span class="pl-s1">class</span> <span class="pl-c1">T1</span>, <span class="pl-s1">class</span> <span class="pl-c1">T2</span><span class="pl-c1">&gt;</span>
+<span class="pl-s1">class</span> <span class="pl-s1">Data</span>
+{
+public:
+	<span class="pl-en">Data</span>() {
+		<span class="pl-s1">cout</span> &lt;&lt; <span class="pl-s">"Data&lt;T1, T2&gt;"</span> &lt;&lt; <span class="pl-s1">endl</span>;
+	}
+private:
+	<span class="pl-c1">T1</span> <span class="pl-s1">_d1</span>;
+	<span class="pl-smi">T2</span> <span class="pl-s1">_d2</span>;
+};
+
+<span class="pl-c">// 模板特化</span>
+<span class="pl-s1">template</span><span class="pl-c1">&lt;</span><span class="pl-c1">&gt;</span>
+<span class="pl-s1">class</span> <span class="pl-s1">Data</span><span class="pl-c1">&lt;</span><span class="pl-s1">int</span>, <span class="pl-s1">char</span><span class="pl-c1">&gt;</span>
+{
+<span class="pl-s1">public</span>:
+	<span class="pl-en">Data</span>() {
+		<span class="pl-s1">cout</span> &lt;&lt; <span class="pl-s">"Data&lt;int, char&gt;"</span> &lt;&lt; <span class="pl-s1">endl</span>;
+	}
+private:
+	<span class="pl-s1">int</span> <span class="pl-s1">_d1</span>;
+	<span class="pl-smi">char</span> <span class="pl-s1">_d2</span>;
+};
+
+<span class="pl-c">// 偏特化</span>
+<span class="pl-s1">template</span> <span class="pl-c1">&lt;</span><span class="pl-s1">class</span> <span class="pl-c1">T1</span><span class="pl-c1">&gt;</span>
+<span class="pl-s1">class</span> <span class="pl-s1">Data</span><span class="pl-c1">&lt;</span><span class="pl-c1">T1</span>, <span class="pl-s1">int</span><span class="pl-c1">&gt;</span>
+{
+<span class="pl-s1">public</span>:
+	<span class="pl-en">Data</span>() { 
+		<span class="pl-s1">cout</span> &lt;&lt; <span class="pl-s">"Data&lt;T1, int&gt;"</span> &lt;&lt; <span class="pl-s1">endl</span>; 
+	}
+private:
+	<span class="pl-c1">T1</span> <span class="pl-s1">_d1</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">_d2</span>;
+};
+
+<span class="pl-c">//两个参数偏特化为指针类型</span>
+<span class="pl-s1">template</span> <span class="pl-c1">&lt;</span><span class="pl-s1">typename</span> <span class="pl-c1">T1</span>, <span class="pl-s1">typename</span> <span class="pl-c1">T2</span><span class="pl-c1">&gt;</span>
+<span class="pl-s1">class</span> <span class="pl-s1">Data</span> <span class="pl-c1">&lt;</span><span class="pl-c1">T1</span><span class="pl-c1">*</span>, <span class="pl-c1">T2</span><span class="pl-c1">*</span><span class="pl-c1">&gt;</span>
+{
+<span class="pl-s1">public</span>:
+	<span class="pl-en">Data</span>() { <span class="pl-s1">cout</span> &lt;&lt; <span class="pl-s">"Data&lt;T1*, T2*&gt;"</span> &lt;&lt; <span class="pl-s1">endl</span>; }
+private:
+	<span class="pl-c1">T1</span> <span class="pl-s1">_d1</span>;
+	<span class="pl-smi">T2</span> <span class="pl-s1">_d2</span>;
+};
+
+<span class="pl-c">//两个参数偏特化为引用类型</span>
+<span class="pl-s1">template</span> <span class="pl-c1">&lt;</span><span class="pl-s1">typename</span> <span class="pl-c1">T1</span>, <span class="pl-s1">typename</span> <span class="pl-c1">T2</span><span class="pl-c1">&gt;</span>
+<span class="pl-s1">class</span> <span class="pl-s1">Data</span> <span class="pl-c1">&lt;</span><span class="pl-c1">T1</span><span class="pl-c1">&amp;</span>, <span class="pl-c1">T2</span><span class="pl-c1">&amp;</span><span class="pl-c1">&gt;</span>
+{
+<span class="pl-s1">public</span>:
+	<span class="pl-en">Data</span>(<span class="pl-s1">const</span> <span class="pl-c1">T1</span><span class="pl-c1">&amp;</span> <span class="pl-s1">d1</span>, <span class="pl-s1">const</span> <span class="pl-c1">T2</span><span class="pl-c1">&amp;</span> <span class="pl-s1">d2</span>)
+		: <span class="pl-en">_d1</span>(<span class="pl-s1">d1</span>)
+		, <span class="pl-en">_d2</span>(<span class="pl-s1">d2</span>)
+	{
+		<span class="pl-s1">cout</span> &lt;&lt; <span class="pl-s">"Data&lt;T1&amp;, T2&amp;&gt;"</span> &lt;&lt; <span class="pl-s1">endl</span>;
+	}
+private:
+	<span class="pl-s1">const</span> <span class="pl-c1">T1</span><span class="pl-c1">&amp;</span> <span class="pl-s1">_d1</span>;
+	<span class="pl-k">const</span> <span class="pl-smi">T2</span><span class="pl-c1">&amp;</span> <span class="pl-s1">_d2</span>;
+};
+
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+
+	<span class="pl-s1">Data</span><span class="pl-c1">&lt;</span><span class="pl-s1">double</span>, <span class="pl-s1">int</span><span class="pl-c1">&gt;</span> <span class="pl-s1">d1</span>; <span class="pl-c">// 调用特化的int版本</span>
+	<span class="pl-s1">Data</span><span class="pl-c1">&lt;</span><span class="pl-s1">int</span>, <span class="pl-s1">double</span><span class="pl-c1">&gt;</span> <span class="pl-s1">d2</span>; <span class="pl-c">// 调用基础的模板</span>
+	<span class="pl-s1">Data</span><span class="pl-c1">&lt;</span><span class="pl-s1">int</span>, <span class="pl-s1">char</span><span class="pl-c1">&gt;</span> <span class="pl-s1">d3</span>; <span class="pl-c">// 调用全特化版本</span>
+	<span class="pl-s1">Data</span><span class="pl-c1">&lt;</span><span class="pl-s1">int</span><span class="pl-c1">*</span>, <span class="pl-s1">int</span><span class="pl-c1">*</span><span class="pl-c1">&gt;</span> <span class="pl-s1">d4</span>; <span class="pl-c">// 调用特化的指针版本</span>
+	<span class="pl-s1">Data</span><span class="pl-c1">&lt;</span><span class="pl-s1">int</span><span class="pl-c1">&amp;</span><span class="pl-s1"></span>, <span class="pl-s1">int</span><span class="pl-c1">&amp;</span><span class="pl-c1">&gt;</span> <span class="pl-en">d5</span>(<span class="pl-c1">1</span>, <span class="pl-c1">2</span>); <span class="pl-c">// 调用特化的指针版本</span>
+	
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h2>类模板特化应用示例</h2>
+<p>有如下专门用来按照小于比较的类模板Less：</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;vector&gt;</span>
+<span class="pl-k">#include</span> <span class="pl-s">&lt;algorithm&gt;</span>
+<span class="pl-s1">template</span><span class="pl-c1">&lt;</span><span class="pl-s1">class</span> <span class="pl-c1">T</span><span class="pl-c1">&gt;</span>
+<span class="pl-s1">struct</span> <span class="pl-s1">Less</span>
+{
+	<span class="pl-smi">bool</span> <span class="pl-en">operator</span>()(<span class="pl-k">const</span> <span class="pl-smi">T</span><span class="pl-c1">&amp;</span> <span class="pl-s1">x</span>, <span class="pl-k">const</span> <span class="pl-smi">T</span><span class="pl-c1">&amp;</span> <span class="pl-s1">y</span>) <span class="pl-s1">const</span>
+	{
+		<span class="pl-k">return</span> <span class="pl-s1">x</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">y</span>;
+	}
+};
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">Date</span> <span class="pl-s1">d1</span>(<span class="pl-c1">2022</span>, <span class="pl-c1">7</span>, <span class="pl-c1">7</span>);
+	<span class="pl-smi">Date</span> <span class="pl-s1">d2</span>(<span class="pl-c1">2022</span>, <span class="pl-c1">7</span>, <span class="pl-c1">6</span>);
+	<span class="pl-smi">Date</span> <span class="pl-s1">d3</span>(<span class="pl-c1">2022</span>, <span class="pl-c1">7</span>, <span class="pl-c1">8</span>);
+	<span class="pl-s1">vector</span><span class="pl-c1">&lt;</span><span class="pl-s1">Date</span><span class="pl-c1">&gt;</span> <span class="pl-s1">v1</span>;
+	<span class="pl-s1">v1</span>.<span class="pl-en">push_back</span>(<span class="pl-s1">d1</span>);
+	<span class="pl-s1">v1</span>.<span class="pl-en">push_back</span>(<span class="pl-s1">d2</span>);
+	<span class="pl-s1">v1</span>.<span class="pl-en">push_back</span>(<span class="pl-s1">d3</span>);
+
+	<span class="pl-c">// 可以直接排序，结果是日期升序</span>
+	<span class="pl-en">sort</span>(<span class="pl-s1">v1</span>.<span class="pl-en">begin</span>(), <span class="pl-s1">v1</span>.<span class="pl-en">end</span>(), <span class="pl-s1">Less</span><span class="pl-c1">&lt;</span><span class="pl-s1">Date</span><span class="pl-c1">&gt;</span>(<span class="pl-s1"></span>));
+
+	<span class="pl-s1">vector</span><span class="pl-c1">&lt;</span><span class="pl-s1">Date</span><span class="pl-c1">*</span><span class="pl-c1">&gt;</span> <span class="pl-s1">v2</span>;
+	<span class="pl-s1">v2</span>.<span class="pl-en">push_back</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">d1</span>);
+	<span class="pl-s1">v2</span>.<span class="pl-en">push_back</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">d2</span>);
+	<span class="pl-s1">v2</span>.<span class="pl-en">push_back</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">d3</span>);
+
+	<span class="pl-c">// 可以直接排序，结果错误日期还不是升序，而v2中放的地址是升序</span>
+	<span class="pl-c">// 此处需要在排序过程中，让sort比较v2中存放地址指向的日期对象</span>
+	<span class="pl-c">// 但是走Less模板，sort在排序时实际比较的是v2中指针的地址，因此无法达到预期</span>
+	<span class="pl-en">sort</span>(<span class="pl-s1">v2</span>.<span class="pl-en">begin</span>(), <span class="pl-s1">v2</span>.<span class="pl-en">end</span>(), <span class="pl-s1">Less</span><span class="pl-c1">&lt;</span><span class="pl-s1">Date</span><span class="pl-c1">*</span><span class="pl-c1">&gt;</span>());
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>
+<p>通过观察上述程序的结果发现，对于日期对象可以直接排序，并且结果是正确的。但是如果待排序元素是指针，结果就不一定正确。因为：sort最终按照Less模板中方式比较，所以只会比较指针，而不是比较指针指向空间中内容，此时可以使用类版本特化来处理上述问题：</p>
+</li>
+<li>
+<p>特化之后，在运行上述代码，就可以得到正确的结果</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">// 对Less类模板按照指针方式特化</span>
+<span class="pl-s1">template</span><span class="pl-c1">&lt;</span><span class="pl-c1">&gt;</span>
+<span class="pl-k">struct</span> <span class="pl-smi">Less</span><span class="pl-c1">&lt;</span><span class="pl-s1">Date</span><span class="pl-c1">*</span><span class="pl-c1">&gt;</span>
+{
+	<span class="pl-smi">bool</span> <span class="pl-en">operator</span>()(<span class="pl-k">const</span> <span class="pl-smi">Date</span><span class="pl-c1">*</span> <span class="pl-s1">x</span>, <span class="pl-k">const</span> <span class="pl-smi">Date</span><span class="pl-c1">*</span> <span class="pl-s1">y</span>) <span class="pl-s1">const</span> 
+	{
+		<span class="pl-k">return</span> <span class="pl-c1">*</span><span class="pl-s1">x</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">*</span><span class="pl-s1">y</span>;
+	}
+};</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/adf8d9bf8bffe5ed6c0b8b1e315f5e5f8d3d60fc514057a3868873612a430d57/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64623538613563346137643134303730623032393532663939356161306331652e706e67"><img src="https://camo.githubusercontent.com/adf8d9bf8bffe5ed6c0b8b1e315f5e5f8d3d60fc514057a3868873612a430d57/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64623538613563346137643134303730623032393532663939356161306331652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/db58a5c4a7d14070b02952f995aa0c1e.png" style="max-width: 100%;"></a></p>
+<hr>
+<h2>模板分离编译</h2>
+<h4>什么是分离编译</h4>
+<ul>
+<li>一个程序（项目）由若干个源文件共同实现，而每个源文件单独编译生成目标文件，最后将所有目标文件链接起来形成单一的可执行文件的过程称为分离编译模式。</li>
+</ul>
+<h4>模板的分离编译</h4>
+<ul>
+<li>有以下场景，模板的声明与定义分离开，在头文件中进行声明，源文件中完成定义：</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/60234fb5dbb35976e34d9b33842b0e4c3c2c354d4ae03fc827d3f17187dfe442/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30363563336666313235346634616232383661646666626239306163666139312e706e67"><img src="https://camo.githubusercontent.com/60234fb5dbb35976e34d9b33842b0e4c3c2c354d4ae03fc827d3f17187dfe442/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30363563336666313235346634616232383661646666626239306163666139312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/065c3ff1254f4ab286adffbb90acfa91.png" style="max-width: 100%;"></a></p>
+<p><strong>分析：</strong></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/74c0e14fd324bc883dff26c9ae28a51d19a8bb33b93da98169ada5abcfad4968/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37663966343563323462393934393863393334623864373339393731373238642e706e67"><img src="https://camo.githubusercontent.com/74c0e14fd324bc883dff26c9ae28a51d19a8bb33b93da98169ada5abcfad4968/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37663966343563323462393934393863393334623864373339393731373238642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/7f9f45c24b99498c934b8d739971728d.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以将实现放到<code class="notranslate">xxx.h</code>，就不会链接错误了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f56f3c901fbbab2a1ddc0417920742f0f07d64b3e0842855d04629af4679bb7e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38333531376430663636643334623265623665343065353436376235646538382e706e67"><img src="https://camo.githubusercontent.com/f56f3c901fbbab2a1ddc0417920742f0f07d64b3e0842855d04629af4679bb7e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38333531376430663636643334623265623665343065353436376235646538382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/83517d0f66d34b2eb6e40e5467b5de88.png" style="max-width: 100%;"></a></p>
+<hr>
+<h3>解决方法</h3>
+<ol>
+<li>将声明和定义放到一个文件 <code class="notranslate">xxx.hpp</code> 里面或者<code class="notranslate">xxx.h</code>其实也是可以的。推荐使用这种。</li>
+<li>模板定义的位置显式实例化。这种方法<strong>不实用，不推荐使用</strong>。</li>
+</ol>
+<hr>
+<h2>模板总结</h2>
+<p><strong>【优点】</strong></p>
+<ol>
+<li>模板复用了代码，节省资源，更快的迭代开发，C++的标准模板库(STL)因此而产生</li>
+<li>增强了代码的灵活性</li>
+</ol>
+<p><strong>【缺陷】</strong></p>
+<ol>
+<li>模板会导致代码膨胀问题，也会导致编译时间变长</li>
+<li>出现模板编译错误时，错误信息非常凌乱，不易定位错误</li>
+</ol></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

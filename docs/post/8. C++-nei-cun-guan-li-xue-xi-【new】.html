@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="
+## 一、C/C++内存分布
+
+- 在学习之前我们先看一下下面这些代码都分布在哪里？
+
+```cpp
+int globalVar = 1;
+static int staticGlobalVar = 1;
+void Test()
+{
+	static int staticVar = 1;
+	int localVar = 1;
+	int num1[10] = { 1, 2, 3, 4 };
+	char char2[] = 'abcd';
+	const char* pChar3 = 'abcd';
+	int* ptr1 = (int*)malloc(sizeof(int) * 4);
+	int* ptr2 = (int*)calloc(4, sizeof(int));
+	int* ptr3 = (int*)realloc(ptr2, sizeof(int) * 4);
+	free(ptr1);
+	free(ptr3);
+}
+```
+1. 选择题：
+>选项: A.栈 B.堆 C.数据段(静态区) D.代码段(常量区)
+
+- globalVar在哪里？__C__ 
+- staticGlobalVar在哪里？__C__
+- staticVar在哪里？__C__ 
+- localVar在哪里？__A__
+- num1 在哪里？__A__ 
+
+---
+
+- char2在哪里？__A__ 
+	- 字符串在常量区，char2会栈上开辟一个数组，然后将常量区的字符串拷贝过到栈上，所以结果是A，上题的num1是直接在栈上开辟的，所以相似
+- *char2在哪里？__A__
+	- 这个上题说过了不讲了
+- pChar3在哪里？__A__ 
+	- const修饰的是代表常变量，不代表就在常量区，pChar3是栈上的一个变量，指向了常量区的字符串
+- *pChar3在哪里？__D__
+	- 常量区的字符串，解引用就是找的常量区	
+- ptr1在哪里？__A__
+	- 也是栈上的一块变量 
+- *ptr1在哪里？__B__
+	- 开辟的空间在堆上
+
+---
+
+2. 填空题：
+
+   - sizeof(num1) = __40__;
+
+
+   - sizeof(char2) = __5__; 
+   - strlen(char2) = __4__;
+   - sizeof(pChar3) = __4/8__;
+   - strlen(pChar3) = __4__;
+   - sizeof(ptr1) = __4/8__;
+
+3. sizeof 和 strlen 区别？
+   - 这里已经在学习C语言章节里说了就不再细说了
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/222e5053152349748dfbb7221935ef4e.png)
+
+
+
+
+【说明】
+1. 栈又叫堆栈--非静态局部变量/函数参数/返回值等等，栈是向下增长的。">
+<meta property="og:title" content="8. C++内存管理学习【new】">
+<meta property="og:description" content="
+## 一、C/C++内存分布
+
+- 在学习之前我们先看一下下面这些代码都分布在哪里？
+
+```cpp
+int globalVar = 1;
+static int staticGlobalVar = 1;
+void Test()
+{
+	static int staticVar = 1;
+	int localVar = 1;
+	int num1[10] = { 1, 2, 3, 4 };
+	char char2[] = 'abcd';
+	const char* pChar3 = 'abcd';
+	int* ptr1 = (int*)malloc(sizeof(int) * 4);
+	int* ptr2 = (int*)calloc(4, sizeof(int));
+	int* ptr3 = (int*)realloc(ptr2, sizeof(int) * 4);
+	free(ptr1);
+	free(ptr3);
+}
+```
+1. 选择题：
+>选项: A.栈 B.堆 C.数据段(静态区) D.代码段(常量区)
+
+- globalVar在哪里？__C__ 
+- staticGlobalVar在哪里？__C__
+- staticVar在哪里？__C__ 
+- localVar在哪里？__A__
+- num1 在哪里？__A__ 
+
+---
+
+- char2在哪里？__A__ 
+	- 字符串在常量区，char2会栈上开辟一个数组，然后将常量区的字符串拷贝过到栈上，所以结果是A，上题的num1是直接在栈上开辟的，所以相似
+- *char2在哪里？__A__
+	- 这个上题说过了不讲了
+- pChar3在哪里？__A__ 
+	- const修饰的是代表常变量，不代表就在常量区，pChar3是栈上的一个变量，指向了常量区的字符串
+- *pChar3在哪里？__D__
+	- 常量区的字符串，解引用就是找的常量区	
+- ptr1在哪里？__A__
+	- 也是栈上的一块变量 
+- *ptr1在哪里？__B__
+	- 开辟的空间在堆上
+
+---
+
+2. 填空题：
+
+   - sizeof(num1) = __40__;
+
+
+   - sizeof(char2) = __5__; 
+   - strlen(char2) = __4__;
+   - sizeof(pChar3) = __4/8__;
+   - strlen(pChar3) = __4__;
+   - sizeof(ptr1) = __4/8__;
+
+3. sizeof 和 strlen 区别？
+   - 这里已经在学习C语言章节里说了就不再细说了
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/222e5053152349748dfbb7221935ef4e.png)
+
+
+
+
+【说明】
+1. 栈又叫堆栈--非静态局部变量/函数参数/返回值等等，栈是向下增长的。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/8.%20C%2B%2B-nei-cun-guan-li-xue-xi-%E3%80%90new%E3%80%91.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>8. C++内存管理学习【new】</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">8. C++内存管理学习【new】</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/10" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>一、C/C++内存分布</h2>
+<ul>
+<li>在学习之前我们先看一下下面这些代码都分布在哪里？</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span> globalVar = <span class="pl-c1">1</span>;
+<span class="pl-k">static</span> <span class="pl-k">int</span> staticGlobalVar = <span class="pl-c1">1</span>;
+<span class="pl-k">void</span> <span class="pl-en">Test</span>()
+{
+	<span class="pl-k">static</span> <span class="pl-k">int</span> staticVar = <span class="pl-c1">1</span>;
+	<span class="pl-k">int</span> localVar = <span class="pl-c1">1</span>;
+	<span class="pl-k">int</span> num1[<span class="pl-c1">10</span>] = { <span class="pl-c1">1</span>, <span class="pl-c1">2</span>, <span class="pl-c1">3</span>, <span class="pl-c1">4</span> };
+	<span class="pl-k">char</span> char2[] = <span class="pl-s"><span class="pl-pds">"</span>abcd<span class="pl-pds">"</span></span>;
+	<span class="pl-k">const</span> <span class="pl-k">char</span>* pChar3 = <span class="pl-s"><span class="pl-pds">"</span>abcd<span class="pl-pds">"</span></span>;
+	<span class="pl-k">int</span>* ptr1 = (<span class="pl-k">int</span>*)<span class="pl-c1">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-k">int</span>) * <span class="pl-c1">4</span>);
+	<span class="pl-k">int</span>* ptr2 = (<span class="pl-k">int</span>*)<span class="pl-c1">calloc</span>(<span class="pl-c1">4</span>, <span class="pl-k">sizeof</span>(<span class="pl-k">int</span>));
+	<span class="pl-k">int</span>* ptr3 = (<span class="pl-k">int</span>*)<span class="pl-c1">realloc</span>(ptr2, <span class="pl-k">sizeof</span>(<span class="pl-k">int</span>) * <span class="pl-c1">4</span>);
+	<span class="pl-c1">free</span>(ptr1);
+	<span class="pl-c1">free</span>(ptr3);
+}</pre></div>
+<ol>
+<li>选择题：</li>
+</ol>
+<blockquote>
+<p>选项: A.栈 B.堆 C.数据段(静态区) D.代码段(常量区)</p>
+</blockquote>
+<ul>
+<li>globalVar在哪里？<strong>C</strong></li>
+<li>staticGlobalVar在哪里？<strong>C</strong></li>
+<li>staticVar在哪里？<strong>C</strong></li>
+<li>localVar在哪里？<strong>A</strong></li>
+<li>num1 在哪里？<strong>A</strong></li>
+</ul>
+<hr>
+<ul>
+<li>char2在哪里？<strong>A</strong>
+<ul>
+<li>字符串在常量区，char2会栈上开辟一个数组，然后将常量区的字符串拷贝过到栈上，所以结果是A，上题的num1是直接在栈上开辟的，所以相似</li>
+</ul>
+</li>
+<li>*char2在哪里？<strong>A</strong>
+<ul>
+<li>这个上题说过了不讲了</li>
+</ul>
+</li>
+<li>pChar3在哪里？<strong>A</strong>
+<ul>
+<li>const修饰的是代表常变量，不代表就在常量区，pChar3是栈上的一个变量，指向了常量区的字符串</li>
+</ul>
+</li>
+<li>*pChar3在哪里？<strong>D</strong>
+<ul>
+<li>常量区的字符串，解引用就是找的常量区</li>
+</ul>
+</li>
+<li>ptr1在哪里？<strong>A</strong>
+<ul>
+<li>也是栈上的一块变量</li>
+</ul>
+</li>
+<li>*ptr1在哪里？<strong>B</strong>
+<ul>
+<li>开辟的空间在堆上</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ol start="2">
+<li>
+<p>填空题：</p>
+<ul>
+<li>
+<p>sizeof(num1) = <strong>40</strong>;</p>
+</li>
+<li>
+<p>sizeof(char2) = <strong>5</strong>;</p>
+</li>
+<li>
+<p>strlen(char2) = <strong>4</strong>;</p>
+</li>
+<li>
+<p>sizeof(pChar3) = <strong>4/8</strong>;</p>
+</li>
+<li>
+<p>strlen(pChar3) = <strong>4</strong>;</p>
+</li>
+<li>
+<p>sizeof(ptr1) = <strong>4/8</strong>;</p>
+</li>
+</ul>
+</li>
+<li>
+<p>sizeof 和 strlen 区别？</p>
+<ul>
+<li>这里已经在学习C语言章节里说了就不再细说了</li>
+</ul>
+</li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/bd5538b336117b1b564ec66ac1fb8119814db8f7649e960ae8a4132ae2e9394c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32323265353035333135323334393734386466626237323231393335656634652e706e67"><img src="https://camo.githubusercontent.com/bd5538b336117b1b564ec66ac1fb8119814db8f7649e960ae8a4132ae2e9394c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32323265353035333135323334393734386466626237323231393335656634652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/222e5053152349748dfbb7221935ef4e.png" style="max-width: 100%;"></a></p>
+<p>【说明】</p>
+<ol>
+<li>栈又叫堆栈--非静态局部变量/函数参数/返回值等等，栈是向下增长的。</li>
+<li>内存映射段是高效的I/O映射方式，用于装载一个共享的动态内存库。用户可使用系统接口创建共享共享内存，做进程间通信。</li>
+<li>堆用于程序运行时动态内存分配，堆是可以上增长的。</li>
+<li>数据段--存储全局数据和静态数据。</li>
+<li>代码段--可执行的代码/只读常量。</li>
+</ol>
+<hr>
+<ul>
+<li>
+<p>为什么要分这些区域</p>
+<ul>
+<li>为了<strong>方便管理</strong>，程序中有各种不同的数据</li>
+</ul>
+</li>
+<li>
+<p>这些区域哪个区域是我们需要重点关注的？</p>
+<ul>
+<li>堆【堆留给我们自己自主控制的】</li>
+</ul>
+</li>
+</ul>
+<h2>二、C语言中动态内存管理方式：malloc/calloc/realloc/free</h2>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">Test</span>()
+{
+	<span class="pl-k">int</span>* p1 = (<span class="pl-k">int</span>*)<span class="pl-c1">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-k">int</span>));
+	<span class="pl-c1">free</span>(p1);
+	<span class="pl-c"><span class="pl-c">//</span> 1.malloc/calloc/realloc的区别是什么？</span>
+	<span class="pl-k">int</span>* p2 = (<span class="pl-k">int</span>*)<span class="pl-c1">calloc</span>(<span class="pl-c1">4</span>, <span class="pl-k">sizeof</span>(<span class="pl-k">int</span>));
+	<span class="pl-k">int</span>* p3 = (<span class="pl-k">int</span>*)<span class="pl-c1">realloc</span>(p2, <span class="pl-k">sizeof</span>(<span class="pl-k">int</span>) * <span class="pl-c1">10</span>);
+	<span class="pl-c"><span class="pl-c">//</span> 这里需要free(p2)吗？</span>
+	<span class="pl-c1">free</span>(p3);
+}</pre></div>
+<p>【面试题】</p>
+<ul>
+<li>
+<p>malloc/calloc/realloc的区别？</p>
+<ul>
+<li>malloc是在内存中直接开辟一块空间</li>
+<li>calloc会在开辟的时候进行初始化【初始化成0】</li>
+<li>realloc可以进行已开辟的空间进行扩容</li>
+</ul>
+</li>
+</ul>
+<h2>三、C++内存管理方式</h2>
+<ul>
+<li>C语言内存管理方式在C++中可以继续使用，但有些地方就无能为力，而且使用起来比较麻烦，因此C++又提出了自己的内存管理方式：通过new和delete操作符进行动态内存管理。</li>
+</ul>
+<h3>3.1 new/delete操作内置类型</h3>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">Test</span>()
+{
+	<span class="pl-c"><span class="pl-c">//</span> 动态申请一个int类型的空间</span>
+	<span class="pl-k">int</span>* ptr4 = <span class="pl-k">new</span> <span class="pl-k">int</span>;
+	<span class="pl-c"><span class="pl-c">//</span> 动态申请一个int类型的空间并初始化为10</span>
+	<span class="pl-k">int</span>* ptr5 = <span class="pl-k">new</span> <span class="pl-c1">int</span>(<span class="pl-c1">10</span>);
+	<span class="pl-c"><span class="pl-c">//</span> 动态申请10个int类型的空间</span>
+	<span class="pl-k">int</span>* ptr6 = <span class="pl-k">new</span> <span class="pl-k">int</span>[<span class="pl-c1">3</span>];
+	<span class="pl-k">delete</span> ptr4;
+	<span class="pl-k">delete</span> ptr5;
+	<span class="pl-k">delete[]</span> ptr6;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0eb28bf31a1ae24c9f2de0f153bcacb1fd6713e13a9db620fddc76ce77aa3ad1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66333434303336633035613034353738613835333634396331643865643232332e706e67"><img src="https://camo.githubusercontent.com/0eb28bf31a1ae24c9f2de0f153bcacb1fd6713e13a9db620fddc76ce77aa3ad1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66333434303336633035613034353738613835333634396331643865643232332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/f344036c05a04578a853649c1d8ed223.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9e5fd144543bfcd3275af467b00ea597857b6e28a3a93d0fc080469ea467d12c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65396131303136313335323134613937383139376564386261663139613431652e706e67"><img src="https://camo.githubusercontent.com/9e5fd144543bfcd3275af467b00ea597857b6e28a3a93d0fc080469ea467d12c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65396131303136313335323134613937383139376564386261663139613431652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/e9a1016135214a978197ed8baf19a41e.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>new10个对象进行初始化，后面跟上大括号进行即可</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span>* p2 = <span class="pl-k">new</span> <span class="pl-k">int</span>[<span class="pl-c1">10</span>] {<span class="pl-c1">1</span>, <span class="pl-c1">2</span>, <span class="pl-c1">3</span>, <span class="pl-c1">4</span>, <span class="pl-c1">5</span>, <span class="pl-c1">6</span>, <span class="pl-c1">7</span>};	</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/be856e661815b1b477becbf9d5a332e0f6475974b4a94c5599600583d6bbb38f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39613664393764653030616334393335616430373365303630393937326133612e706e67"><img src="https://camo.githubusercontent.com/be856e661815b1b477becbf9d5a332e0f6475974b4a94c5599600583d6bbb38f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39613664393764653030616334393335616430373365303630393937326133612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/9a6d97de00ac4935ad073e0609972a3a.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这里要一定注意，要匹配着使用</li>
+</ul>
+<p>注意：<strong>申请和释放单个元素的空间，使用new和delete操作符，申请和释放连续的空间，使用new[]和delete[]，注意：匹配起来使用。</strong></p>
+<h3>3.2 new和delete操作自定义类型</h3>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">A</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">A</span>(<span class="pl-k">int</span> a = <span class="pl-c1">0</span>)
+		: _a(a)
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>A():<span class="pl-pds">"</span></span> &lt;&lt; <span class="pl-c1">this</span> &lt;&lt; endl;
+	}
+	<span class="pl-en">~A</span>()
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>~A():<span class="pl-pds">"</span></span> &lt;&lt; <span class="pl-c1">this</span> &lt;&lt; endl;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _a;
+};
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c"><span class="pl-c">//</span> new/delete 和 malloc/free最大区别是 new/delete对于【自定义类型】除了开空间还会调用构造函数和析构函数</span>
+	A* p1 = (A*)<span class="pl-c1">malloc</span>(<span class="pl-k">sizeof</span>(A));
+	A* p2 = <span class="pl-k">new</span> <span class="pl-c1">A</span>(<span class="pl-c1">1</span>);
+	<span class="pl-c1">free</span>(p1);
+	<span class="pl-k">delete</span> p2;
+	
+	<span class="pl-c"><span class="pl-c">//</span> 内置类型是几乎是一样的</span>
+	<span class="pl-k">int</span>* p3 = (<span class="pl-k">int</span>*)<span class="pl-c1">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-k">int</span>)); <span class="pl-c"><span class="pl-c">//</span> C</span>
+	<span class="pl-k">int</span>* p4 = <span class="pl-k">new</span> <span class="pl-k">int</span>;
+	<span class="pl-c1">free</span>(p3);
+	<span class="pl-k">delete</span> p4;
+	
+	A* p5 = (A*)<span class="pl-c1">malloc</span>(<span class="pl-k">sizeof</span>(A) * <span class="pl-c1">10</span>);
+	A* p6 = <span class="pl-k">new</span> A[<span class="pl-c1">10</span>];
+	<span class="pl-c1">free</span>(p5);
+	<span class="pl-k">delete[]</span> p6;
+	
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f4d9a6e3b7a7a48290213e9364e75d5c2753380ccc4073ef24397c20b0031d9e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39653330393761616163353934393738383937363261333330653366633430322e706e67"><img src="https://camo.githubusercontent.com/f4d9a6e3b7a7a48290213e9364e75d5c2753380ccc4073ef24397c20b0031d9e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39653330393761616163353934393738383937363261333330653366633430322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/9e3097aaac59497889762a330e3fc402.png" style="max-width: 100%;"></a></p>
+<p>小结：<strong>在申请自定义类型的空间时，new会调用构造函数，delete会调用析构函数，而malloc与free不会。</strong></p>
+<ul>
+<li>在我们使用malloc的时候，都需要手动检查，而new失败了就会抛异常</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">struct</span> <span class="pl-en">ListNode</span>
+{
+	ListNode* _next;
+	<span class="pl-k">int</span> _val;
+
+	<span class="pl-en">ListNode</span>(<span class="pl-k">int</span> val)
+		:_next(<span class="pl-c1">nullptr</span>)
+		, _val(val)
+	{}
+};
+
+<span class="pl-c"><span class="pl-c">//</span> 创建的不带哨兵位</span>
+ListNode* <span class="pl-en">CreateList</span>(<span class="pl-k">int</span> n)
+{
+	ListNode <span class="pl-smi">head</span>(-<span class="pl-c1">1</span>);  <span class="pl-c"><span class="pl-c">//</span> 哨兵位</span>
+
+	ListNode* tail = &amp;head;
+	<span class="pl-k">int</span> val;
+	<span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>请依次输入%d个节点的值：&gt;<span class="pl-pds">"</span></span>, n);
+	<span class="pl-k">for</span> (<span class="pl-k">int</span> i = <span class="pl-c1">0</span>; i &lt; n; i++)
+	{
+		cin &gt;&gt; val;
+		tail-&gt;<span class="pl-smi">_next</span> = <span class="pl-k">new</span> <span class="pl-c1">ListNode</span>(val);
+		tail = tail-&gt;<span class="pl-smi">_next</span>;
+	}
+
+	<span class="pl-k">return</span> head.<span class="pl-smi">_next</span>;
+}
+
+<span class="pl-k">void</span> <span class="pl-en">func</span>()
+{
+	<span class="pl-k">int</span> n = <span class="pl-c1">1</span>;
+	<span class="pl-k">while</span> (<span class="pl-c1">1</span>)
+	{
+		<span class="pl-k">int</span>* p = <span class="pl-k">new</span> <span class="pl-k">int</span>[<span class="pl-c1">1024</span> * <span class="pl-c1">1024</span> * <span class="pl-c1">100</span>];
+
+		cout &lt;&lt; n &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>-&gt;<span class="pl-pds">"</span></span> &lt;&lt; p &lt;&lt; endl;
+		++n;
+	}
+}
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c"><span class="pl-c">//</span> 1、用法上，变简洁了</span>
+	<span class="pl-k">int</span>* p0 = (<span class="pl-k">int</span>*)<span class="pl-c1">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-k">int</span>));
+	<span class="pl-k">int</span>* p1 = <span class="pl-k">new</span> <span class="pl-k">int</span>;
+	<span class="pl-k">int</span>* p2 = <span class="pl-k">new</span> <span class="pl-k">int</span>[<span class="pl-c1">10</span>]; <span class="pl-c"><span class="pl-c">//</span> new 10个int对象</span>
+
+	<span class="pl-c"><span class="pl-c">//</span> 2、可以控制初始化</span>
+	<span class="pl-k">int</span>* p3 = <span class="pl-k">new</span> <span class="pl-c1">int</span>(<span class="pl-c1">10</span>); <span class="pl-c"><span class="pl-c">//</span> new 1个int对象,初始化成10</span>
+	<span class="pl-k">int</span>* p4 = <span class="pl-k">new</span> <span class="pl-k">int</span>[<span class="pl-c1">10</span>] { <span class="pl-c1">1</span>, <span class="pl-c1">2</span>, <span class="pl-c1">3</span>, <span class="pl-c1">4</span>, <span class="pl-c1">5</span> };
+
+	<span class="pl-c"><span class="pl-c">//</span> 3、自定义类型，开空间+构造函数</span>
+	<span class="pl-c"><span class="pl-c">//</span> 4、new失败了以后抛异常，不需要手动检查</span>
+	ListNode* node1 = <span class="pl-k">new</span> <span class="pl-c1">ListNode</span>(<span class="pl-c1">1</span>);
+	ListNode* node2 = <span class="pl-k">new</span> <span class="pl-c1">ListNode</span>(<span class="pl-c1">2</span>);
+	ListNode* node3 = <span class="pl-k">new</span> <span class="pl-c1">ListNode</span>(<span class="pl-c1">3</span>);
+	<span class="pl-c"><span class="pl-c">//</span>...</span>
+	ListNode* list1 = <span class="pl-c1">CreateList</span>(<span class="pl-c1">5</span>);
+
+	<span class="pl-k">delete</span> p3;
+	<span class="pl-k">delete[]</span> p4;
+	<span class="pl-k">delete</span> p1;
+	<span class="pl-k">delete[]</span> p2;
+
+	<span class="pl-c"><span class="pl-c">//</span> 抛异常</span>
+	<span class="pl-k">try</span>
+	{
+		<span class="pl-c1">func</span>();
+	}
+	<span class="pl-k">catch</span> (<span class="pl-k">const</span> <span class="pl-c1">exception</span>&amp; e)
+	{
+		cout &lt;&lt; e.<span class="pl-c1">what</span>() &lt;&lt; endl;
+	}
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h2>四、operator new与operator delete函数</h2>
+<ul>
+<li>
+<p>new和delete是用户进行动态内存申请和释放的操作符，<strong>operator new 和operator delete</strong>是系统提供的全局函数，new在底层调用<strong>operator new</strong>全局函数来申请空间，delete在底层通过<strong>operator delete</strong>全局函数来释放空间。</p>
+</li>
+<li>
+<p>operator new：该函数实际通过malloc来申请空间，<strong>当malloc申请空间成功时直接返回</strong>；<strong>申请空间失败，尝试执行空间不足应对措施</strong>，如果改应对措施用户设置了，则继续申请，否则抛异常。</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span>* __CRTDECL <span class="pl-k">operator</span> <span class="pl-k">new</span>(<span class="pl-c1">size_t</span> size) _THROW1(_STD bad_alloc)
+{
+	<span class="pl-c"><span class="pl-c">//</span> try to allocate size bytes</span>
+	<span class="pl-k">void</span>* p;
+	<span class="pl-k">while</span> ((p = <span class="pl-c1">malloc</span>(size)) == <span class="pl-c1">0</span>)
+		<span class="pl-k">if</span> (<span class="pl-c1">_callnewh</span>(size) == <span class="pl-c1">0</span>)
+		{
+			<span class="pl-c"><span class="pl-c">//</span> report no memory</span>
+			<span class="pl-c"><span class="pl-c">//</span> 如果申请内存失败了，这里会抛出bad_alloc 类型异常</span>
+			<span class="pl-k">static</span> <span class="pl-k">const</span> std::bad_alloc nomem;
+			<span class="pl-c1">_RAISE</span>(nomem);
+		}
+	<span class="pl-k">return</span> (p);
+}
+<span class="pl-c"><span class="pl-c">/*</span></span>
+<span class="pl-c">operator delete: 该函数最终是通过free来释放空间的</span>
+<span class="pl-c"><span class="pl-c">*/</span></span>
+<span class="pl-k">void</span> <span class="pl-k">operator</span> <span class="pl-k">delete</span>(<span class="pl-k">void</span>* pUserData)
+{
+	_CrtMemBlockHeader* pHead;
+	<span class="pl-c1">RTCCALLBACK</span>(_RTC_Free_hook, (pUserData, <span class="pl-c1">0</span>));
+	<span class="pl-k">if</span> (pUserData == <span class="pl-c1">NULL</span>)
+		<span class="pl-k">return</span>;
+	<span class="pl-c1">_mlock</span>(_HEAP_LOCK); <span class="pl-c"><span class="pl-c">/*</span> block other threads <span class="pl-c">*/</span></span>
+	__TRY
+		<span class="pl-c"><span class="pl-c">/*</span> get a pointer to memory block header <span class="pl-c">*/</span></span>
+		pHead = <span class="pl-c1">pHdr</span>(pUserData);
+	<span class="pl-c"><span class="pl-c">/*</span> verify block type <span class="pl-c">*/</span></span>
+	<span class="pl-c1">_ASSERTE</span>(<span class="pl-c1">_BLOCK_TYPE_IS_VALID</span>(pHead-&gt;<span class="pl-smi">nBlockUse</span>));
+	<span class="pl-c1">_free_dbg</span>(pUserData, pHead-&gt;<span class="pl-smi">nBlockUse</span>);
+	__FINALLY
+		<span class="pl-c1">_munlock</span>(_HEAP_LOCK); <span class="pl-c"><span class="pl-c">/*</span> release other threads <span class="pl-c">*/</span></span>
+	__END_TRY_FINALLY
+		<span class="pl-k">return</span>;
+}
+<span class="pl-c"><span class="pl-c">/*</span></span>
+<span class="pl-c">free的实现</span>
+<span class="pl-c"><span class="pl-c">*/</span></span>
+#<span class="pl-k">define</span> <span class="pl-en">free</span>(<span class="pl-v">p</span>) _free_dbg(p, _NORMAL_BLOCK)</pre></div>
+<ul>
+<li>
+<p>通过上述两个全局函数的实现知道，<strong>operator new 实际也是通过malloc来申请空间</strong>，如果malloc申请空间成功就直接返回，否则执行用户提供的空间不足应对措施，如果用户提供该措施就继续申请，否则就抛异常。<strong>operator delete 最终是通过free来释放空间的。</strong></p>
+</li>
+<li>
+<p>我们通过汇编也可以看到，这些最后还是分别调用<code class="notranslate">malloc</code>和<code class="notranslate">free</code>的</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9ae500ebfad5ecd2f6b9d308cf949216761182948664ed9f92caf836fbcc4161/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61656662656535656463393134653264626633366534353638303966356565322e706e67"><img src="https://camo.githubusercontent.com/9ae500ebfad5ecd2f6b9d308cf949216761182948664ed9f92caf836fbcc4161/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61656662656535656463393134653264626633366534353638303966356565322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/aefbee5edc914e2dbf36e456809f5ee2.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2e9fbcc2fb6b654a5c2ee5cb96bd7a25319631581caa5a00b02ac14d52e46a4c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31313837303766353666323434653830623063373836326365616665626437662e706e67"><img src="https://camo.githubusercontent.com/2e9fbcc2fb6b654a5c2ee5cb96bd7a25319631581caa5a00b02ac14d52e46a4c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31313837303766353666323434653830623063373836326365616665626437662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/118707f56f244e80b0c7862ceafebd7f.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4f818b982a2876b382f241b460e6f49a5a6d805098910a77fe62d212ee7629ab/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31653138313032353438343934363264623334373535666537386531666137622e706e67"><img src="https://camo.githubusercontent.com/4f818b982a2876b382f241b460e6f49a5a6d805098910a77fe62d212ee7629ab/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31653138313032353438343934363264623334373535666537386531666137622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/1e1810254849462db34755fe78e1fa7b.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>operator new对malloc 的封装，失败抛异常实现new</li>
+<li>operator delete对free的封装</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Stack</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">Stack</span>()
+	{
+		_a = (<span class="pl-k">int</span>*)<span class="pl-c1">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-k">int</span>) * <span class="pl-c1">4</span>);
+		_top = <span class="pl-c1">0</span>;
+		_capacity = <span class="pl-c1">4</span>;
+	}
+
+	<span class="pl-en">~Stack</span>()
+	{
+		<span class="pl-c1">free</span>(_a);
+		_top = _capacity = <span class="pl-c1">0</span>;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span>* _a;
+	<span class="pl-k">int</span> _top;
+	<span class="pl-k">int</span> _capacity;
+};
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	A* ptr1 = <span class="pl-k">new</span> A;  <span class="pl-c"><span class="pl-c">//</span> operator new + 1次构造</span>
+	A* ptr2 = <span class="pl-k">new</span> A[<span class="pl-c1">10</span>]; <span class="pl-c"><span class="pl-c">//</span> operator new[] + 10次构造</span>
+
+	<span class="pl-k">delete</span> ptr1; <span class="pl-c"><span class="pl-c">//</span> 1次析构 + operator delete</span>
+	<span class="pl-k">delete[]</span> ptr2; <span class="pl-c"><span class="pl-c">//</span> 10次析构 + operator delete[]</span>
+
+	Stack* pst = <span class="pl-k">new</span> Stack;
+	<span class="pl-k">delete</span> pst;
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li><strong>delete是先析构再释放这块空间</strong></li>
+</ul>
+<hr>
+<ul>
+<li>那么在使用自定义类型进行new的时候会在头部多开4个字节存放个数，这就是为什么在delete的时候要匹配着加<code class="notranslate">[]</code>，还需要调用析构函数，这样就知道要释放多少了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c5300add4e3b39e742f170091643a141acfb841147143e5c24fe124eeba08df9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34353734353664393462316434383635383266653530663837316431636161662e706e67"><img src="https://camo.githubusercontent.com/c5300add4e3b39e742f170091643a141acfb841147143e5c24fe124eeba08df9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34353734353664393462316434383635383266653530663837316431636161662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/457456d94b1d486582fe50f871d1caaf.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>通过内存监视窗口再看一下</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/8567096618d978ac6374d34576af4358c125e3055adf1afc4e24304883bac0ff/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35326566616234303634323834303430383733613562343534663132633063632e706e67"><img src="https://camo.githubusercontent.com/8567096618d978ac6374d34576af4358c125e3055adf1afc4e24304883bac0ff/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35326566616234303634323834303430383733613562343534663132633063632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/52efab4064284040873a5b454f12c0cc.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>如果不显示写这个析构函数，就也不会多开4个字节，编译器会自动生成一个，编译器觉得什么也不干，自动就会优化掉了，也就不会调用了</p>
+</li>
+<li>
+<p>而内置类型就不会多开，内置类型就不用调用析构函数</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5fbfbdaed8e436421adfce51298b0394eec9c12d41f77fc4ce460b6d0294021d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65656662316533366239373434663838393962306564326538373332383530362e706e67"><img src="https://camo.githubusercontent.com/5fbfbdaed8e436421adfce51298b0394eec9c12d41f77fc4ce460b6d0294021d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65656662316533366239373434663838393962306564326538373332383530362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/eefb1e36b9744f8899b0ed2e87328506.png" style="max-width: 100%;"></a></p>
+<h2>五、new和delete的实现原理</h2>
+<h3>5.1 内置类型</h3>
+<ul>
+<li>如果申请的是内置类型的空间，new和malloc，delete和free基本类似，不同的地方是：new/delete申请和释放的是单个元素的空间，new[]和delete[]申请的是连续空间，而且new在申请空间失败时会抛异常，malloc会返回NULL。</li>
+</ul>
+<h3>5.2 自定义类型</h3>
+<p><strong>new的原理</strong></p>
+<ol>
+<li>调用operator new函数申请空间</li>
+<li>在申请的空间上执行构造函数，完成对象的构造</li>
+</ol>
+<p><strong>delete的原理</strong></p>
+<ol>
+<li>在空间上执行析构函数，完成对象中资源的清理工作</li>
+<li>调用operator delete函数释放对象的空间</li>
+</ol>
+<p><strong>new T[N]的原理</strong></p>
+<ol>
+<li>调用operator new[]函数，在operator new[]中实际调用operator new函数完成N个对象空间的申请</li>
+<li>在申请的空间上执行N次构造函数</li>
+</ol>
+<p><strong>delete[]的原理</strong></p>
+<ol>
+<li>在释放的对象空间上执行N次析构函数，完成N个对象中资源的清理</li>
+<li>调用operator delete[]释放空间，实际在operator delete[]中调用operator delete来释放空间</li>
+</ol>
+<h2>六、定位new表达式(placement-new)</h2>
+<ul>
+<li><strong>定位new表达式是在已分配的原始内存空间中调用构造函数初始化一个对象。</strong></li>
+</ul>
+<p>使用格式：</p>
+<ul>
+<li>new (place_address) type或者new (place_address) type(initializer-list)</li>
+<li>place_address必须是一个指针，initializer-list是类型的初始化列表</li>
+</ul>
+<p>使用场景：</p>
+<ul>
+<li>定位new表达式在实际中一般是<strong>配合内存池</strong>使用。因为内存池分配出的内存没有初始化，所以如果是自定义类型的对象，需要使用new的定义表达式进行显示调构造函数进行初始化。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">A</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">A</span>(<span class="pl-k">int</span> a = <span class="pl-c1">0</span>)
+		: _a(a)
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>A():<span class="pl-pds">"</span></span> &lt;&lt; <span class="pl-c1">this</span> &lt;&lt; endl;
+	}
+	<span class="pl-en">~A</span>()
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>~A():<span class="pl-pds">"</span></span> &lt;&lt; <span class="pl-c1">this</span> &lt;&lt; endl;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _a;
+};
+
+<span class="pl-c"><span class="pl-c">//</span> 定位new/replacement new</span>
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c"><span class="pl-c">//</span> p1现在指向的只不过是与A对象相同大小的一段空间，还不能算是一个对象，因为构造函数没有执行</span>
+	A* p1 = (A*)<span class="pl-c1">malloc</span>(<span class="pl-k">sizeof</span>(A));
+	<span class="pl-k">new</span>(p1)A; <span class="pl-c"><span class="pl-c">//</span> 注意：如果A类的构造函数有参数时，此处需要传参</span>
+	p1-&gt;<span class="pl-en">~A</span>();
+	<span class="pl-c1">free</span>(p1);
+	A* p2 = (A*)<span class="pl-k">operator</span> <span class="pl-smi">new</span>(<span class="pl-k">sizeof</span>(A));
+	<span class="pl-k">new</span>(p2)<span class="pl-c1">A</span>(<span class="pl-c1">10</span>);
+	p2-&gt;<span class="pl-en">~A</span>();
+	<span class="pl-k">operator</span> <span class="pl-smi">delete</span>(p2);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h2>七、常见面试题</h2>
+<ul>
+<li><strong>malloc/free和new/delete的区别</strong></li>
+</ul>
+<p><strong>共同点</strong>是：</p>
+<ul>
+<li>都是从堆上申请空间，并且需要用户手动释放。</li>
+</ul>
+<p><strong>不同点</strong>是：</p>
+<ol>
+<li>malloc和free是函数，new和delete是操作符</li>
+<li>malloc申请的空间不会初始化，new可以初始化</li>
+<li>malloc申请空间时，需要手动计算空间大小并传递，new只需在其后跟上空间的类型即可，如果是多个对象，[]中指定对象个数即可</li>
+<li>malloc的返回值为void*, 在使用时必须强转，new不需要，因为new后跟的是空间的类型</li>
+<li>malloc申请空间失败时，返回的是NULL，因此使用时必须判空，new不需要，但是new需要捕获异常</li>
+<li>申请自定义类型对象时，malloc/free只会开辟空间，不会调用构造函数与析构函数，而new在申请空间后会调用构造函数完成对象的初始化，delete在释放空间前会调用析构函数完成空间中资源的清理</li>
+</ol>
+<h3>7.1 内存泄漏</h3>
+<ul>
+<li>什么是内存泄漏，内存泄漏的危害</li>
+<li>什么是内存泄漏：内存泄漏指因为疏忽或错误造成程序未能释放已经不再使用的内存的情况。内存泄漏并不是指内存在物理上的消失，而是应用程序分配某段内存后，因为设计错误，失去了对该段内存的控制，因而造成了内存的浪费。</li>
+<li>内存泄漏的危害：长期运行的程序出现内存泄漏，影响很大，如操作系统、后台服务等等，出现内存泄漏会导致响应越来越慢，最终卡死。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">MemoryLeaks</span>()
+{
+	<span class="pl-c"><span class="pl-c">//</span> 1.内存申请了忘记释放</span>
+	<span class="pl-k">int</span>* p1 = (<span class="pl-k">int</span>*)<span class="pl-c1">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-k">int</span>));
+	<span class="pl-k">int</span>* p2 = <span class="pl-k">new</span> <span class="pl-k">int</span>;
+	<span class="pl-c"><span class="pl-c">//</span> 2.异常安全问题</span>
+	<span class="pl-k">int</span>* p3 = <span class="pl-k">new</span> <span class="pl-k">int</span>[<span class="pl-c1">10</span>];
+	<span class="pl-c1">Func</span>(); <span class="pl-c"><span class="pl-c">//</span> 这里Func函数抛异常导致 delete[] p3未执行，p3没被释放.</span>
+	<span class="pl-k">delete[]</span> p3;
+}</pre></div>
+<h3>7.2 内存泄漏分类</h3>
+<p>C/C++程序中一般我们关心两种方面的内存泄漏：</p>
+<ul>
+<li>堆内存泄漏(Heap leak)
+<ul>
+<li>堆内存指的是程序执行中依据须要分配通过malloc / calloc / realloc / new等从堆中分配的一块内存，用完后必须通过调用相应的 free或者delete 删掉。假设程序的设计错误导致这部分内存没有被释放，那么以后这部分空间将无法再被使用，就会产生Heap Leak。</li>
+</ul>
+</li>
+<li>系统资源泄漏
+<ul>
+<li>指程序使用系统分配的资源，比方套接字、文件描述符、管道等没有使用对应的函数释放掉，导致系统资源的浪费，严重可导致系统效能减少，系统执行不稳定。</li>
+</ul>
+</li>
+</ul>
+<h3>7.3 如何检测内存泄漏</h3>
+<ul>
+<li>在vs下，可以使用windows操作系统提供的_CrtDumpMemoryLeaks() 函数进行简单检测，该函数只报出了大概泄漏了多少个字节，没有其他更准确的位置信息</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">int</span>* p = <span class="pl-k">new</span> <span class="pl-k">int</span>[<span class="pl-c1">10</span>];
+	<span class="pl-c"><span class="pl-c">//</span> 将该函数放在main函数之后，每次程序退出的时候就会检测是否存在内存泄漏</span>
+	<span class="pl-c1">_CrtDumpMemoryLeaks</span>();
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}
+<span class="pl-c"><span class="pl-c">//</span>//////////////////////////////////////////////////////</span>
+<span class="pl-c"><span class="pl-c">//</span> 程序退出后，在输出窗口中可以检测到泄漏了多少字节，但是没有具体的位置</span>
+Detected memory leaks!
+Dumping objects -&gt;
+{<span class="pl-c1">79</span>} <span class="pl-c1">normal</span> block at <span class="pl-c1">0x00EC5FB8</span>, <span class="pl-c1">40</span> bytes <span class="pl-k">long</span>.
+Data: &lt; &gt; CD CD CD CD CD CD CD CD CD CD CD CD CD CD CD CD
+Object dump complete.</pre></div>
+<ul>
+<li>因此写代码时一定要小心，尤其是动态内存操作时，一定要记着释放。但有些情况下总是防不胜防，简单的可以采用上述方式快速定位下。如果工程比较大，内存泄漏位置比较多，不太好查时一般都是借助第三方内存泄漏检测工具处理的。</li>
+</ul>
+<h3>7.4 如何避免内存泄漏</h3>
+<ol>
+<li>工程前期良好的设计规范，养成良好的编码规范，申请的内存空间记着匹配的去释放。ps：这个理想状态。但是如果碰上异常时，就算注意释放了，还是可能会出问题。需要下一条智能指针来管理才有保证。</li>
+<li>采用RAII思想或者智能指针来管理资源。</li>
+<li>有些公司内部规范使用内部实现的私有内存管理库。这套库自带内存泄漏检测的功能选项。</li>
+<li>出问题了使用内存泄漏工具检测。ps：不过很多工具都不够靠谱，或者收费昂贵。</li>
+</ol>
+<p><strong>总结一下：</strong></p>
+<p>内存泄漏非常常见，解决方案分为两种：<br>
+1、事前预防型。如智能指针等。<br>
+2、事后查错型。如泄漏检测工具。</p></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

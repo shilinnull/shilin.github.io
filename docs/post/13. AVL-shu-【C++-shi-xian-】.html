@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## AVL树的概念
+
+
+- AVL树（英语：AVL tree）是计算机科学中最早被发明的自平衡二叉查找树。">
+<meta property="og:title" content="13. AVL树【C++实现】">
+<meta property="og:description" content="## AVL树的概念
+
+
+- AVL树（英语：AVL tree）是计算机科学中最早被发明的自平衡二叉查找树。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/13.%20AVL-shu-%E3%80%90C%2B%2B-shi-xian-%E3%80%91.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>13. AVL树【C++实现】</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">13. AVL树【C++实现】</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/15" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>AVL树的概念</h2>
+<ul>
+<li>
+<p>AVL树（英语：AVL tree）是计算机科学中最早被发明的自平衡二叉查找树。在AVL树中，任一节点对应的两棵子树的最大高度差为1，因此它也被称为高度平衡树。查找、插入和删除在平均和最坏情况下的时间复杂度都是 𝑂(log𝑛)。增加和删除元素的操作则可能需要借由一次或多次树旋转，以实现树的重新平衡。AVL树得名于它的发明者格奥尔吉·阿杰尔松-韦利斯基和叶夫根尼·兰迪斯，他们在1962年的论文《An algorithm for the organization of information》中公开了这一数据结构。</p>
+</li>
+<li>
+<p>节点的平衡因子是它的左子树的高度减去它的右子树的高度（有时相反）。带有平衡因子1、0或 -1的节点被认为是平衡的。带有平衡因子 -2或2的节点被认为是不平衡的，并需要重新平衡这个树。平衡因子可以直接存储在每个节点中，或从可能存储在节点中的子树高度计算出来。</p>
+</li>
+</ul>
+<p>一棵AVL树或者是空树，或者是具有以下性质的二叉搜索树：</p>
+<ul>
+<li><strong>它的左右子树都是AVL树</strong></li>
+<li><strong>左右子树高度之差(简称平衡因子)的绝对值不超过1(-1/0/1)</strong></li>
+</ul>
+<p>如：</p>
+<ul>
+<li><strong>平衡因子 = 右子树-左子树</strong></li>
+</ul>
+<p>非AVL树：<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/54cba791a69712c5a3b233c729e9afee163e6390d3081d84c51677e46cc79d94/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35363136323634653330663534633661393732333633643066613032336165382e706e67"><img src="https://camo.githubusercontent.com/54cba791a69712c5a3b233c729e9afee163e6390d3081d84c51677e46cc79d94/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35363136323634653330663534633661393732333633643066613032336165382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/5616264e30f54c6a972363d0fa023ae8.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>在平衡之后：</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/37c546174d4c973f104a8f12c35bc9fff5f501b24347acd775bc40df2febb466/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38306262653938363362316234656163393062386135326333626533663735652e706e67"><img src="https://camo.githubusercontent.com/37c546174d4c973f104a8f12c35bc9fff5f501b24347acd775bc40df2febb466/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38306262653938363362316234656163393062386135326333626533663735652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/80bbe9863b1b4eac90b8a52c3be3f75e.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/72e5ae2e689c6b0e03860ae607313a547d7dc1818b9fc6ee99e16633f7f26e97/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38663234633261333330333134393138613662326635333565653866376661322e676966"><img src="https://camo.githubusercontent.com/72e5ae2e689c6b0e03860ae607313a547d7dc1818b9fc6ee99e16633f7f26e97/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38663234633261333330333134393138613662326635333565653866376661322e676966" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/8f24c2a330314918a6b2f535ee8f7fa2.gif" style="max-width: 100%;"></a></p>
+<ul>
+<li>如果一棵二叉搜索树是高度平衡的，它就是AVL树。如果它有n个结点，其高度可保持在<br>
+$O(log_2 n)$，搜索时间复杂度O($log_2 n$)。</li>
+</ul>
+<h2>AVL树节点的定义</h2>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">V</span>&gt;
+<span class="pl-k">struct</span> <span class="pl-en">AVLTreeNode</span>
+{
+	AVLTreeNode&lt;K, V&gt;* _left;
+	AVLTreeNode&lt;K, V&gt;* _right;
+	AVLTreeNode&lt;K, V&gt;* _parnet;
+	pair&lt;K, V&gt; _kv;
+
+	<span class="pl-k">int</span> _bf; <span class="pl-c"><span class="pl-c">//</span> balance factor</span>
+
+	<span class="pl-en">AVLTreeNode</span>(<span class="pl-k">const</span> pair&lt;K, V&gt; kv)
+		:_left(<span class="pl-c1">nullptr</span>)
+		, _right(<span class="pl-c1">nullptr</span>)
+		, _parnet(<span class="pl-c1">nullptr</span>)
+		, kv(kv)
+		<span class="pl-en">_bf</span>(<span class="pl-c1">0</span>)
+	{}
+};</pre></div>
+<h2>AVL树的插入</h2>
+<p>AVL树就是在二叉搜索树的基础上引入了平衡因子，因此AVL树也可以看成是二叉搜索树。那么<br>
+AVL树的插入过程可以分为两步：</p>
+<ol>
+<li>按照二叉搜索树的方式插入新节点</li>
+<li>调整节点的平衡因子
+<ul>
+<li>插入到父亲的左边，父亲平衡因子--</li>
+<li>插入到父亲的右边，父亲平衡因子++</li>
+<li>父亲 bf 平衡因子 == 0，父亲所在子树高度不变，不用继续往上更新，插入结束</li>
+<li>父亲 bf 平衡因子 == 1 或者 -1，父亲所在子树高度变了，必须往上更新</li>
+<li>父亲 bf 更新后 == 2 或者 -2 ，父亲所在的子树已经不平衡，需要旋转处理</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>更新后不可能出现其他值，插入之前树是AVL树，平衡因子要么是<code class="notranslate">1，-1，0，++，-\-</code>，</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">bool</span> <span class="pl-en">Insert</span>(<span class="pl-k">const</span> pair&lt;K, V&gt;&amp; kv)
+{
+	<span class="pl-k">if</span> (_root == <span class="pl-c1">nullptr</span>)
+	{
+		_root = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(kv);
+		<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+	}
+	Node* parent = <span class="pl-c1">nullptr</span>;
+	Node* cur = _root;
+	<span class="pl-k">while</span> (cur)
+	{
+		<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">kv</span>.<span class="pl-smi">first</span> &lt; kv.<span class="pl-smi">first</span>)
+		{
+			parent = cur;
+			cur = cur-&gt;<span class="pl-smi">_right</span>;
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">kv</span>.<span class="pl-smi">first</span> &gt; kv.<span class="pl-smi">first</span>)
+		{
+			parent = cur;
+			cur = cur-&gt;<span class="pl-smi">_left</span>;
+		}
+		<span class="pl-k">else</span>
+		{
+			<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+		}
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span> 插入节点</span>
+	cur = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(kv);
+	<span class="pl-k">if</span> (parent-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span> &lt; kv.<span class="pl-smi">first</span>)
+		parent-&gt;<span class="pl-smi">_right</span> = cur;
+	<span class="pl-k">else</span>
+		parent-&gt;<span class="pl-smi">_left</span> = cur;
+	cur-&gt;<span class="pl-smi">_parnet</span> = parent;
+	
+	<span class="pl-c"><span class="pl-c">//</span> 更新平衡因子</span>
+	<span class="pl-k">while</span> (parent)
+	{
+		<span class="pl-k">if</span> (cur == parent-&gt;<span class="pl-smi">_left</span>)
+			parent-&gt;<span class="pl-smi">_bf</span>--;
+		<span class="pl-k">else</span>
+			parent-&gt;<span class="pl-smi">_bf</span>++;
+	
+		<span class="pl-k">if</span> (parent-&gt;<span class="pl-smi">_bf</span> == <span class="pl-c1">0</span>) <span class="pl-c"><span class="pl-c">//</span> 更新结束</span>
+			<span class="pl-k">break</span>;
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (parent-&gt;<span class="pl-smi">_bf</span> == <span class="pl-c1">1</span> || parent-&gt;<span class="pl-smi">_bf</span> == -<span class="pl-c1">1</span>)
+		{
+			<span class="pl-c"><span class="pl-c">//</span> 继续更新</span>
+			cur = parent;
+			parent = parent-&gt;<span class="pl-smi">_parnet</span>;
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (parent-&gt;<span class="pl-smi">_bf</span> == -<span class="pl-c1">2</span> || parent-&gt;<span class="pl-smi">_bf</span> == <span class="pl-c1">2</span>)
+		{
+			<span class="pl-c"><span class="pl-c">//</span> 需要旋转</span>
+			<span class="pl-c"><span class="pl-c">//</span> ...</span>
+			<span class="pl-k">break</span>;
+		}
+		<span class="pl-k">else</span>
+		{
+			<span class="pl-c1">assert</span>(<span class="pl-c1">false</span>);
+		}
+	}
+
+	<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+}</pre></div>
+<h2>AVL树的旋转</h2>
+<p>如果在一棵原本是平衡的AVL树中插入一个新节点，可能造成不平衡，此时必须调整树的结构，使之平衡化。根据节点插入位置的不同，AVL树的旋转分为<strong>四种</strong>：</p>
+<p>假如以pParent为根的子树不平衡，即pParent的平衡因子为2或者-2，分以下情况考虑</p>
+<ol>
+<li>pParent的平衡因子为2，说明pParent的右子树高，设pParent的右子树的根为pSubR
+<ul>
+<li>当pSubR的平衡因子为1时，执行左单旋</li>
+<li>当pSubR的平衡因子为-1时，执行右左双旋</li>
+</ul>
+</li>
+<li>pParent的平衡因子为-2，说明pParent的左子树高，设pParent的左子树的根为pSubL
+<ul>
+<li>当pSubL的平衡因子为-1是，执行右单旋</li>
+<li>当pSubL的平衡因子为1时，执行左右双旋</li>
+</ul>
+</li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/46393597f176efb7d2db0c61ee95ba7df15d0e0b0eeaf9b564c421f12ce023bc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33346538393639633532333234643932616462313361626339303337653761622e706e67"><img src="https://camo.githubusercontent.com/46393597f176efb7d2db0c61ee95ba7df15d0e0b0eeaf9b564c421f12ce023bc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33346538393639633532333234643932616462313361626339303337653761622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/34e8969c52324d92adb13abc9037e7ab.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>旋转完成后，原pParent为根的子树个高度降低，已经平衡，不需要再向上更新。</li>
+</ul>
+<h4>新节点插入较高右子树的右侧---右右：左单旋</h4>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/fdf87e441e9eb66b673c4d35df104a997b9726641ee69de9dce15b1eb8f703ae/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39623033633532663763646634386331386565316338323638656361393762662e706e67"><img src="https://camo.githubusercontent.com/fdf87e441e9eb66b673c4d35df104a997b9726641ee69de9dce15b1eb8f703ae/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39623033633532663763646634386331386565316338323638656361393762662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/9b03c52f7cdf48c18ee1c8268eca97bf.png" style="max-width: 100%;"></a></p>
+<p>左单旋的步骤如下：</p>
+<ol>
+<li>让subR的左子树作为parent的右子树。</li>
+<li>让parent作为subR的左子树。</li>
+<li>让subR作为整个子树的根。</li>
+<li>更新平衡因子。</li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/cf4c071dc6c31d024aee9d07ac1f4b672572391c11d2edfa28c4ac30e05d577d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30383966383162626531396334326465623835646461326264633165646430342e706e67"><img src="https://camo.githubusercontent.com/cf4c071dc6c31d024aee9d07ac1f4b672572391c11d2edfa28c4ac30e05d577d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30383966383162626531396334326465623835646461326264633165646430342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/089f81bbe19c42deb85dda2bdc1edd04.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span>左单旋</span>
+<span class="pl-k">void</span> <span class="pl-en">RotateL</span>(Node* parent)
+{
+	Node* subR = parent-&gt;<span class="pl-smi">_right</span>;
+	Node* subRL = subR-&gt;<span class="pl-smi">_left</span>;
+	Node* parentParent = parent-&gt;<span class="pl-smi">_parent</span>;
+
+	<span class="pl-c"><span class="pl-c">//</span>1、建立subR和parent之间的关系</span>
+	parent-&gt;<span class="pl-smi">_parent</span> = subR;
+	subR-&gt;<span class="pl-smi">_left</span> = parent;
+
+	<span class="pl-c"><span class="pl-c">//</span>2、建立parent和subRL之间的关系</span>
+	parent-&gt;<span class="pl-smi">_right</span> = subRL;
+	<span class="pl-k">if</span> (subRL)
+		subRL-&gt;<span class="pl-smi">_parent</span> = parent;
+
+	<span class="pl-c"><span class="pl-c">//</span>3、建立parentParent和subR之间的关系</span>
+	<span class="pl-k">if</span> (parentParent == <span class="pl-c1">nullptr</span>)
+	{
+		_root = subR;
+		subR-&gt;<span class="pl-smi">_parent</span> = <span class="pl-c1">nullptr</span>; <span class="pl-c"><span class="pl-c">//</span>subR的_parent指向需改变</span>
+	}
+	<span class="pl-k">else</span>
+	{
+		<span class="pl-k">if</span> (parent == parentParent-&gt;<span class="pl-smi">_left</span>)
+		{
+			parentParent-&gt;<span class="pl-smi">_left</span> = subR;
+		}
+		<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>parent == parentParent-&gt;_right</span>
+		{
+			parentParent-&gt;<span class="pl-smi">_right</span> = subR;
+		}
+		subR-&gt;<span class="pl-smi">_parent</span> = parentParent;
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span>4、更新平衡因子</span>
+	subR-&gt;<span class="pl-smi">_bf</span> = parent-&gt;<span class="pl-smi">_bf</span> = <span class="pl-c1">0</span>;
+}</pre></div>
+<h4>新节点插入较高左子树的左侧---左左：右单旋</h4>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/910624b2e90a6737291a191657f8cea5aea539bfdee5ef1e3e337c6f75501afb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61646366663033666437323134393333616134366235343164373261376130302e706e67"><img src="https://camo.githubusercontent.com/910624b2e90a6737291a191657f8cea5aea539bfdee5ef1e3e337c6f75501afb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61646366663033666437323134393333616134366235343164373261376130302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/adcff03fd7214933aa46b541d72a7a00.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>上图在插入前，AVL树是平衡的，新节点插入到30的左子树(注意：此处不是左孩子)中，30左<br>
+子树增加了一层，导致以60为根的二叉树不平衡，要让60平衡，只能将60左子树的高度减少一层，右子树增加一层，即将左子树往上提，这样60转下来，因为60比30大，只能将其放在30的右子树，而如果30有右子树，右子树根的值一定大于30，小于60，只能将其放在60的左子树，旋转完成后，更新节点的平衡因子即可。在旋转过程中，有以下几种情况需要考虑：</li>
+</ul>
+<ol>
+<li>30节点的右孩子可能存在，也可能不存在</li>
+<li>60可能是根节点，也可能是子树</li>
+</ol>
+<ul>
+<li>如果是根节点，旋转完成后，要更新根节点</li>
+<li>如果是子树，可能是某个节点的左子树，也可能是右子树<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/40de6a29f9b978de4c4c10cb518272df4c3774bfb91fee103e17843e04fa4bed/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63313935393938363762303534373765626333363463616565333265666232322e706e67"><img src="https://camo.githubusercontent.com/40de6a29f9b978de4c4c10cb518272df4c3774bfb91fee103e17843e04fa4bed/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63313935393938363762303534373765626333363463616565333265666232322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/c19599867b05477ebc364caee32efb22.png" style="max-width: 100%;"></a></li>
+</ul>
+<hr>
+<p>右单旋的步骤如下：</p>
+<ol>
+<li>让subL的右子树作为parent的左子树。</li>
+<li>让parent作为subL的右子树。</li>
+<li>让subL作为整个子树的根。</li>
+<li>更新平衡因子。</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span> 右单旋</span>
+<span class="pl-k">void</span> <span class="pl-en">RotateR</span>(Node* parent)
+{
+	Node* subL = parent-&gt;<span class="pl-smi">_left</span>;
+	Node* subLR = subL-&gt;<span class="pl-smi">_right</span>;
+	Node* parentParent = parent-&gt;<span class="pl-smi">_parent</span>;
+
+	<span class="pl-c"><span class="pl-c">//</span>1、建立subL和parent之间的关系</span>
+	subL-&gt;<span class="pl-smi">_right</span> = parent;
+	parent-&gt;<span class="pl-smi">_parent</span> = subL;
+
+	<span class="pl-c"><span class="pl-c">//</span>2、建立parent和subLR之间的关系</span>
+	parent-&gt;<span class="pl-smi">_left</span> = subLR;
+	<span class="pl-k">if</span> (subLR)
+		subLR-&gt;<span class="pl-smi">_parent</span> = parent;
+
+	<span class="pl-c"><span class="pl-c">//</span>3、建立parentParent和subL之间的关系</span>
+	<span class="pl-k">if</span> (parentParent == <span class="pl-c1">nullptr</span>)
+	{
+		_root = subL;
+		_root-&gt;<span class="pl-smi">_parent</span> = <span class="pl-c1">nullptr</span>;
+	}
+	<span class="pl-k">else</span>
+	{
+		<span class="pl-k">if</span> (parent == parentParent-&gt;<span class="pl-smi">_left</span>)
+		{
+			parentParent-&gt;<span class="pl-smi">_left</span> = subL;
+		}
+		<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>parent == parentParent-&gt;_right</span>
+		{
+			parentParent-&gt;<span class="pl-smi">_right</span> = subL;
+		}
+		subL-&gt;<span class="pl-smi">_parent</span> = parentParent;
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span>4、更新平衡因子</span>
+	subL-&gt;<span class="pl-smi">_bf</span> = parent-&gt;<span class="pl-smi">_bf</span> = <span class="pl-c1">0</span>;
+}</pre></div>
+<h4>新节点插入较高左子树的右侧---左右：先左单旋再右单旋</h4>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/692dacc34fd1d3f9bf7e1b8fef5e669197fb9dcc622812c99fbe6a9f01a98291/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62623737343164363830636334363163626262343539656463326461633064662e706e67"><img src="https://camo.githubusercontent.com/692dacc34fd1d3f9bf7e1b8fef5e669197fb9dcc622812c99fbe6a9f01a98291/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62623737343164363830636334363163626262343539656463326461633064662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/bb7741d680cc461cbbb459edc2dac0df.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>将双旋变成单旋后再旋转，即：先对30进行左单旋，然后再对90进行右单旋，旋转完成后再考虑平衡因子的更新。</li>
+</ul>
+<hr>
+<p>左右双旋的步骤如下：</p>
+<ol>
+<li>以subL为旋转点进行左单旋。</li>
+<li>以parent为旋转点进行右单旋。</li>
+<li>更新平衡因子。</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span>左右双旋</span>
+<span class="pl-k">void</span> <span class="pl-en">RotateLR</span>(Node* parent)
+{
+	Node* subL = parent-&gt;<span class="pl-smi">_left</span>;
+	Node* subLR = subL-&gt;<span class="pl-smi">_right</span>;
+	<span class="pl-k">int</span> bf = subLR-&gt;<span class="pl-smi">_bf</span>; <span class="pl-c"><span class="pl-c">//</span>subLR不可能为nullptr，因为subL的平衡因子是1</span>
+
+	<span class="pl-c"><span class="pl-c">//</span>1、以subL为旋转点进行左单旋</span>
+	<span class="pl-c1">RotateL</span>(subL);
+
+	<span class="pl-c"><span class="pl-c">//</span>2、以parent为旋转点进行右单旋</span>
+	<span class="pl-c1">RotateR</span>(parent);
+
+	<span class="pl-c"><span class="pl-c">//</span>3、更新平衡因子</span>
+	<span class="pl-k">if</span> (bf == <span class="pl-c1">1</span>)
+	{
+		subLR-&gt;<span class="pl-smi">_bf</span> = <span class="pl-c1">0</span>;
+		subL-&gt;<span class="pl-smi">_bf</span> = -<span class="pl-c1">1</span>;
+		parent-&gt;<span class="pl-smi">_bf</span> = <span class="pl-c1">0</span>;
+	}
+	<span class="pl-k">else</span> <span class="pl-k">if</span> (bf == -<span class="pl-c1">1</span>)
+	{
+		subLR-&gt;<span class="pl-smi">_bf</span> = <span class="pl-c1">0</span>;
+		subL-&gt;<span class="pl-smi">_bf</span> = <span class="pl-c1">0</span>;
+		parent-&gt;<span class="pl-smi">_bf</span> = <span class="pl-c1">1</span>;
+	}
+	<span class="pl-k">else</span> <span class="pl-k">if</span> (bf == <span class="pl-c1">0</span>)
+	{
+		subLR-&gt;<span class="pl-smi">_bf</span> = <span class="pl-c1">0</span>;
+		subL-&gt;<span class="pl-smi">_bf</span> = <span class="pl-c1">0</span>;
+		parent-&gt;<span class="pl-smi">_bf</span> = <span class="pl-c1">0</span>;
+	}
+	<span class="pl-k">else</span>
+	{
+		<span class="pl-c1">assert</span>(<span class="pl-c1">false</span>); <span class="pl-c"><span class="pl-c">//</span>在旋转前树的平衡因子就有问题</span>
+	}
+}</pre></div>
+<h4>新节点插入较高右子树的左侧---右左：先右单旋再左单旋</h4>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0c90bba5ebfa2252a6da57e7b43ac559909b303a8e1c0fbe1e0f65d2cbb33afd/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61623232356133353232653934363135383637366666386535323762613363352e706e67"><img src="https://camo.githubusercontent.com/0c90bba5ebfa2252a6da57e7b43ac559909b303a8e1c0fbe1e0f65d2cbb33afd/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61623232356133353232653934363135383637366666386535323762613363352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/ab225a3522e946158676ff8e527ba3c5.png" style="max-width: 100%;"></a></p>
+<p>右左双旋的步骤如下：</p>
+<ol>
+<li>以subR为旋转点进行右单旋。</li>
+<li>以parent为旋转点进行左单旋。</li>
+<li>更新平衡因子。</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span>右左双旋</span>
+<span class="pl-k">void</span> <span class="pl-en">RotateRL</span>(Node* parent)
+{
+	Node* subR = parent-&gt;<span class="pl-smi">_right</span>;
+	Node* subRL = subR-&gt;<span class="pl-smi">_left</span>;
+	<span class="pl-k">int</span> bf = subRL-&gt;<span class="pl-smi">_bf</span>;
+
+	<span class="pl-c"><span class="pl-c">//</span>1、以subR为轴进行右单旋</span>
+	<span class="pl-c1">RotateR</span>(subR);
+
+	<span class="pl-c"><span class="pl-c">//</span>2、以parent为轴进行左单旋</span>
+	<span class="pl-c1">RotateL</span>(parent);
+
+	<span class="pl-c"><span class="pl-c">//</span>3、更新平衡因子</span>
+	<span class="pl-k">if</span> (bf == <span class="pl-c1">1</span>)
+	{
+		subRL-&gt;<span class="pl-smi">_bf</span> = <span class="pl-c1">0</span>;
+		parent-&gt;<span class="pl-smi">_bf</span> = -<span class="pl-c1">1</span>;
+		subR-&gt;<span class="pl-smi">_bf</span> = <span class="pl-c1">0</span>;
+	}
+	<span class="pl-k">else</span> <span class="pl-k">if</span> (bf == -<span class="pl-c1">1</span>)
+	{
+		subRL-&gt;<span class="pl-smi">_bf</span> = <span class="pl-c1">0</span>;
+		parent-&gt;<span class="pl-smi">_bf</span> = <span class="pl-c1">0</span>;
+		subR-&gt;<span class="pl-smi">_bf</span> = <span class="pl-c1">1</span>;
+	}
+	<span class="pl-k">else</span> <span class="pl-k">if</span> (bf == <span class="pl-c1">0</span>)
+	{
+		subRL-&gt;<span class="pl-smi">_bf</span> = <span class="pl-c1">0</span>;
+		parent-&gt;<span class="pl-smi">_bf</span> = <span class="pl-c1">0</span>;
+		subR-&gt;<span class="pl-smi">_bf</span> = <span class="pl-c1">0</span>;
+	}
+	<span class="pl-k">else</span>
+	{
+		<span class="pl-c1">assert</span>(<span class="pl-c1">false</span>); <span class="pl-c"><span class="pl-c">//</span>在旋转前树的平衡因子就有问题</span>
+	}
+}</pre></div>
+<h2>AVL树的验证</h2>
+<p>AVL树是在二叉搜索树的基础上加入了平衡性的限制，因此要验证AVL树，可以分两步：</p>
+<ol>
+<li>验证其为二叉搜索树如果中序遍历可得到一个有序的序列，就说明为二叉搜索树。</li>
+<li>验证其为平衡树每个节点子树高度差的绝对值不超过1(注意节点中如果没有平衡因子)节点的平衡因子是否计算正确。</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span>判断是否为AVL树</span>
+<span class="pl-k">bool</span> <span class="pl-en">IsAVLTree</span>()
+{
+	<span class="pl-k">int</span> hight = <span class="pl-c1">0</span>; <span class="pl-c"><span class="pl-c">//</span>输出型参数</span>
+	<span class="pl-k">return</span> <span class="pl-c1">_IsBalanced</span>(_root, hight);
+}
+<span class="pl-c"><span class="pl-c">//</span>检测二叉树是否平衡</span>
+<span class="pl-k">bool</span> <span class="pl-en">_IsBalanced</span>(Node* root, <span class="pl-k">int</span>&amp; hight)
+{
+	<span class="pl-k">if</span> (root == <span class="pl-c1">nullptr</span>) <span class="pl-c"><span class="pl-c">//</span>空树是平衡二叉树</span>
+	{
+		hight = <span class="pl-c1">0</span>; <span class="pl-c"><span class="pl-c">//</span>空树的高度为0</span>
+		<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+	}
+	<span class="pl-c"><span class="pl-c">//</span>先判断左子树</span>
+	<span class="pl-k">int</span> leftHight = <span class="pl-c1">0</span>;
+	<span class="pl-k">if</span> (<span class="pl-c1">_IsBalanced</span>(root-&gt;<span class="pl-smi">_left</span>, leftHight) == <span class="pl-c1">false</span>)
+		<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+	<span class="pl-c"><span class="pl-c">//</span>再判断右子树</span>
+	<span class="pl-k">int</span> rightHight = <span class="pl-c1">0</span>;
+	<span class="pl-k">if</span> (<span class="pl-c1">_IsBalanced</span>(root-&gt;<span class="pl-smi">_right</span>, rightHight) == <span class="pl-c1">false</span>)
+		<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+	<span class="pl-c"><span class="pl-c">//</span>检查该结点的平衡因子</span>
+	<span class="pl-k">if</span> (rightHight - leftHight != root-&gt;<span class="pl-smi">_bf</span>)
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>平衡因子设置异常：<span class="pl-pds">"</span></span> &lt;&lt; root-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span> &lt;&lt; endl;
+	}
+	<span class="pl-c"><span class="pl-c">//</span>把左右子树的高度中的较大值+1作为当前树的高度返回给上一层</span>
+	hight = <span class="pl-c1">max</span>(leftHight, rightHight) + <span class="pl-c1">1</span>;
+	<span class="pl-k">return</span> <span class="pl-c1">abs</span>(rightHight - leftHight) &lt; <span class="pl-c1">2</span>; <span class="pl-c"><span class="pl-c">//</span>平衡二叉树的条件</span>
+}</pre></div>
+<h2>AVL树的查找</h2>
+<p>AVL树的查找函数与二叉搜索树的查找方式一模一样，逻辑如下：</p>
+<ol>
+<li>若树为空树，则查找失败，返回nullptr。</li>
+<li>若key值小于当前结点的值，则应该在该结点的左子树当中进行查找。</li>
+<li>若key值大于当前结点的值，则应该在该结点的右子树当中进行查找。</li>
+<li>若key值等于当前结点的值，则查找成功，返回对应结点。</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span>查找函数</span>
+Node* <span class="pl-en">Find</span>(<span class="pl-k">const</span> K&amp; key)
+{
+	Node* cur = _root;
+	<span class="pl-k">while</span> (cur)
+	{
+		<span class="pl-k">if</span> (key &lt; cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) <span class="pl-c"><span class="pl-c">//</span>key值小于该结点的值</span>
+		{
+			cur = cur-&gt;<span class="pl-smi">_left</span>; <span class="pl-c"><span class="pl-c">//</span>在该结点的左子树当中查找</span>
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (key &gt; cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) <span class="pl-c"><span class="pl-c">//</span>key值大于该结点的值</span>
+		{
+			cur = cur-&gt;<span class="pl-smi">_right</span>; <span class="pl-c"><span class="pl-c">//</span>在该结点的右子树当中查找</span>
+		}
+		<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>找到了目标结点</span>
+		{
+			<span class="pl-k">return</span> cur; <span class="pl-c"><span class="pl-c">//</span>返回该结点</span>
+		}
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">nullptr</span>; <span class="pl-c"><span class="pl-c">//</span>查找失败</span>
+}</pre></div>
+<h2>AVL树的修改</h2>
+<h4>修改函数一</h4>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span>修改函数</span>
+<span class="pl-k">bool</span> <span class="pl-en">Modify</span>(<span class="pl-k">const</span> K&amp; key, <span class="pl-k">const</span> V&amp; value)
+{
+	Node* ret = <span class="pl-c1">Find</span>(key);
+	<span class="pl-k">if</span> (ret == <span class="pl-c1">nullptr</span>) <span class="pl-c"><span class="pl-c">//</span>未找到指定key值的结点</span>
+	{
+		<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+	}
+	ret-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">second</span> = value; <span class="pl-c"><span class="pl-c">//</span>修改结点的value</span>
+	<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+}</pre></div>
+<h4>修改函数二</h4>
+<ul>
+<li>若待插入结点的键值key在map当中不存在，则结点插入成功，并返回插入后结点的指针和true。</li>
+<li>若待插入结点的键值key在map当中已经存在，则结点插入失败，并返回map当中键值为key的结点的指针和false。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span>插入函数</span>
+pair&lt;Node*, <span class="pl-k">bool</span>&gt; <span class="pl-en">Insert</span>(<span class="pl-k">const</span> pair&lt;K, V&gt;&amp; kv)
+{
+	<span class="pl-k">if</span> (_root == <span class="pl-c1">nullptr</span>) <span class="pl-c"><span class="pl-c">//</span>若AVL树为空树，则插入结点直接作为根结点</span>
+	{
+		_root = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(kv);
+		<span class="pl-k">return</span> <span class="pl-c1">make_pair</span>(_root, <span class="pl-c1">true</span>); <span class="pl-c"><span class="pl-c">//</span>插入成功，返回新插入结点和true</span>
+	}
+	<span class="pl-c"><span class="pl-c">//</span>1、按照二叉搜索树的插入方法，找到待插入位置</span>
+	Node* cur = _root;
+	Node* parent = <span class="pl-c1">nullptr</span>;
+	<span class="pl-k">while</span> (cur)
+	{
+		<span class="pl-k">if</span> (kv.<span class="pl-smi">first</span> &lt; cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) <span class="pl-c"><span class="pl-c">//</span>待插入结点的key值小于当前结点的key值</span>
+		{
+			<span class="pl-c"><span class="pl-c">//</span>往该结点的左子树走</span>
+			parent = cur;
+			cur = cur-&gt;<span class="pl-smi">_left</span>;
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (kv.<span class="pl-smi">first</span> &gt; cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) <span class="pl-c"><span class="pl-c">//</span>待插入结点的key值大于当前结点的key值</span>
+		{
+			<span class="pl-c"><span class="pl-c">//</span>往该结点的右子树走</span>
+			parent = cur;
+			cur = cur-&gt;<span class="pl-smi">_right</span>;
+		}
+		<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>待插入结点的key值等于当前结点的key值</span>
+		{
+			<span class="pl-c"><span class="pl-c">//</span>插入失败（不允许key值冗余）</span>
+			<span class="pl-k">return</span> <span class="pl-c1">make_pair</span>(cur, <span class="pl-c1">false</span>); <span class="pl-c"><span class="pl-c">//</span>插入失败，返回已经存在的结点和false</span>
+		}
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span>2、将待插入结点插入到树中</span>
+	cur = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(kv); <span class="pl-c"><span class="pl-c">//</span>根据所给值构造一个新结点</span>
+	Node* newnode = cur; <span class="pl-c"><span class="pl-c">//</span>记录新插入的结点</span>
+	<span class="pl-k">if</span> (kv.<span class="pl-smi">first</span> &lt; parent-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) <span class="pl-c"><span class="pl-c">//</span>新结点的key值小于parent的key值</span>
+	{
+		<span class="pl-c"><span class="pl-c">//</span>插入到parent的左边</span>
+		parent-&gt;<span class="pl-smi">_left</span> = cur;
+		cur-&gt;<span class="pl-smi">_parent</span> = parent;
+	}
+	<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>新结点的key值大于parent的key值</span>
+	{
+		<span class="pl-c"><span class="pl-c">//</span>插入到parent的右边</span>
+		parent-&gt;<span class="pl-smi">_right</span> = cur;
+		cur-&gt;<span class="pl-smi">_parent</span> = parent;
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span>3、更新平衡因子，如果出现不平衡，则需要进行旋转</span>
+	<span class="pl-k">while</span> (cur != _root) <span class="pl-c"><span class="pl-c">//</span>最坏一路更新到根结点</span>
+	{
+		<span class="pl-k">if</span> (cur == parent-&gt;<span class="pl-smi">_left</span>) <span class="pl-c"><span class="pl-c">//</span>parent的左子树增高</span>
+		{
+			parent-&gt;<span class="pl-smi">_bf</span>--; <span class="pl-c"><span class="pl-c">//</span>parent的平衡因子--</span>
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (cur == parent-&gt;<span class="pl-smi">_right</span>) <span class="pl-c"><span class="pl-c">//</span>parent的右子树增高</span>
+		{
+			parent-&gt;<span class="pl-smi">_bf</span>++; <span class="pl-c"><span class="pl-c">//</span>parent的平衡因子++</span>
+		}
+		<span class="pl-c"><span class="pl-c">//</span>判断是否更新结束或需要进行旋转</span>
+		<span class="pl-k">if</span> (parent-&gt;<span class="pl-smi">_bf</span> == <span class="pl-c1">0</span>) <span class="pl-c"><span class="pl-c">//</span>更新结束（新增结点把parent左右子树矮的那一边增高了，此时左右高度一致）</span>
+		{
+			<span class="pl-k">break</span>; <span class="pl-c"><span class="pl-c">//</span>parent树的高度没有发生变化，不会影响其父结点及以上结点的平衡因子</span>
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (parent-&gt;<span class="pl-smi">_bf</span> == -<span class="pl-c1">1</span> || parent-&gt;<span class="pl-smi">_bf</span> == <span class="pl-c1">1</span>) <span class="pl-c"><span class="pl-c">//</span>需要继续往上更新平衡因子</span>
+		{
+			<span class="pl-c"><span class="pl-c">//</span>parent树的高度变化，会影响其父结点的平衡因子，需要继续往上更新平衡因子</span>
+			cur = parent;
+			parent = parent-&gt;<span class="pl-smi">_parent</span>;
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (parent-&gt;<span class="pl-smi">_bf</span> == -<span class="pl-c1">2</span> || parent-&gt;<span class="pl-smi">_bf</span> == <span class="pl-c1">2</span>) <span class="pl-c"><span class="pl-c">//</span>需要进行旋转（此时parent树已经不平衡了）</span>
+		{
+			<span class="pl-k">if</span> (parent-&gt;<span class="pl-smi">_bf</span> == -<span class="pl-c1">2</span>)
+			{
+				<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_bf</span> == -<span class="pl-c1">1</span>)
+				{
+					<span class="pl-c1">RotateR</span>(parent); <span class="pl-c"><span class="pl-c">//</span>右单旋</span>
+				}
+				<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>cur-&gt;_bf == 1</span>
+				{
+					<span class="pl-c1">RotateLR</span>(parent); <span class="pl-c"><span class="pl-c">//</span>左右双旋</span>
+				}
+			}
+			<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>parent-&gt;_bf == 2</span>
+			{
+				<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_bf</span> == -<span class="pl-c1">1</span>)
+				{
+					<span class="pl-c1">RotateRL</span>(parent); <span class="pl-c"><span class="pl-c">//</span>右左双旋</span>
+				}
+				<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>cur-&gt;_bf == 1</span>
+				{
+					<span class="pl-c1">RotateL</span>(parent); <span class="pl-c"><span class="pl-c">//</span>左单旋</span>
+				}
+			}
+			<span class="pl-k">break</span>; <span class="pl-c"><span class="pl-c">//</span>旋转后就一定平衡了，无需继续往上更新平衡因子(旋转后树高度变为插入之前了)</span>
+		}
+		<span class="pl-k">else</span>
+		{
+			<span class="pl-c1">assert</span>(<span class="pl-c1">false</span>); <span class="pl-c"><span class="pl-c">//</span>在插入前树的平衡因子就有问题</span>
+		}
+	}
+
+	<span class="pl-k">return</span> <span class="pl-c1">make_pair</span>(newnode, <span class="pl-c1">true</span>); <span class="pl-c"><span class="pl-c">//</span>插入成功，返回新插入结点和true</span>
+}</pre></div>
+<h4>重载[ ]</h4>
+<ol>
+<li>调用插入函数插入键值对。</li>
+<li>拿出从插入函数获取到的结点。</li>
+<li>返回该结点value的引用。</li>
+</ol>
+<ul>
+<li>如果key不在树中，则先插入键值对<code class="notranslate">&lt;key, V()&gt;</code>，然后返回该键值对中<code class="notranslate">value</code>的引用。</li>
+<li>如果key已经在树中，则返回键值为<code class="notranslate">key</code>结点<code class="notranslate">value</code>的引用。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span>operator[]重载</span>
+V&amp; <span class="pl-k">operator</span>[](<span class="pl-k">const</span> K&amp; key)
+{
+	<span class="pl-c"><span class="pl-c">//</span>调用插入函数插入键值对</span>
+	pair&lt;Node*, <span class="pl-k">bool</span>&gt; ret = <span class="pl-c1">Insert</span>(<span class="pl-c1">make_pair</span>(key, <span class="pl-c1">V</span>()));
+	<span class="pl-c"><span class="pl-c">//</span>拿出从插入函数获取到的结点</span>
+	Node* node = ret.<span class="pl-smi">first</span>;
+	<span class="pl-c"><span class="pl-c">//</span>返回该结点value的引用</span>
+	<span class="pl-k">return</span> node-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">second</span>;
+}</pre></div>
+<h2>AVL树的删除</h2>
+<p>删除方法和二叉搜索树相同</p>
+<ol>
+<li>先找到待删除的结点。</li>
+<li>若找到的待删除结点的左右子树均不为空，则需要使用<strong>替换法</strong>进行删除。</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span>删除函数</span>
+<span class="pl-k">bool</span> <span class="pl-en">Erase</span>(<span class="pl-k">const</span> K&amp; key)
+{
+	<span class="pl-c"><span class="pl-c">//</span>用于遍历二叉树</span>
+	Node* parent = <span class="pl-c1">nullptr</span>;
+	Node* cur = _root;
+	<span class="pl-c"><span class="pl-c">//</span>用于标记实际的删除结点及其父结点</span>
+	Node* delParentPos = <span class="pl-c1">nullptr</span>;
+	Node* delPos = <span class="pl-c1">nullptr</span>;
+	<span class="pl-k">while</span> (cur)
+	{
+		<span class="pl-k">if</span> (key &lt; cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) <span class="pl-c"><span class="pl-c">//</span>所给key值小于当前结点的key值</span>
+		{
+			<span class="pl-c"><span class="pl-c">//</span>往该结点的左子树走</span>
+			parent = cur;
+			cur = cur-&gt;<span class="pl-smi">_left</span>;
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (key &gt; cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) <span class="pl-c"><span class="pl-c">//</span>所给key值大于当前结点的key值</span>
+		{
+			<span class="pl-c"><span class="pl-c">//</span>往该结点的右子树走</span>
+			parent = cur;
+			cur = cur-&gt;<span class="pl-smi">_right</span>;
+		}
+		<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>找到了待删除结点</span>
+		{
+			<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_left</span> == <span class="pl-c1">nullptr</span>) <span class="pl-c"><span class="pl-c">//</span>待删除结点的左子树为空</span>
+			{
+				<span class="pl-k">if</span> (cur == _root) <span class="pl-c"><span class="pl-c">//</span>待删除结点是根结点</span>
+				{
+					_root = _root-&gt;<span class="pl-smi">_right</span>; <span class="pl-c"><span class="pl-c">//</span>让根结点的右子树作为新的根结点</span>
+					<span class="pl-k">if</span> (_root)
+						_root-&gt;<span class="pl-smi">_parent</span> = <span class="pl-c1">nullptr</span>;
+					<span class="pl-k">delete</span> cur; <span class="pl-c"><span class="pl-c">//</span>删除原根结点</span>
+					<span class="pl-k">return</span> <span class="pl-c1">true</span>; <span class="pl-c"><span class="pl-c">//</span>根结点无祖先结点，无需进行平衡因子的更新操作</span>
+				}
+				<span class="pl-k">else</span>
+				{
+					delParentPos = parent; <span class="pl-c"><span class="pl-c">//</span>标记实际删除结点的父结点</span>
+					delPos = cur; <span class="pl-c"><span class="pl-c">//</span>标记实际删除的结点</span>
+				}
+				<span class="pl-k">break</span>; <span class="pl-c"><span class="pl-c">//</span>删除结点有祖先结点，需更新平衡因子</span>
+			}
+			<span class="pl-k">else</span> <span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_right</span> == <span class="pl-c1">nullptr</span>) <span class="pl-c"><span class="pl-c">//</span>待删除结点的右子树为空</span>
+			{
+				<span class="pl-k">if</span> (cur == _root) <span class="pl-c"><span class="pl-c">//</span>待删除结点是根结点</span>
+				{
+					_root = _root-&gt;<span class="pl-smi">_left</span>; <span class="pl-c"><span class="pl-c">//</span>让根结点的左子树作为新的根结点</span>
+					<span class="pl-k">if</span> (_root)
+						_root-&gt;<span class="pl-smi">_parent</span> = <span class="pl-c1">nullptr</span>;
+					<span class="pl-k">delete</span> cur; <span class="pl-c"><span class="pl-c">//</span>删除原根结点</span>
+					<span class="pl-k">return</span> <span class="pl-c1">true</span>; <span class="pl-c"><span class="pl-c">//</span>根结点无祖先结点，无需进行平衡因子的更新操作</span>
+				}
+				<span class="pl-k">else</span>
+				{
+					delParentPos = parent; <span class="pl-c"><span class="pl-c">//</span>标记实际删除结点的父结点</span>
+					delPos = cur; <span class="pl-c"><span class="pl-c">//</span>标记实际删除的结点</span>
+				}
+				<span class="pl-k">break</span>; <span class="pl-c"><span class="pl-c">//</span>删除结点有祖先结点，需更新平衡因子</span>
+			}
+			<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>待删除结点的左右子树均不为空</span>
+			{
+				<span class="pl-c"><span class="pl-c">//</span>替换法删除</span>
+				<span class="pl-c"><span class="pl-c">//</span>寻找待删除结点右子树当中key值最小的结点作为实际删除结点</span>
+				Node* minParent = cur;
+				Node* minRight = cur-&gt;<span class="pl-smi">_right</span>;
+				<span class="pl-k">while</span> (minRight-&gt;<span class="pl-smi">_left</span>)
+				{
+					minParent = minRight;
+					minRight = minRight-&gt;<span class="pl-smi">_left</span>;
+				}
+				cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span> = minRight-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>; <span class="pl-c"><span class="pl-c">//</span>将待删除结点的key改为minRight的key</span>
+				cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">second</span> = minRight-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">second</span>; <span class="pl-c"><span class="pl-c">//</span>将待删除结点的value改为minRight的value</span>
+				delParentPos = minParent; <span class="pl-c"><span class="pl-c">//</span>标记实际删除结点的父结点</span>
+				delPos = minRight; <span class="pl-c"><span class="pl-c">//</span>标记实际删除的结点</span>
+				<span class="pl-k">break</span>; <span class="pl-c"><span class="pl-c">//</span>删除结点有祖先结点，需更新平衡因子</span>
+			}
+		}
+	}
+	<span class="pl-k">if</span> (delParentPos == <span class="pl-c1">nullptr</span>) <span class="pl-c"><span class="pl-c">//</span>delParentPos没有被修改过，说明没有找到待删除结点</span>
+	{
+		<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span>记录待删除结点及其父结点（用于后续实际删除）</span>
+	Node* del = delPos;
+	Node* delP = delParentPos;
+
+	<span class="pl-c"><span class="pl-c">//</span>更新平衡因子</span>
+	<span class="pl-k">while</span> (delPos != _root) <span class="pl-c"><span class="pl-c">//</span>最坏一路更新到根结点</span>
+	{
+		<span class="pl-k">if</span> (delPos == delParentPos-&gt;<span class="pl-smi">_left</span>) <span class="pl-c"><span class="pl-c">//</span>delParentPos的左子树高度降低</span>
+		{
+			delParentPos-&gt;<span class="pl-smi">_bf</span>++; <span class="pl-c"><span class="pl-c">//</span>delParentPos的平衡因子++</span>
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (delPos == delParentPos-&gt;<span class="pl-smi">_right</span>) <span class="pl-c"><span class="pl-c">//</span>delParentPos的右子树高度降低</span>
+		{
+			delParentPos-&gt;<span class="pl-smi">_bf</span>--; <span class="pl-c"><span class="pl-c">//</span>delParentPos的平衡因子--</span>
+		}
+		<span class="pl-c"><span class="pl-c">//</span>判断是否更新结束或需要进行旋转</span>
+		<span class="pl-k">if</span> (delParentPos-&gt;<span class="pl-smi">_bf</span> == <span class="pl-c1">0</span>)<span class="pl-c"><span class="pl-c">//</span>需要继续往上更新平衡因子</span>
+		{
+			<span class="pl-c"><span class="pl-c">//</span>delParentPos树的高度变化，会影响其父结点的平衡因子，需要继续往上更新平衡因子</span>
+			delPos = delParentPos;
+			delParentPos = delParentPos-&gt;<span class="pl-smi">_parent</span>;
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (delParentPos-&gt;<span class="pl-smi">_bf</span> == -<span class="pl-c1">1</span> || delParentPos-&gt;<span class="pl-smi">_bf</span> == <span class="pl-c1">1</span>) <span class="pl-c"><span class="pl-c">//</span>更新结束</span>
+		{
+			<span class="pl-k">break</span>; <span class="pl-c"><span class="pl-c">//</span>delParent树的高度没有发生变化，不会影响其父结点及以上结点的平衡因子</span>
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (delParentPos-&gt;<span class="pl-smi">_bf</span> == -<span class="pl-c1">2</span> || delParentPos-&gt;<span class="pl-smi">_bf</span> == <span class="pl-c1">2</span>) <span class="pl-c"><span class="pl-c">//</span>需要进行旋转（此时delParentPos树已经不平衡了）</span>
+		{
+			<span class="pl-k">if</span> (delParentPos-&gt;<span class="pl-smi">_bf</span> == -<span class="pl-c1">2</span>)
+			{
+				<span class="pl-k">if</span> (delParentPos-&gt;<span class="pl-smi">_left</span>-&gt;<span class="pl-smi">_bf</span> == -<span class="pl-c1">1</span>)
+				{
+					Node* tmp = delParentPos-&gt;<span class="pl-smi">_left</span>; <span class="pl-c"><span class="pl-c">//</span>记录delParentPos右旋转后新的根结点</span>
+					<span class="pl-c1">RotateR</span>(delParentPos); <span class="pl-c"><span class="pl-c">//</span>右单旋</span>
+					delParentPos = tmp; <span class="pl-c"><span class="pl-c">//</span>更新根结点</span>
+				}
+				<span class="pl-k">else</span> <span class="pl-k">if</span>(delParentPos-&gt;<span class="pl-smi">_left</span>-&gt;<span class="pl-smi">_bf</span> == <span class="pl-c1">1</span>)
+				{
+					Node* tmp = delParentPos-&gt;<span class="pl-smi">_left</span>-&gt;<span class="pl-smi">_right</span>; <span class="pl-c"><span class="pl-c">//</span>记录delParentPos左右旋转后新的根结点</span>
+					<span class="pl-c1">RotateLR</span>(delParentPos); <span class="pl-c"><span class="pl-c">//</span>左右双旋</span>
+					delParentPos = tmp; <span class="pl-c"><span class="pl-c">//</span>更新根结点</span>
+				}
+				<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>delParentPos-&gt;_left-&gt;_bf == 0</span>
+				{
+					Node* tmp = delParentPos-&gt;<span class="pl-smi">_left</span>; <span class="pl-c"><span class="pl-c">//</span>记录delParentPos右旋转后新的根结点</span>
+					<span class="pl-c1">RotateR</span>(delParentPos); <span class="pl-c"><span class="pl-c">//</span>右单旋</span>
+					delParentPos = tmp; <span class="pl-c"><span class="pl-c">//</span>更新根结点</span>
+					<span class="pl-c"><span class="pl-c">//</span>平衡因子调整</span>
+					delParentPos-&gt;<span class="pl-smi">_bf</span> = <span class="pl-c1">1</span>;
+					delParentPos-&gt;<span class="pl-smi">_right</span>-&gt;<span class="pl-smi">_bf</span> = -<span class="pl-c1">1</span>;
+					<span class="pl-k">break</span>; <span class="pl-c"><span class="pl-c">//</span>更正</span>
+				}
+			}
+			<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>delParentPos-&gt;_bf == 2</span>
+			{
+				<span class="pl-k">if</span> (delParentPos-&gt;<span class="pl-smi">_right</span>-&gt;<span class="pl-smi">_bf</span> == -<span class="pl-c1">1</span>)
+				{
+					Node* tmp = delParentPos-&gt;<span class="pl-smi">_right</span>-&gt;<span class="pl-smi">_left</span>; <span class="pl-c"><span class="pl-c">//</span>记录delParentPos右左旋转后新的根结点</span>
+					<span class="pl-c1">RotateRL</span>(delParentPos); <span class="pl-c"><span class="pl-c">//</span>右左双旋</span>
+					delParentPos = tmp; <span class="pl-c"><span class="pl-c">//</span>更新根结点</span>
+				}
+				<span class="pl-k">else</span> <span class="pl-k">if</span>(delParentPos-&gt;<span class="pl-smi">_right</span>-&gt;<span class="pl-smi">_bf</span> == <span class="pl-c1">1</span>)
+				{
+					Node* tmp = delParentPos-&gt;<span class="pl-smi">_right</span>; <span class="pl-c"><span class="pl-c">//</span>记录delParentPos左旋转后新的根结点</span>
+					<span class="pl-c1">RotateL</span>(delParentPos); <span class="pl-c"><span class="pl-c">//</span>左单旋</span>
+					delParentPos = tmp; <span class="pl-c"><span class="pl-c">//</span>更新根结点</span>
+				}
+				<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>delParentPos-&gt;_right-&gt;_bf == 0</span>
+				{
+					Node* tmp = delParentPos-&gt;<span class="pl-smi">_right</span>; <span class="pl-c"><span class="pl-c">//</span>记录delParentPos左旋转后新的根结点</span>
+					<span class="pl-c1">RotateL</span>(delParentPos); <span class="pl-c"><span class="pl-c">//</span>左单旋</span>
+					delParentPos = tmp; <span class="pl-c"><span class="pl-c">//</span>更新根结点</span>
+					<span class="pl-c"><span class="pl-c">//</span>平衡因子调整</span>
+					delParentPos-&gt;<span class="pl-smi">_bf</span> = -<span class="pl-c1">1</span>;
+					delParentPos-&gt;<span class="pl-smi">_left</span>-&gt;<span class="pl-smi">_bf</span> = <span class="pl-c1">1</span>;
+					<span class="pl-k">break</span>; <span class="pl-c"><span class="pl-c">//</span>更正</span>
+				}
+			}
+			<span class="pl-c"><span class="pl-c">//</span>delParentPos树的高度变化，会影响其父结点的平衡因子，需要继续往上更新平衡因子</span>
+			delPos = delParentPos;
+			delParentPos = delParentPos-&gt;<span class="pl-smi">_parent</span>;
+			<span class="pl-c"><span class="pl-c">//</span>break; //error</span>
+		}
+		<span class="pl-k">else</span>
+		{
+			<span class="pl-c1">assert</span>(<span class="pl-c1">false</span>); <span class="pl-c"><span class="pl-c">//</span>在删除前树的平衡因子就有问题</span>
+		}
+	}
+	<span class="pl-c"><span class="pl-c">//</span>进行实际删除</span>
+	<span class="pl-k">if</span> (del-&gt;<span class="pl-smi">_left</span> == <span class="pl-c1">nullptr</span>) <span class="pl-c"><span class="pl-c">//</span>实际删除结点的左子树为空</span>
+	{
+		<span class="pl-k">if</span> (del == delP-&gt;<span class="pl-smi">_left</span>) <span class="pl-c"><span class="pl-c">//</span>实际删除结点是其父结点的左孩子</span>
+		{
+			delP-&gt;<span class="pl-smi">_left</span> = del-&gt;<span class="pl-smi">_right</span>;
+			<span class="pl-k">if</span> (del-&gt;<span class="pl-smi">_right</span>)
+				del-&gt;<span class="pl-smi">_right</span>-&gt;<span class="pl-smi">_parent</span> = delP;
+		}
+		<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>实际删除结点是其父结点的右孩子</span>
+		{
+			delP-&gt;<span class="pl-smi">_right</span> = del-&gt;<span class="pl-smi">_right</span>;
+			<span class="pl-k">if</span> (del-&gt;<span class="pl-smi">_right</span>)
+				del-&gt;<span class="pl-smi">_right</span>-&gt;<span class="pl-smi">_parent</span> = delP;
+		}
+	}
+	<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>实际删除结点的右子树为空</span>
+	{
+		<span class="pl-k">if</span> (del == delP-&gt;<span class="pl-smi">_left</span>) <span class="pl-c"><span class="pl-c">//</span>实际删除结点是其父结点的左孩子</span>
+		{
+			delP-&gt;<span class="pl-smi">_left</span> = del-&gt;<span class="pl-smi">_left</span>;
+			<span class="pl-k">if</span> (del-&gt;<span class="pl-smi">_left</span>)
+				del-&gt;<span class="pl-smi">_left</span>-&gt;<span class="pl-smi">_parent</span> = delP;
+		}
+		<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>实际删除结点是其父结点的右孩子</span>
+		{
+			delP-&gt;<span class="pl-smi">_right</span> = del-&gt;<span class="pl-smi">_left</span>;
+			<span class="pl-k">if</span> (del-&gt;<span class="pl-smi">_left</span>)
+				del-&gt;<span class="pl-smi">_left</span>-&gt;<span class="pl-smi">_parent</span> = delP;
+		}
+	}
+	<span class="pl-k">delete</span> del; <span class="pl-c"><span class="pl-c">//</span>实际删除结点</span>
+	<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+}</pre></div>
+<h2>AVL树的性能</h2>
+<ul>
+<li>AVL树是一棵绝对平衡的二叉搜索树，其要求每个节点的左右子树高度差的绝对值都不超过1，这样可以保证查询时高效的时间复杂度，即$log_2 (N)$。但是如果要对AVL树做一些结构修改的操作，性能非常低下，比如：插入时要维护其绝对平衡，旋转的次数比较多，更差的是在删除时，有可能一直要让旋转持续到根的位置。因此：如果需要一种查询高效且有序的数据结构，而且数据的个数为静态的(即不会改变)，可以考虑AVL树，但一个结构经常修改，就不太适合。</li>
+</ul></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</html>

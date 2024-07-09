@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## 请设计一个类，不能被拷贝
+
+
+- 拷贝只会放生在两个场景中：**拷贝构造函数以及赋值运算符重载**，因此想要让一个类禁止拷贝， 只需让该类不能调用拷贝构造函数以及赋值运算符重载即可。">
+<meta property="og:title" content="20. C++特殊类设计">
+<meta property="og:description" content="## 请设计一个类，不能被拷贝
+
+
+- 拷贝只会放生在两个场景中：**拷贝构造函数以及赋值运算符重载**，因此想要让一个类禁止拷贝， 只需让该类不能调用拷贝构造函数以及赋值运算符重载即可。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/20.%20C%2B%2B-te-shu-lei-she-ji.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>20. C++特殊类设计</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">20. C++特殊类设计</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/22" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>请设计一个类，不能被拷贝</h2>
+<ul>
+<li>拷贝只会放生在两个场景中：<strong>拷贝构造函数以及赋值运算符重载</strong>，因此想要让一个类禁止拷贝， 只需让该类不能调用拷贝构造函数以及赋值运算符重载即可。</li>
+</ul>
+<p><strong>C++98：</strong></p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">CopyBan</span> {
+	<span class="pl-c"><span class="pl-c">//</span> ...</span>
+
+<span class="pl-k">private:</span> 
+	<span class="pl-en">CopyBan</span>(<span class="pl-k">const</span> CopyBan&amp;); 
+	CopyBan&amp; <span class="pl-k">operator</span>=(<span class="pl-k">const</span> CopyBan&amp;);
+	<span class="pl-c"><span class="pl-c">//</span>... </span>
+};</pre></div>
+<p>原因：</p>
+<ol>
+<li>设置成私有：如果只声明没有设置成private，用户自己如果在类外定义了，就可以不 能禁止拷贝了</li>
+<li>只声明不定义：不定义是因为该函数根本不会调用，定义了其实也没有什么意义，不写 反而还简单，而且如果定义了就不会防止成员函数内部拷贝了。</li>
+</ol>
+<p><strong>C++11：</strong></p>
+<ul>
+<li>C++11扩展delete的用法，delete除了释放new申请的资源外，如果在默认成员函数后跟上 <code class="notranslate">=delete</code>，表示让编译器删除掉该默认成员函数。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">CopyBan</span> {
+<span class="pl-en">CopyBan</span>(<span class="pl-k">const</span> CopyBan&amp;) = <span class="pl-k">delete</span>;
+CopyBan&amp; <span class="pl-k">operator</span>=(<span class="pl-k">const</span> CopyBan&amp;) = <span class="pl-k">delete</span>;
+};</pre></div>
+<h2>请设计一个类，只能在堆上创建对象</h2>
+<p><strong>实现方式：</strong></p>
+<ol>
+<li>将类的构造函数私有，拷贝构造声明成私有。防止别人调用拷贝在栈上生成对象。</li>
+<li>提供一个静态的成员函数，在该静态成员函数中完成堆对象的创建</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">HeapOnly</span>
+{
+<span class="pl-k">public:</span>
+    <span class="pl-k">static</span> HeapOnly* <span class="pl-en">CreateObject</span>()
+    {
+        <span class="pl-k">return</span> <span class="pl-k">new</span> HeapOnly;
+    }
+<span class="pl-k">private:</span>
+    <span class="pl-en">HeapOnly</span>() {}
+    <span class="pl-c"><span class="pl-c">//</span> C++98</span>
+    <span class="pl-c"><span class="pl-c">//</span> 1.只声明,不实现。因为实现可能会很麻烦，而你本身不需要</span>
+    <span class="pl-c"><span class="pl-c">//</span> 2.声明成私有</span>
+    <span class="pl-en">HeapOnly</span>(<span class="pl-k">const</span> HeapOnly&amp;);
+    
+    <span class="pl-c"><span class="pl-c">//</span> C++11    </span>
+    <span class="pl-en">HeapOnly</span>(<span class="pl-k">const</span> HeapOnly&amp;) = <span class="pl-k">delete</span>;
+};</pre></div>
+<h2>请设计一个类，只能在栈上创建对象</h2>
+<ul>
+<li>方法一：同上将构造函数私有化，然后设计静态方法创建对象返回即可。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">StackOnly</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">static</span> StackOnly <span class="pl-en">CreateObj</span>()
+	{
+		<span class="pl-k">return</span> <span class="pl-c1">StackOnly</span>();
+	}
+	<span class="pl-c"><span class="pl-c">//</span> 禁掉operator new可以把下面用new 调用拷贝构造申请对象给禁掉</span>
+	<span class="pl-c"><span class="pl-c">//</span> StackOnly obj = StackOnly::CreateObj();</span>
+	<span class="pl-c"><span class="pl-c">//</span> StackOnly* ptr3 = new StackOnly(obj);</span>
+	<span class="pl-k">void</span>* <span class="pl-k">operator</span> <span class="pl-k">new</span>(<span class="pl-c1">size_t</span> size) = <span class="pl-k">delete</span>;
+	<span class="pl-k">void</span> <span class="pl-k">operator</span> <span class="pl-k">delete</span>(<span class="pl-k">void</span>* p) = <span class="pl-k">delete</span>;
+<span class="pl-k">private:</span>
+	<span class="pl-en">StackOnly</span>()
+		:_a(<span class="pl-c1">0</span>)
+	{}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _a;
+};</pre></div>
+<h2>请设计一个类，不能被继承</h2>
+<p><strong>C++98方式：</strong></p>
+<ul>
+<li>C++98中构造函数私有化，派生类中调不到基类的构造函数。则无法继承</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">NonInherit</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">static</span> NonInherit <span class="pl-en">GetInstance</span>()
+	{
+		<span class="pl-k">return</span> <span class="pl-c1">NonInherit</span>();
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-en">NonInherit</span>()
+	{}
+};</pre></div>
+<p><strong>C++11方法：</strong></p>
+<ul>
+<li><code class="notranslate">final</code>关键字，final修饰类，表示该类不能被继承。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">NonInherit</span> <span class="pl-k">final</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-c"><span class="pl-c">//</span> ...</span>
+};</pre></div>
+<h2>请设计一个类，只能创建一个对象(单例模式)</h2>
+<p>设计模式：</p>
+<ul>
+<li>
+<p>设计模式（Design Pattern）是一套被反复使用、多数人知晓的、经过分类的、代码设计经验的 总结。为什么会产生设计模式这样的东西呢？就像人类历史发展会产生兵法。最开始部落之间打 仗时都是人拼人的对砍。后来春秋战国时期，七国之间经常打仗，就发现打仗也是有套路的，后 来孙子就总结出了《孙子兵法》。孙子兵法也是类似。</p>
+</li>
+<li>
+<p>使用设计模式的目的：为了代码可重用性、让代码更容易被他人理解、保证代码可靠性。 设计模 式使代码编写真正工程化；设计模式是软件工程的基石脉络，如同大厦的结构一样。</p>
+</li>
+</ul>
+<h3>单例模式：</h3>
+<ul>
+<li>一个类只能创建一个对象，即单例模式，该模式可以保证系统中该类只有一个实例，并提供一个 访问它的全局访问点，该实例被所有程序模块共享。比如在某个服务器程序中，该服务器的配置信息存放在一个文件中，这些配置数据由一个单例对象统一读取，然后服务进程中的其他对象再 通过这个单例对象获取这些配置信息，这种方式简化了在复杂环境下的配置管理。</li>
+</ul>
+<p>单例模式有<strong>两种</strong>实现模式：</p>
+<h4>饿汉模式：</h4>
+<ul>
+<li>饿汉模式:就是说不管你将来用不用，程序启动时就创建一个唯一的实例对象，提前(main函数启动时)创建好实例对象
+<ul>
+<li><strong>优点：实现简单</strong></li>
+<li><strong>缺点：1、可能会导致进程启动慢、2、如果两个单例有启动先后顺序，那么饿汉无法控制</strong></li>
+</ul>
+</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">A</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">static</span> A * <span class="pl-en">GetInstance</span>()
+	{
+		<span class="pl-k">return</span> &amp;_inst;
+	}
+
+	<span class="pl-k">void</span> <span class="pl-en">Add</span>(<span class="pl-k">const</span> string &amp; key, <span class="pl-k">const</span> string &amp; value)
+	{
+		_dict[key] = value;
+	}
+
+	<span class="pl-k">void</span> <span class="pl-en">Print</span>()
+	{
+		<span class="pl-k">for</span> (<span class="pl-k">auto</span>&amp; kv : _dict)
+		{
+			cout &lt;&lt; kv.<span class="pl-smi">first</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>:<span class="pl-pds">"</span></span> &lt;&lt; kv.<span class="pl-smi">second</span> &lt;&lt; endl;
+		}
+		cout &lt;&lt; endl;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-c"><span class="pl-c">//</span> 构造函数私有</span>
+	<span class="pl-en">A</span>()
+	{}
+
+	<span class="pl-en">A</span>(<span class="pl-k">const</span> A &amp; aa) = <span class="pl-k">delete</span>;
+	A&amp; <span class="pl-k">operator</span>=(<span class="pl-k">const</span> A&amp; aa) = <span class="pl-k">delete</span>;
+
+	map&lt;string, string&gt; _dict;
+	<span class="pl-k">int</span> _n = <span class="pl-c1">0</span>;
+
+	<span class="pl-k">static</span> A _inst;
+};
+
+<span class="pl-c"><span class="pl-c">//</span> 在程序入口之前就完成单例对象的初始化</span>
+A A::_inst;
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c"><span class="pl-c">//</span> 无法创建</span>
+	<span class="pl-c"><span class="pl-c">//</span>A aa1;</span>
+	<span class="pl-c"><span class="pl-c">//</span>A aa2;</span>
+
+	<span class="pl-c"><span class="pl-c">//</span> 可以进行调用</span>
+	<span class="pl-c1">A::GetInstance</span>()-&gt;<span class="pl-c1">Add</span>(<span class="pl-s"><span class="pl-pds">"</span>sort<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>排序<span class="pl-pds">"</span></span>);
+	<span class="pl-c1">A::GetInstance</span>()-&gt;<span class="pl-c1">Add</span>(<span class="pl-s"><span class="pl-pds">"</span>left<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>左边<span class="pl-pds">"</span></span>);
+	<span class="pl-c1">A::GetInstance</span>()-&gt;<span class="pl-c1">Add</span>(<span class="pl-s"><span class="pl-pds">"</span>right<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>右边<span class="pl-pds">"</span></span>);
+	<span class="pl-c1">A::GetInstance</span>()-&gt;<span class="pl-c1">Print</span>();
+
+	<span class="pl-c"><span class="pl-c">//</span> 拷贝构造禁止使用</span>
+	<span class="pl-c"><span class="pl-c">//</span> A copy(*A::GetInstance());</span>
+	<span class="pl-c"><span class="pl-c">//</span> copy.Print();</span>
+	<span class="pl-c"><span class="pl-c">//</span> A::GetInstance()-&gt;Add("left", "剩余");</span>
+	<span class="pl-c"><span class="pl-c">//</span> copy.Print();</span>
+	<span class="pl-c"><span class="pl-c">//</span> A::GetInstance()-&gt;Print();</span>
+
+	<span class="pl-c"><span class="pl-c">//</span> 赋值也无法使用</span>
+	<span class="pl-c"><span class="pl-c">//</span> *A::GetInstance() = *A::GetInstance();</span>
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>如果这个单例对象在多线程高并发环境下频繁使用，性能要求较高，那么显然使用饿汉模式来避 免资源竞争，提高响应速度更好。</li>
+</ul>
+<h4>懒汉模式：</h4>
+<ul>
+<li>
+<p>如果单例对象构造十分耗时或者占用很多资源，比如加载插件啊， 初始化网络连接啊，读取 文件啊等等，而有可能该对象程序运行时不会用到，那么也要在程序一开始就进行初始化， 就会导致程序启动时非常的缓慢。 所以这种情况使用懒汉模式（延迟加载）更好。</p>
+</li>
+<li>
+<p><strong>优点：第一次使用实例对象时，创建对象。进程启动无负载。多个单例实例启动顺序自由控制。</strong></p>
+</li>
+<li>
+<p><strong>缺点：复杂</strong></p>
+</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">B</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">static</span> B* <span class="pl-en">GetInstance</span>()
+	{
+		<span class="pl-k">if</span> (_inst == <span class="pl-c1">nullptr</span>)
+		{
+			_inst = <span class="pl-k">new</span> B;
+		}
+
+		<span class="pl-k">return</span> _inst;
+	}
+
+	<span class="pl-k">void</span> <span class="pl-en">Add</span>(<span class="pl-k">const</span> string&amp; key, <span class="pl-k">const</span> string&amp; value)
+	{
+		_dict[key] = value;
+	}
+
+	<span class="pl-k">void</span> <span class="pl-en">Print</span>()
+	{
+		<span class="pl-k">for</span> (<span class="pl-k">auto</span>&amp; kv : _dict)
+		{
+			cout &lt;&lt; kv.<span class="pl-smi">first</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>:<span class="pl-pds">"</span></span> &lt;&lt; kv.<span class="pl-smi">second</span> &lt;&lt; endl;
+		}
+		cout &lt;&lt; endl;
+	}
+
+	<span class="pl-k">static</span> <span class="pl-k">void</span> <span class="pl-en">DelInstance</span>()
+	{
+		<span class="pl-k">if</span> (_inst)
+		{
+			<span class="pl-k">delete</span> _inst;
+			_inst = <span class="pl-c1">nullptr</span>;
+		}
+	}
+
+<span class="pl-k">private:</span>
+	<span class="pl-en">B</span>()
+	{}
+
+	<span class="pl-en">~B</span>()
+	{
+		<span class="pl-c"><span class="pl-c">//</span> 持久化：要求把数据写到文件</span>
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>数据写到文件<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	}
+
+	<span class="pl-en">B</span>(<span class="pl-k">const</span> B&amp; aa) = <span class="pl-k">delete</span>;
+	B&amp; <span class="pl-k">operator</span>=(<span class="pl-k">const</span> B&amp; aa) = <span class="pl-k">delete</span>;
+
+	map&lt;string, string&gt; _dict;
+	<span class="pl-k">int</span> _n = <span class="pl-c1">0</span>;
+	<span class="pl-k">static</span> B* _inst;
+
+	<span class="pl-c"><span class="pl-c">//</span> 期望main函数结束后自动调用</span>
+	<span class="pl-k">class</span> <span class="pl-en">gc</span>
+	{
+	<span class="pl-k">public:</span>
+		<span class="pl-en">~gc</span>()
+		{
+			<span class="pl-c1">DelInstance</span>();
+		}
+	};
+	<span class="pl-k">static</span> gc _gc;
+};
+
+B* B::_inst = <span class="pl-c1">nullptr</span>;
+
+<span class="pl-c"><span class="pl-c">//</span> 期望main函数结束后自动调用</span>
+B::gc B::_gc;
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c1">B::GetInstance</span>()-&gt;<span class="pl-c1">Add</span>(<span class="pl-s"><span class="pl-pds">"</span>sort<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>排序<span class="pl-pds">"</span></span>);
+	<span class="pl-c1">B::GetInstance</span>()-&gt;<span class="pl-c1">Add</span>(<span class="pl-s"><span class="pl-pds">"</span>left<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>左边<span class="pl-pds">"</span></span>);
+	<span class="pl-c1">B::GetInstance</span>()-&gt;<span class="pl-c1">Add</span>(<span class="pl-s"><span class="pl-pds">"</span>right<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>右边<span class="pl-pds">"</span></span>);
+	<span class="pl-c1">B::GetInstance</span>()-&gt;<span class="pl-c1">Print</span>();
+
+	<span class="pl-c1">B::GetInstance</span>()-&gt;<span class="pl-c1">Add</span>(<span class="pl-s"><span class="pl-pds">"</span>right<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>xxx<span class="pl-pds">"</span></span>);
+	<span class="pl-c1">B::GetInstance</span>()-&gt;<span class="pl-c1">Print</span>();
+	
+	<span class="pl-c"><span class="pl-c">//</span> 显示的调用释放</span>
+	<span class="pl-c1">B::DelInstance</span>();
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>xxxxxxxxxxx<span class="pl-pds">"</span></span> &lt;&lt; endl;
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h3>懒汉模式的线程安全问题</h3>
+<ul>
+<li>懒汉模式的线程安全问题已经在 <strong>Linux多线程【线程互斥】</strong> 中讲解：
+<ul>
+<li>大概实现如下：</li>
+</ul>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/43e6f34ce2d1c021c7f68caa5238aa9c707b210209d5bbfe78f76a6cdaac219b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33323535616134356132373834346266623338303836326335323830663638652e706e67"><img src="https://camo.githubusercontent.com/43e6f34ce2d1c021c7f68caa5238aa9c707b210209d5bbfe78f76a6cdaac219b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33323535616134356132373834346266623338303836326335323830663638652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/3255aa45a27844bfb380862c5280f68e.png" style="max-width: 100%;"></a></p>
+<ul>
+<li><strong>局部的静态对象，是在第一次调用时初始化</strong></li>
+<li>C++11之前，他不是，也就说, C++11之前的编译器，那么这个代码不安全的</li>
+<li>C++11之后可以保证局部静态对象的初始化是线程安全的，只初始化一次</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Singleton</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-c"><span class="pl-c">//</span> 提供获取单例对象的接口函数</span>
+	<span class="pl-k">static</span> Singleton&amp; <span class="pl-en">GetInstance</span>()
+	{
+		<span class="pl-c"><span class="pl-c">//</span> 局部的静态对象，是在第一次调用时初始化</span>
+		<span class="pl-c"><span class="pl-c">//</span> C++11之前，他不是，也就说, C++11之前的编译器，那么这个代码不安全的</span>
+		<span class="pl-c"><span class="pl-c">//</span> C++11之后可以保证局部静态对象的初始化是线程安全的，只初始化一次</span>
+		<span class="pl-k">static</span> Singleton inst;
+
+		<span class="pl-k">return</span> inst;
+	}
+
+<span class="pl-k">private:</span>
+	<span class="pl-c"><span class="pl-c">//</span> 构造函数私有</span>
+	<span class="pl-en">Singleton</span>()
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Singleton()<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	}
+	<span class="pl-c"><span class="pl-c">//</span> 防拷贝</span>
+	<span class="pl-en">Singleton</span>(<span class="pl-k">const</span> Singleton&amp; s) = <span class="pl-k">delete</span>;
+	Singleton&amp; <span class="pl-k">operator</span>=(<span class="pl-k">const</span> Singleton&amp; s) = <span class="pl-k">delete</span>;
+};
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c1">Singleton::GetInstance</span>();
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h4>工厂模式</h4>
+<ul>
+<li>用于创建对象的一个接口，让子类决定实例化哪个类</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Product</span> {
+<span class="pl-k">public:</span>
+    <span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">show</span>() = 0;
+};
+ 
+<span class="pl-k">class</span> <span class="pl-en">ConcreteProduct</span> : <span class="pl-k">public</span> <span class="pl-en">Product</span> {
+<span class="pl-k">public:</span>
+    <span class="pl-k">void</span> <span class="pl-en">show</span>() <span class="pl-k">override</span> {
+        std::cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>ConcreteProduct Show<span class="pl-pds">"</span></span> &lt;&lt; std::endl;
+    }
+};
+ 
+<span class="pl-k">class</span> <span class="pl-en">Factory</span> {
+<span class="pl-k">public:</span>
+    <span class="pl-k">virtual</span> Product* <span class="pl-en">createProduct</span>() = 0;
+};
+ 
+<span class="pl-k">class</span> <span class="pl-en">ConcreteFactory</span> : <span class="pl-k">public</span> <span class="pl-en">Factory</span> {
+<span class="pl-k">public:</span>
+    Product* <span class="pl-en">createProduct</span>() <span class="pl-k">override</span> {
+        <span class="pl-k">return</span> <span class="pl-k">new</span> <span class="pl-c1">ConcreteProduct</span>();
+    }
+};</pre></div>
+<h4>观察者模式</h4>
+<ul>
+<li>定义了一种一对多的依赖关系，让多个观察者对象同时监听某一主题对象</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>iostream<span class="pl-pds">&gt;</span></span>
+#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>list<span class="pl-pds">&gt;</span></span>
+#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>string<span class="pl-pds">&gt;</span></span>
+ 
+<span class="pl-k">class</span> <span class="pl-en">Observer</span> {
+<span class="pl-k">public:</span>
+    <span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">update</span>(std::string message) = 0;
+};
+ 
+<span class="pl-k">class</span> <span class="pl-en">ConcreteObserver</span> : <span class="pl-k">public</span> <span class="pl-en">Observer</span> {
+<span class="pl-k">public:</span>
+    <span class="pl-k">void</span> <span class="pl-en">update</span>(std::string message) <span class="pl-k">override</span> {
+        std::cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Received message: <span class="pl-pds">"</span></span> &lt;&lt; message &lt;&lt; std::endl;
+    }
+};
+ 
+<span class="pl-k">class</span> <span class="pl-en">Subject</span> {
+<span class="pl-k">private:</span>
+    std::list&lt;Observer*&gt; observers;
+    std::string message;
+ 
+<span class="pl-k">public:</span>
+    <span class="pl-k">void</span> <span class="pl-en">attach</span>(Observer* observer) {
+        observers.<span class="pl-c1">push_back</span>(observer);
+    }
+ 
+    <span class="pl-k">void</span> <span class="pl-en">notify</span>() {
+        <span class="pl-k">for</span> (<span class="pl-k">auto</span> observer : observers) {
+            observer-&gt;<span class="pl-c1">update</span>(message);
+        }
+    }
+ 
+    <span class="pl-k">void</span> <span class="pl-en">setMessage</span>(std::string msg) {
+        message = msg;
+    }
+};
+ 
+<span class="pl-k">int</span> <span class="pl-en">main</span>() {
+    Subject subject;
+    Observer* observer = <span class="pl-k">new</span> <span class="pl-c1">ConcreteObserver</span>();
+    subject.<span class="pl-c1">attach</span>(observer);
+    subject.<span class="pl-c1">setMessage</span>(<span class="pl-s"><span class="pl-pds">"</span>Hello, World!<span class="pl-pds">"</span></span>);
+    subject.<span class="pl-c1">notify</span>();
+    <span class="pl-k">delete</span> observer;
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

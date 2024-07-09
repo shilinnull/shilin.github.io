@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## C语言的输入与输出
+
+- C语言的输入与输出 C语言中我们用到的最频繁的输入输出方式就是`scanf()`与`printf()`。">
+<meta property="og:title" content="22. C++的IO流操作">
+<meta property="og:description" content="## C语言的输入与输出
+
+- C语言的输入与输出 C语言中我们用到的最频繁的输入输出方式就是`scanf()`与`printf()`。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/22.%20C%2B%2B-de-IO-liu-cao-zuo.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>22. C++的IO流操作</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">22. C++的IO流操作</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/24" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>C语言的输入与输出</h2>
+<ul>
+<li>C语言的输入与输出 C语言中我们用到的最频繁的输入输出方式就是<code class="notranslate">scanf()</code>与<code class="notranslate">printf()</code>。 <code class="notranslate">scanf()</code>: 从标准输入设备(键盘)读取数据，并将值存放在变量中。<code class="notranslate">printf()</code>: 将指定的文字/字符串输出到标准输出设备(屏幕)。 注意宽度输出和精度输出控制。C语言借助了相应的缓冲区来进行输入与输出。</li>
+</ul>
+<p><strong>对输入输出缓冲区的理解：</strong></p>
+<ol>
+<li>可以屏蔽掉低级I/O的实现，低级I/O的实现依赖操作系统本身内核的实现，所以如果能够屏 蔽这部分的差异，可以很容易写出可移植的程序。</li>
+<li>可以使用这部分的内容实现“行”读取的行为，对于计算机而言是没有“行”这个概念，有了这 部分，就可以定义“行”的概念，然后解析缓冲区的内容，返回一个“行”。</li>
+</ol>
+<h2>流是什么</h2>
+<ul>
+<li>
+<p>“流”即是流动的意思，是物质从一处向另一处流动的过程，是对一种有序连续且具有方向性的数 据（ 其单位可以是bit,byte,packet ）的抽象描述。</p>
+</li>
+<li>
+<p>C++流是指信息从外部输入设备（如键盘）向计算机内部（如内存）输入和从内存向外部输出设 备（显示器）输出的过程。这种输入输出的过程被形象的比喻为“流”。</p>
+</li>
+</ul>
+<p>它的特性是：<strong>有序连续</strong>、<strong>具有方向性</strong></p>
+<ul>
+<li>为了实现这种流动，C++定义了I/O标准类库，这些每个类都称为流/流类，用以完成某方面的功 能</li>
+</ul>
+<h2>C++IO流</h2>
+<ul>
+<li>C++系统实现了一个庞大的类库，其中ios为基类，其他类都是直接或间接派生自ios类</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0a1ab432fe2c7065adb0cc5e6564b1ae7183d908769cfbdd64d1b730be6770ff/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65616435323666396135366234396138623035623339386234363463616234312e706e67"><img src="https://camo.githubusercontent.com/0a1ab432fe2c7065adb0cc5e6564b1ae7183d908769cfbdd64d1b730be6770ff/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65616435323666396135366234396138623035623339386234363463616234312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/ead526f9a56b49a8b05b398b464cab41.png" style="max-width: 100%;"></a></p>
+<h2>C++标准IO流</h2>
+<ul>
+<li>C++标准库提供了4个全局流对象<strong>cin、cout、cerr、clog</strong>，使用cout进行标准输出，即数据从内 存流向控制台(显示器)。使用cin进行标准输入即数据通过键盘输入到程序中，同时C++标准库还 提供了<code class="notranslate">cerr</code>用来进行标准错误的输出，以及<code class="notranslate">clog</code>进行日志的输出，从上图可以看出，cout、 cerr、clog是ostream类的三个不同的对象，因此这三个对象现在基本没有区别，只是应用场景不 同。</li>
+</ul>
+<p>注意：</p>
+<ol>
+<li>
+<p>cin为缓冲流。键盘输入的数据保存在缓冲区中，当要提取时，是从缓冲区中拿。如果一次输 入过多，会留在那儿慢慢用，如果输入错了，必须在回车之前修改，如果回车键按下就无法 挽回了。只有把输入缓冲区中的数据取完后，才要求输入新的数据。</p>
+</li>
+<li>
+<p>输入的数据类型必须与要提取的数据类型一致，否则出错。出错只是在流的状态字<code class="notranslate">state</code>中对 应位置位（置1），程序继续。</p>
+</li>
+<li>
+<p>空格和回车都可以作为数据之间的分格符，所以多个数据可以在一行输入，也可以分行输 入。但如果是字符型和字符串，则空格（ASCII码为32）<strong>无法用cin输入</strong>，字符串中也不能有空格。回车符也无法读入。</p>
+</li>
+<li>
+<p>cin和cout可以直接输入和输出内置类型数据，原因：<strong>标准库已经将所有内置类型的输入和 输出全部重载了</strong></p>
+</li>
+<li>
+<p>对于自定义类型，如果要支持cin和cout的标准输入输出，需要对<code class="notranslate">&lt;&lt;</code>和<code class="notranslate">&gt;&gt;</code>进行重载。</p>
+</li>
+<li>
+<p>在线OJ中的输入和输出：</p>
+<ul>
+<li>对于IO类型的算法，一般都需要循环输入：</li>
+<li>输出：严格按照题目的要求进行，多一个少一个空格都不行。</li>
+<li>连续输入时，vs系列编译器下在输入ctrl+Z时结束</li>
+</ul>
+</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span> 单个元素循环输入 </span>
+<span class="pl-k">while</span>(cin&gt;&gt;a) 
+{ 
+	<span class="pl-c"><span class="pl-c">//</span> ... </span>
+} 
+<span class="pl-c"><span class="pl-c">//</span> 多个元素循环输入 </span>
+<span class="pl-k">while</span>(c&gt;&gt;a&gt;&gt;b&gt;&gt;c) 
+{ 
+	<span class="pl-c"><span class="pl-c">//</span> ... </span>
+} 
+<span class="pl-c"><span class="pl-c">//</span> 整行接收 </span>
+<span class="pl-k">while</span>(cin&gt;&gt;str) 
+{
+	<span class="pl-c"><span class="pl-c">//</span> ... </span>
+}</pre></div>
+<ol start="7">
+<li>istream类型对象转换为逻辑条件判断值</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate">istream&amp; <span class="pl-k">operator</span>&gt;&gt; (<span class="pl-k">int</span>&amp; val); 
+<span class="pl-k">explicit</span> <span class="pl-k">operator</span> <span class="pl-en">bool</span>() <span class="pl-k">const</span>;</pre></div>
+<ul>
+<li>实际上我们看到使用while(cin&gt;&gt;i)去流中提取对象数据时，调用的是operator&gt;&gt;，返回值是 istream类型的对象，那么这里可以做逻辑条件值，源自于istream的对象又调用了operator bool，operator bool调用时如果接收流失败，或者有结束标志，则返回false。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Date</span>
+{
+	<span class="pl-k">friend</span> ostream&amp; <span class="pl-k">operator</span> &lt;&lt; (ostream&amp; out, <span class="pl-k">const</span> Date&amp; d);
+	<span class="pl-k">friend</span> istream&amp; <span class="pl-k">operator</span> &gt;&gt; (istream&amp; in, Date&amp; d);
+<span class="pl-k">public:</span>
+	<span class="pl-en">Date</span>(<span class="pl-k">int</span> year = <span class="pl-c1">1</span>, <span class="pl-k">int</span> month = <span class="pl-c1">1</span>, <span class="pl-k">int</span> day = <span class="pl-c1">1</span>)
+		:_year(year)
+		, _month(month)
+		, _day(day)
+	{}
+
+	<span class="pl-k">operator</span> <span class="pl-en">bool</span>()
+	{
+		<span class="pl-c"><span class="pl-c">//</span> 这里是随意写的，假设输入_year为0，则结束</span>
+		<span class="pl-k">if</span> (_year == <span class="pl-c1">0</span>)
+			<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+		<span class="pl-k">else</span>
+			<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _year;
+	<span class="pl-k">int</span> _month;
+	<span class="pl-k">int</span> _day;
+};
+
+istream&amp; <span class="pl-k">operator</span> &gt;&gt; (istream&amp; in, Date&amp; d)
+{
+	in &gt;&gt; d.<span class="pl-smi">_year</span> &gt;&gt; d.<span class="pl-smi">_month</span> &gt;&gt; d.<span class="pl-smi">_day</span>;
+	<span class="pl-k">return</span> in;
+}
+
+ostream&amp; <span class="pl-k">operator</span> &lt;&lt; (ostream&amp; out, <span class="pl-k">const</span> Date&amp; d)
+{
+	out &lt;&lt; d.<span class="pl-smi">_year</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span> &lt;&lt; d.<span class="pl-smi">_month</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span> &lt;&lt; d.<span class="pl-smi">_day</span>;
+	<span class="pl-k">return</span> out;
+}
+
+<span class="pl-c"><span class="pl-c">//</span> C++ IO流，使用面向对象+运算符重载的方式</span>
+<span class="pl-c"><span class="pl-c">//</span> 能更好的兼容自定义类型，流插入和流提取</span>
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c"><span class="pl-c">//</span> 自动识别类型的本质--函数重载</span>
+	<span class="pl-c"><span class="pl-c">//</span> 内置类型可以直接使用--因为库里面ostream类型已经实现了</span>
+	<span class="pl-k">int</span> i = <span class="pl-c1">1</span>;
+	<span class="pl-k">double</span> j = <span class="pl-c1">2.2</span>;
+	cout &lt;&lt; i &lt;&lt; endl;
+	cout &lt;&lt; j &lt;&lt; endl;
+
+	<span class="pl-c"><span class="pl-c">//</span> 自定义类型则需要我们自己重载&lt;&lt; 和 &gt;&gt;</span>
+	Date <span class="pl-smi">d</span>(<span class="pl-c1">2022</span>, <span class="pl-c1">4</span>, <span class="pl-c1">10</span>);
+	cout &lt;&lt; d;
+	<span class="pl-k">while</span> (d)
+	{
+		cin &gt;&gt; d;
+		cout &lt;&lt; d;
+	}
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h2>C++文件IO流</h2>
+<p>C++根据文件内容的数据格式分为<strong>二进制文件</strong>和<strong>文本文件</strong>。采用文件流对象操作文件的一般步骤：</p>
+<ol>
+<li>
+<p>定义一个文件流对象</p>
+<ul>
+<li>ifstream ifile(只输入用)</li>
+<li>ofstream ofile(只输出用)</li>
+<li>fstream iofile(既输入又输出用)</li>
+</ul>
+</li>
+<li>
+<p>使用文件流对象的成员函数打开一个磁盘文件，使得文件流对象和磁盘文件之间建立联系</p>
+</li>
+<li>
+<p>使用提取和插入运算符对文件进行读写操作，或使用成员函数进行读写</p>
+</li>
+<li>
+<p>关闭文件</p>
+</li>
+</ol>
+<h3>二进制读写</h3>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span> 二进制读写</span>
+#<span class="pl-k">include</span><span class="pl-s"><span class="pl-pds">&lt;</span>fstream<span class="pl-pds">&gt;</span></span>
+
+<span class="pl-k">struct</span> <span class="pl-en">ServerInfo</span>
+{
+	<span class="pl-k">char</span> _address[<span class="pl-c1">32</span>];
+	<span class="pl-c"><span class="pl-c">//</span> 不要使用string</span>
+	<span class="pl-c"><span class="pl-c">//</span> string _address;</span>
+	<span class="pl-k">double</span> _x;
+
+	Date _date;
+};
+
+<span class="pl-k">class</span> <span class="pl-en">BinIO</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">BinIO</span>(<span class="pl-k">const</span> <span class="pl-k">char</span>* filename = <span class="pl-s"><span class="pl-pds">"</span>info.bin<span class="pl-pds">"</span></span>)
+		:_filename(filename)
+	{}
+
+	<span class="pl-k">void</span> <span class="pl-en">Write</span>(<span class="pl-k">const</span> ServerInfo&amp; winfo)
+	{
+		<span class="pl-c"><span class="pl-c">//</span> 写是ofstream</span>
+		ofstream <span class="pl-smi">ofs</span>(_filename, ofstream::out | ofstream::binary);
+		ofs.<span class="pl-c1">write</span>((<span class="pl-k">char</span>*)&amp;winfo, <span class="pl-k">sizeof</span>(winfo));
+		ofs.<span class="pl-c1">close</span>();
+	}
+
+	<span class="pl-k">void</span> <span class="pl-en">Read</span>(<span class="pl-k">const</span> ServerInfo&amp; rinfo)
+	{
+		<span class="pl-c"><span class="pl-c">//</span> 读是ifstream</span>
+		ifstream <span class="pl-smi">ifs</span>(_filename, ifstream::in | ifstream::binary);
+		ifs.<span class="pl-c1">read</span>((<span class="pl-k">char</span>*)&amp;rinfo, <span class="pl-k">sizeof</span>(rinfo));
+		ifs.<span class="pl-c1">close</span>();
+	}
+
+<span class="pl-k">private:</span>
+	string _filename;
+};
+
+
+<span class="pl-c"><span class="pl-c">//</span> 一个进程读写</span>
+<span class="pl-c"><span class="pl-c">//</span>int main()</span>
+<span class="pl-c"><span class="pl-c">//</span>{</span>
+<span class="pl-c"><span class="pl-c">//</span>	// 二进制写文件</span>
+<span class="pl-c"><span class="pl-c">//</span>	ServerInfo winfo = { "192.168.1.1", 12.13, { 2022, 4, 10 } };</span>
+<span class="pl-c"><span class="pl-c">//</span>	BinIO bin;</span>
+<span class="pl-c"><span class="pl-c">//</span>	bin.Write(winfo);</span>
+<span class="pl-c"><span class="pl-c">//</span></span>
+<span class="pl-c"><span class="pl-c">//</span>	// 读文件</span>
+<span class="pl-c"><span class="pl-c">//</span>	ServerInfo rinfo;</span>
+<span class="pl-c"><span class="pl-c">//</span>	BinIO bin;</span>
+<span class="pl-c"><span class="pl-c">//</span>	bin.Read(rinfo);</span>
+<span class="pl-c"><span class="pl-c">//</span></span>
+<span class="pl-c"><span class="pl-c">//</span>	cout &lt;&lt; rinfo._address &lt;&lt; endl;</span>
+<span class="pl-c"><span class="pl-c">//</span>	cout &lt;&lt; rinfo._x &lt;&lt; endl;</span>
+<span class="pl-c"><span class="pl-c">//</span>	cout &lt;&lt; rinfo._date &lt;&lt; endl;</span>
+<span class="pl-c"><span class="pl-c">//</span></span>
+<span class="pl-c"><span class="pl-c">//</span>	return 0;</span>
+<span class="pl-c"><span class="pl-c">//</span>}</span>
+
+<span class="pl-c"><span class="pl-c">//</span> 写操作</span>
+<span class="pl-c"><span class="pl-c">//</span>int main()</span>
+<span class="pl-c"><span class="pl-c">//</span>{</span>
+<span class="pl-c"><span class="pl-c">//</span>	// 二进制写文件</span>
+<span class="pl-c"><span class="pl-c">//</span>	ServerInfo winfo = { "192.168.1.1", 12.13, { 2022, 4, 10 } };</span>
+<span class="pl-c"><span class="pl-c">//</span>	BinIO bin;</span>
+<span class="pl-c"><span class="pl-c">//</span>	bin.Write(winfo);</span>
+<span class="pl-c"><span class="pl-c">//</span></span>
+<span class="pl-c"><span class="pl-c">//</span>	return 0;</span>
+<span class="pl-c"><span class="pl-c">//</span>}</span>
+
+
+<span class="pl-c"><span class="pl-c">//</span> 读操作</span>
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c"><span class="pl-c">//</span> 读文件</span>
+	ServerInfo rinfo;
+	BinIO bin;
+	bin.<span class="pl-c1">Read</span>(rinfo);
+
+	cout &lt;&lt; rinfo.<span class="pl-smi">_address</span> &lt;&lt; endl;
+	cout &lt;&lt; rinfo.<span class="pl-smi">_x</span> &lt;&lt; endl;
+	cout &lt;&lt; rinfo.<span class="pl-smi">_date</span> &lt;&lt; endl;
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>可以看到是正常的</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/173956fdd771d593f895bf909a3b29a007ed00e85a6ad2b040dc3d424b90ffbf/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38303434333131383361623134373566626462366532386665386635666163662e706e67"><img src="https://camo.githubusercontent.com/173956fdd771d593f895bf909a3b29a007ed00e85a6ad2b040dc3d424b90ffbf/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38303434333131383361623134373566626462366532386665386635666163662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/804431183ab1475fbdb6e28fe8f5facf.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>当把这里的<code class="notranslate">char _address[32]</code>换成<code class="notranslate">string</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2cb1c6306b9225cefe86486c5bf656c8deaa45c086b0c7115b7029a835dbc1c4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66376437666263306233303834393135386335633438663339333732333136342e706e67"><img src="https://camo.githubusercontent.com/2cb1c6306b9225cefe86486c5bf656c8deaa45c086b0c7115b7029a835dbc1c4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66376437666263306233303834393135386335633438663339333732333136342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/f7d7fbc0b30849158c5c48f393723164.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>代码就显示异常退出了，这里是因为同一个进程写和读是有<strong>浅拷贝</strong>的风险</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f34ccd3d2169f7ccd90e6b4dc7e30857e9bd1c1f2c11ab53363e70489cd48bdd/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32373561353036313663646434613736623138336630393162653864653365372e706e67"><img src="https://camo.githubusercontent.com/f34ccd3d2169f7ccd90e6b4dc7e30857e9bd1c1f2c11ab53363e70489cd48bdd/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32373561353036313663646434613736623138336630393162653864653365372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/275a50616cdd4a76b183f091be8de3e7.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>一个进程读，过一会一个进程写，会出现野指针访问</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/34682f86ea94fd438cca954133e8814664d7430ae04c0daba46cdb1c165e183a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62363666303937313238306534323031396539316164323632316631326434302e706e67"><img src="https://camo.githubusercontent.com/34682f86ea94fd438cca954133e8814664d7430ae04c0daba46cdb1c165e183a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62363666303937313238306534323031396539316164323632316631326434302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/b66f0971280e42019e91ad2621f12d40.png" style="max-width: 100%;"></a></p>
+<h3>文本读写</h3>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">TextIO</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">TextIO</span>(<span class="pl-k">const</span> <span class="pl-k">char</span>* filename = <span class="pl-s"><span class="pl-pds">"</span>info.text<span class="pl-pds">"</span></span>)
+		:_filename(filename)
+	{}
+
+	<span class="pl-k">void</span> <span class="pl-en">Write</span>(<span class="pl-k">const</span> ServerInfo&amp; winfo)
+	{
+		ofstream <span class="pl-smi">ofs</span>(_filename);
+		ofs &lt;&lt; winfo.<span class="pl-smi">_address</span> &lt;&lt; endl;
+		ofs &lt;&lt; winfo.<span class="pl-smi">_x</span> &lt;&lt; endl;
+		ofs &lt;&lt; winfo.<span class="pl-smi">_date</span> &lt;&lt; endl;
+	}
+
+	<span class="pl-k">void</span> <span class="pl-en">Read</span>(ServerInfo&amp; rinfo)
+	{
+		ifstream <span class="pl-smi">ifs</span>(_filename);
+		ifs &gt;&gt; rinfo.<span class="pl-smi">_address</span>;
+		ifs &gt;&gt; rinfo.<span class="pl-smi">_x</span>;
+		ifs &gt;&gt; rinfo.<span class="pl-smi">_date</span>;
+	}
+
+<span class="pl-k">private:</span>
+	string _filename;
+};
+
+<span class="pl-c"><span class="pl-c">//</span> 写</span>
+<span class="pl-c"><span class="pl-c">//</span>int main()</span>
+<span class="pl-c"><span class="pl-c">//</span>{</span>
+<span class="pl-c"><span class="pl-c">//</span>	ServerInfo winfo = { "192.168.1.1", 12.13, { 2022, 4, 10 } };</span>
+<span class="pl-c"><span class="pl-c">//</span></span>
+<span class="pl-c"><span class="pl-c">//</span>	TextIO text;</span>
+<span class="pl-c"><span class="pl-c">//</span>	text.Write(winfo);</span>
+<span class="pl-c"><span class="pl-c">//</span></span>
+<span class="pl-c"><span class="pl-c">//</span>	return 0;</span>
+<span class="pl-c"><span class="pl-c">//</span>}</span>
+
+<span class="pl-c"><span class="pl-c">//</span> 读</span>
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	ServerInfo info;
+	TextIO text;
+	text.<span class="pl-c1">Read</span>(info);
+
+	cout &lt;&lt; info.<span class="pl-smi">_address</span> &lt;&lt; endl;
+	cout &lt;&lt; info.<span class="pl-smi">_x</span> &lt;&lt; endl;
+	cout &lt;&lt; info.<span class="pl-smi">_date</span> &lt;&lt; endl;
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h2>stringstream的简单介绍</h2>
+<ul>
+<li>在C语言中，如果想要将一个整形变量的数据转化为字符串格式，如何去做？</li>
+</ul>
+<ol>
+<li>使用<code class="notranslate">itoa()</code>函数</li>
+<li>使用<code class="notranslate">sprintf()</code>函数</li>
+</ol>
+<ul>
+<li>但是两个函数在转化时，都得需要先给出保存结果的空间，那空间要给多大呢，就不太好界定， 而且转化格式不匹配时，可能还会得到错误的结果甚至程序崩溃。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">int</span> n = <span class="pl-c1">123456789</span>;
+	<span class="pl-k">char</span> s1[<span class="pl-c1">32</span>];
+	<span class="pl-c1">_itoa</span>(n, s1, <span class="pl-c1">10</span>);
+	<span class="pl-k">char</span> s2[<span class="pl-c1">32</span>];
+	<span class="pl-c1">sprintf</span>(s2, <span class="pl-s"><span class="pl-pds">"</span>%d<span class="pl-pds">"</span></span>, n);
+	<span class="pl-k">char</span> s3[<span class="pl-c1">32</span>];
+	<span class="pl-c1">sprintf</span>(s3, <span class="pl-s"><span class="pl-pds">"</span>%f<span class="pl-pds">"</span></span>, n);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>在C++中，可以使用stringstream类对象来避开此问题。</li>
+<li>在程序中如果想要使用stringstream，必须要包含头文件。在该头文件下，标准库三个类：<br>
+<code class="notranslate">istringstream</code>、<code class="notranslate">ostringstream</code> 和 <code class="notranslate">stringstream</code>，分别用来进行流的输入、输出和输入输出操作，本文主要介绍<strong>stringstream</strong>。</li>
+</ul>
+<p><strong>stringstream</strong>主要可以用来：</p>
+<ol>
+<li>将数值类型数据格式化为字符串</li>
+</ol>
+<ul>
+<li>注意多次转换时，必须使用clear将上次转换状态清空掉</li>
+<li><code class="notranslate">stringstream</code>在转换结尾时(即最后一个转换后),会将其内部状态设置为<code class="notranslate">badbit</code>，因此下一次转换是必须调用<code class="notranslate">clear()</code>将状态重置为<code class="notranslate">goodbit</code>才可以转换</li>
+<li>但是<code class="notranslate">clear()</code>不会将<code class="notranslate">stringstream</code>底层字符串清空掉，将<code class="notranslate">stringstream</code>底层管理string对象设置成<code class="notranslate">""</code>，否则多次转换时，会将结果全部累积在底层string对象中</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">int</span> a = <span class="pl-c1">12345678</span>;
+	<span class="pl-c"><span class="pl-c">//</span> 将一个整形变量转化为字符串，存储到string类对象中</span>
+	stringstream s;
+	s &lt;&lt; a;
+	string sa;
+	s &gt;&gt; sa;
+	cout &lt;&lt; sa &lt;&lt; endl;
+
+	s.<span class="pl-c1">str</span>(<span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>);
+	s.<span class="pl-c1">clear</span>(); <span class="pl-c"><span class="pl-c">//</span> 清空s, 不清空会转化失败</span>
+
+	<span class="pl-k">double</span> d = <span class="pl-c1">12.34</span>;
+	s &lt;&lt; d;
+	s &gt;&gt; sa;
+	string <span class="pl-smi">sValue</span>;
+	<span class="pl-smi">sValue</span> = s.<span class="pl-c1">str</span>(); <span class="pl-c"><span class="pl-c">//</span> str()方法：返回stringsteam中管理的string类型</span>
+	cout &lt;&lt; <span class="pl-smi">sValue</span> &lt;&lt; endl;
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7af0a503d24b68b58f3dcd8ef9816ee37ab53ad8ca99acfcfcc545068999e701/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61666136623235313738663934353964383261343732396534343238663938362e706e67"><img src="https://camo.githubusercontent.com/7af0a503d24b68b58f3dcd8ef9816ee37ab53ad8ca99acfcfcc545068999e701/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61666136623235313738663934353964383261343732396534343238663938362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/afa6b25178f9459d82a4729e4428f986.png" style="max-width: 100%;"></a></p>
+<ol start="2">
+<li>字符串拼接</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c"><span class="pl-c">//</span> C语言的方式拼接</span>
+	<span class="pl-k">char</span> sql1[<span class="pl-c1">128</span>];
+	<span class="pl-k">char</span> name[<span class="pl-c1">10</span>];
+	<span class="pl-c1">scanf</span>(<span class="pl-s"><span class="pl-pds">"</span>%s<span class="pl-pds">"</span></span>, name);
+
+	<span class="pl-c1">sprintf</span>(sql1, <span class="pl-s"><span class="pl-pds">"</span>select * from t_scroe where name = '%s'<span class="pl-pds">"</span></span>, name);
+	<span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>%s<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, sql1);
+
+	<span class="pl-c"><span class="pl-c">//</span> C++的方式拼接</span>
+	string sql2;
+	sql2 += <span class="pl-s"><span class="pl-pds">"</span>select * from t_scroe where name = '<span class="pl-pds">"</span></span>;
+	sql2 += name;
+	sql2 += <span class="pl-s"><span class="pl-pds">"</span>'<span class="pl-pds">"</span></span>;
+	cout &lt;&lt; sql2 &lt;&lt; endl;
+
+	<span class="pl-c"><span class="pl-c">//</span> 使用ostringstream方法一：分开写</span>
+	Date <span class="pl-smi">d</span>(<span class="pl-c1">2024</span>, <span class="pl-c1">1</span>, <span class="pl-c1">19</span>);
+	ostringstream oss;
+	oss &lt;&lt; d;
+	string sql3;
+	sql3 += <span class="pl-s"><span class="pl-pds">"</span>select * from t_data where date = '<span class="pl-pds">"</span></span>;
+	sql3 += oss.<span class="pl-c1">str</span>();
+	sql3 += <span class="pl-s"><span class="pl-pds">"</span>'<span class="pl-pds">"</span></span>;
+	cout &lt;&lt; sql3 &lt;&lt; endl;
+
+	<span class="pl-c"><span class="pl-c">//</span> 使用ostringstream方法二：直接写</span>
+	ostringstream sqloss;
+	sqloss &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>select * from t_data where date = '<span class="pl-pds">"</span></span>&lt;&lt; d &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>'<span class="pl-pds">"</span></span>;
+	cout &lt;&lt; sqloss.<span class="pl-c1">str</span>() &lt;&lt; endl;
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ol start="3">
+<li>序列化和反序列化结构数据</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">struct</span> <span class="pl-en">ChatInfo</span>
+{
+	string _name; <span class="pl-c"><span class="pl-c">//</span> 名字</span>
+	<span class="pl-k">int</span> _id;      <span class="pl-c"><span class="pl-c">//</span> id</span>
+	Date _date;   <span class="pl-c"><span class="pl-c">//</span> 时间</span>
+	string _msg;  <span class="pl-c"><span class="pl-c">//</span> 聊天信息</span>
+};
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	ChatInfo winfo = { <span class="pl-s"><span class="pl-pds">"</span>张三<span class="pl-pds">"</span></span>, <span class="pl-c1">135246</span>, { <span class="pl-c1">2022</span>, <span class="pl-c1">4</span>, <span class="pl-c1">10</span> }, <span class="pl-s"><span class="pl-pds">"</span>晚上一起看电影吧<span class="pl-pds">"</span></span> };
+	stringstream oss;
+	oss &lt;&lt; winfo.<span class="pl-smi">_name</span> &lt;&lt; endl;
+	oss &lt;&lt; winfo.<span class="pl-smi">_id</span> &lt;&lt; endl;
+	oss &lt;&lt; winfo.<span class="pl-smi">_date</span> &lt;&lt; endl;
+	oss &lt;&lt; winfo.<span class="pl-smi">_msg</span> &lt;&lt; endl;
+	cout &lt;&lt; oss.<span class="pl-c1">str</span>() &lt;&lt; endl;
+
+	<span class="pl-c"><span class="pl-c">//</span> 网络输出</span>
+	ChatInfo rinfo;
+	string str = oss.<span class="pl-c1">str</span>();
+	stringstream <span class="pl-smi">iss</span>(str);
+	iss &gt;&gt; rinfo.<span class="pl-smi">_name</span>;
+	iss &gt;&gt; rinfo.<span class="pl-smi">_id</span>;
+	iss &gt;&gt; rinfo.<span class="pl-smi">_date</span>;
+	iss &gt;&gt; rinfo.<span class="pl-smi">_msg</span>;
+
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>-------------------------------------------------------<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>姓名：<span class="pl-pds">"</span></span> &lt;&lt; rinfo.<span class="pl-smi">_name</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>(<span class="pl-pds">"</span></span> &lt;&lt; rinfo.<span class="pl-smi">_id</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>) <span class="pl-pds">"</span></span>;
+	cout &lt;&lt; rinfo.<span class="pl-smi">_date</span> &lt;&lt; endl;
+	cout &lt;&lt; rinfo.<span class="pl-smi">_name</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>:&gt;<span class="pl-pds">"</span></span> &lt;&lt; rinfo.<span class="pl-smi">_msg</span> &lt;&lt; endl;
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>-------------------------------------------------------<span class="pl-pds">"</span></span> &lt;&lt; endl;
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p>注意：</p>
+<ol>
+<li><code class="notranslate">stringstream</code>实际是在其底层维护了一个string类型的对象用来保存结果。</li>
+<li>多次数据类型转化时，一定要用<code class="notranslate">clear()</code>来清空，才能正确转化，但<code class="notranslate">clear()</code>不会将<code class="notranslate">stringstream</code>底层的<code class="notranslate">string</code>对象清空。</li>
+<li>可以使用<code class="notranslate">s.str("")</code>方法将底层<code class="notranslate">string</code>对象设置为 <strong>"空字符串"</strong>。</li>
+<li>可以使用<code class="notranslate">s.str()</code>将让<code class="notranslate">stringstream</code>返回其底层的string对象。</li>
+<li><code class="notranslate">stringstream</code>使用string类对象代替字符数组，可以避免缓冲区溢出的危险，而且其会对参数类型进行推演，不需要格式化控制，也不会出现格式化失败的风险，因此使用更方便，更安全。</li>
+</ol></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

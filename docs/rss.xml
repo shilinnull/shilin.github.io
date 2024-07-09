@@ -1,8 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Shilin' Blog</title><link>https://xiaolinzi.eu.org</link><description>珍惜每一天~</description><copyright>Shilin' Blog</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/108561949?v=4&amp;size=64</url><title>avatar</title><link>https://xiaolinzi.eu.org</link></image><lastBuildDate>Tue, 09 Jul 2024 06:53:27 +0000</lastBuildDate><managingEditor>Shilin' Blog</managingEditor><ttl>60</ttl><webMaster>Shilin' Blog</webMaster><item><title>21. C++的类型转换</title><link>https://xiaolinzi.eu.org/post/21.%20C%2B%2B-de-lei-xing-zhuan-huan.html</link><description>## C语言中的类型转换&#13;
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Shilin' Blog</title><link>https://xiaolinzi.eu.org</link><description>珍惜每一天~</description><copyright>Shilin' Blog</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/108561949?v=4&amp;size=64</url><title>avatar</title><link>https://xiaolinzi.eu.org</link></image><lastBuildDate>Tue, 09 Jul 2024 16:09:26 +0000</lastBuildDate><managingEditor>Shilin' Blog</managingEditor><ttl>60</ttl><webMaster>Shilin' Blog</webMaster><item><title>22. C++的IO流操作</title><link>https://xiaolinzi.eu.org/post/22.%20C%2B%2B-de-IO-liu-cao-zuo.html</link><description>## C语言的输入与输出&#13;
+&#13;
+- C语言的输入与输出 C语言中我们用到的最频繁的输入输出方式就是`scanf()`与`printf()`。</description><guid isPermaLink="true">https://xiaolinzi.eu.org/post/22.%20C%2B%2B-de-IO-liu-cao-zuo.html</guid><pubDate>Tue, 09 Jul 2024 06:53:21 +0000</pubDate></item><item><title>21. C++的类型转换</title><link>https://xiaolinzi.eu.org/post/21.%20C%2B%2B-de-lei-xing-zhuan-huan.html</link><description>## C语言中的类型转换&#13;
 &#13;
 &#13;
-- 在C语言中，如果赋值运算符左右两侧类型不同，或者形参与实参类型不匹配，或者返回值类型与接收返回值类型不一致时，就需要发生类型转化，C语言中总共有两种形式的类型转换：隐式类型转换和显式类型转换。</description><guid isPermaLink="true">https://xiaolinzi.eu.org/post/21.%20C%2B%2B-de-lei-xing-zhuan-huan.html</guid><pubDate>Tue, 09 Jul 2024 06:53:04 +0000</pubDate></item><item><title>19. C++11线程库操作</title><link>https://xiaolinzi.eu.org/post/19.%20C%2B%2B11-xian-cheng-ku-cao-zuo.html</link><description>&#13;
+- 在C语言中，如果赋值运算符左右两侧类型不同，或者形参与实参类型不匹配，或者返回值类型与接收返回值类型不一致时，就需要发生类型转化，C语言中总共有两种形式的类型转换：隐式类型转换和显式类型转换。</description><guid isPermaLink="true">https://xiaolinzi.eu.org/post/21.%20C%2B%2B-de-lei-xing-zhuan-huan.html</guid><pubDate>Tue, 09 Jul 2024 06:53:04 +0000</pubDate></item><item><title>20. C++特殊类设计</title><link>https://xiaolinzi.eu.org/post/20.%20C%2B%2B-te-shu-lei-she-ji.html</link><description>## 请设计一个类，不能被拷贝&#13;
+&#13;
+&#13;
+- 拷贝只会放生在两个场景中：**拷贝构造函数以及赋值运算符重载**，因此想要让一个类禁止拷贝， 只需让该类不能调用拷贝构造函数以及赋值运算符重载即可。</description><guid isPermaLink="true">https://xiaolinzi.eu.org/post/20.%20C%2B%2B-te-shu-lei-she-ji.html</guid><pubDate>Tue, 09 Jul 2024 06:52:28 +0000</pubDate></item><item><title>19. C++11线程库操作</title><link>https://xiaolinzi.eu.org/post/19.%20C%2B%2B11-xian-cheng-ku-cao-zuo.html</link><description>&#13;
 ## 线程库&#13;
 &#13;
 &#13;
@@ -22,7 +27,10 @@
 &#13;
 - 在C++98中，STL提供了底层为红黑树结构的一系列关联式容器，在查询时效率可达到$log_2N$，即最差情况下需要比较红黑树的高度次，当树中的节点非常多时，查询效率也不理想。</description><guid isPermaLink="true">https://xiaolinzi.eu.org/post/15.%20C%2B%2B-ha-xi-biao-%E3%80%81-ha-xi-tong-de-shi-xian-yi-ji-mo-ni-shi-xian-feng-zhuang-unordered_map%20-he-%20unordered_set%20%26%26%20-wei-tu-%20%26%26%20-bu-long-guo-lv-qi-%20%26%26%20-ha-xi-qie-ge-xiang-guan.html</guid><pubDate>Tue, 09 Jul 2024 04:33:51 +0000</pubDate></item><item><title>14. 红黑树【C++实现】</title><link>https://xiaolinzi.eu.org/post/14.%20-hong-hei-shu-%E3%80%90C%2B%2B-shi-xian-%E3%80%91.html</link><description>## 红黑树的概念&#13;
 &#13;
-**红黑树**（英语：Red–black tree）是一种自平衡二叉查找树，是在计算机科学中用到的一种数据结构，典型用途是实现关联数组。</description><guid isPermaLink="true">https://xiaolinzi.eu.org/post/14.%20-hong-hei-shu-%E3%80%90C%2B%2B-shi-xian-%E3%80%91.html</guid><pubDate>Tue, 09 Jul 2024 04:33:28 +0000</pubDate></item><item><title>12. C++二叉搜索树介绍以及实现</title><link>https://xiaolinzi.eu.org/post/12.%20C%2B%2B-er-cha-sou-suo-shu-jie-shao-yi-ji-shi-xian.html</link><description>## 二叉搜索树&#13;
+**红黑树**（英语：Red–black tree）是一种自平衡二叉查找树，是在计算机科学中用到的一种数据结构，典型用途是实现关联数组。</description><guid isPermaLink="true">https://xiaolinzi.eu.org/post/14.%20-hong-hei-shu-%E3%80%90C%2B%2B-shi-xian-%E3%80%91.html</guid><pubDate>Tue, 09 Jul 2024 04:33:28 +0000</pubDate></item><item><title>13. AVL树【C++实现】</title><link>https://xiaolinzi.eu.org/post/13.%20AVL-shu-%E3%80%90C%2B%2B-shi-xian-%E3%80%91.html</link><description>## AVL树的概念&#13;
+&#13;
+&#13;
+- AVL树（英语：AVL tree）是计算机科学中最早被发明的自平衡二叉查找树。</description><guid isPermaLink="true">https://xiaolinzi.eu.org/post/13.%20AVL-shu-%E3%80%90C%2B%2B-shi-xian-%E3%80%91.html</guid><pubDate>Tue, 09 Jul 2024 04:33:07 +0000</pubDate></item><item><title>12. C++二叉搜索树介绍以及实现</title><link>https://xiaolinzi.eu.org/post/12.%20C%2B%2B-er-cha-sou-suo-shu-jie-shao-yi-ji-shi-xian.html</link><description>## 二叉搜索树&#13;
 &#13;
 ### 二叉搜索树概念&#13;
 &#13;

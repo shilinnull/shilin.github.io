@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## 二叉搜索树
+
+### 二叉搜索树概念
+
+
+- 二叉搜索树又称二叉排序树，它或者是一棵空树，或者是具有以下性质的二叉树:
+
+	- 若它的左子树不为空，则左子树上所有节点的值都小于根节点的值
+	- 若它的右子树不为空，则右子树上所有节点的值都大于根节点的值
+	- 它的左右子树也分别为二叉搜索树
+
+
+
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/a9d67fd3c3914e179128d2004c1f734d.png)
+
+
+### 二叉搜索树操作
+
+
+
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/3fc378ecb75e4ee5a940c98d1c1ee369.png)
+
+
+```c
+int a[] = {8, 3, 1, 10, 6, 4, 7, 14, 13};
+```
+
+
+
+1. 二叉搜索树的**查找**
+a、从根开始比较，查找，比**根大则往右边走查找，比根小则往左边走查找**。">
+<meta property="og:title" content="12. C++二叉搜索树介绍以及实现">
+<meta property="og:description" content="## 二叉搜索树
+
+### 二叉搜索树概念
+
+
+- 二叉搜索树又称二叉排序树，它或者是一棵空树，或者是具有以下性质的二叉树:
+
+	- 若它的左子树不为空，则左子树上所有节点的值都小于根节点的值
+	- 若它的右子树不为空，则右子树上所有节点的值都大于根节点的值
+	- 它的左右子树也分别为二叉搜索树
+
+
+
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/a9d67fd3c3914e179128d2004c1f734d.png)
+
+
+### 二叉搜索树操作
+
+
+
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/3fc378ecb75e4ee5a940c98d1c1ee369.png)
+
+
+```c
+int a[] = {8, 3, 1, 10, 6, 4, 7, 14, 13};
+```
+
+
+
+1. 二叉搜索树的**查找**
+a、从根开始比较，查找，比**根大则往右边走查找，比根小则往左边走查找**。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/12.%20C%2B%2B-er-cha-sou-suo-shu-jie-shao-yi-ji-shi-xian.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>12. C++二叉搜索树介绍以及实现</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">12. C++二叉搜索树介绍以及实现</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/14" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>二叉搜索树</h2>
+<h3>二叉搜索树概念</h3>
+<ul>
+<li>
+<p>二叉搜索树又称二叉排序树，它或者是一棵空树，或者是具有以下性质的二叉树:</p>
+<ul>
+<li>若它的左子树不为空，则左子树上所有节点的值都小于根节点的值</li>
+<li>若它的右子树不为空，则右子树上所有节点的值都大于根节点的值</li>
+<li>它的左右子树也分别为二叉搜索树</li>
+</ul>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d1c790bd42f183ad9efc7a5f8c3550abb129c29982dbd59f770b6e8c67a6b577/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61396436376664336333393134653137393132386432303034633166373334642e706e67"><img src="https://camo.githubusercontent.com/d1c790bd42f183ad9efc7a5f8c3550abb129c29982dbd59f770b6e8c67a6b577/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61396436376664336333393134653137393132386432303034633166373334642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/a9d67fd3c3914e179128d2004c1f734d.png" style="max-width: 100%;"></a></p>
+<h3>二叉搜索树操作</h3>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/778a413d8d36a5596f4bdaf3e3f5cc0d1b20c56498a0bbbebbbca1a42c06d6cb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33666333373865636237356534656535613934306339386431633165653336392e706e67"><img src="https://camo.githubusercontent.com/778a413d8d36a5596f4bdaf3e3f5cc0d1b20c56498a0bbbebbbca1a42c06d6cb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33666333373865636237356534656535613934306339386431633165653336392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/3fc378ecb75e4ee5a940c98d1c1ee369.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">a</span>[] <span class="pl-c1">=</span> {<span class="pl-c1">8</span>, <span class="pl-c1">3</span>, <span class="pl-c1">1</span>, <span class="pl-c1">10</span>, <span class="pl-c1">6</span>, <span class="pl-c1">4</span>, <span class="pl-c1">7</span>, <span class="pl-c1">14</span>, <span class="pl-c1">13</span>};</pre></div>
+<ol>
+<li>
+<p>二叉搜索树的<strong>查找</strong><br>
+a、从根开始比较，查找，比<strong>根大则往右边走查找，比根小则往左边走查找</strong>。<br>
+b、最多<strong>查找高度次</strong>，走到到空，还没找到，这个值不存在。</p>
+</li>
+<li>
+<p>二叉搜索树的<strong>插入</strong><br>
+插入的具体过程如下：<br>
+a. 树为空，则直接新增节点，赋值给<code class="notranslate">root</code>指针<br>
+b. 树不空，按二叉搜索树性质查找插入位置，插入新节点</p>
+</li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ae4e55ec9d39d7776abcd2998cd899f2c79a85546519305dca09accd17642b8b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30323732376666353965376634666663616561363337353062306232613131312e706e67"><img src="https://camo.githubusercontent.com/ae4e55ec9d39d7776abcd2998cd899f2c79a85546519305dca09accd17642b8b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30323732376666353965376634666663616561363337353062306232613131312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/02727ff59e7f4ffcaea63750b0b2a111.png" style="max-width: 100%;"></a></p>
+<ol>
+<li>二叉搜索树的删除</li>
+</ol>
+<p>首先查找元素是否在二叉搜索树中，如果不存在，则返回, 否则要删除的结点可能分下面四种情况：</p>
+<p>a. 要删除的结点无孩子结点<br>
+b. 要删除的结点只有左孩子结点<br>
+c. 要删除的结点只有右孩子结点<br>
+d. 要删除的结点有左、右孩子结点</p>
+<p>看起来有待删除节点有4中情况，实际情况a可以与情况b或者c合并起来，因此真正的删除过程<br>
+如下：</p>
+<ul>
+<li>情况b：删除该结点且使被删除节点的双亲结点指向被删除节点的左孩子结点--直接删除</li>
+<li>情况c：删除该结点且使被删除节点的双亲结点指向被删除结点的右孩子结点--直接删除</li>
+<li>情况d：在它的右子树中寻找中序下的第一个结点(关键码最小)，用它的值填补到被删除节点中，再来处理该结点的删除问题--替换法删除</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/044686aeb83e06725ddbc135bd5a280927ca777784868513ca63a5be391bba05/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61653661313866323231323034623433383035366561666537643766623230642e706e67"><img src="https://camo.githubusercontent.com/044686aeb83e06725ddbc135bd5a280927ca777784868513ca63a5be391bba05/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61653661313866323231323034623433383035366561666537643766623230642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/ae6a18f221204b438056eafe7d7fb20d.png" style="max-width: 100%;"></a></p>
+<h2>二叉搜索树的实现</h2>
+<h3>定义树节点</h3>
+<ul>
+<li>首先这个很简单，左右</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>&gt;
+<span class="pl-k">struct</span> <span class="pl-en">BSTreeNode</span>
+{
+	BSTreeNode&lt;K&gt;* _left;
+	BSTreeNode&lt;K&gt;* _right;
+	K _val;
+
+	<span class="pl-en">BSTreeNode</span>(<span class="pl-k">const</span> K&amp; val)
+		:_left(<span class="pl-c1">nullptr</span>)
+		, _right(<span class="pl-c1">nullptr</span>)
+		, _val(val)
+	{}
+};
+<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>&gt;
+<span class="pl-k">class</span> <span class="pl-en">BSTree</span>
+{
+	<span class="pl-k">typedef</span> BSTreeNode&lt;K&gt; Node;
+<span class="pl-k">public:</span>
+
+	Node* _root = <span class="pl-c1">nullptr</span>;
+};</pre></div>
+<h3>插入</h3>
+<ul>
+<li>首先判断根节点是否为空，为空直接插入</li>
+<li>然后定义一个前驱节点，再定义当前节点，然后找要插入的位置</li>
+<li>如果<code class="notranslate">cur</code>比当前位置大往右走，比当前位置小往左走</li>
+<li>最后还要判断要插入到左叶子还是右叶子，如果当前位置的值小于<code class="notranslate">val</code>，就当在左面（要满足搜索二叉树的性质），否则就右面</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">bool</span> <span class="pl-en">Insert</span>(<span class="pl-k">const</span> K&amp; val)
+{
+	<span class="pl-k">if</span> (_root == <span class="pl-c1">nullptr</span>) {
+		_root = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(val);
+		<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+	}
+
+	Node* parent = <span class="pl-c1">nullptr</span>;
+	Node* cur = _root;
+	<span class="pl-k">while</span> (cur) 
+	{
+		<span class="pl-c"><span class="pl-c">//</span> 提前保存cur的位置</span>
+		parent = cur;
+		<span class="pl-c"><span class="pl-c">//</span> 比当前位置大往右走，比当前位置小往左走</span>
+		<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &lt; val)
+			cur = cur-&gt;<span class="pl-smi">_left</span>;
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &gt; val)
+			cur = cur-&gt;<span class="pl-smi">_right</span>;
+		<span class="pl-k">else</span>
+			<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+	}
+	<span class="pl-c"><span class="pl-c">//</span> 走到这里说明找到合适的位置了</span>
+	cur = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(val);
+	<span class="pl-k">if</span> (parent-&gt;<span class="pl-smi">_val</span> &lt; val)
+		parent-&gt;<span class="pl-smi">_left</span> = cur;
+	<span class="pl-k">else</span>
+		parent-&gt;<span class="pl-smi">_right</span> = cur;
+
+	<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+}</pre></div>
+<h3>删除一个节点</h3>
+<ul>
+<li>首先找值，如果当前位置比val小就往左走，如果当前位置比val大就往右走，没有找到返回<code class="notranslate">false</code></li>
+<li>找到了后就删除，但是需要考虑几个问题
+<ul>
+<li>左为空</li>
+<li>右为空</li>
+<li>左右都不为空</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li>左为空</li>
+</ol>
+<ul>
+<li>情况一：左为空，那么就让parent的左连接到cur的右</li>
+<li>情况二：cur等于根，那么直接让我的根成为根的右子树</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/655aea33d7a342c920f9a1ec06c290fae81db90334ff41ae9efa75955ef28e6e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61633665393963313663633534313564396563303133646333383932643861382e706e67"><img src="https://camo.githubusercontent.com/655aea33d7a342c920f9a1ec06c290fae81db90334ff41ae9efa75955ef28e6e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61633665393963313663633534313564396563303133646333383932643861382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/ac6e99c16cc5415d9ec013dc3892d8a8.png" style="max-width: 100%;"></a></p>
+<ol start="2">
+<li>右为空</li>
+</ol>
+<p>和左为空原理一样</p>
+<ul>
+<li>情况一：右为空，那么就让parent的左连接到cur的左</li>
+<li>情况二：cur等于根，那么直接让我的根成为根的左	子树</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ae0d9adf28efc016c68b5b1c0d3fd68c94546cd8a2453739c6b7f7d20a0755d2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34643137353638623366353634656139393831316136353735666565346138382e706e67"><img src="https://camo.githubusercontent.com/ae0d9adf28efc016c68b5b1c0d3fd68c94546cd8a2453739c6b7f7d20a0755d2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34643137353638623366353634656139393831316136353735666565346138382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/4d17568b3f564ea99811a6575fee4a88.png" style="max-width: 100%;"></a></p>
+<ol start="3">
+<li>左右都不为空</li>
+</ol>
+<ul>
+<li>我们这里使用<strong>替换法</strong>
+<ul>
+<li>找<strong>左树的最大节点</strong>或者<strong>右子树的最小节点</strong></li>
+</ul>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/a87cc71df687f7cd6c841a5e5bcf16680a9620900754c2a31c0a35857249c8e7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64333430646235346232333034303434393236633638306435636662326261652e706e67"><img src="https://camo.githubusercontent.com/a87cc71df687f7cd6c841a5e5bcf16680a9620900754c2a31c0a35857249c8e7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64333430646235346232333034303434393236633638306435636662326261652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/d340db54b2304044926c680d5cfb2bae.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">bool</span> <span class="pl-en">Erase</span>(<span class="pl-k">const</span> K&amp; key)
+{
+	Node* parent = <span class="pl-c1">nullptr</span>;
+	Node* cur = _root;
+	<span class="pl-k">while</span> (cur)
+	{
+		<span class="pl-c"><span class="pl-c">//</span> 找val</span>
+		<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &lt; key)
+		{
+			parent = cur;
+			cur = cur-&gt;<span class="pl-smi">_right</span>;
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &gt; key)
+		{
+			parent = cur;
+			cur = cur-&gt;<span class="pl-smi">_left</span>;
+		}
+		<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span> 删除情况</span>
+		{
+			<span class="pl-c"><span class="pl-c">//</span> 准备删除</span>
+			<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_left</span> == <span class="pl-c1">nullptr</span>)
+			{<span class="pl-c"><span class="pl-c">//</span>左为空</span>
+				<span class="pl-k">if</span> (cur == _root)
+					_root = cur-&gt;<span class="pl-smi">_right</span>;
+				<span class="pl-k">else</span>
+				{
+					<span class="pl-k">if</span> (cur == parent-&gt;<span class="pl-smi">_left</span>)
+						parent-&gt;<span class="pl-smi">_left</span> = cur-&gt;<span class="pl-smi">_right</span>;
+					<span class="pl-k">else</span>
+						parent-&gt;<span class="pl-smi">_right</span> = cur-&gt;<span class="pl-smi">_right</span>;
+				}
+
+				<span class="pl-k">delete</span> cur;
+			}
+			<span class="pl-k">else</span> <span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_right</span> == <span class="pl-c1">nullptr</span>)
+			{<span class="pl-c"><span class="pl-c">//</span>右为空</span>
+				<span class="pl-k">if</span> (cur == _root)
+					_root = cur-&gt;<span class="pl-smi">_left</span>;
+				<span class="pl-k">else</span>
+				{
+					<span class="pl-k">if</span> (cur == parent-&gt;<span class="pl-smi">_left</span>)
+						parent-&gt;<span class="pl-smi">_left</span> = cur-&gt;<span class="pl-smi">_left</span>;
+					<span class="pl-k">else</span>
+						parent-&gt;<span class="pl-smi">_right</span> = cur-&gt;<span class="pl-smi">_left</span>;
+				}
+
+				<span class="pl-k">delete</span> cur;
+			}
+			<span class="pl-k">else</span>
+			{<span class="pl-c"><span class="pl-c">//</span>左右都不为空</span>
+				<span class="pl-c"><span class="pl-c">//</span> 右树的最小节点(最左节点)</span>
+				Node* parent = cur;
+				Node* subLeft = cur-&gt;<span class="pl-smi">_right</span>;
+				<span class="pl-k">while</span> (subLeft-&gt;<span class="pl-smi">_left</span>)
+				{
+					parent = subLeft;
+					subLeft = subLeft-&gt;<span class="pl-smi">_left</span>;
+				}
+
+				<span class="pl-c1">std::swap</span>(cur-&gt;<span class="pl-smi">_val</span>, subLeft-&gt;<span class="pl-smi">_val</span>);
+
+				<span class="pl-k">if</span> (subLeft == parent-&gt;<span class="pl-smi">_left</span>)
+					parent-&gt;<span class="pl-smi">_left</span> = subLeft-&gt;<span class="pl-smi">_right</span>;
+				<span class="pl-k">else</span>
+					parent-&gt;<span class="pl-smi">_right</span> = subLeft-&gt;<span class="pl-smi">_right</span>;
+
+				<span class="pl-k">delete</span> subLeft;
+			}
+			<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+		}
+	}<span class="pl-c"><span class="pl-c">//</span> (cur)end...</span>
+	<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+}</pre></div>
+<h3>查找</h3>
+<ul>
+<li>大于当前值往右走，小于往左走</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">bool</span> <span class="pl-en">Find</span>(<span class="pl-k">const</span> K&amp; val)
+{
+	Node* cur = _root;
+	<span class="pl-k">while</span> (cur){
+		<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &lt; val)
+			cur = cur-&gt;<span class="pl-smi">_left</span>;
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &gt; val)
+			cur = cur-&gt;<span class="pl-smi">_right</span>;
+		<span class="pl-k">else</span> <span class="pl-k">if</span>(cur-&gt;<span class="pl-smi">_val</span> == val)
+			<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+}</pre></div>
+<h3>遍历节点</h3>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">InOrder</span>(Node* root)
+{
+	<span class="pl-k">if</span> (root == <span class="pl-c1">nullptr</span>)
+		<span class="pl-k">return</span>;
+	<span class="pl-c1">_InOrder</span>(root-&gt;<span class="pl-smi">_right</span>);
+	cout &lt;&lt; root-&gt;<span class="pl-smi">_val</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>;
+	<span class="pl-c1">_InOrder</span>(root-&gt;<span class="pl-smi">_left</span>);
+}</pre></div>
+<h2>递归版本&amp;&amp;全部代码</h2>
+<ul>
+<li>递归版本实现要注意的是要<strong>引用传参</strong></li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span> 树的节点</span>
+<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>&gt;
+<span class="pl-k">struct</span> <span class="pl-en">BSTreeNode</span>
+{
+	BSTreeNode&lt;K&gt;* _left;
+	BSTreeNode&lt;K&gt;* _right;
+	K _val;
+
+	<span class="pl-en">BSTreeNode</span>(<span class="pl-k">const</span> K&amp; val)
+		:_left(<span class="pl-c1">nullptr</span>)
+		, _right(<span class="pl-c1">nullptr</span>)
+		, _val(val)
+	{}
+};
+
+<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>&gt;
+<span class="pl-k">class</span> <span class="pl-en">BSTree</span>
+{
+	<span class="pl-k">typedef</span> BSTreeNode&lt;K&gt; Node;
+<span class="pl-k">public:</span>
+	<span class="pl-k">bool</span> <span class="pl-en">Insert</span>(<span class="pl-k">const</span> K&amp; val)
+	{
+		<span class="pl-k">if</span> (_root == <span class="pl-c1">nullptr</span>) {
+			_root = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(val);
+			<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+		}
+
+		Node* parent = <span class="pl-c1">nullptr</span>;
+		Node* cur = _root;
+		<span class="pl-k">while</span> (cur) 
+		{
+			<span class="pl-c"><span class="pl-c">//</span> 提前保存cur的位置</span>
+			parent = cur;
+			<span class="pl-c"><span class="pl-c">//</span> 比当前位置大往右走，比当前位置小往左走</span>
+			<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &lt; val)
+				cur = cur-&gt;<span class="pl-smi">_left</span>;
+			<span class="pl-k">else</span> <span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &gt; val)
+				cur = cur-&gt;<span class="pl-smi">_right</span>;
+			<span class="pl-k">else</span>
+				<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+		}
+		<span class="pl-c"><span class="pl-c">//</span> 走到这里说明找到合适的位置了</span>
+		cur = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(val);
+		<span class="pl-k">if</span> (parent-&gt;<span class="pl-smi">_val</span> &lt; val)
+			parent-&gt;<span class="pl-smi">_left</span> = cur;
+		<span class="pl-k">else</span>
+			parent-&gt;<span class="pl-smi">_right</span> = cur;
+
+		<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+	}
+
+	<span class="pl-k">bool</span> <span class="pl-en">Find</span>(<span class="pl-k">const</span> K&amp; val)
+	{
+		Node* cur = _root;
+		<span class="pl-k">while</span> (cur){
+			<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &lt; val)
+				cur = cur-&gt;<span class="pl-smi">_left</span>;
+			<span class="pl-k">else</span> <span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &gt; val)
+				cur = cur-&gt;<span class="pl-smi">_right</span>;
+			<span class="pl-k">else</span> <span class="pl-k">if</span>(cur-&gt;<span class="pl-smi">_val</span> == val)
+				<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+		}
+		<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+	}
+
+	<span class="pl-k">bool</span> <span class="pl-en">Erase</span>(<span class="pl-k">const</span> K&amp; key)
+	{
+		Node* parent = <span class="pl-c1">nullptr</span>;
+		Node* cur = _root;
+		<span class="pl-k">while</span> (cur)
+		{
+			<span class="pl-c"><span class="pl-c">//</span> 找val</span>
+			<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &lt; key)
+			{
+				parent = cur;
+				cur = cur-&gt;<span class="pl-smi">_right</span>;
+			}
+			<span class="pl-k">else</span> <span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &gt; key)
+			{
+				parent = cur;
+				cur = cur-&gt;<span class="pl-smi">_left</span>;
+			}
+			<span class="pl-k">else</span>
+			{
+				<span class="pl-c"><span class="pl-c">//</span> 准备删除</span>
+				<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_left</span> == <span class="pl-c1">nullptr</span>)
+				{<span class="pl-c"><span class="pl-c">//</span>左为空</span>
+					<span class="pl-k">if</span> (cur == _root)
+						_root = cur-&gt;<span class="pl-smi">_right</span>;
+					<span class="pl-k">else</span>
+					{
+						<span class="pl-k">if</span> (cur == parent-&gt;<span class="pl-smi">_left</span>)
+							parent-&gt;<span class="pl-smi">_left</span> = cur-&gt;<span class="pl-smi">_right</span>;
+						<span class="pl-k">else</span>
+							parent-&gt;<span class="pl-smi">_right</span> = cur-&gt;<span class="pl-smi">_right</span>;
+					}
+
+					<span class="pl-k">delete</span> cur;
+				}
+				<span class="pl-k">else</span> <span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_right</span> == <span class="pl-c1">nullptr</span>)
+				{<span class="pl-c"><span class="pl-c">//</span>右为空</span>
+					<span class="pl-k">if</span> (cur == _root)
+						_root = cur-&gt;<span class="pl-smi">_left</span>;
+					<span class="pl-k">else</span>
+					{
+						<span class="pl-k">if</span> (cur == parent-&gt;<span class="pl-smi">_left</span>)
+							parent-&gt;<span class="pl-smi">_left</span> = cur-&gt;<span class="pl-smi">_left</span>;
+						<span class="pl-k">else</span>
+							parent-&gt;<span class="pl-smi">_right</span> = cur-&gt;<span class="pl-smi">_left</span>;
+					}
+
+					<span class="pl-k">delete</span> cur;
+				}
+				<span class="pl-k">else</span>
+				{<span class="pl-c"><span class="pl-c">//</span>左右都不为空</span>
+					<span class="pl-c"><span class="pl-c">//</span> 右树的最小节点(最左节点)</span>
+					Node* parent = cur;
+					Node* subLeft = cur-&gt;<span class="pl-smi">_right</span>;
+					<span class="pl-k">while</span> (subLeft-&gt;<span class="pl-smi">_left</span>)
+					{
+						parent = subLeft;
+						subLeft = subLeft-&gt;<span class="pl-smi">_left</span>;
+					}
+
+					<span class="pl-c1">std::swap</span>(cur-&gt;<span class="pl-smi">_val</span>, subLeft-&gt;<span class="pl-smi">_val</span>);
+
+					<span class="pl-k">if</span> (subLeft == parent-&gt;<span class="pl-smi">_left</span>)
+						parent-&gt;<span class="pl-smi">_left</span> = subLeft-&gt;<span class="pl-smi">_right</span>;
+					<span class="pl-k">else</span>
+						parent-&gt;<span class="pl-smi">_right</span> = subLeft-&gt;<span class="pl-smi">_right</span>;
+
+					<span class="pl-k">delete</span> subLeft;
+				}
+				<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+			}
+		}<span class="pl-c"><span class="pl-c">//</span> (cur)end...</span>
+		<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+	}
+
+	<span class="pl-k">void</span> <span class="pl-en">InOrder</span>()
+	{
+		<span class="pl-c1">_InOrder</span>(_root);
+		std::cout &lt;&lt; std::endl;
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span> ------------递归版本--------------</span>
+
+	<span class="pl-k">void</span> <span class="pl-en">FindR</span>(<span class="pl-k">const</span> K&amp; val)
+	{
+		<span class="pl-k">return</span> <span class="pl-c1">_FindR</span>(_root, val);
+	}
+
+	<span class="pl-k">bool</span> <span class="pl-en">InsertR</span>(<span class="pl-k">const</span> K&amp; val)
+	{
+		<span class="pl-k">return</span> <span class="pl-c1">_InsertR</span>(_root, val);
+	}
+
+	<span class="pl-k">bool</span> <span class="pl-en">EraseR</span>(<span class="pl-k">const</span> K&amp; val)
+	{
+		<span class="pl-k">return</span> <span class="pl-c1">_EraseR</span>(_root, val);
+	}
+
+<span class="pl-k">private:</span>
+	<span class="pl-c"><span class="pl-c">//</span> 这里也要注意是用引用</span>
+	<span class="pl-k">bool</span> <span class="pl-en">_EraseR</span>(Node*&amp; root, <span class="pl-k">const</span> K&amp; val)
+	{
+		<span class="pl-k">if</span> (root == <span class="pl-c1">nullptr</span>)
+			<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+
+		<span class="pl-k">if</span> (root-&gt;<span class="pl-smi">_val</span> &lt; val)
+			<span class="pl-k">return</span> <span class="pl-c1">_EraseR</span>(root-&gt;<span class="pl-smi">_right</span>, val);
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (root-&gt;<span class="pl-smi">_val</span> &gt; val)
+			<span class="pl-k">return</span> <span class="pl-c1">_EraseR</span>(root-&gt;<span class="pl-smi">_left</span>, val);
+		<span class="pl-k">else</span>
+		{
+			<span class="pl-c"><span class="pl-c">//</span> 删除</span>
+			<span class="pl-k">if</span> (root-&gt;<span class="pl-smi">_left</span> == <span class="pl-c1">nullptr</span>)
+			{
+				Node* del = root;
+				root = root-&gt;<span class="pl-smi">_right</span>;
+				<span class="pl-k">delete</span> del;
+
+				<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+			}
+			<span class="pl-k">else</span> <span class="pl-k">if</span> (root-&gt;<span class="pl-smi">_right</span> == <span class="pl-c1">nullptr</span>)
+			{
+				Node* del = root;
+				root = root-&gt;<span class="pl-smi">_left</span>;
+				<span class="pl-k">delete</span> del;
+
+				<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+			}
+			<span class="pl-k">else</span>
+			{
+				<span class="pl-c"><span class="pl-c">//</span> 找替代节点</span>
+				Node* subLeft = root-&gt;<span class="pl-smi">_right</span>;
+				<span class="pl-k">while</span> (subLeft-&gt;<span class="pl-smi">_left</span>)
+				{
+					subLeft = subLeft-&gt;<span class="pl-smi">_left</span>;
+				}
+
+				<span class="pl-c1">std::swap</span>(root-&gt;<span class="pl-smi">_val</span>, subLeft-&gt;<span class="pl-smi">_val</span>);
+
+				<span class="pl-c"><span class="pl-c">//</span> 转换成在子树去递归删除</span>
+				<span class="pl-k">return</span> <span class="pl-c1">_EraseR</span>(root-&gt;<span class="pl-smi">_right</span>, val);
+			}
+		}
+		<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+	}
+
+	<span class="pl-k">bool</span> <span class="pl-en">_FindR</span>(Node* root, <span class="pl-k">const</span> K&amp; val)
+	{
+		<span class="pl-k">if</span> (root == <span class="pl-c1">nullptr</span>)
+			<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+		<span class="pl-k">if</span> (root-&gt;<span class="pl-smi">_val</span> &lt; val)
+			<span class="pl-k">return</span> <span class="pl-c1">_FindR</span>(root-&gt;<span class="pl-smi">_right</span>, val);
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (root-&gt;<span class="pl-smi">_val</span> &gt; val)
+			<span class="pl-k">return</span> <span class="pl-c1">_FindR</span>(root-&gt;<span class="pl-smi">_left</span>, val);
+		<span class="pl-k">else</span>
+			<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+	}
+	<span class="pl-c"><span class="pl-c">//</span> 这里注意是使用的引用</span>
+	<span class="pl-k">bool</span> <span class="pl-en">_InsertR</span>(Node*&amp; root, <span class="pl-k">const</span> K&amp; val)
+	{
+		<span class="pl-k">if</span> (root == <span class="pl-c1">nullptr</span>)
+		{
+			root = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(val);
+			<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+		}
+
+		<span class="pl-k">if</span> (root-&gt;<span class="pl-smi">_val</span> &lt; val)
+			<span class="pl-k">return</span> <span class="pl-c1">_InsertR</span>(root-&gt;<span class="pl-smi">_right</span>, val);
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (root-&gt;<span class="pl-smi">_val</span> &gt; val)
+			<span class="pl-k">return</span> <span class="pl-c1">_InsertR</span>(root-&gt;<span class="pl-smi">_left</span>, val);
+		<span class="pl-k">else</span>
+			<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+	}
+
+	<span class="pl-k">void</span> <span class="pl-en">_InOrder</span>(Node* root)
+	{
+		<span class="pl-k">if</span> (root == <span class="pl-c1">nullptr</span>)
+			<span class="pl-k">return</span>;
+
+		<span class="pl-c1">_InOrder</span>(root-&gt;<span class="pl-smi">_right</span>);
+		cout &lt;&lt; root-&gt;<span class="pl-smi">_val</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>;
+		<span class="pl-c1">_InOrder</span>(root-&gt;<span class="pl-smi">_left</span>);
+	}
+	
+	Node* _root = <span class="pl-c1">nullptr</span>;
+};</pre></div>
+<h2>二叉搜索树的性能分析</h2>
+<ul>
+<li>
+<p>插入和删除操作都必须先查找，查找效率代表了二叉搜索树中各个操作的性能。</p>
+</li>
+<li>
+<p>对有n个结点的二叉搜索树，若每个元素查找的概率相等，则二叉搜索树平均查找长度是结点在二 叉搜索树的深度的函数，即结点越深，则比较次数越多。</p>
+</li>
+<li>
+<p>但对于同一个关键码集合，如果各关键码插入的次序不同，可能得到不同结构的二叉搜索树：</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b2af1d475479f42355e868ce3ae2f95695234fca53f42845631d5e4f1e386325/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32353634323866333466303034366430396661303765323434633664393266312e706e67"><img src="https://camo.githubusercontent.com/b2af1d475479f42355e868ce3ae2f95695234fca53f42845631d5e4f1e386325/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32353634323866333466303034366430396661303765323434633664393266312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/256428f34f0046d09fa07e244c6d92f1.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>最优情况下，二叉搜索树为完全二叉树(或者接近完全二叉树)，其平均比较次数为：$log_2 N$</li>
+<li>最差情况下，二叉搜索树退化为单支树(或者类似单支)，其平均比较次数为：$\frac{N}{2}$</li>
+<li>问题：如果退化成单支树，二叉搜索树的性能就失去了。那能否进行改进，不论按照什么次序插入关键码，二叉搜索树的性能都能达到最优？ <strong>AVL树</strong>和<strong>红黑树</strong>就可以上场了。</li>
+</ul>
+<h2>完善二叉搜索树</h2>
+<h3>释放节点</h3>
+<ul>
+<li>一样需要使用引用传参</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">Destory</span>(Node*&amp; root)
+{
+	<span class="pl-k">if</span> (root == <span class="pl-c1">nullptr</span>)
+		<span class="pl-k">return</span>;
+	<span class="pl-c1">Destory</span>(root-&gt;<span class="pl-smi">_left</span>);
+	<span class="pl-c1">Destory</span>(root-&gt;<span class="pl-smi">_right</span>);
+	<span class="pl-k">delete</span> root;
+	root = <span class="pl-c1">nullptr</span>;
+}</pre></div>
+<h3>拷贝</h3>
+<ul>
+<li>递归拷贝左树和右树</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">Node* <span class="pl-en">Copy</span>(Node* root)
+{
+	<span class="pl-k">if</span> (root == <span class="pl-c1">nullptr</span>)
+		<span class="pl-k">return</span> <span class="pl-c1">nullptr</span>;
+
+	Node* newRoot = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(_root-&gt;<span class="pl-smi">_val</span>);
+	newRoot-&gt;<span class="pl-smi">_left</span> = <span class="pl-c1">Copy</span>(root-&gt;<span class="pl-smi">_left</span>);
+	newRoot-&gt;<span class="pl-smi">_right</span> = <span class="pl-c1">Copy</span>(root-&gt;<span class="pl-smi">_right</span>);
+
+	<span class="pl-k">return</span> newRoot;
+}</pre></div>
+<ul>
+<li>写完这个拷贝构造后我们需要写一个默认构造</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-en">BSTree</span>() = default;</pre></div>
+<h3>赋值</h3>
+<div class="highlight highlight-source-c++"><pre class="notranslate">BSTree&lt;K&gt;&amp; <span class="pl-k">operator</span>=(BSTree&lt;K&gt; t)
+{
+	<span class="pl-c1">swap</span>(_root, t.<span class="pl-smi">_root</span>);
+	<span class="pl-k">return</span> *<span class="pl-c1">this</span>;
+}</pre></div>
+<h2>二叉搜索树的应用</h2>
+<ol>
+<li><strong>K模型</strong>：K模型即只有key作为关键码，结构中只需要存储Key即可，关键码即为需要搜索到的值。</li>
+</ol>
+<ul>
+<li>比如：给一个单词<code class="notranslate">word</code>，判断该单词是否拼写正确，具体方式如下：
+<ul>
+<li>以词库中所有单词集合中的每个单词作为key，构建一棵二叉搜索树</li>
+<li>在二叉搜索树中检索该单词是否存在，存在则拼写正确，不存在则拼写错误。</li>
+</ul>
+</li>
+</ul>
+<ol start="2">
+<li><strong>KV模型</strong>：每一个关键码<code class="notranslate">key</code>，都有与之对应的值<code class="notranslate">Value</code>，即<code class="notranslate">&lt;Key, Value&gt;</code>的键值对。该种方式在现实生活中非常常见：
+<ul>
+<li>比如英汉词典就是英文与中文的对应关系，通过英文可以快速找到与其对应的中文，英文单词与其对应的中文<code class="notranslate">&lt;word, chinese&gt;</code>就构成一种键值对；</li>
+<li>再比如统计单词次数，统计成功后，给定单词就可快速找到其出现的次数，单词与其出现次数就是<code class="notranslate">&lt;word, count&gt;</code>就构成一种键值对。</li>
+</ul>
+</li>
+</ol>
+<h2>全部源码以及KV模型的实现</h2>
+<blockquote>
+<p>BinarySearchTree.h</p>
+</blockquote>
+<div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">pragma</span> once
+#<span class="pl-k">include</span><span class="pl-s"><span class="pl-pds">&lt;</span>iostream<span class="pl-pds">&gt;</span></span>
+<span class="pl-k">namespace</span> <span class="pl-en">key</span>
+{
+	<span class="pl-c"><span class="pl-c">//</span> 树的节点</span>
+	<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>&gt;
+	<span class="pl-k">struct</span> <span class="pl-en">BSTreeNode</span>
+	{
+		BSTreeNode&lt;K&gt;* _left;
+		BSTreeNode&lt;K&gt;* _right;
+		K _val;
+
+		<span class="pl-en">BSTreeNode</span>(<span class="pl-k">const</span> K&amp; val)
+			:_left(<span class="pl-c1">nullptr</span>)
+			, _right(<span class="pl-c1">nullptr</span>)
+			, _val(val)
+		{}
+	};
+
+	<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>&gt;
+	<span class="pl-k">class</span> <span class="pl-en">BSTree</span>
+	{
+		<span class="pl-k">typedef</span> BSTreeNode&lt;K&gt; Node;
+	<span class="pl-k">public:</span>
+		<span class="pl-k">bool</span> <span class="pl-en">Insert</span>(<span class="pl-k">const</span> K&amp; val)
+		{
+			<span class="pl-k">if</span> (_root == <span class="pl-c1">nullptr</span>) {
+				_root = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(val);
+				<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+			}
+
+			Node* parent = <span class="pl-c1">nullptr</span>;
+			Node* cur = _root;
+			<span class="pl-k">while</span> (cur)
+			{
+				<span class="pl-c"><span class="pl-c">//</span> 提前保存cur的位置</span>
+				parent = cur;
+				<span class="pl-c"><span class="pl-c">//</span> 比当前位置大往右走，比当前位置小往左走</span>
+				<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &lt; val)
+					cur = cur-&gt;<span class="pl-smi">_left</span>;
+				<span class="pl-k">else</span> <span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &gt; val)
+					cur = cur-&gt;<span class="pl-smi">_right</span>;
+				<span class="pl-k">else</span>
+					<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+			}
+			<span class="pl-c"><span class="pl-c">//</span> 走到这里说明找到合适的位置了</span>
+			cur = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(val);
+			<span class="pl-k">if</span> (parent-&gt;<span class="pl-smi">_val</span> &lt; val)
+				parent-&gt;<span class="pl-smi">_left</span> = cur;
+			<span class="pl-k">else</span>
+				parent-&gt;<span class="pl-smi">_right</span> = cur;
+
+			<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+		}
+
+		<span class="pl-k">bool</span> <span class="pl-en">Find</span>(<span class="pl-k">const</span> K&amp; val)
+		{
+			Node* cur = _root;
+			<span class="pl-k">while</span> (cur) {
+				<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &lt; val)
+					cur = cur-&gt;<span class="pl-smi">_left</span>;
+				<span class="pl-k">else</span> <span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &gt; val)
+					cur = cur-&gt;<span class="pl-smi">_right</span>;
+				<span class="pl-k">else</span> <span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> == val)
+					<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+			}
+			<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+		}
+
+		<span class="pl-k">bool</span> <span class="pl-en">Erase</span>(<span class="pl-k">const</span> K&amp; key)
+		{
+			Node* parent = <span class="pl-c1">nullptr</span>;
+			Node* cur = _root;
+			<span class="pl-k">while</span> (cur)
+			{
+				<span class="pl-c"><span class="pl-c">//</span> 找val</span>
+				<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &lt; key)
+				{
+					parent = cur;
+					cur = cur-&gt;<span class="pl-smi">_right</span>;
+				}
+				<span class="pl-k">else</span> <span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &gt; key)
+				{
+					parent = cur;
+					cur = cur-&gt;<span class="pl-smi">_left</span>;
+				}
+				<span class="pl-k">else</span>
+				{
+					<span class="pl-c"><span class="pl-c">//</span> 准备删除</span>
+					<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_left</span> == <span class="pl-c1">nullptr</span>)
+					{<span class="pl-c"><span class="pl-c">//</span>左为空</span>
+						<span class="pl-k">if</span> (cur == _root)
+							_root = cur-&gt;<span class="pl-smi">_right</span>;
+						<span class="pl-k">else</span>
+						{
+							<span class="pl-k">if</span> (cur == parent-&gt;<span class="pl-smi">_left</span>)
+								parent-&gt;<span class="pl-smi">_left</span> = cur-&gt;<span class="pl-smi">_right</span>;
+							<span class="pl-k">else</span>
+								parent-&gt;<span class="pl-smi">_right</span> = cur-&gt;<span class="pl-smi">_right</span>;
+						}
+
+						<span class="pl-k">delete</span> cur;
+					}
+					<span class="pl-k">else</span> <span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_right</span> == <span class="pl-c1">nullptr</span>)
+					{<span class="pl-c"><span class="pl-c">//</span>右为空</span>
+						<span class="pl-k">if</span> (cur == _root)
+							_root = cur-&gt;<span class="pl-smi">_left</span>;
+						<span class="pl-k">else</span>
+						{
+							<span class="pl-k">if</span> (cur == parent-&gt;<span class="pl-smi">_left</span>)
+								parent-&gt;<span class="pl-smi">_left</span> = cur-&gt;<span class="pl-smi">_left</span>;
+							<span class="pl-k">else</span>
+								parent-&gt;<span class="pl-smi">_right</span> = cur-&gt;<span class="pl-smi">_left</span>;
+						}
+
+						<span class="pl-k">delete</span> cur;
+					}
+					<span class="pl-k">else</span>
+					{<span class="pl-c"><span class="pl-c">//</span>左右都不为空</span>
+						<span class="pl-c"><span class="pl-c">//</span> 右树的最小节点(最左节点)</span>
+						Node* parent = cur;
+						Node* subLeft = cur-&gt;<span class="pl-smi">_right</span>;
+						<span class="pl-k">while</span> (subLeft-&gt;<span class="pl-smi">_left</span>)
+						{
+							parent = subLeft;
+							subLeft = subLeft-&gt;<span class="pl-smi">_left</span>;
+						}
+
+						<span class="pl-c1">std::swap</span>(cur-&gt;<span class="pl-smi">_val</span>, subLeft-&gt;<span class="pl-smi">_val</span>);
+
+						<span class="pl-k">if</span> (subLeft == parent-&gt;<span class="pl-smi">_left</span>)
+							parent-&gt;<span class="pl-smi">_left</span> = subLeft-&gt;<span class="pl-smi">_right</span>;
+						<span class="pl-k">else</span>
+							parent-&gt;<span class="pl-smi">_right</span> = subLeft-&gt;<span class="pl-smi">_right</span>;
+
+						<span class="pl-k">delete</span> subLeft;
+					}
+					<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+				}
+			}<span class="pl-c"><span class="pl-c">//</span> (cur)end...</span>
+			<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+		}
+
+		<span class="pl-k">void</span> <span class="pl-en">InOrder</span>()
+		{
+			<span class="pl-c1">_InOrder</span>(_root);
+			std::cout &lt;&lt; std::endl;
+		}
+
+		<span class="pl-c"><span class="pl-c">//</span> ------------递归版本--------------</span>
+
+		<span class="pl-k">void</span> <span class="pl-en">FindR</span>(<span class="pl-k">const</span> K&amp; val)
+		{
+			<span class="pl-k">return</span> <span class="pl-c1">_FindR</span>(_root, val);
+		}
+
+		<span class="pl-k">bool</span> <span class="pl-en">InsertR</span>(<span class="pl-k">const</span> K&amp; val)
+		{
+			<span class="pl-k">return</span> <span class="pl-c1">_InsertR</span>(_root, val);
+		}
+
+		<span class="pl-k">bool</span> <span class="pl-en">EraseR</span>(<span class="pl-k">const</span> K&amp; val)
+		{
+			<span class="pl-k">return</span> <span class="pl-c1">_EraseR</span>(_root, val);
+		}
+
+		<span class="pl-en">~BSTree</span>()
+		{
+			<span class="pl-c1">Destory</span>(_root);
+		}
+
+		<span class="pl-en">BSTree</span>() = <span class="pl-k">default</span>;
+
+		<span class="pl-en">BSTree</span>(<span class="pl-k">const</span> BSTree&lt;K&gt;&amp; t)
+		{
+			_root = <span class="pl-c1">Copy</span>(t.<span class="pl-smi">_root</span>);
+		}
+
+		BSTree&lt;K&gt;&amp; <span class="pl-k">operator</span>=(BSTree&lt;K&gt; t)
+		{
+			<span class="pl-c1">swap</span>(_root, t.<span class="pl-smi">_root</span>);
+
+			<span class="pl-k">return</span> *<span class="pl-c1">this</span>;
+		}
+
+	<span class="pl-k">private:</span>
+
+		Node* <span class="pl-en">Copy</span>(Node* root)
+		{
+			<span class="pl-k">if</span> (root == <span class="pl-c1">nullptr</span>)
+				<span class="pl-k">return</span> <span class="pl-c1">nullptr</span>;
+
+			Node* newRoot = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(_root-&gt;<span class="pl-smi">_val</span>);
+			newRoot-&gt;<span class="pl-smi">_left</span> = <span class="pl-c1">Copy</span>(root-&gt;<span class="pl-smi">_left</span>);
+			newRoot-&gt;<span class="pl-smi">_right</span> = <span class="pl-c1">Copy</span>(root-&gt;<span class="pl-smi">_right</span>);
+
+			<span class="pl-k">return</span> newRoot;
+		}
+
+
+		<span class="pl-k">void</span> <span class="pl-en">Destory</span>(Node*&amp; root)
+		{
+			<span class="pl-k">if</span> (root == <span class="pl-c1">nullptr</span>)
+				<span class="pl-k">return</span>;
+			<span class="pl-c1">Destory</span>(root-&gt;<span class="pl-smi">_left</span>);
+			<span class="pl-c1">Destory</span>(root-&gt;<span class="pl-smi">_right</span>);
+			<span class="pl-k">delete</span> root;
+			root = <span class="pl-c1">nullptr</span>;
+		}
+
+		<span class="pl-c"><span class="pl-c">//</span> 这里也要注意是用引用</span>
+		<span class="pl-k">bool</span> <span class="pl-en">_EraseR</span>(Node*&amp; root, <span class="pl-k">const</span> K&amp; val)
+		{
+			<span class="pl-k">if</span> (root == <span class="pl-c1">nullptr</span>)
+				<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+
+			<span class="pl-k">if</span> (root-&gt;<span class="pl-smi">_val</span> &lt; val)
+				<span class="pl-k">return</span> <span class="pl-c1">_EraseR</span>(root-&gt;<span class="pl-smi">_right</span>, val);
+			<span class="pl-k">else</span> <span class="pl-k">if</span> (root-&gt;<span class="pl-smi">_val</span> &gt; val)
+				<span class="pl-k">return</span> <span class="pl-c1">_EraseR</span>(root-&gt;<span class="pl-smi">_left</span>, val);
+			<span class="pl-k">else</span>
+			{
+				<span class="pl-c"><span class="pl-c">//</span> 删除</span>
+				<span class="pl-k">if</span> (root-&gt;<span class="pl-smi">_left</span> == <span class="pl-c1">nullptr</span>)
+				{
+					Node* del = root;
+					root = root-&gt;<span class="pl-smi">_right</span>;
+					<span class="pl-k">delete</span> del;
+
+					<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+				}
+				<span class="pl-k">else</span> <span class="pl-k">if</span> (root-&gt;<span class="pl-smi">_right</span> == <span class="pl-c1">nullptr</span>)
+				{
+					Node* del = root;
+					root = root-&gt;<span class="pl-smi">_left</span>;
+					<span class="pl-k">delete</span> del;
+
+					<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+				}
+				<span class="pl-k">else</span>
+				{
+					<span class="pl-c"><span class="pl-c">//</span> 找替代节点</span>
+					Node* subLeft = root-&gt;<span class="pl-smi">_right</span>;
+					<span class="pl-k">while</span> (subLeft-&gt;<span class="pl-smi">_left</span>)
+					{
+						subLeft = subLeft-&gt;<span class="pl-smi">_left</span>;
+					}
+
+					<span class="pl-c1">std::swap</span>(root-&gt;<span class="pl-smi">_val</span>, subLeft-&gt;<span class="pl-smi">_val</span>);
+
+					<span class="pl-c"><span class="pl-c">//</span> 转换成在子树去递归删除</span>
+					<span class="pl-k">return</span> <span class="pl-c1">_EraseR</span>(root-&gt;<span class="pl-smi">_right</span>, val);
+				}
+			}
+			<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+		}
+
+		<span class="pl-k">bool</span> <span class="pl-en">_FindR</span>(Node* root, <span class="pl-k">const</span> K&amp; val)
+		{
+			<span class="pl-k">if</span> (root == <span class="pl-c1">nullptr</span>)
+				<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+			<span class="pl-k">if</span> (root-&gt;<span class="pl-smi">_val</span> &lt; val)
+				<span class="pl-k">return</span> <span class="pl-c1">_FindR</span>(root-&gt;<span class="pl-smi">_right</span>, val);
+			<span class="pl-k">else</span> <span class="pl-k">if</span> (root-&gt;<span class="pl-smi">_val</span> &gt; val)
+				<span class="pl-k">return</span> <span class="pl-c1">_FindR</span>(root-&gt;<span class="pl-smi">_left</span>, val);
+			<span class="pl-k">else</span>
+				<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+		}
+		<span class="pl-c"><span class="pl-c">//</span> 这里注意是使用的引用</span>
+		<span class="pl-k">bool</span> <span class="pl-en">_InsertR</span>(Node*&amp; root, <span class="pl-k">const</span> K&amp; val)
+		{
+			<span class="pl-k">if</span> (root == <span class="pl-c1">nullptr</span>)
+			{
+				root = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(val);
+				<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+			}
+
+			<span class="pl-k">if</span> (root-&gt;<span class="pl-smi">_val</span> &lt; val)
+				<span class="pl-k">return</span> <span class="pl-c1">_InsertR</span>(root-&gt;<span class="pl-smi">_right</span>, val);
+			<span class="pl-k">else</span> <span class="pl-k">if</span> (root-&gt;<span class="pl-smi">_val</span> &gt; val)
+				<span class="pl-k">return</span> <span class="pl-c1">_InsertR</span>(root-&gt;<span class="pl-smi">_left</span>, val);
+			<span class="pl-k">else</span>
+				<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+		}
+
+		<span class="pl-k">void</span> <span class="pl-en">_InOrder</span>(Node* root)
+		{
+			<span class="pl-k">if</span> (root == <span class="pl-c1">nullptr</span>)
+				<span class="pl-k">return</span>;
+
+			<span class="pl-c1">_InOrder</span>(root-&gt;<span class="pl-smi">_right</span>);
+			std::cout &lt;&lt; root-&gt;<span class="pl-smi">_val</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>;
+			<span class="pl-c1">_InOrder</span>(root-&gt;<span class="pl-smi">_left</span>);
+		}
+
+		Node* _root = <span class="pl-c1">nullptr</span>;
+	};
+}
+
+
+<span class="pl-k">namespace</span> <span class="pl-en">key_value</span>
+{
+	<span class="pl-c"><span class="pl-c">//</span> 树的节点</span>
+	<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">V</span>&gt;
+	<span class="pl-k">struct</span> <span class="pl-en">BSTreeNode</span>
+	{
+		BSTreeNode&lt;K, V&gt;* _left;
+		BSTreeNode&lt;K, V&gt;* _right;
+		K _val;
+		V _value;
+
+		<span class="pl-en">BSTreeNode</span>(<span class="pl-k">const</span> K&amp; val, <span class="pl-k">const</span> V&amp; value)
+			:_left(<span class="pl-c1">nullptr</span>)
+			, _right(<span class="pl-c1">nullptr</span>)
+			, _val(val)
+			, _value(value)
+		{}
+	};
+
+	<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">V</span>&gt;
+	<span class="pl-k">class</span> <span class="pl-en">BSTree</span>
+	{
+		<span class="pl-k">typedef</span> BSTreeNode&lt;K, V&gt; Node;
+	<span class="pl-k">public:</span>
+		<span class="pl-k">bool</span> <span class="pl-en">Insert</span>(<span class="pl-k">const</span> K&amp; val, <span class="pl-k">const</span> V&amp; value)
+		{
+			<span class="pl-k">if</span> (_root == <span class="pl-c1">nullptr</span>) {
+				_root = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(val, value);
+				<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+			}
+
+			Node* parent = <span class="pl-c1">nullptr</span>;
+			Node* cur = _root;
+			<span class="pl-k">while</span> (cur)
+			{
+				<span class="pl-c"><span class="pl-c">//</span> 提前保存cur的位置</span>
+				parent = cur;
+				<span class="pl-c"><span class="pl-c">//</span> 比当前位置大往右走，比当前位置小往左走</span>
+				<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &lt; val)
+					cur = cur-&gt;<span class="pl-smi">_left</span>;
+				<span class="pl-k">else</span> <span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &gt; val)
+					cur = cur-&gt;<span class="pl-smi">_right</span>;
+				<span class="pl-k">else</span>
+					<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+			}
+			<span class="pl-c"><span class="pl-c">//</span> 走到这里说明找到合适的位置了</span>
+			cur = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(val, value);
+			<span class="pl-k">if</span> (parent-&gt;<span class="pl-smi">_val</span> &lt; val)
+				parent-&gt;<span class="pl-smi">_left</span> = cur;
+			<span class="pl-k">else</span>
+				parent-&gt;<span class="pl-smi">_right</span> = cur;
+
+			<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+		}
+
+		Node* <span class="pl-en">Find</span>(<span class="pl-k">const</span> K&amp; val)
+		{
+			Node* cur = _root;
+			<span class="pl-k">while</span> (cur) {
+				<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &lt; val)
+					cur = cur-&gt;<span class="pl-smi">_left</span>;
+				<span class="pl-k">else</span> <span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &gt; val)
+					cur = cur-&gt;<span class="pl-smi">_right</span>;
+				<span class="pl-k">else</span> <span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> == val)
+					<span class="pl-k">return</span> cur;
+			}
+			<span class="pl-k">return</span> <span class="pl-c1">nullptr</span>;
+		}
+
+		<span class="pl-k">bool</span> <span class="pl-en">Erase</span>(<span class="pl-k">const</span> K&amp; key)
+		{
+			Node* parent = <span class="pl-c1">nullptr</span>;
+			Node* cur = _root;
+			<span class="pl-k">while</span> (cur)
+			{
+				<span class="pl-c"><span class="pl-c">//</span> 找val</span>
+				<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &lt; key)
+				{
+					parent = cur;
+					cur = cur-&gt;<span class="pl-smi">_right</span>;
+				}
+				<span class="pl-k">else</span> <span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_val</span> &gt; key)
+				{
+					parent = cur;
+					cur = cur-&gt;<span class="pl-smi">_left</span>;
+				}
+				<span class="pl-k">else</span>
+				{
+					<span class="pl-c"><span class="pl-c">//</span> 准备删除</span>
+					<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_left</span> == <span class="pl-c1">nullptr</span>)
+					{<span class="pl-c"><span class="pl-c">//</span>左为空</span>
+						<span class="pl-k">if</span> (cur == _root)
+							_root = cur-&gt;<span class="pl-smi">_right</span>;
+						<span class="pl-k">else</span>
+						{
+							<span class="pl-k">if</span> (cur == parent-&gt;<span class="pl-smi">_left</span>)
+								parent-&gt;<span class="pl-smi">_left</span> = cur-&gt;<span class="pl-smi">_right</span>;
+							<span class="pl-k">else</span>
+								parent-&gt;<span class="pl-smi">_right</span> = cur-&gt;<span class="pl-smi">_right</span>;
+						}
+
+						<span class="pl-k">delete</span> cur;
+					}
+					<span class="pl-k">else</span> <span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_right</span> == <span class="pl-c1">nullptr</span>)
+					{<span class="pl-c"><span class="pl-c">//</span>右为空</span>
+						<span class="pl-k">if</span> (cur == _root)
+							_root = cur-&gt;<span class="pl-smi">_left</span>;
+						<span class="pl-k">else</span>
+						{
+							<span class="pl-k">if</span> (cur == parent-&gt;<span class="pl-smi">_left</span>)
+								parent-&gt;<span class="pl-smi">_left</span> = cur-&gt;<span class="pl-smi">_left</span>;
+							<span class="pl-k">else</span>
+								parent-&gt;<span class="pl-smi">_right</span> = cur-&gt;<span class="pl-smi">_left</span>;
+						}
+
+						<span class="pl-k">delete</span> cur;
+					}
+					<span class="pl-k">else</span>
+					{<span class="pl-c"><span class="pl-c">//</span>左右都不为空</span>
+						<span class="pl-c"><span class="pl-c">//</span> 右树的最小节点(最左节点)</span>
+						Node* parent = cur;
+						Node* subLeft = cur-&gt;<span class="pl-smi">_right</span>;
+						<span class="pl-k">while</span> (subLeft-&gt;<span class="pl-smi">_left</span>)
+						{
+							parent = subLeft;
+							subLeft = subLeft-&gt;<span class="pl-smi">_left</span>;
+						}
+
+						<span class="pl-c1">std::swap</span>(cur-&gt;<span class="pl-smi">_val</span>, subLeft-&gt;<span class="pl-smi">_val</span>);
+
+						<span class="pl-k">if</span> (subLeft == parent-&gt;<span class="pl-smi">_left</span>)
+							parent-&gt;<span class="pl-smi">_left</span> = subLeft-&gt;<span class="pl-smi">_right</span>;
+						<span class="pl-k">else</span>
+							parent-&gt;<span class="pl-smi">_right</span> = subLeft-&gt;<span class="pl-smi">_right</span>;
+
+						<span class="pl-k">delete</span> subLeft;
+					}
+					<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+				}
+			}<span class="pl-c"><span class="pl-c">//</span> (cur)end...</span>
+			<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+		}
+
+		<span class="pl-k">void</span> <span class="pl-en">InOrder</span>()
+		{
+			<span class="pl-c1">_InOrder</span>(_root);
+			std::cout &lt;&lt; std::endl;
+		}
+	<span class="pl-k">private:</span>
+		<span class="pl-k">void</span> <span class="pl-en">_InOrder</span>(Node* root)
+		{
+			<span class="pl-k">if</span> (root == <span class="pl-c1">nullptr</span>)
+				<span class="pl-k">return</span>;
+
+			<span class="pl-c1">_InOrder</span>(root-&gt;<span class="pl-smi">_right</span>);
+			std::cout &lt;&lt; root-&gt;<span class="pl-smi">_val</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>:<span class="pl-pds">"</span></span> &lt;&lt; root-&gt;<span class="pl-smi">_value</span> &lt;&lt; std::endl;
+			<span class="pl-c1">_InOrder</span>(root-&gt;<span class="pl-smi">_left</span>);
+		}
+
+		Node* _root = <span class="pl-c1">nullptr</span>;
+	};
+}</pre></div>
+<blockquote>
+<p>BinarySearchTree.cpp</p>
+</blockquote>
+<div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">include</span><span class="pl-s"><span class="pl-pds">"</span>BinarySearchTree.h<span class="pl-pds">"</span></span>
+
+<span class="pl-c"><span class="pl-c">//</span>int main()</span>
+<span class="pl-c"><span class="pl-c">//</span>{</span>
+<span class="pl-c"><span class="pl-c">//</span>	int a[] = { 8, 3, 1, 10, 6, 4, 7, 14, 13 };</span>
+<span class="pl-c"><span class="pl-c">//</span>	key::BSTree&lt;int&gt; b;</span>
+<span class="pl-c"><span class="pl-c">//</span>	for (auto e : a)</span>
+<span class="pl-c"><span class="pl-c">//</span>	{</span>
+<span class="pl-c"><span class="pl-c">//</span>		b.InsertR(e);</span>
+<span class="pl-c"><span class="pl-c">//</span>	}</span>
+<span class="pl-c"><span class="pl-c">//</span>	b.InOrder();</span>
+<span class="pl-c"><span class="pl-c">//</span>	// 删除</span>
+<span class="pl-c"><span class="pl-c">//</span>	b.EraseR(14);</span>
+<span class="pl-c"><span class="pl-c">//</span>	b.InOrder();</span>
+<span class="pl-c"><span class="pl-c">//</span></span>
+<span class="pl-c"><span class="pl-c">//</span>	b.EraseR(3);</span>
+<span class="pl-c"><span class="pl-c">//</span>	b.InOrder();</span>
+<span class="pl-c"><span class="pl-c">//</span></span>
+<span class="pl-c"><span class="pl-c">//</span>	b.EraseR(8);</span>
+<span class="pl-c"><span class="pl-c">//</span>	b.InOrder();</span>
+<span class="pl-c"><span class="pl-c">//</span></span>
+<span class="pl-c"><span class="pl-c">//</span>	for (auto e : a)</span>
+<span class="pl-c"><span class="pl-c">//</span>	{</span>
+<span class="pl-c"><span class="pl-c">//</span>		b.EraseR(e);</span>
+<span class="pl-c"><span class="pl-c">//</span>		b.InOrder();</span>
+<span class="pl-c"><span class="pl-c">//</span>	}</span>
+<span class="pl-c"><span class="pl-c">//</span></span>
+<span class="pl-c"><span class="pl-c">//</span>	return 0;</span>
+<span class="pl-c"><span class="pl-c">//</span>}</span>
+
+
+#<span class="pl-k">include</span><span class="pl-s"><span class="pl-pds">&lt;</span>string<span class="pl-pds">&gt;</span></span>
+
+<span class="pl-k">void</span> <span class="pl-en">TestBSTree1</span>()
+{
+	<span class="pl-c"><span class="pl-c">//</span> 输入单词，查找单词对应的中文翻译</span>
+	key_value::BSTree&lt;std::string, std::string&gt; dict;
+	dict.<span class="pl-c1">Insert</span>(<span class="pl-s"><span class="pl-pds">"</span>string<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>字符串<span class="pl-pds">"</span></span>);
+	dict.<span class="pl-c1">Insert</span>(<span class="pl-s"><span class="pl-pds">"</span>tree<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>树<span class="pl-pds">"</span></span>);
+	dict.<span class="pl-c1">Insert</span>(<span class="pl-s"><span class="pl-pds">"</span>left<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>左边、剩余<span class="pl-pds">"</span></span>);
+	dict.<span class="pl-c1">Insert</span>(<span class="pl-s"><span class="pl-pds">"</span>right<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>右边<span class="pl-pds">"</span></span>);
+	dict.<span class="pl-c1">Insert</span>(<span class="pl-s"><span class="pl-pds">"</span>sort<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>排序<span class="pl-pds">"</span></span>);
+	<span class="pl-c"><span class="pl-c">//</span> 插入词库中所有单词</span>
+	std::string str;
+	<span class="pl-k">while</span> (std::cin &gt;&gt; str)
+	{
+		key_value::BSTreeNode&lt;std::string, std::string&gt;* ret = dict.<span class="pl-c1">Find</span>(str);
+		<span class="pl-k">if</span> (ret == <span class="pl-c1">nullptr</span>)
+		{
+			std::cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>单词拼写错误，词库中没有这个单词:<span class="pl-pds">"</span></span> &lt;&lt; str &lt;&lt; std::endl;
+		}
+		<span class="pl-k">else</span>
+		{
+			std::cout &lt;&lt; str &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>中文翻译:<span class="pl-pds">"</span></span> &lt;&lt; ret-&gt;<span class="pl-smi">_value</span> &lt;&lt; std::endl;
+		}
+	}
+}
+<span class="pl-k">void</span> <span class="pl-en">TestBSTree2</span>()
+{
+	<span class="pl-c"><span class="pl-c">//</span> 统计水果出现的次数</span>
+	std::string arr[] = { <span class="pl-s"><span class="pl-pds">"</span>苹果<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>西瓜<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>苹果<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>西瓜<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>苹果<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>苹果<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>西瓜<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>苹果<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>香蕉<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>苹果<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>香蕉<span class="pl-pds">"</span></span> };
+	key_value::BSTree&lt;std::string, <span class="pl-k">int</span>&gt; countTree;
+	<span class="pl-k">for</span> (<span class="pl-k">const</span> <span class="pl-k">auto</span>&amp; str : arr)
+	{
+		<span class="pl-c"><span class="pl-c">//</span> 先查找水果在不在搜索树中</span>
+		<span class="pl-c"><span class="pl-c">//</span> 1、不在，说明水果第一次出现，则插入&lt;水果, 1&gt;</span>
+		<span class="pl-c"><span class="pl-c">//</span> 2、在，则查找到的节点中水果对应的次数++</span>
+		<span class="pl-c"><span class="pl-c">//</span>BSTreeNode&lt;string, int&gt;* ret = countTree.Find(str);</span>
+		<span class="pl-k">auto</span> ret = countTree.<span class="pl-c1">Find</span>(str);
+		<span class="pl-k">if</span> (ret == <span class="pl-c1">NULL</span>)
+		{
+			countTree.<span class="pl-c1">Insert</span>(str, <span class="pl-c1">1</span>);
+		}
+		<span class="pl-k">else</span>
+		{
+			ret-&gt;<span class="pl-smi">_value</span>++;
+		}
+	}
+	countTree.<span class="pl-c1">InOrder</span>();
+}
+
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c1">TestBSTree1</span>();
+	<span class="pl-c1">TestBSTree2</span>();
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## C语言中的类型转换
+
+
+- 在C语言中，如果赋值运算符左右两侧类型不同，或者形参与实参类型不匹配，或者返回值类型与接收返回值类型不一致时，就需要发生类型转化，C语言中总共有两种形式的类型转换：隐式类型转换和显式类型转换。">
+<meta property="og:title" content="21. C++的类型转换">
+<meta property="og:description" content="## C语言中的类型转换
+
+
+- 在C语言中，如果赋值运算符左右两侧类型不同，或者形参与实参类型不匹配，或者返回值类型与接收返回值类型不一致时，就需要发生类型转化，C语言中总共有两种形式的类型转换：隐式类型转换和显式类型转换。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/21.%20C%2B%2B-de-lei-xing-zhuan-huan.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>21. C++的类型转换</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">21. C++的类型转换</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/23" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>C语言中的类型转换</h2>
+<ul>
+<li>在C语言中，如果赋值运算符左右两侧类型不同，或者形参与实参类型不匹配，或者返回值类型与接收返回值类型不一致时，就需要发生类型转化，C语言中总共有两种形式的类型转换：隐式类型转换和显式类型转换。</li>
+</ul>
+<ol>
+<li><strong>隐式类型转化</strong>：编译器在编译阶段自动进行，能转就转，不能转就编译失败</li>
+<li><strong>显式类型转化</strong>：需要用户自己处理</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">int</span> i = <span class="pl-c1">1</span>;
+	<span class="pl-c"><span class="pl-c">//</span> 隐式类型转换</span>
+	<span class="pl-k">double</span> d = i;
+	<span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>%d, %.2f<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, i, d);
+	<span class="pl-k">int</span>* p = &amp;i;
+
+	<span class="pl-c"><span class="pl-c">//</span> 显示的强制类型转换</span>
+	<span class="pl-k">int</span> address = (<span class="pl-k">int</span>)p; 
+	<span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>%x, %d<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, p, address);
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><strong>缺陷：</strong></p>
+<ul>
+<li>转换的可视性比较差，所有的转换形式都是以一种相同形式书写，难以跟踪错误的转换</li>
+</ul>
+<h2>为什么C++需要四种类型转</h2>
+<p>C风格的转换格式很简单，但是有不少缺点的：</p>
+<ol>
+<li>隐式类型转化有些情况下可能会出问题：比如数据精度丢失</li>
+<li>显式类型转换将所有情况混合在一起，代码不够清晰</li>
+</ol>
+<p>因此C++提出了自己的类型转化风格，注意因为C++要兼容C语言，所以C++中还可以使用C语言的转化风格。</p>
+<h2>C++强制类型转换</h2>
+<ul>
+<li>
+<p>标准C++为了加强类型转换的可视性，引入了四种命名的强制类型转换操作符：</p>
+<ul>
+<li><code class="notranslate">static_cast</code>、<code class="notranslate">reinterpret_cast</code>、<code class="notranslate">const_cast</code>、<code class="notranslate">dynamic_cast</code></li>
+</ul>
+</li>
+</ul>
+<h2>static_cast (静态转换)</h2>
+<ul>
+<li><code class="notranslate">static_cast</code>用于非多态类型的转换（静态转换），编译器隐式执行的任何类型转换都可用 <code class="notranslate">static_cast</code>，但它不能用于两个不相关的类型进行转换</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/45e2d5428923aa1352aa15218c0b9e508b99eddc3b7417b978bced8ed4f9175f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65383066303262356264353634343063396438376664373866303530323864332e706e67"><img src="https://camo.githubusercontent.com/45e2d5428923aa1352aa15218c0b9e508b99eddc3b7417b978bced8ed4f9175f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65383066303262356264353634343063396438376664373866303530323864332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/e80f02b5bd56440c9d87fd78f05028d3.png" style="max-width: 100%;"></a></p>
+<h2>reinterpret_cast</h2>
+<ul>
+<li>reinterpret_cast操作符通常为操作数的位模式提供较低层次的重新解释，用于将一种类型转换 为另一种不同的类型</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">double</span> d = <span class="pl-c1">3.14</span>;
+	<span class="pl-k">int</span> a = <span class="pl-k">static_cast</span>&lt;<span class="pl-k">int</span>&gt;(d);
+	cout &lt;&lt; a &lt;&lt; endl;
+	<span class="pl-c"><span class="pl-c">//</span> 这里使用static_cast会报错，应该使用reinterpret_cast</span>
+	<span class="pl-c"><span class="pl-c">//</span> int *p = static_cast&lt;int*&gt;(a);</span>
+	<span class="pl-k">int</span>* p = <span class="pl-k">reinterpret_cast</span>&lt;<span class="pl-k">int</span>*&gt;(a);
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d4611d0385ad22697d22f99663df969faadaac5ac66aab6c886a9f7d241082d0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31313830393862643334363834373237393464396365633662356661653464332e706e67"><img src="https://camo.githubusercontent.com/d4611d0385ad22697d22f99663df969faadaac5ac66aab6c886a9f7d241082d0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31313830393862643334363834373237393464396365633662356661653464332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/118098bd3468472794d9cec6b5fae4d3.png" style="max-width: 100%;"></a></p>
+<h2>const_cast</h2>
+<ul>
+<li>
+<p><code class="notranslate">const_cast</code>最常用的用途就是删除变量的const属性，方便赋值</p>
+</li>
+<li>
+<p>这里编译器可能是对其作了优化，直接将const修饰的值放到了寄存器里，在读取的时候没有向内存中读，而修改的时候是修改的内存中的数据，所以是不一样的~~</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/eca2722c17cd7d03457eec1aeb17f8204a54f9ab524e340479acce7a50b9fdab/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36643464326236613866383734396332393532366135636166363735303031352e706e67"><img src="https://camo.githubusercontent.com/eca2722c17cd7d03457eec1aeb17f8204a54f9ab524e340479acce7a50b9fdab/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36643464326236613866383734396332393532366135636166363735303031352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/6d4d2b6a8f8749c29526a5caf6750015.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>然而加上了<code class="notranslate">volatile</code>后，值一样了，但是a的地址又不一样了，这里可能是流插入的运算符捣的鬼，在匹配的时候匹配错了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/27a95c27c98de868d07839dcac4db81452bce04149ee642eb56d2aec3d6033fd/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61336338613235313035663334396331616233326230366636363937356331662e706e67"><img src="https://camo.githubusercontent.com/27a95c27c98de868d07839dcac4db81452bce04149ee642eb56d2aec3d6033fd/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61336338613235313035663334396331616233326230366636363937356331662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/a3c8a25105f349c1ab32b06f66975c1f.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>那么我分别使用C语言的<code class="notranslate">printf</code>和<code class="notranslate">cout</code>打印也是正常的：</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/a510e744f66f458eb2430c594214b319db02614269213dcbb0445f50aac8ec2a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64613232323535383663633534366134613238363838313437386162386630372e706e67"><img src="https://camo.githubusercontent.com/a510e744f66f458eb2430c594214b319db02614269213dcbb0445f50aac8ec2a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64613232323535383663633534366134613238363838313437386162386630372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/da2225586cc546a4a286881478ab8f07.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>在Linux平台下也是如此：</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/867da05864a3638c24468e5bea55270de577ab301dd11d420a5fde51343f5bf0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38376331663433343335376234353035383565653965373839623764346266652e706e67"><img src="https://camo.githubusercontent.com/867da05864a3638c24468e5bea55270de577ab301dd11d420a5fde51343f5bf0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38376331663433343335376234353035383565653965373839623764346266652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/87c1f434357b450585ee9e789b7d4bfe.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/74c41c367524cabf3062cb822b2efbedafbcc2445ca1b1ca6188916722ce213b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37343539626433663734393734336164386332326635643337633266363538372e706e67"><img src="https://camo.githubusercontent.com/74c41c367524cabf3062cb822b2efbedafbcc2445ca1b1ca6188916722ce213b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37343539626433663734393734336164386332326635643337633266363538372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/7459bd3f749743ad8c22f5d37c2f6587.png" style="max-width: 100%;"></a></p>
+<h2>dynamic_cast</h2>
+<ul>
+<li>dynamic_cast用于将一个父类对象的指针/引用转换为子类对象的指针或引用(动态转换)</li>
+<li>向上转型：子类对象指针/引用-&gt;父类指针/引用(不需要转换，赋值兼容规则)</li>
+<li>向下转型：父类对象指针/引用-&gt;子类指针/引用(用dynamic_cast转型是安全的)</li>
+</ul>
+<p>注意：</p>
+<ol>
+<li><strong>dynamic_cast只能用于父类含有虚函数的类</strong></li>
+<li><strong>dynamic_cast会先检查是否能转换成功，能成功则转换，不能则返回0</strong></li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">A</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">f</span>() {}
+	<span class="pl-k">int</span> _a = <span class="pl-c1">0</span>;
+};
+
+<span class="pl-k">class</span> <span class="pl-en">B</span> : <span class="pl-k">public</span> <span class="pl-en">A</span>
+{
+
+<span class="pl-k">public:</span>
+	<span class="pl-k">int</span> _b = <span class="pl-c1">1</span>;
+};
+
+<span class="pl-c"><span class="pl-c">//</span>void fun(A* pa)</span>
+<span class="pl-c"><span class="pl-c">//</span>{</span>
+<span class="pl-c"><span class="pl-c">//</span>	// 向下转换：直接转换是不安全的</span>
+<span class="pl-c"><span class="pl-c">//</span>	// 如果pa是指向父类A对象，存在越界问题</span>
+<span class="pl-c"><span class="pl-c">//</span>	B* ptr = (B*)pa;</span>
+<span class="pl-c"><span class="pl-c">//</span>	ptr-&gt;_a++;</span>
+<span class="pl-c"><span class="pl-c">//</span>	ptr-&gt;_b++;</span>
+<span class="pl-c"><span class="pl-c">//</span>}</span>
+
+<span class="pl-c"><span class="pl-c">//</span> 解决方法：使用dynamic_cast</span>
+<span class="pl-k">void</span> <span class="pl-en">fun</span>(A* pa)
+{
+	B* ptr = <span class="pl-k">dynamic_cast</span>&lt;B*&gt;(pa);
+	<span class="pl-k">if</span> (ptr)
+	{
+		ptr-&gt;<span class="pl-smi">_a</span>++;
+		ptr-&gt;<span class="pl-smi">_b</span>++;
+	}
+	<span class="pl-k">else</span>
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>转换失败<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	}
+}
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c"><span class="pl-c">//</span> 向下转换规则：父类对象不能转换成子类对象，但是父类指针和引用可以转换子类指针和引用</span>
+	B b1;
+	A a;
+	B b;
+	<span class="pl-c1">fun</span>(&amp;a);
+	<span class="pl-c1">fun</span>(&amp;b);
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2c5e87ad985aa771c80174f669c6da83ac75e1da18d9aa83f43661519fe5f309/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30376366356663343139626534336665393162613464306633306565636439362e706e67"><img src="https://camo.githubusercontent.com/2c5e87ad985aa771c80174f669c6da83ac75e1da18d9aa83f43661519fe5f309/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30376366356663343139626534336665393162613464306633306565636439362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/07cf5fc419be43fe91ba4d0f30eecd96.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/40152a5bc5edeeb6a9d39f8211084849eaab9f0b7f1b039918c0fe3f9cb1c4b6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37663561653234303436643734303039393436366439373239383062643236362e706e67"><img src="https://camo.githubusercontent.com/40152a5bc5edeeb6a9d39f8211084849eaab9f0b7f1b039918c0fe3f9cb1c4b6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37663561653234303436643734303039393436366439373239383062643236362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/7f5ae24046d740099466d972980bd266.png" style="max-width: 100%;"></a></p>
+<ol start="3">
+<li>dynamic_cast会先检查是否能转换成功，能成功则转换，不能则返回0 注意 强制类型转换关闭或挂起了正常的类型检查，每次使用强制类型转换前，程序员应该仔细考虑是 否还有其他不同的方法达到同一目的，如果非强制类型转换不可，则应限制强制转换值的作用 域，以减少发生错误的机会。强烈建议：避免使用强制类型转换</li>
+</ol>
+<h2>RTTI</h2>
+<ul>
+<li>RTTI：Run-time Type identification的简称，即：运行时类型识别。</li>
+<li>C++通过以下方式来支持RTTI：
+<ul>
+<li>
+<ol>
+<li>typeid运算符</li>
+</ol>
+</li>
+<li>
+<ol start="2">
+<li>dynamic_cast运算符</li>
+</ol>
+</li>
+<li>
+<ol start="3">
+<li>decltype</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<h2>其他类型转换小结</h2>
+<ol>
+<li>内置类型之间，相近类型可以转换</li>
+<li>构造函数，其他类型转换成自定义类型，有构造函数就可以支持
+<ul>
+<li>自定义类型 &lt;- 内置类型</li>
+<li>自定义类型 &lt;- 自定义类型</li>
+</ul>
+</li>
+<li>operator type()  内置类型 &lt;- 自定义类型</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">C</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">C</span>(<span class="pl-k">int</span> x)
+	{}
+};
+
+<span class="pl-k">class</span> <span class="pl-en">D</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">D</span>(<span class="pl-k">const</span> C&amp; c)
+	{}
+};
+
+<span class="pl-k">class</span> <span class="pl-en">E</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">operator</span> <span class="pl-en">int</span>()
+	{
+		<span class="pl-c"><span class="pl-c">//</span> ...</span>
+		<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+	}
+};
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c"><span class="pl-c">//</span> 显示类型转换</span>
+	<span class="pl-k">int</span>* p = <span class="pl-c1">nullptr</span>;
+	<span class="pl-k">int</span> i = (<span class="pl-k">int</span>)p;
+
+	<span class="pl-c"><span class="pl-c">//</span> 自定义类型 &lt;- 内置类型</span>
+	C c1 = <span class="pl-c1">11</span>;
+	string s1 = <span class="pl-s"><span class="pl-pds">"</span>xxxx<span class="pl-pds">"</span></span>;
+
+	<span class="pl-c"><span class="pl-c">//</span> 自定义类型 &lt;- 自定义类型</span>
+	D d = c1;
+
+	<span class="pl-c"><span class="pl-c">//</span> 内置类型 &lt;- 自定义类型</span>
+	E e;
+	<span class="pl-k">int</span> x = e;
+	cout &lt;&lt; x &lt;&lt; endl;
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

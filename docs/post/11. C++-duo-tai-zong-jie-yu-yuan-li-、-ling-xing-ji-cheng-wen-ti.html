@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## 多态
+
+
+### 什么是多态
+
+- 生活中的多态，是指的客观的事物在人脑中的主观体现。">
+<meta property="og:title" content="11. C++多态总结与原理、菱形继承问题">
+<meta property="og:description" content="## 多态
+
+
+### 什么是多态
+
+- 生活中的多态，是指的客观的事物在人脑中的主观体现。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/11.%20C%2B%2B-duo-tai-zong-jie-yu-yuan-li-%E3%80%81-ling-xing-ji-cheng-wen-ti.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>11. C++多态总结与原理、菱形继承问题</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">11. C++多态总结与原理、菱形继承问题</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/13" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>多态</h2>
+<h3>什么是多态</h3>
+<ul>
+<li>
+<p>生活中的多态，是指的客观的事物在人脑中的主观体现。例如，在路上看到一只哈士奇，你可以看做是哈士奇，可以看做是狗，也可以看做是动物。主观意识上的类别，与客观存在的事物，存在 <code class="notranslate">is a</code> 的关系的时候，即形成了多态。</p>
+</li>
+<li>
+<p>在程序中，一个类的引用指向另外一个类的对象，从而产生多种形态。当二者存在直接或者间接的继承关系时，父类引用指向子类的对象，即形成多态。</p>
+</li>
+<li>
+<p><strong>多态是面向对象三大特性之一，记住继承是多态的前提，如果类与类之间没有继承关系，也不会存在多态。</strong></p>
+</li>
+</ul>
+<h2>多态的定义及实现</h2>
+<h3>多态的构成条件</h3>
+<ul>
+<li>多态是在不同继承关系的类对象，去调用同一函数，产生了不同的行为。比如Student继承了<br>
+Person。Person对象买票全价，Student对象买票半价。</li>
+</ul>
+<p>那么在继承中要构成多态还有<strong>两个条件</strong>：</p>
+<ol>
+<li>
+<p><strong>必须通过基类的指针或者引用调用虚函数</strong></p>
+</li>
+<li>
+<p><strong>被调用的函数必须是虚函数，且派生类必须对基类的虚函数进行重写</strong></p>
+</li>
+</ol>
+<h3>虚函数</h3>
+<ul>
+<li><strong>虚函数</strong>：即被virtual修饰的类成员函数称为虚函数。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Person</span> {
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">BuyTicket</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>买票-全价<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+};</pre></div>
+<h2>虚函数的重写</h2>
+<ul>
+<li>虚函数的重写(覆盖)：派生类中有一个跟基类<strong>完全相同的虚函数</strong>(即派生类虚函数与基类虚函数的返回值类型、函数名字、参数列表完全相同)，称<strong>子类的虚函数重写了基类的虚函数</strong>。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Person</span> {
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">BuyTicket</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>买票-全价<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+};
+
+<span class="pl-k">class</span> <span class="pl-en">Student</span> : <span class="pl-k">public</span> <span class="pl-en">Person</span> {
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">BuyTicket</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>买票-半价<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+};
+
+<span class="pl-k">void</span> <span class="pl-en">Func</span>(Person&amp; p)
+{
+	p.<span class="pl-c1">BuyTicket</span>();
+}
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Person ps;
+	Student st;
+	<span class="pl-c1">Func</span>(ps);
+	<span class="pl-c1">Func</span>(st);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4aeb6ad87cdd91c142e02327ea07a8874809c6f36713c5d79924d407f051acc5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66306136626339643663383434303230383866326630353965343733656431392e706e67"><img src="https://camo.githubusercontent.com/4aeb6ad87cdd91c142e02327ea07a8874809c6f36713c5d79924d407f051acc5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66306136626339643663383434303230383866326630353965343733656431392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/f0a6bc9d6c84402088f2f059e473ed19.png" style="max-width: 100%;"></a></p>
+<h3>虚函数重写的两个例外</h3>
+<h4>协变</h4>
+<ul>
+<li>
+<p>协变(基类与派生类虚函数返回值类型不同)</p>
+</li>
+<li>
+<p>派生类重写基类虚函数时，与基类虚函数<strong>返回值类型不同</strong>。即基类虚函数返回基类<strong>对象的指针或者引用</strong>，派生类虚函数<strong>返回派生类对象的指针或者引用时</strong>，称为<strong>协变</strong>。</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">A</span> {};
+<span class="pl-k">class</span> <span class="pl-en">B</span> : <span class="pl-k">public</span> <span class="pl-en">A</span> {};
+
+<span class="pl-k">class</span> <span class="pl-en">Person</span> {
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> A* <span class="pl-en">f</span>() { <span class="pl-k">return</span> <span class="pl-k">new</span> A; }
+};
+
+<span class="pl-k">class</span> <span class="pl-en">Student</span> : <span class="pl-k">public</span> <span class="pl-en">Person</span> {
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> B* <span class="pl-en">f</span>() { <span class="pl-k">return</span> <span class="pl-k">new</span> B; }
+};</pre></div>
+<h3>重写</h3>
+<ul>
+<li>析构函数的重写(基类与派生类析构函数的名字不同)</li>
+<li>如果基类的析构函数为虚函数，此时派生类析构函数只要定义，无论是否加virtual关键字，<strong>都与基类的析构函数构成重写</strong>，虽然基类与派生类析构函数名字不同。虽然函数名不相同，看起来违背了重写的规则，其实不然，这里可以理解为编译器对析构函数的名称做了特殊处理，编译后析构函数的名称统一处理成<code class="notranslate">destructor</code>。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Person</span> {
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-en">~Person</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>~Person()<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+};
+
+<span class="pl-k">class</span> <span class="pl-en">Student</span> : <span class="pl-k">public</span> <span class="pl-en">Person</span> {
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-en">~Student</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>~Student()<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+};
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Person* p1 = <span class="pl-k">new</span> Person;
+	Person* p2 = <span class="pl-k">new</span> Student;
+
+	<span class="pl-k">delete</span> p1;
+	<span class="pl-k">delete</span> p2;
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/991f269c4fb0ff58ac640f20fe23ea2e55e5efaaba45e754e49e0dfdd1e6e0fb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64323932303632346632666634643166626136303537303838616463356664302e706e67"><img src="https://camo.githubusercontent.com/991f269c4fb0ff58ac640f20fe23ea2e55e5efaaba45e754e49e0dfdd1e6e0fb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64323932303632346632666634643166626136303537303838616463356664302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/d2920624f2ff4d1fba6057088adc5fd0.png" style="max-width: 100%;"></a></p>
+<h3>C++11 override 和 final</h3>
+<ul>
+<li>从上面可以看出，C++对函数重写的要求比较严格，但是有些情况下由于疏忽，可能会导致函数名字母次序写反而无法构成重载，而这种错误在编译期间是不会报出的，只有在程序运行时没有得到预期结果才来debug会得不偿失，因此：C++11提供了override和final两个关键字，可以帮助用户检测是否重写。</li>
+</ul>
+<ol>
+<li>final：修饰虚函数，表示该虚函数不能再被重写</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Car</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">Drive</span>() <span class="pl-k">final</span> {}
+};
+<span class="pl-k">class</span> <span class="pl-en">Benz</span> :<span class="pl-k">public</span> <span class="pl-en">Car</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">Drive</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Benz-舒适<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+};</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/59606013366559360a59e7c5c365638d9d879b6db6b7cfc8378758b548886a15/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31356432336434313036646234626663393739346234663431653333653334652e706e67"><img src="https://camo.githubusercontent.com/59606013366559360a59e7c5c365638d9d879b6db6b7cfc8378758b548886a15/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31356432336434313036646234626663393739346234663431653333653334652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/15d23d4106db4bfc9794b4f41e33e34e.png" style="max-width: 100%;"></a></p>
+<ol start="2">
+<li>override: 检查派生类虚函数是否重写了基类某个虚函数，如果没有重写编译报错。</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Car</span> {
+<span class="pl-k">public:</span>
+	 <span class="pl-k">void</span> <span class="pl-en">Drive</span>() {}
+};
+<span class="pl-k">class</span> <span class="pl-en">Benz</span> :<span class="pl-k">public</span> <span class="pl-en">Car</span> {
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">Drive</span>() <span class="pl-k">override</span> { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Benz-舒适<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+};</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9828ef9d3656945b25012d7966eb892fd7dfe96d81aa6856028a0da8e0590d4d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37326530653633313639323534383838613262643336623739636235373465652e706e67"><img src="https://camo.githubusercontent.com/9828ef9d3656945b25012d7966eb892fd7dfe96d81aa6856028a0da8e0590d4d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37326530653633313639323534383838613262643336623739636235373465652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/72e0e63169254888a2bd36b79cb574ee.png" style="max-width: 100%;"></a></p>
+<h3>重载、覆盖(重写)、隐藏(重定义)的对比</h3>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b38ea2e2f93feb2dd309495f04e38a4fbb250e97a61fd4e78a2ca72f6c8cdc63/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32663165353462343163613834643631626335626633363961353137623738652e706e67"><img src="https://camo.githubusercontent.com/b38ea2e2f93feb2dd309495f04e38a4fbb250e97a61fd4e78a2ca72f6c8cdc63/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32663165353462343163613834643631626335626633363961353137623738652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/2f1e54b41ca84d61bc5bf369a517b78e.png" style="max-width: 100%;"></a></p>
+<h2>抽象类</h2>
+<h3>概念</h3>
+<ul>
+<li>在虚函数的后面写上<code class="notranslate">=0</code> ，则这个函数为<strong>纯虚函数</strong>。包含纯虚函数的类叫做<strong>抽象类</strong>（也叫接类），<strong>抽象类不能实例化出对象。派生类继承后也不能实例化出对象</strong>，只有重写纯虚函数，派生类才能实例化出对象。纯虚函数规范了派生类必须重写，另外纯虚函数更体现出了接口继承。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span>抽象类（接口类）</span>
+<span class="pl-k">class</span> <span class="pl-en">Car</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-c"><span class="pl-c">//</span>纯虚函数</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">Drive</span>() = 0;
+};
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Car c; <span class="pl-c"><span class="pl-c">//</span>抽象类不能实例化出对象，error</span>
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/aba514af1794d79d2ec07719f7224a1fa4f32294090ef0f3dc317b049f51e7b7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62383963363139393963666634316334396162303461303063363766346636372e706e67"><img src="https://camo.githubusercontent.com/aba514af1794d79d2ec07719f7224a1fa4f32294090ef0f3dc317b049f51e7b7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62383963363139393963666634316334396162303461303063363766346636372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/b89c61999cff41c49ab04a00c67f4f67.png" style="max-width: 100%;"></a></p>
+<ul>
+<li><strong>派生类继承抽象类后也不能实例化出对象，只有重写纯虚函数，派生类才能实例化出对象。</strong></li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span>抽象类（接口类）</span>
+<span class="pl-k">class</span> <span class="pl-en">Car</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-c"><span class="pl-c">//</span>纯虚函数</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">Drive</span>() = 0;
+};
+<span class="pl-c"><span class="pl-c">//</span>派生类</span>
+<span class="pl-k">class</span> <span class="pl-en">Benz</span> : <span class="pl-k">public</span> <span class="pl-en">Car</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-c"><span class="pl-c">//</span>重写纯虚函数</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">Drive</span>()
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Benz-舒适<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	}
+};
+<span class="pl-c"><span class="pl-c">//</span>派生类</span>
+<span class="pl-k">class</span> <span class="pl-en">BMV</span> : <span class="pl-k">public</span> <span class="pl-en">Car</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-c"><span class="pl-c">//</span>重写纯虚函数</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">Drive</span>()
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>BMV-操控<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	}
+};
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c"><span class="pl-c">//</span>派生类重写了纯虚函数，可以实例化出对象</span>
+	Benz b1;
+	BMV b2;
+	<span class="pl-c"><span class="pl-c">//</span>不同对象用基类指针调用Drive函数，完成不同的行为</span>
+	Car* p1 = &amp;b1;
+	Car* p2 = &amp;b2;
+	p1-&gt;<span class="pl-c1">Drive</span>();  <span class="pl-c"><span class="pl-c">//</span>Benz-舒适</span>
+	p2-&gt;<span class="pl-c1">Drive</span>();  <span class="pl-c"><span class="pl-c">//</span>BMV-操控</span>
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h3>接口继承和实现继承</h3>
+<ul>
+<li>普通函数的继承是一种实现继承，派生类继承了基类函数，可以使用函数，继承的是<strong>函数的实现</strong>。虚函数的继承是一种<strong>接口继承</strong>，派生类继承的是<strong>基类虚函数的接口</strong>，目的是为了重写，达成多态，继承的是<strong>接口</strong>。所以如果不实现多态，不要把函数定义成虚函数。</li>
+</ul>
+<h4>小结</h4>
+<ul>
+<li><strong>多态调用</strong>：运时，指向对象的虚表中找虚函数调用，指向父类调用父类的虚函数，指向子类调用子类的虚函数</li>
+<li><strong>普通调用</strong>：编译时，调用对象是哪个类型，就调用他的函数</li>
+<li><strong>虚表</strong>：<strong>虚函数表</strong>，存的<strong>虚函数</strong>，<strong>目标实现多态</strong></li>
+<li><strong>虚基表</strong>：存的当前位置距离虚<strong>基表部分的偏移量</strong>，解决<strong>菱形继承数据冗余和二义</strong>性</li>
+</ul>
+<h2>多态的原理</h2>
+<h3>虚函数表</h3>
+<ul>
+<li>这里常考一道笔试题：<code class="notranslate">sizeof(Base)</code>是多少？</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Base</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">Func1</span>()
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Func1()<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _b = <span class="pl-c1">1</span>;
+};</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d7dae2aaac743d9fb7a60d02ea7639fc06878f0e76173c47eaf59e7e0ace81b5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34623237376335363864373034303561623237346466656634343639393333642e706e67"><img src="https://camo.githubusercontent.com/d7dae2aaac743d9fb7a60d02ea7639fc06878f0e76173c47eaf59e7e0ace81b5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34623237376335363864373034303561623237346466656634343639393333642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/4b277c568d70405ab274dfef4469933d.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p><strong>只要一个类有一个虚函数，就要考虑一个虚函数指针（虚函数表指针）</strong>，要把虚函数的<strong>地址</strong>保存到这张表上（v代表virtual，f代表function），<strong>一个含有虚函数的类中都至少都有一个虚函数表指针</strong>，因为虚函数的地址要被放到虚函数表中，<strong>虚函数表也简称虚表</strong>.</p>
+</li>
+<li>
+<p>我们多添加几个虚函数就可以观察到：这是一个虚函数<strong>函数指针数组</strong></p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5078cf665054b1fe5053d3575ed8da1e59259274a64a7c4dd0188094186734ee/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63343931623566616339306534356666626536666239386366393565306561322e706e67"><img src="https://camo.githubusercontent.com/5078cf665054b1fe5053d3575ed8da1e59259274a64a7c4dd0188094186734ee/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63343931623566616339306534356666626536666239386366393565306561322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/c491b5fac90e45ffbe6fb98cf95e0ea2.png" style="max-width: 100%;"></a></p>
+<hr>
+<ul>
+<li>我们再次将其改造：</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Base</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">Func1</span>()
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Base::Func1()<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	}
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">Func2</span>()
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Base::Func2()<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	}
+	<span class="pl-k">void</span> <span class="pl-en">Func3</span>()
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Base::Func3()<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _b = <span class="pl-c1">1</span>;
+};
+
+<span class="pl-k">class</span> <span class="pl-en">Derive</span> : <span class="pl-k">public</span> <span class="pl-en">Base</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">Func1</span>()
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Derive::Func1()<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	}
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> _d = <span class="pl-c1">2</span>;
+};
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Base b;
+	Derive d;
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9201e765acf9b5d8ab2f80886a93dafdbd038d0119a872c640d9d0611ea6dca8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34623263373634326637376634303636383762356137316365376235383661622e706e67"><img src="https://camo.githubusercontent.com/9201e765acf9b5d8ab2f80886a93dafdbd038d0119a872c640d9d0611ea6dca8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34623263373634326637376634303636383762356137316365376235383661622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/4b2c7642f77f406687b5a71ce7b586ab.png" style="max-width: 100%;"></a></p>
+<ol>
+<li>派生类对象d中也有一个虚表指针，<strong>d对象由两部分构成，一部分是父类继承下来的成员，虚表指针也就是存在部分的另一部分是自己的成员。</strong></li>
+<li><strong>基类b对象和派生类d对象虚表是不一样的</strong>，这里我们发现Func1完成了重写，所以d的虚表中存的是重写的Derive::Func1，所以虚函数的重写也叫作<strong>覆盖</strong>，覆盖就是指虚表中虚函数的覆盖。重写是语法的叫法，覆盖是原理层的叫法。</li>
+<li>另外Func2继承下来后是虚函数，所以放进了虚表，Func3也继承下来了，但是不是虚函数，所以不会放进虚表。</li>
+<li>虚函数表本质是一个存虚函数指针的指针数组，一般情况这个数组最后面放了一个<strong>nullptr</strong>，<strong>Linux平台不会给</strong>。</li>
+<li>总结一下派生类的<strong>虚表生成</strong>：
+<ul>
+<li>a. 先将基类中的虚表内容拷贝一份到派生类虚表中</li>
+<li>b. 如果派生类重写了基类中某个虚函数，用派生类自己的虚函数覆盖虚表中基类的虚函数</li>
+<li>c. 派生类自己新增加的虚函数按其在派生类中的声明次序增加到派生类虚表的最后。</li>
+</ul>
+</li>
+<li>虚函数存在哪的？虚表存在哪的？ 答：<strong>虚函数存在虚表</strong>，<strong>虚表存在对象中</strong>。注意上面的<strong>回答的错</strong>的。但是很多人都是这样深以为然的。注意<strong>虚表存的是虚函数指针</strong>，<strong>不是虚函数，虚函数和普通函数一样</strong>的，都是存在<strong>代码段</strong>的，只是他的指针又存到了<strong>虚表</strong>中。另外对象中存的不是虚表，存的是<strong>虚表指针</strong>。那么虚表存在哪的呢？实际我们去验证一下会发现vs下是存在<strong>代码段</strong>的。</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Base</span> {
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func1</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Base::func1<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func2</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Base::func2<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> a;
+};
+
+<span class="pl-k">void</span> <span class="pl-en">func</span>()
+{
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>void func()<span class="pl-pds">"</span></span> &lt;&lt; endl;
+}
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Base b1;
+	Base b2;
+
+	<span class="pl-k">static</span> <span class="pl-k">int</span> a = <span class="pl-c1">0</span>;
+	<span class="pl-k">int</span> b = <span class="pl-c1">0</span>;
+	<span class="pl-k">int</span>* p1 = <span class="pl-k">new</span> <span class="pl-k">int</span>;
+	<span class="pl-k">const</span> <span class="pl-k">char</span>* p2 = <span class="pl-s"><span class="pl-pds">"</span>hello world<span class="pl-pds">"</span></span>;
+
+	<span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>静态区:%p<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, &amp;a);
+	<span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>栈:%p<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, &amp;b);
+	<span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>堆:%p<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, p1);
+	<span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>代码段:%p<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, p2);
+	<span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>虚表:%p<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, *((<span class="pl-k">int</span>*)&amp;b1));
+	<span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>虚函数地址:%p<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, &amp;Base::func1);
+	<span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>普通函数地址:%p<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, func);
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f583c85119fef07cc74566a930fe3d60a3577cda9404405b0be019540fa31df3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65616435313761326139636334366161396133356563633437626266626438642e706e67"><img src="https://camo.githubusercontent.com/f583c85119fef07cc74566a930fe3d60a3577cda9404405b0be019540fa31df3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65616435313761326139636334366161396133356563633437626266626438642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/ead517a2a9cc46aa9a35ecc47bbfbd8d.png" style="max-width: 100%;"></a></p>
+<h3>多态的原理</h3>
+<ul>
+<li>再来回到之前的代码：</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Person</span> {
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">BuyTicket</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>买票-全价<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+};
+
+<span class="pl-k">class</span> <span class="pl-en">Student</span> : <span class="pl-k">public</span> <span class="pl-en">Person</span> {
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">BuyTicket</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>买票-半价<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+};
+
+<span class="pl-k">void</span> <span class="pl-en">Func</span>(Person&amp; p)
+{
+	p.<span class="pl-c1">BuyTicket</span>();
+}
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Person Mike;
+	<span class="pl-c1">Func</span>(Mike);
+	Student Johnson;
+	<span class="pl-c1">Func</span>(Johnson);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ol>
+<li>观察下图的箭头我们看到，p是指向mike对象时，p-&gt;BuyTicket在mike的虚表中找到虚函数是Person::BuyTicket。</li>
+<li>观察下图的箭头我们看到，p是指向johnson对象时，p-&gt;BuyTicket在johson的虚表中找到虚函数是Student::BuyTicket。</li>
+<li>这样就实现出了不同对象去完成同一行为时，展现出不同的形态。</li>
+<li>反过来思考我们要达到多态，有两个条件，一个是<strong>虚函数覆盖</strong>，一个是<strong>对象的指针或引用调用虚函数</strong>。反思一下为什么？</li>
+<li>再通过下面的汇编代码分析，看出满足多态以后的函数调用，不是在编译时确定的，是运行起来以后到对象的中取找的。不满足多态的函数调用时编译时确认好的。</li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4b8cbbc117cb0c6d4d479426aef9d6466060936135a42380fa0288e176e5335b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32643932303530376262326234393430383638373965623066343131653837372e706e67"><img src="https://camo.githubusercontent.com/4b8cbbc117cb0c6d4d479426aef9d6466060936135a42380fa0288e176e5335b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32643932303530376262326234393430383638373965623066343131653837372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/2d920507bb2b494086879eb0f411e877.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">Func</span>(Person* p)
+{
+	p-&gt;<span class="pl-c1">BuyTicket</span>();
+}
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Person mike;
+	<span class="pl-c1">Func</span>(&amp;mike);
+	mike.<span class="pl-c1">BuyTicket</span>();
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}
+<span class="pl-c"><span class="pl-c">//</span> 以下汇编代码中跟你这个问题不相关的都被去掉了</span>
+<span class="pl-k">void</span> <span class="pl-en">Func</span>(Person* p)
+{
+	<span class="pl-c"><span class="pl-c">//</span> ...</span>
+	p-&gt;<span class="pl-c1">BuyTicket</span>();
+	<span class="pl-c"><span class="pl-c">//</span> p中存的是mike对象的指针，将p移动到eax中</span>
+	001940DE mov eax,dword ptr [p]
+	<span class="pl-c"><span class="pl-c">//</span> [eax]就是取eax值指向的内容，这里相当于把mike对象头4个字节(虚表指针)移动到了edx</span>
+	<span class="pl-c1">001940E1</span> mov edx,dword ptr [eax]
+	<span class="pl-c"><span class="pl-c">//</span> [edx]就是取edx值指向的内容，这里相当于把虚表中的头4字节存的虚函数指针移动到了eax</span>
+	00B823EE mov eax,dword ptr [edx]
+	<span class="pl-c"><span class="pl-c">//</span> call eax中存虚函数的指针。这里可以看出满足多态的调用，不是在编译时确定的，是运行起来</span>
+	<span class="pl-c"><span class="pl-c">//</span> 以后到对象的中取找的。</span>
+	001940EA call eax
+	<span class="pl-c1">00</span>头1940EC cmp esi,esp
+}
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c"><span class="pl-c">//</span> ...</span>
+	<span class="pl-c"><span class="pl-c">//</span> 首先BuyTicket虽然是虚函数，但是mike是对象，不满足多态的条件，所以这里是普通函数的调</span>
+	<span class="pl-c"><span class="pl-c">//</span> 用转换成地址时，是在编译时已经从符号表确认了函数的地址，直接call 地址</span>
+	mike.<span class="pl-c1">BuyTicket</span>();
+	<span class="pl-c1">00195182</span> lea ecx,[mike]
+	<span class="pl-c1">00195185</span> call <span class="pl-smi">Person::BuyTicket</span> (01914F6h)
+	<span class="pl-c"><span class="pl-c">//</span> ...</span>
+}</pre></div>
+<ul>
+<li>上面的指针和引用可以形成多态，为什么对象不可以？</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c307a025d18469efcdf178453672e66ad8fdf2959b6aac806f32253ec11815c3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38383534333864386539396234336334396465643861336162636434636633652e706e67"><img src="https://camo.githubusercontent.com/c307a025d18469efcdf178453672e66ad8fdf2959b6aac806f32253ec11815c3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38383534333864386539396234336334396465643861336162636434636633652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/885438d8e99b43c49ded8a3abcd4cf3e.png" style="max-width: 100%;"></a></p>
+<blockquote>
+<p>如果是一个指针或者引用，<strong>是指向子类对象中切割出来父类那一部分</strong><br>
+对象的话是切割出子类对象中父类的那一部分，<strong>拷贝</strong>给父类的，在拷贝的时候<strong>不会拷贝虚表指针</strong></p>
+</blockquote>
+<h3>动态绑定与静态绑定</h3>
+<ol>
+<li><strong>静态绑定又称为前期绑定(早绑定)</strong>，在程序编译期间确定了程序的行为，也称为<strong>静态多态</strong>，比如：函数重载</li>
+<li><strong>动态绑定又称后期绑定(晚绑定)</strong>，是在程序运行期间，根据具体拿到的类型确定程序的具体行为，调用具体的函数，也称为<strong>动态多态</strong>。</li>
+</ol>
+<h2>单继承和多继承关系的虚函数表</h2>
+<ul>
+<li>接下来关注派生类对象的虚表模型</li>
+</ul>
+<h3>单继承中的虚函数表</h3>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Base</span> {
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func1</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Base::func1<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func2</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Base::func2<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> a;
+};
+<span class="pl-k">class</span> <span class="pl-en">Derive</span> :<span class="pl-k">public</span> <span class="pl-en">Base</span> {
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func1</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Derive::func1<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func3</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Derive::func3<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func4</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Derive::func4<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> b;
+};
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Base b;
+	Derive d;
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p>观察下图中的监视窗口中我们发现看不见func3和func4。这里是编译器的监视窗口故意隐藏了这两个函数，也可以认为是他的一个小bug。</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3c0b048132e39c9258599f18864ca1d363d62fa02f17d9dc2060df23ddc46ba5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33333334306230336266333634623162613137653234626633626166383965632e706e67"><img src="https://camo.githubusercontent.com/3c0b048132e39c9258599f18864ca1d363d62fa02f17d9dc2060df23ddc46ba5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33333334306230336266333634623162613137653234626633626166383965632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/33340b03bf364b1ba17e24bf3baf89ec.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>那么我们如何查看d的虚表呢？下面我们使用代码打印出虚表中的函数。</li>
+</ul>
+<p>思路：<strong>取出b、d对象的头4bytes，就是虚表的指针，前面我们说了虚函数表本质是一个存虚函数</strong><br>
+<strong>指针的指针数组，这个数组最后面放了一个nullptr</strong></p>
+<ol>
+<li>先取b的地址，强转成一个int*的指针</li>
+<li>再解引用取值，就取到了b对象头4bytes的值，这个值就是指向虚表的指针</li>
+<li>再强转成VFPTR*，因为虚表就是一个存VFPTR类型(虚函数指针类型)的数组。</li>
+<li>虚表指针传递给PrintVTable进行打印虚表</li>
+<li>需要说明的是这个打印虚表的代码经常会崩溃，因为编译器有时对虚表的处理不干净，虚表最<br>
+后面没有放nullptr，导致越界，这是编译器的问题。我们只需要点目录栏的-&gt;生成-&gt;清理解决方案，再编译就好了。</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Base</span> {
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func1</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Base::func1<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func2</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Base::func2<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> a;
+};
+<span class="pl-k">class</span> <span class="pl-en">Derive</span> :<span class="pl-k">public</span> <span class="pl-en">Base</span> {
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func1</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Derive::func1<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func3</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Derive::func3<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func4</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Derive::func4<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> b;
+};
+
+<span class="pl-c"><span class="pl-c">//</span> 打印虚表</span>
+<span class="pl-k">typedef</span> <span class="pl-en">void</span>(*VFPTR) ();
+<span class="pl-k">void</span> <span class="pl-en">PrintVTable</span>(VFPTR vTable[])
+{
+	<span class="pl-c"><span class="pl-c">//</span> 依次取虚表中的虚函数指针打印并调用。调用就可以看出存的是哪个函数</span>
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span> 虚表地址&gt;<span class="pl-pds">"</span></span> &lt;&lt; vTable &lt;&lt; endl;
+	<span class="pl-k">for</span> (<span class="pl-k">int</span> i = <span class="pl-c1">0</span>; vTable[i] != <span class="pl-c1">nullptr</span>; ++i)
+	{
+		<span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span> 第%d个虚函数地址 :0X%x,-&gt;<span class="pl-pds">"</span></span>, i, vTable[i]);
+		VFPTR f = vTable[i];
+		<span class="pl-c1">f</span>();
+	}
+	cout &lt;&lt; endl;
+}
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Base b;
+	Derive d;
+
+	VFPTR* vTableb = (VFPTR*)(*(<span class="pl-k">int</span>*)&amp;b);
+	<span class="pl-c1">PrintVTable</span>(vTableb);
+	VFPTR* vTabled = (VFPTR*)(*(<span class="pl-k">int</span>*)&amp;d);
+	<span class="pl-c1">PrintVTable</span>(vTabled);
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>可以观察到<strong>虚函数都是存放到虚表中的</strong></li>
+<li>如果是<strong>64位</strong>就强制类型转换成<code class="notranslate">long long</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/37ff2ca85b0125fd751773f0b24a55b868135bdcac684d91c60592942dd008a9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65666231643863666636366534633063383964393534346633623539623762372e706e67"><img src="https://camo.githubusercontent.com/37ff2ca85b0125fd751773f0b24a55b868135bdcac684d91c60592942dd008a9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65666231643863666636366534633063383964393534346633623539623762372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/efb1d8cff66e4c0c89d9544f3b59b7b7.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6b439873407e4f336a172220abcccb9f2283ba461fc9c83b380dde0ed097d203/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64643463396234613636343834383937623437373266393232353938623163362e706e67"><img src="https://camo.githubusercontent.com/6b439873407e4f336a172220abcccb9f2283ba461fc9c83b380dde0ed097d203/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64643463396234613636343834383937623437373266393232353938623163362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/dd4c9b4a66484897b4772f922598b1c6.png" style="max-width: 100%;"></a></p>
+<h3>多继承中的虚函数表</h3>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Base1</span> {
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func1</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Base1::func1<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func2</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Base1::func2<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> b1;
+};
+<span class="pl-k">class</span> <span class="pl-en">Base2</span> {
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func1</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Base2::func1<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func2</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Base2::func2<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> b2;
+};
+<span class="pl-k">class</span> <span class="pl-en">Derive</span> : <span class="pl-k">public</span> <span class="pl-en">Base1</span>, <span class="pl-k">public</span> <span class="pl-en">Base2</span> {
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func1</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Derive::func1<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func3</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Derive::func3<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> d1;
+};
+
+<span class="pl-k">typedef</span> <span class="pl-en">void</span>(*VFPTR) ();
+<span class="pl-k">void</span> <span class="pl-en">PrintVTable</span>(VFPTR vTable[])
+{
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span> 虚表地址&gt;<span class="pl-pds">"</span></span> &lt;&lt; vTable &lt;&lt; endl;
+	<span class="pl-k">for</span> (<span class="pl-k">int</span> i = <span class="pl-c1">0</span>; vTable[i] != <span class="pl-c1">nullptr</span>; ++i)
+	{
+		<span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span> 第%d个虚函数地址 :0X%x,-&gt;<span class="pl-pds">"</span></span>, i, vTable[i]);
+		VFPTR f = vTable[i];
+		<span class="pl-c1">f</span>();
+	}
+	cout &lt;&lt; endl;
+}
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Derive d;
+	VFPTR* vTableb1 = (VFPTR*)(*(<span class="pl-k">int</span>*)&amp;d);
+	<span class="pl-c1">PrintVTable</span>(vTableb1);
+	VFPTR* vTableb2 = (VFPTR*)(*(<span class="pl-k">int</span>*)((<span class="pl-k">char</span>*)&amp;d + <span class="pl-k">sizeof</span>(Base1)));
+	<span class="pl-c1">PrintVTable</span>(vTableb2);
+	<span class="pl-c"><span class="pl-c">//</span> 这样也可以</span>
+	Base2* ptr = &amp;d;
+	<span class="pl-c1">PrintVTable</span>(((VFPTR*)*(<span class="pl-k">int</span>*)ptr));
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/912d3d178a525c0dca33a1b1fe6f7132ea1e4e1c7b04f64725b10c76c3081500/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38376262663464633232643334313439393836356565663861396632353236322e706e67"><img src="https://camo.githubusercontent.com/912d3d178a525c0dca33a1b1fe6f7132ea1e4e1c7b04f64725b10c76c3081500/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38376262663464633232643334313439393836356565663861396632353236322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/87bbf4dc22d341499865eef8a9f25262.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/221fd76fabe5d750359eb506a518d8f0f80977144dc85a682b918bdcdf323649/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63316165373165306335376134633933386431376134363539613436656164662e706e67"><img src="https://camo.githubusercontent.com/221fd76fabe5d750359eb506a518d8f0f80977144dc85a682b918bdcdf323649/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63316165373165306335376134633933386431376134363539613436656164662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/c1ae71e0c57a4c938d17a4659a46eadf.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p><strong>多继承派生类的未重写的虚函数放在第一个继承基类部分的虚函数表中</strong></p>
+</li>
+<li>
+<p>发现上面的两个<strong>func1</strong>的地址不一样</p>
+</li>
+</ul>
+<p>观察下图：</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e666ef666a8b0d45c61ebeacfb75138ac138f7ce9ae860585e9cde26b40f897b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66383564336138366137303434303137383732356163343135656264656535362e706e67"><img src="https://camo.githubusercontent.com/e666ef666a8b0d45c61ebeacfb75138ac138f7ce9ae860585e9cde26b40f897b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66383564336138366137303434303137383732356163343135656264656535362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/f85d3a86a70440178725ac415ebdee56.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>发现上面的p2跳转多跳了，不是直接跳转，而是多了一个<code class="notranslate">ecx-8</code>，ecx是存放的this指针，需要<strong>修正this指针</strong>，指向<code class="notranslate">Derive</code></li>
+</ul>
+<h2>菱形继承、菱形虚拟继承</h2>
+<h3>菱形继承</h3>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">A</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func1</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>A::func1<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+	<span class="pl-k">int</span> _a;
+};
+
+<span class="pl-k">class</span> <span class="pl-en">B</span> : <span class="pl-k">public</span> <span class="pl-en">A</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func2</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>B::func2<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+	<span class="pl-k">int</span> _b;
+};
+
+<span class="pl-k">class</span> <span class="pl-en">C</span> : <span class="pl-k">public</span> <span class="pl-en">A</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func3</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>C::func3<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+
+	<span class="pl-k">int</span> _c;
+};
+
+<span class="pl-k">class</span> <span class="pl-en">D</span> : <span class="pl-k">public</span> <span class="pl-en">B</span>, <span class="pl-k">public</span> <span class="pl-en">C</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func4</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>D::func4<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+
+	<span class="pl-k">int</span> _d;
+};
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	D d;
+	cout &lt;&lt; <span class="pl-k">sizeof</span>(d) &lt;&lt; endl;
+
+	<span class="pl-c"><span class="pl-c">//</span> 结论菱形继承的对象模型跟多继承类似</span>
+	d.<span class="pl-smi">B</span>::_a = <span class="pl-c1">1</span>;
+	d.<span class="pl-smi">C</span>::_a = <span class="pl-c1">2</span>;
+	d.<span class="pl-smi">_b</span> = <span class="pl-c1">3</span>;
+	d.<span class="pl-smi">_c</span> = <span class="pl-c1">4</span>;
+	d.<span class="pl-smi">_d</span> = <span class="pl-c1">5</span>;
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/bd25b397810bbfc770cedc96a6513998476994d9ad6c06c7fb854c9d3d6e322b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63396539306635336263313834366135626334303430326139353332343665382e706e67"><img src="https://camo.githubusercontent.com/bd25b397810bbfc770cedc96a6513998476994d9ad6c06c7fb854c9d3d6e322b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63396539306635336263313834366135626334303430326139353332343665382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/c9e90f53bc1846a5bc40402a953246e8.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/38ae1e67bf4e984eda7fadd47bbd6ec91e91e2e0ccf0571cd2b58b869502f88d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30336334643430366433643834666430613133653635323730613336373633322e706e67"><img src="https://camo.githubusercontent.com/38ae1e67bf4e984eda7fadd47bbd6ec91e91e2e0ccf0571cd2b58b869502f88d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30336334643430366433643834666430613133653635323730613336373633322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/03c4d406d3d84fd0a13e65270a367632.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/77221e967652f03f027b7e4e1bf9204392740286a5cc1a49df4e51c094dc43f8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66323631313432633030373634316464393631393462346338623165343830632e706e67"><img src="https://camo.githubusercontent.com/77221e967652f03f027b7e4e1bf9204392740286a5cc1a49df4e51c094dc43f8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66323631313432633030373634316464393631393462346338623165343830632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/f261142c007641dd96194b4c8b1e480c.png" style="max-width: 100%;"></a></p>
+<h3>菱形虚拟继承</h3>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">A</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func1</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>A::func1<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+	<span class="pl-k">int</span> _a;
+};
+
+<span class="pl-k">class</span> <span class="pl-en">B</span> : <span class="pl-k">virtual</span> public A
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func2</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>B::func2<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+	<span class="pl-k">int</span> _b;
+};
+
+<span class="pl-k">class</span> <span class="pl-en">C</span> : <span class="pl-k">virtual</span> public A
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func3</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>C::func3<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+
+	<span class="pl-k">int</span> _c;
+};
+
+<span class="pl-k">class</span> <span class="pl-en">D</span> : <span class="pl-k">public</span> <span class="pl-en">B</span>, <span class="pl-k">public</span> <span class="pl-en">C</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func4</span>() { cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>D::func4<span class="pl-pds">"</span></span> &lt;&lt; endl; }
+
+	<span class="pl-k">int</span> _d;
+};
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	D d;
+	cout &lt;&lt; <span class="pl-k">sizeof</span>(d) &lt;&lt; endl;
+
+	d.<span class="pl-smi">B</span>::_a = <span class="pl-c1">1</span>;
+	d.<span class="pl-smi">C</span>::_a = <span class="pl-c1">2</span>;
+	d.<span class="pl-smi">_b</span> = <span class="pl-c1">3</span>;
+	d.<span class="pl-smi">_c</span> = <span class="pl-c1">4</span>;
+	d.<span class="pl-smi">_d</span> = <span class="pl-c1">5</span>;
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>A在最下面，因为是虚继承</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/21158fd3937cfc944426e62a5e4d9bb2fd0b5d12d6910f225f418a84410c9700/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62653239343564666661333034306165383465323466613466633565363138382e706e67"><img src="https://camo.githubusercontent.com/21158fd3937cfc944426e62a5e4d9bb2fd0b5d12d6910f225f418a84410c9700/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62653239343564666661333034306165383465323466613466633565363138382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/be2945dffa3040ae84e24fa4fc5e6188.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>第一个是<strong>虚表</strong></li>
+<li>第二个是<strong>虚基表</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/28cecf9dc53a9b5c62cc83d2339b1a892492cd1d2f22379dd0721a5452734edf/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37643637336133316462303934613831393736643032333835663662643931622e706e67"><img src="https://camo.githubusercontent.com/28cecf9dc53a9b5c62cc83d2339b1a892492cd1d2f22379dd0721a5452734edf/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37643637336133316462303934613831393736643032333835663662643931622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/7d673a31db094a81976d02385f6bd91b.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>虚基表中又保存：</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0297993a13c00b0b11ddf9971081ba60ef1c6af7002615747789c2d3c6452fe9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39613036616138326364323234633534613637393165336233373436396565332e706e67"><img src="https://camo.githubusercontent.com/0297993a13c00b0b11ddf9971081ba60ef1c6af7002615747789c2d3c6452fe9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39613036616138326364323234633534613637393165336233373436396565332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/9a06aa82cd224c54a6791e3b37469ee3.png" style="max-width: 100%;"></a></p>
+<ul>
+<li><strong>一个是存的虚表的偏移量</strong></li>
+<li><strong>一个是存的虚基类的偏移量</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/eaf31bc1a0741ed23ea4f8df207bab6de3288f0e42061ae3dcd2e439d554428c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36356438313564383731393134376465386363646137663766626266386539372e706e67"><img src="https://camo.githubusercontent.com/eaf31bc1a0741ed23ea4f8df207bab6de3288f0e42061ae3dcd2e439d554428c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36356438313564383731393134376465386363646137663766626266386539372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/65d815d8719147de8ccda7f7fbbf8e97.png" style="max-width: 100%;"></a></p>
+<hr>
+<h2>继承和多态常见的面试问题</h2>
+<h3>概念考察</h3>
+<blockquote>
+<p>1、下面哪种面向对象的方法可以让你变得富有（）</p>
+</blockquote>
+<p>A.继承 B.封装 C.多态 D.抽象</p>
+<blockquote>
+<p>2、（）是面向对象程序设计语言中的一种机制，这种机制实现了方法的定义与具体的对象无关，而方法的调用则可以关联于具体的对象。</p>
+</blockquote>
+<p>A.继承 B.模板 C.对象的自身引用 D.动态绑定</p>
+<blockquote>
+<p>3、关于面向对象设计中的继承和组合，下面说法错误的是（）</p>
+</blockquote>
+<p>A.继承允许我们覆盖重写父类的实现细节，父类的实现对于子类是可见的，是一种静态复用，也称为白盒复用。<br>
+B.组合的对象不需要关系各自的实现细节，之间的关系是在运行时候才确定的，是一种动态复用，也称为黑盒复用。<br>
+C.优先使用继承，而不是组合，是面向对象设计的第二原则。<br>
+D.继承可以使子类能自动继承父类的接口，但在设计模式中认为这是一种破坏了父类的封装性的表现。</p>
+<blockquote>
+<p>4、以下关于纯虚函数的说法，正确的是（）</p>
+</blockquote>
+<p>A.声明纯虚函数的类不能实例化对象<br>
+B.声明纯虚函数的类是虚基类<br>
+C.子类必须实现基类的纯虚函数<br>
+D.纯虚函数必须是空函数</p>
+<blockquote>
+<p>5、关于虚函数的描述正确的是（）</p>
+</blockquote>
+<p>A.派生类的虚函数与基类的虚函数具有不同的参数个数和类型<br>
+B.内联函数不能是虚函数<br>
+C.派生类必须重新定义基类的虚函数<br>
+D.虚函数可以是一个static型的函数</p>
+<blockquote>
+<p>6、关于虚表的说法正确的是（）</p>
+</blockquote>
+<p>A.一个类只能有一张虚表<br>
+B.基类中有虚函数，如果子类中没有重写基类的虚函数，此时子类与基类共用同一张虚表<br>
+C.虚表是在运行期间动态生成的<br>
+D.一个类的不同对象共享该类的虚表</p>
+<blockquote>
+<p>7、假设A类中有虚函数，B继承自A，B重写A中的虚函数，也没有定义任何虚函数，则（）</p>
+</blockquote>
+<p>A.A类对象的前4个字节存储虚表地址，B类对象的前4个字节不是虚表地址<br>
+B.A类对象和B类对象前4个字节存储的都是虚基表的地址<br>
+C.A类对象和B类对象前4个字节存储的虚表地址相同<br>
+D.A类和B类虚表中虚函数个数相同，但A类和B类使用的不是同一张虚表</p>
+<blockquote>
+<p>8、下面程序输出结果是什么？</p>
+</blockquote>
+<div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>iostream<span class="pl-pds">&gt;</span></span>
+<span class="pl-k">using</span> <span class="pl-k">namespace</span> <span class="pl-en">std</span><span class="pl-k">;</span>
+<span class="pl-k">class</span> <span class="pl-en">A</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">A</span>(<span class="pl-k">char</span>* s) { cout &lt;&lt; s &lt;&lt; endl; }
+	<span class="pl-en">~A</span>() {};
+};
+<span class="pl-k">class</span> <span class="pl-en">B</span> : <span class="pl-k">virtual</span> public A
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">B</span>(<span class="pl-k">char</span>* s1, <span class="pl-k">char</span>* s2)
+		:A(s1)
+	{
+		cout &lt;&lt; s2 &lt;&lt; endl;
+	}
+};
+<span class="pl-k">class</span> <span class="pl-en">C</span> : <span class="pl-k">virtual</span> public A
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">C</span>(<span class="pl-k">char</span>* s1, <span class="pl-k">char</span>* s2)
+		:A(s1)
+	{
+		cout &lt;&lt; s2 &lt;&lt; endl;
+	}
+};
+<span class="pl-k">class</span> <span class="pl-en">D</span> : <span class="pl-k">public</span> <span class="pl-en">B</span>, <span class="pl-k">public</span> <span class="pl-en">C</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">D</span>(<span class="pl-k">char</span>* s1, <span class="pl-k">char</span>* s2, <span class="pl-k">char</span>* s3, <span class="pl-k">char</span>* s4)
+		:B(s1, s2)
+		,C(s1, s3)
+		,A(s1)
+	{
+		cout &lt;&lt; s4 &lt;&lt; endl;
+	}
+};
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	D* p = <span class="pl-k">new</span> <span class="pl-c1">D</span>(<span class="pl-s"><span class="pl-pds">"</span>class A<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>class B<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>class C<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>class D<span class="pl-pds">"</span></span>);
+	<span class="pl-k">delete</span> p;
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p>A.class A class B class C class D<br>
+B.class D class B class C class A<br>
+C.class D class C class B class A<br>
+D.class A class C class C class D</p>
+<blockquote>
+<p>9、下面说法正确的是？（多继承中指针的偏移问题）</p>
+</blockquote>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Base1</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">int</span> _b1;
+};
+<span class="pl-k">class</span> <span class="pl-en">Base2</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">int</span> _b2;
+};
+<span class="pl-k">class</span> <span class="pl-en">Derive</span> : <span class="pl-k">public</span> <span class="pl-en">Base1</span>, <span class="pl-k">public</span> <span class="pl-en">Base2</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">int</span> _d;
+};
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Derive d;
+	Base1* p1 = &amp;d;
+	Base2* p2 = &amp;d;
+	Derive* p3 = &amp;d;
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p>A.p1 == p2 == p3<br>
+B.p1 &lt; p2 &lt; p3<br>
+C.p1 == p3 != p2<br>
+D.p1 != p2 != p3</p>
+<blockquote>
+<p>10、以下程序输出结果是什么？</p>
+</blockquote>
+<div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>iostream<span class="pl-pds">&gt;</span></span>
+<span class="pl-k">using</span> <span class="pl-k">namespace</span> <span class="pl-en">std</span><span class="pl-k">;</span>
+<span class="pl-k">class</span> <span class="pl-en">A</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">func</span>(<span class="pl-k">int</span> val = <span class="pl-c1">1</span>)
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>A-&gt;<span class="pl-pds">"</span></span> &lt;&lt; val &lt;&lt; endl;
+	}
+	<span class="pl-k">virtual</span> <span class="pl-k">void</span> <span class="pl-en">test</span>()
+	{
+		<span class="pl-c1">func</span>();
+	}
+};
+<span class="pl-k">class</span> <span class="pl-en">B</span> : <span class="pl-k">public</span> <span class="pl-en">A</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">void</span> <span class="pl-en">func</span>(<span class="pl-k">int</span> val = <span class="pl-c1">0</span>)
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>B-&gt;<span class="pl-pds">"</span></span> &lt;&lt; val &lt;&lt; endl;
+	}
+};
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	B* p = <span class="pl-k">new</span> B;
+	p-&gt;<span class="pl-c1">test</span>();
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p>A.A-&gt;0 B.B-&gt;1 C.A-&gt;1 D.B-&gt;0  E.编译错误 F.以上都不正确</p>
+<p>参考答案：</p>
+<table role="table">
+<thead>
+<tr>
+<th>题号</th>
+<th>答案</th>
+<th>题号</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>A</td>
+<td>6</td>
+<td>D</td>
+</tr>
+<tr>
+<td>2</td>
+<td>D</td>
+<td>7</td>
+<td>D</td>
+</tr>
+<tr>
+<td>3</td>
+<td>C</td>
+<td>8</td>
+<td>A</td>
+</tr>
+<tr>
+<td>4</td>
+<td>A</td>
+<td>9</td>
+<td>C</td>
+</tr>
+<tr>
+<td>5</td>
+<td>B</td>
+<td>10</td>
+<td>B</td>
+</tr>
+</tbody>
+</table>
+<h3>问答题</h3>
+<blockquote>
+<p>1、什么是多态？</p>
+</blockquote>
+<ul>
+<li>多态又分为<strong>静态的多态</strong>和<strong>动态的多态</strong></li>
+<li>静态多态：<strong>函数重载</strong>。</li>
+<li>动态多态：1. 父类的指针或者引用调用<strong>虚函数</strong>。2. 虚函数完成重写，<strong>指向谁，调用谁的虚函数，实现多种多态</strong></li>
+</ul>
+<blockquote>
+<p>2、什么是重载、重写(覆盖)、重定义(隐藏)？</p>
+</blockquote>
+<ul>
+<li>重载是指两个函数在同一作用域，这两个<strong>函数的函数名相同，参数不同</strong>。</li>
+<li><strong>重写(覆盖)是指两个函数分别在基类和派生类的作用域，这两个函数的函数名、参数、返回值都必须相同(协变例外)</strong>，且这两个函数都是虚函数。</li>
+<li><strong>重定义</strong>(隐藏)是指两个函数<strong>分别在基类和派生类的作用域，这两个函数的函数名相同。若两个基类和派生类的同名函数不构成重写就是重定义</strong>。</li>
+</ul>
+<blockquote>
+<p>3、多态的实现原理？</p>
+</blockquote>
+<ul>
+<li>构成多态的父类对象和子类对象的成员当中都包含一个<strong>虚表指针</strong>，这个虚表指针指向一个<strong>虚表</strong>，<strong>虚表当中存储的是该类对应的虚函数地址</strong>。因此，当父类指针指向父类对象时，通过父类指针找到<strong>虚表指针</strong>，然后在虚表当中找到的就是父类当中对应的<strong>虚函数</strong>；当父类指针指向子类对象时，通过父类指针找到<strong>虚表指针</strong>，然后在虚表当中找到的就是子类当中对应的<strong>虚函数</strong>。</li>
+</ul>
+<blockquote>
+<p>4、inline函数可以是虚函数吗？</p>
+</blockquote>
+<ul>
+<li>我们知道<strong>内联函数是会在调用的地方展开</strong>的，也就是说<strong>内联函数是没有地址</strong>的，但是内联函数是<strong>可以定义成虚函数</strong>的，当我们把内联函数定义虚函数后，<strong>编译器就忽略了该函数的内联属性</strong>，这个函数就不再是内联函数了，因为需要将虚函数的地址放到虚表中去。</li>
+<li><strong>可以，普通调用，inline起作用，多态调用，inline不起作用</strong></li>
+</ul>
+<blockquote>
+<p>5、静态成员函数可以是虚函数吗？</p>
+</blockquote>
+<ul>
+<li>静态成员函数<strong>不能</strong>是虚函数，因为静态成员函数没有this指针，使用类型<code class="notranslate">::</code>成员函数的调用方式无法访问虚表，所以静态成员函数无法放进虚表，无法构成多态，没有意义。</li>
+</ul>
+<blockquote>
+<p>6、构造函数可以是虚函数吗？</p>
+</blockquote>
+<ul>
+<li>构造函数<strong>不能</strong>是虚函数，因为<strong>对象中的虚表指针是在构造函数初始化列表阶段才初始化的</strong>，虚函数多态调用，要到虚表中找，但虚表指针都还没有初始化。</li>
+</ul>
+<blockquote>
+<p>7、析构函数可以是虚函数吗？什么场景下析构函数是虚函数？</p>
+</blockquote>
+<ul>
+<li><strong>析构函数可以是虚函数</strong>，并且最后把<strong>基类的析构函数定义成虚函数</strong>。若是我们分别new一个父类对象和一个子类对象，并均用父类指针指向它们，当我们使用delete调用析构函数并释放对象空间时，只有当父类的析构函数是虚函数的情况下，才能正确调用父类和子类的析构函数分别对父类和子类对象进行析构，否则当我们使用父类指针delete对象时，只能调用到父类的析构函数。</li>
+</ul>
+<blockquote>
+<p>8、对象访问普通函数快还是虚函数更快？</p>
+</blockquote>
+<ul>
+<li><strong>对象访问普通函数比访问虚函数更快</strong>，若我们访问的是一个普通函数，那直接访问就行了，但当我们<strong>访问的是虚函数时，我们需要先找到虚表指针</strong>，然后在虚表当中找到对应的虚函数，最后才能调用到虚函数。</li>
+</ul>
+<blockquote>
+<p>9、虚函数表是在什么阶段生成的？存在哪的？</p>
+</blockquote>
+<ul>
+<li>虚表是在构造函数初始化列表阶段进行初始化的，虚表一般情况下是存在**代码段(常量区)**的。</li>
+</ul>
+<blockquote>
+<p>10、C++菱形继承的问题？虚继承的原理？</p>
+</blockquote>
+<ul>
+<li>菱形虚拟继承因为子类对象当中会有两份父类的成员，因此会导致<strong>数据冗余和二义性的问题</strong>。<br>
+虚继承对于相同的虚基类在对象当中只会存储一份，若要<strong>访问虚基类的成员需要通过虚基表获取到偏移量</strong>，进而找到对应的虚基类成员，从而解决了数据冗余和二义性的问题。</li>
+</ul>
+<blockquote>
+<p>什么是抽象类？抽象类的作用？</p>
+</blockquote>
+<ul>
+<li>抽象类很好的体现了虚函数的继承是一种<strong>接口继承</strong>，<strong>强制子类去抽象纯虚函数</strong>，因为子类若是不抽象从父类继承下来的纯虚函数，那么子类也是抽象类也不能实例化出对象。其次，抽象类可以很好的去表示现实世界中没有示例对象对应的抽象类型，比如：植物、人、动物等。</li>
+</ul></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

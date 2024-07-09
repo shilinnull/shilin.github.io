@@ -1,5 +1,18 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Shilin' Blog</title><link>https://xiaolinzi.eu.org</link><description>珍惜每一天~</description><copyright>Shilin' Blog</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/108561949?v=4&amp;size=64</url><title>avatar</title><link>https://xiaolinzi.eu.org</link></image><lastBuildDate>Mon, 08 Jul 2024 16:08:26 +0000</lastBuildDate><managingEditor>Shilin' Blog</managingEditor><ttl>60</ttl><webMaster>Shilin' Blog</webMaster><item><title>9. C++模板【函数模板与类模板】【非类型模板参数、模板特化和模板分离编译】</title><link>https://xiaolinzi.eu.org/post/9.%20C%2B%2B-mo-ban-%E3%80%90-han-shu-mo-ban-yu-lei-mo-ban-%E3%80%91%E3%80%90-fei-lei-xing-mo-ban-can-shu-%E3%80%81-mo-ban-te-hua-he-mo-ban-fen-li-bian-yi-%E3%80%91.html</link><description>## 前言&#13;
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Shilin' Blog</title><link>https://xiaolinzi.eu.org</link><description>珍惜每一天~</description><copyright>Shilin' Blog</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/108561949?v=4&amp;size=64</url><title>avatar</title><link>https://xiaolinzi.eu.org</link></image><lastBuildDate>Tue, 09 Jul 2024 04:31:20 +0000</lastBuildDate><managingEditor>Shilin' Blog</managingEditor><ttl>60</ttl><webMaster>Shilin' Blog</webMaster><item><title>10. C++继承总结</title><link>https://xiaolinzi.eu.org/post/10.%20C%2B%2B-ji-cheng-zong-jie.html</link><description>## 封装&#13;
+&#13;
+&#13;
+&gt;我们之前学了封装，那么封装到底是什么呢？&#13;
+&#13;
+- 封装&#13;
+	-	数据和方法放到一起，把想给外面访问的定义成公有，不想给你访问的定义成私有和保护&#13;
+	-	一个类型放到另一个类型里面，通过typedef成员函数调整，封装另一个全新的类型&#13;
+&#13;
+## 继承的概念及定义&#13;
+&#13;
+### 继承的概念&#13;
+&#13;
+- 继承(inheritance)机制是面向对象程序**设计使代码可以复用**的最重要的手段，它允许程序员在保持原有类特性的基础上进行扩展，增加功能，这样产生新的类，称派生类。</description><guid isPermaLink="true">https://xiaolinzi.eu.org/post/10.%20C%2B%2B-ji-cheng-zong-jie.html</guid><pubDate>Tue, 09 Jul 2024 04:30:58 +0000</pubDate></item><item><title>9. C++模板【函数模板与类模板】【非类型模板参数、模板特化和模板分离编译】</title><link>https://xiaolinzi.eu.org/post/9.%20C%2B%2B-mo-ban-%E3%80%90-han-shu-mo-ban-yu-lei-mo-ban-%E3%80%91%E3%80%90-fei-lei-xing-mo-ban-can-shu-%E3%80%81-mo-ban-te-hua-he-mo-ban-fen-li-bian-yi-%E3%80%91.html</link><description>## 前言&#13;
 &#13;
 - 如何实现一个通用的交换函数呢？&#13;
 &#13;

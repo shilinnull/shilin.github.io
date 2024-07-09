@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## 封装
+
+
+>我们之前学了封装，那么封装到底是什么呢？
+
+- 封装
+	-	数据和方法放到一起，把想给外面访问的定义成公有，不想给你访问的定义成私有和保护
+	-	一个类型放到另一个类型里面，通过typedef成员函数调整，封装另一个全新的类型
+
+## 继承的概念及定义
+
+### 继承的概念
+
+- 继承(inheritance)机制是面向对象程序**设计使代码可以复用**的最重要的手段，它允许程序员在保持原有类特性的基础上进行扩展，增加功能，这样产生新的类，称派生类。">
+<meta property="og:title" content="10. C++继承总结">
+<meta property="og:description" content="## 封装
+
+
+>我们之前学了封装，那么封装到底是什么呢？
+
+- 封装
+	-	数据和方法放到一起，把想给外面访问的定义成公有，不想给你访问的定义成私有和保护
+	-	一个类型放到另一个类型里面，通过typedef成员函数调整，封装另一个全新的类型
+
+## 继承的概念及定义
+
+### 继承的概念
+
+- 继承(inheritance)机制是面向对象程序**设计使代码可以复用**的最重要的手段，它允许程序员在保持原有类特性的基础上进行扩展，增加功能，这样产生新的类，称派生类。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/10.%20C%2B%2B-ji-cheng-zong-jie.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>10. C++继承总结</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">10. C++继承总结</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/12" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>封装</h2>
+<blockquote>
+<p>我们之前学了封装，那么封装到底是什么呢？</p>
+</blockquote>
+<ul>
+<li>封装
+<ul>
+<li>数据和方法放到一起，把想给外面访问的定义成公有，不想给你访问的定义成私有和保护</li>
+<li>一个类型放到另一个类型里面，通过typedef成员函数调整，封装另一个全新的类型</li>
+</ul>
+</li>
+</ul>
+<h2>继承的概念及定义</h2>
+<h3>继承的概念</h3>
+<ul>
+<li>继承(inheritance)机制是面向对象程序<strong>设计使代码可以复用</strong>的最重要的手段，它允许程序员在保持原有类特性的基础上进行扩展，增加功能，这样产生新的类，称派生类。继承呈现了面向对象程序设计的层次结构，体现了由简单到复杂的认知过程。以前我们接触的复用都是函数复用，<strong>继承是类设计层次的复用。</strong></li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Person</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">void</span> <span class="pl-en">Print</span>()
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>name:<span class="pl-pds">"</span></span> &lt;&lt; _name &lt;&lt; endl;
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>age:<span class="pl-pds">"</span></span> &lt;&lt; _age &lt;&lt; endl;
+	}
+<span class="pl-k">protected:</span>
+	string _name = <span class="pl-s"><span class="pl-pds">"</span>peter<span class="pl-pds">"</span></span>; <span class="pl-c"><span class="pl-c">//</span> 姓名</span>
+	<span class="pl-k">int</span> _age = <span class="pl-c1">18</span>; <span class="pl-c"><span class="pl-c">//</span> 年龄</span>
+};
+
+<span class="pl-k">class</span> <span class="pl-en">Student</span> : <span class="pl-k">public</span> <span class="pl-en">Person</span>
+{
+<span class="pl-k">protected:</span>
+	<span class="pl-k">int</span> _stuid; <span class="pl-c"><span class="pl-c">//</span> 学号</span>
+};
+
+
+<span class="pl-k">class</span> <span class="pl-en">Teacher</span> : <span class="pl-k">public</span> <span class="pl-en">Person</span>
+{
+<span class="pl-k">protected:</span>
+	<span class="pl-k">int</span> _jobid; <span class="pl-c"><span class="pl-c">//</span> 工号</span>
+};
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Student s;
+	Teacher t;	
+	s.<span class="pl-c1">Print</span>();
+	t.<span class="pl-c1">Print</span>();
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9c40529ddafffdaa06d7d74e965835d79e174b10c98cef106d9b9ed91360332d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61633338643039633966306634343838383161656639323761316238366665662e706e67"><img src="https://camo.githubusercontent.com/9c40529ddafffdaa06d7d74e965835d79e174b10c98cef106d9b9ed91360332d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61633338643039633966306634343838383161656639323761316238366665662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/ac38d09c9f0f448881aef927a1b86fef.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f64449fcab23ad9ac4dda4791a6ebf35a9f0ef8d65c2ddc4f8847453c4dc97a0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31353362343035376565356434663464386237306338346537356238326262322e706e67"><img src="https://camo.githubusercontent.com/f64449fcab23ad9ac4dda4791a6ebf35a9f0ef8d65c2ddc4f8847453c4dc97a0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31353362343035376565356434663464386237306338346537356238326262322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/153b4057ee5d4f4d8b70c84e75b82bb2.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>继承后父类的Person的成员（成员函数+成员变量）都会变成子类的一部分。这里体现出了<br>
+Student和Teacher复用了Person的成员。下面我们使用监视窗口查看Student和Teacher对象，可以看到变量的复用。调用Print可以看到成员函数的复用。</li>
+</ul>
+<h2>继承定义</h2>
+<h3>定义格式</h3>
+<ul>
+<li>下面我们看到<strong>Person是父类</strong>，也称作<strong>基类</strong>。<strong>Student是子类</strong>，也称作<strong>派生类</strong>。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6db39ddc4c0abe02f28bac2b9cffb9e4940f6710648ef72a329ba79d05fb8daf/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33316237333163636539373134303264613466373763363536613435393365612e706e67"><img src="https://camo.githubusercontent.com/6db39ddc4c0abe02f28bac2b9cffb9e4940f6710648ef72a329ba79d05fb8daf/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33316237333163636539373134303264613466373763363536613435393365612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/31b731cce971402da4f77c656a4593ea.png" style="max-width: 100%;"></a></p>
+<h3>继承关系和访问限定符</h3>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4ecba74d780b63de8fc0815d02b3a281363654c4d38aaaea483dcff2d61abd33/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31653333623930626232346534613737613831353565633432316238643833312e706e67"><img src="https://camo.githubusercontent.com/4ecba74d780b63de8fc0815d02b3a281363654c4d38aaaea483dcff2d61abd33/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31653333623930626232346534613737613831353565633432316238643833312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/1e33b90bb24e4a77a8155ec421b8d831.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f71cbdd3ab811eb0413147e71e5ce95c6a7e5aa0c1a703d326a47dd3cb2fde64/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32616462333631633666363534346536613732663162613434363665643163622e706e67"><img src="https://camo.githubusercontent.com/f71cbdd3ab811eb0413147e71e5ce95c6a7e5aa0c1a703d326a47dd3cb2fde64/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32616462333631633666363534346536613732663162613434363665643163622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/2adb361c6f6544e6a72f1ba4466ed1cb.png" style="max-width: 100%;"></a></p>
+<h3>继承基类成员访问方式的变化</h3>
+<table role="table">
+<thead>
+<tr>
+<th>类成员/继承方式</th>
+<th>public继承</th>
+<th>protected继承</th>
+<th>private继承</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>基类的public成员</strong></td>
+<td>派生类的public成员</td>
+<td>派生类的protected成员</td>
+<td>派生类的private成员</td>
+</tr>
+<tr>
+<td><strong>基类的protected成员</strong></td>
+<td>派生类的protected成员</td>
+<td>派生类的protected成员</td>
+<td>派生类的private成员</td>
+</tr>
+<tr>
+<td><strong>基类的private成员</strong></td>
+<td>在派生类中不可见</td>
+<td>在派生类中不可见</td>
+<td>在派生类中不可见</td>
+</tr>
+</tbody>
+</table>
+<p><strong>总结：</strong></p>
+<ol>
+<li><strong>基类private成员在派生类中无论以什么方式继承都是不可见的</strong>。这里的不可见是指基类的私有成员还是被继承到了派生类对象中，但是语法上限制派生类对象不管在类里面还是类外面都不能去访问它。</li>
+<li>基类<strong>private</strong>成员在派生类中是不能被访问，如果<strong>基类成员不想在类外直接被访问，但需要在派生类中能访问</strong>，就定义为<strong>protected</strong>。可以看出保护成员限定符是因继承才出现的。</li>
+<li>实际上面的表格我们进行一下总结会发现，基类的私有成员在子类都是不可见。基类的其他成员在子类的访问方式 == Min(成员在基类的访问限定符，继承方式)，<code class="notranslate">public &gt; protected &gt; private</code>。</li>
+<li>使用关键字class时默认的继承方式是private，使用<strong>struct时默认的继承方式是public</strong>，不过<strong>最好显示的写出继承方式</strong>。</li>
+<li>在实际运用中一般使用都是public继承，几乎很少使用<code class="notranslate">protetced/private</code>继承，也<strong>不提倡使用protetced/private继承</strong>，<strong>因为protetced/private继承下来的成员都只能在派生类的类里面使用，实际中扩展维护性不强。</strong></li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span> 基类A的定义</span>
+<span class="pl-k">class</span> <span class="pl-en">A</span> 
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">int</span> a_public_Num;
+<span class="pl-k">protected:</span>
+	<span class="pl-k">int</span> a_protect_Num;
+<span class="pl-k">private:</span>
+	<span class="pl-k">int</span> a_private_Num;
+};
+
+<span class="pl-c"><span class="pl-c">//</span> 类pubB 使用public的方式继承A</span>
+<span class="pl-k">class</span> <span class="pl-en">pubB</span> : <span class="pl-k">public</span> <span class="pl-en">A</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">pubB</span>()
+	{
+		a_public_Num = <span class="pl-c1">1</span>;
+		a_protect_Num = <span class="pl-c1">2</span>; <span class="pl-c"><span class="pl-c">//</span> 类内可以访问</span>
+		<span class="pl-c"><span class="pl-c">//</span> a_private_Num = 3 // 不能访问</span>
+	}
+}; 
+
+<span class="pl-c"><span class="pl-c">//</span> 类proB 使用protect的方式继承A</span>
+<span class="pl-k">class</span> <span class="pl-en">proB</span> : <span class="pl-k">protected</span> <span class="pl-en">A</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">proB</span>()
+	{
+		a_public_Num = <span class="pl-c1">4</span>;
+		a_protect_Num = <span class="pl-c1">5</span>; <span class="pl-c"><span class="pl-c">//</span> 类内可以访问</span>
+		<span class="pl-c"><span class="pl-c">//</span> a_private_Num = 6 // 不能访问</span>
+	}
+}; 
+
+<span class="pl-c"><span class="pl-c">//</span> 类proB 使用private的方式继承A</span>
+<span class="pl-k">class</span> <span class="pl-en">prvB</span> : <span class="pl-k">private</span> <span class="pl-en">A</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">prvB</span>()
+	{
+		a_public_Num = <span class="pl-c1">7</span>;
+		a_protect_Num = <span class="pl-c1">8</span>; <span class="pl-c"><span class="pl-c">//</span> 类内可以访问</span>
+		<span class="pl-c"><span class="pl-c">//</span> a_private_Num = 9 // 不能访问</span>
+	}
+};
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	pubB b1;
+	cout &lt;&lt; b1.<span class="pl-smi">a_public_Num</span> &lt;&lt; endl; <span class="pl-c"><span class="pl-c">//</span> 可以访问</span>
+
+	proB b2;
+	<span class="pl-c"><span class="pl-c">//</span> cout &lt;&lt; b2.a_public_Num &lt;&lt; endl;  // 不可访问</span>
+	
+	prvB b3;
+	<span class="pl-c"><span class="pl-c">//</span> cout &lt;&lt; b3.a_public_Num &lt;&lt; endl; // 不可访问</span>
+	
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h2>基类和派生类对象赋值转换</h2>
+<ul>
+<li>
+<p>派生类对象 可以赋值给 基类的对象 / 基类的指针 / 基类的引用。这里有个形象的说法叫切片或者切割。寓意把派生类中父类那部分切来赋值过去。</p>
+</li>
+<li>
+<p>基类对象不能赋值给派生类对象。</p>
+</li>
+<li>
+<p>基类的指针或者引用可以通过强制类型转换赋值给派生类的指针或者引用。但是必须是基类的指针是指向派生类对象时才是安全的。这里基类如果是多态类型，可以使用RTTI(Run-Time Type Information)的<a href="https://baike.baidu.com/item/dynamic_cast" rel="nofollow">dynamic_cast</a> 来进行识别后进行安全转换。</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Person</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">void</span> <span class="pl-en">Print</span>()
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>name:<span class="pl-pds">"</span></span> &lt;&lt; _name &lt;&lt; endl;
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>age:<span class="pl-pds">"</span></span> &lt;&lt; _age &lt;&lt; endl;
+	}
+<span class="pl-k">protected:</span>
+	string _name = <span class="pl-s"><span class="pl-pds">"</span>peter<span class="pl-pds">"</span></span>; <span class="pl-c"><span class="pl-c">//</span> 姓名</span>
+	<span class="pl-k">int</span> _age = <span class="pl-c1">18</span>; <span class="pl-c"><span class="pl-c">//</span> 年龄</span>
+};
+
+<span class="pl-k">class</span> <span class="pl-en">Student</span> : <span class="pl-k">public</span> <span class="pl-en">Person</span>
+{
+<span class="pl-k">protected:</span>
+	<span class="pl-k">int</span> _stuid; <span class="pl-c"><span class="pl-c">//</span> 学号</span>
+	<span class="pl-k">int</span> _major; <span class="pl-c"><span class="pl-c">//</span> 专业</span>
+};
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Student s;
+	Person p = s; <span class="pl-c"><span class="pl-c">//</span> 只有公有继承才可以</span>
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>每个子类对象都是一个特殊的父类对象</li>
+<li><strong>子类赋值给父类对象就叫做切割/切片</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/290c325aceff31399149083c68b3e8e6d15c2bf68cabfb8443bb5e75e795d15c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39373438383530366531663434326532396433333634336535306132343230372e706e67"><img src="https://camo.githubusercontent.com/290c325aceff31399149083c68b3e8e6d15c2bf68cabfb8443bb5e75e795d15c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39373438383530366531663434326532396433333634336535306132343230372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/97488506e1f442e29d33643e50a24207.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Person</span>
+{
+<span class="pl-k">protected:</span>
+	string _name; <span class="pl-c"><span class="pl-c">//</span> 姓名</span>
+	string _sex; <span class="pl-c"><span class="pl-c">//</span> 性别</span>
+	<span class="pl-k">int</span> _age; <span class="pl-c"><span class="pl-c">//</span> 年龄</span>
+};
+
+<span class="pl-k">class</span> <span class="pl-en">Student</span> : <span class="pl-k">public</span> <span class="pl-en">Person</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">int</span> _No; <span class="pl-c"><span class="pl-c">//</span> 学号</span>
+};
+
+<span class="pl-k">void</span> <span class="pl-en">main</span>()
+{
+	Student sobj;
+	<span class="pl-c"><span class="pl-c">//</span> 1.子类对象可以赋值给父类对象/指针/引用</span>
+	Person pobj = sobj;
+	Person* pp = &amp;sobj;
+	Person&amp; rp = sobj;
+	
+	<span class="pl-c"><span class="pl-c">//</span>2.基类对象不能赋值给派生类对象</span>
+	<span class="pl-c"><span class="pl-c">//</span>sobj = pobj;</span>
+
+	<span class="pl-c"><span class="pl-c">//</span> 3.基类的指针可以通过强制类型转换赋值给派生类的指针</span>
+	pp = &amp;sobj;
+	Student* ps1 = (Student*)pp; <span class="pl-c"><span class="pl-c">//</span> 这种情况转换时可以的。</span>
+	ps1-&gt;<span class="pl-smi">_No</span> = <span class="pl-c1">10</span>;
+	pp = &amp;pobj;
+
+	Student* ps2 = (Student*)pp; <span class="pl-c"><span class="pl-c">//</span> 这种情况转换时虽然可以，但是会存在越界访问的问题</span>
+	ps2-&gt;<span class="pl-smi">_No</span> = <span class="pl-c1">10</span>;
+}</pre></div>
+<h2>继承中的作用域</h2>
+<ol>
+<li>在继承体系中<strong>基类</strong>和<strong>派生</strong>类都有独立的作用域。</li>
+<li>子类和父类中有同名成员，<strong>子类成员将屏蔽父类对同名成员的直接访问，这种情况叫隐藏，也叫重定义</strong>。（在子类成员函数中，可以使用 基类::基类成员 显示访问）</li>
+<li>需要注意的是<strong>如果是成员函数的隐藏，只需要函数名相同就构成隐藏，参数可相同可不同</strong>。</li>
+<li>注意在实际中在<strong>继承体系</strong>里面最好<strong>不要定义同名的成员</strong>。</li>
+</ol>
+<div class="highlight highlight-source-shell"><pre class="notranslate">// Student的_num和Person的_num构成隐藏关系，可以看出这样代码虽然能跑，但是非常容易混淆
+class Person
+{
+protected:
+	string _name = <span class="pl-s"><span class="pl-pds">"</span>小李子<span class="pl-pds">"</span></span><span class="pl-k">;</span> // 姓名
+	int _num = 111<span class="pl-k">;</span> // 身份证号
+}<span class="pl-k">;</span>
+class Student <span class="pl-c1">:</span> public Person
+{
+public:
+	void <span class="pl-en">Print</span>()
+	{
+		cout <span class="pl-s"><span class="pl-k">&lt;&lt;</span> "<span class="pl-k">姓名:</span>" &lt;&lt; _name &lt;&lt; endl;</span>
+<span class="pl-s">		cout &lt;&lt; "身份证号:" &lt;&lt; Person::_num &lt;&lt; endl;</span>
+<span class="pl-s">		cout &lt;&lt; "学号:" &lt;&lt; _num &lt;&lt; endl;</span>
+<span class="pl-s">	}</span>
+<span class="pl-s">protected:</span>
+<span class="pl-s">	int _num = 999; // 学号</span>
+<span class="pl-s">};</span>
+<span class="pl-s">int main()</span>
+<span class="pl-s">{</span>
+<span class="pl-s">	Student s1;</span>
+<span class="pl-s">	s1.Print();</span>
+<span class="pl-s"></span>
+<span class="pl-s">	return 0;</span>
+<span class="pl-s">};</span></pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1aeba072eacbd06c1883fb9f6b931d24fc8ae37f18907d1f23c10e77e7ec6ff4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38393766616662393532653034616134613037396631333336386536643537642e706e67"><img src="https://camo.githubusercontent.com/1aeba072eacbd06c1883fb9f6b931d24fc8ae37f18907d1f23c10e77e7ec6ff4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38393766616662393532653034616134613037396631333336386536643537642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/897fafb952e04aa4a079f13368e6d57d.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p><strong>B中的fun和A中的fun不是构成重载，因为不是在同一作用域</strong></p>
+</li>
+<li>
+<p><strong>B中的fun和A中的fun构成隐藏，成员函数满足函数名相同就构成隐藏。</strong></p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/23c0c0c854045ac7ee5ab547ad591fee9f8f316a5123eca38cb7ca4f0c3eea02/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39333238666335353363306234323031613461623663366536663833646665322e706e67"><img src="https://camo.githubusercontent.com/23c0c0c854045ac7ee5ab547ad591fee9f8f316a5123eca38cb7ca4f0c3eea02/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39333238666335353363306234323031613461623663366536663833646665322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/9328fc553c0b4201a4ab6c6e6f83dfe2.png" style="max-width: 100%;"></a></p>
+<blockquote>
+<p><strong>不同的域不构成重载</strong></p>
+</blockquote>
+<ul>
+<li>也可以指定域进行调用</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate">b.A::fun();</pre></div>
+<hr>
+<blockquote>
+<p>6个默认成员函数，<strong>默认</strong>的意思就是指我们不写，编译器会变我们自动生成一个，那么在派生类中，这几个成员函数是如何生成的呢？</p>
+</blockquote>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c19473501f08371423f61c7af4c757fb3c91e32f7a23144ef3a2229aafa99deb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63313438313562323339326534303262626565316136366536386663326632662e706e67"><img src="https://camo.githubusercontent.com/c19473501f08371423f61c7af4c757fb3c91e32f7a23144ef3a2229aafa99deb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63313438313562323339326534303262626565316136366536386663326632662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/c14815b2392e402bbee1a66e68fc2f2f.png" style="max-width: 100%;"></a></p>
+<ol>
+<li>派生类的构造函数必须调用基类的<strong>构造函数初始化基类的那一部分成员</strong>。如<strong>果基类没有默认的构造函数，则必须在派生类构造函数的初始化列表阶段显示调用。</strong></li>
+<li>派生类的<strong>拷贝构造函数必须调用基类的拷贝构造完成基类的拷贝初始化</strong>。</li>
+<li>派生类的<strong>operator=必须要调用基类的operator=完成基类的复制</strong>。</li>
+<li>派生类的<strong>析构函数会在被调用完成后自动调用基类的析构函数清理基类成员。因为这样才能保证派生类对象先清理派生类成员再清理基类成员的顺序</strong>。</li>
+<li>派生类对象<strong>初始化先调用基类构造再调派生类构造</strong>。</li>
+<li>派生类对象析构<strong>清理先调用派生类析构再调基类的析构</strong>。</li>
+<li><strong>因为后续一些场景析构函数需要构成重写，重写的条件之一是函数名相同。那么编译器会对析构函数名进行特殊处理，处理成destrutor()</strong>，<strong>所以父类析构函数不加virtual的情况下，子类析构函数和父类析构函数构成隐藏关系。</strong></li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/074d3e395fd2996e9ed047f2e98c0c5567e7e3cf634b1a91d8d7c20ae70262b5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30343538376566633465613734323732383566366162356165636438633436662e706e67"><img src="https://camo.githubusercontent.com/074d3e395fd2996e9ed047f2e98c0c5567e7e3cf634b1a91d8d7c20ae70262b5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30343538376566633465613734323732383566366162356165636438633436662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/04587efc4ea7427285f6ab5aecd8c46f.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Person</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">Person</span>(<span class="pl-k">const</span> <span class="pl-k">char</span>* name = <span class="pl-s"><span class="pl-pds">"</span>peter<span class="pl-pds">"</span></span>)
+		: _name(name)
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Person()<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	}
+
+	<span class="pl-en">Person</span>(<span class="pl-k">const</span> Person&amp; p)
+		: _name(p._name)
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Person(const Person&amp; p)<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	}
+
+	Person&amp; <span class="pl-k">operator</span>=(<span class="pl-k">const</span> Person&amp; p)
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Person operator=(const Person&amp; p)<span class="pl-pds">"</span></span> &lt;&lt; endl;
+		<span class="pl-k">if</span> (<span class="pl-c1">this</span> != &amp;p)
+			_name = p.<span class="pl-smi">_name</span>;
+		<span class="pl-k">return</span> *<span class="pl-c1">this</span>;
+	}
+
+	<span class="pl-en">~Person</span>()
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>~Person()<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	}
+<span class="pl-k">protected:</span>
+	string _name; 
+};
+
+<span class="pl-k">class</span> <span class="pl-en">Student</span> : <span class="pl-k">public</span> <span class="pl-en">Person</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">Student</span>(<span class="pl-k">const</span> <span class="pl-k">char</span>* name, <span class="pl-k">int</span> num)
+		: Person(name)
+		, _num(num)
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Student()<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	}
+
+	<span class="pl-en">Student</span>(<span class="pl-k">const</span> Student&amp; s)
+		: Person(s)
+		, _num(s._num)
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Student(const Student&amp; s)<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	}
+
+	Student&amp; <span class="pl-k">operator</span>=(<span class="pl-k">const</span> Student&amp; s)
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Student&amp; operator= (const Student&amp; s)<span class="pl-pds">"</span></span> &lt;&lt; endl;
+		<span class="pl-k">if</span> (<span class="pl-c1">this</span> != &amp;s)
+		{
+			<span class="pl-c"><span class="pl-c">//</span> 指定作用域显示调用</span>
+			Person::<span class="pl-k">operator</span>=(s);
+			_num = s.<span class="pl-smi">_num</span>;
+		}
+		<span class="pl-k">return</span> *<span class="pl-c1">this</span>;
+	}
+
+	<span class="pl-en">~Student</span>()
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>~Student()<span class="pl-pds">"</span></span> &lt;&lt; endl;
+	}
+<span class="pl-k">protected:</span>
+	<span class="pl-k">int</span> _num;
+	string _str;
+};
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Student <span class="pl-smi">s1</span>(<span class="pl-s"><span class="pl-pds">"</span>jack<span class="pl-pds">"</span></span>, <span class="pl-c1">18</span>);
+	Student <span class="pl-smi">s2</span>(s1);
+	Student <span class="pl-smi">s3</span>(<span class="pl-s"><span class="pl-pds">"</span>rose<span class="pl-pds">"</span></span>, <span class="pl-c1">17</span>);
+	s1 = s3;
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li><strong>注意，构造顺序是<code class="notranslate">先父后子</code>，析构顺序是<code class="notranslate">先子后父</code>，子类析构函数结束后会自动调用父类析构</strong></li>
+</ul>
+<hr>
+<h2>继承与友元</h2>
+<ul>
+<li>友元关系不能继承，也就是说基类友元不能访问子类私有和保护成员</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Student</span>;
+<span class="pl-k">class</span> <span class="pl-en">Person</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">friend</span> <span class="pl-k">void</span> <span class="pl-en">Display</span>(<span class="pl-k">const</span> Person&amp; p, <span class="pl-k">const</span> Student&amp; s);
+<span class="pl-k">protected:</span>
+	string _name; <span class="pl-c"><span class="pl-c">//</span> 姓名</span>
+};
+
+<span class="pl-k">class</span> <span class="pl-en">Student</span> : <span class="pl-k">public</span> <span class="pl-en">Person</span>
+{
+<span class="pl-k">protected:</span>
+	<span class="pl-k">int</span> _stuNum; <span class="pl-c"><span class="pl-c">//</span> 学号</span>
+};
+
+<span class="pl-k">void</span> <span class="pl-en">Display</span>(<span class="pl-k">const</span> Person&amp; p, <span class="pl-k">const</span> Student&amp; s)
+{
+	cout &lt;&lt; p.<span class="pl-smi">_name</span> &lt;&lt; endl;
+	cout &lt;&lt; s.<span class="pl-smi">_stuNum</span> &lt;&lt; endl;
+}
+
+<span class="pl-k">void</span> <span class="pl-en">main</span>()
+{
+	Person p;
+	Student s;
+	<span class="pl-c1">Display</span>(p, s);
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1df60d24da48ad9c1ce8b1174df999ad4f02cfdbe24e99dd4aef9df69b1c8185/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64343463653462346237623934643564626662613538653162376464346434642e706e67"><img src="https://camo.githubusercontent.com/1df60d24da48ad9c1ce8b1174df999ad4f02cfdbe24e99dd4aef9df69b1c8185/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64343463653462346237623934643564626662613538653162376464346434642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/d44ce4b4b7b94d5dbfba58e1b7dd4d4d.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们也可以再在这里面加上一个友元</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0a839964aed41b095ee60da0f1fa32af8c12b90f736f268616bd243e87998f20/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31613463326232346237386334356434613338303161356265613733373765312e706e67"><img src="https://camo.githubusercontent.com/0a839964aed41b095ee60da0f1fa32af8c12b90f736f268616bd243e87998f20/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31613463326232346237386334356434613338303161356265613733373765312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/1a4c2b24b78c45d4a3801a5bea7377e1.png" style="max-width: 100%;"></a></p>
+<h2>继承与静态成员</h2>
+<ul>
+<li>基类定义了static静态成员，则整个继承体系里面只有一个这样的成员。无论派生出多少个子类，都只有一个static成员实例 。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Person</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-en">Person</span>() { ++_count; }
+<span class="pl-k">protected:</span>
+	string _name; <span class="pl-c"><span class="pl-c">//</span> 姓名</span>
+<span class="pl-k">public:</span>
+	<span class="pl-k">static</span> <span class="pl-k">int</span> _count; <span class="pl-c"><span class="pl-c">//</span> 统计人的个数。</span>
+};
+
+<span class="pl-k">int</span> Person::_count = <span class="pl-c1">0</span>;
+
+<span class="pl-k">class</span> <span class="pl-en">Student</span> : <span class="pl-k">public</span> <span class="pl-en">Person</span>
+{
+<span class="pl-k">protected:</span>
+	<span class="pl-k">int</span> _stuNum; <span class="pl-c"><span class="pl-c">//</span> 学号</span>
+};
+
+<span class="pl-k">class</span> <span class="pl-en">Graduate</span> : <span class="pl-k">public</span> <span class="pl-en">Student</span>
+{
+<span class="pl-k">protected:</span>
+	string _seminarCourse; <span class="pl-c"><span class="pl-c">//</span> 研究科目</span>
+};
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	Student s1;
+	Student s2;
+	Student s3;
+	Graduate s4;
+
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span> &amp;Person :<span class="pl-pds">"</span></span> &lt;&lt; &amp;Person::_count &lt;&lt; endl;
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span> &amp;Student :<span class="pl-pds">"</span></span> &lt;&lt; &amp;Student::_count &lt;&lt; endl;
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span> &amp;Graduate :<span class="pl-pds">"</span></span> &lt;&lt; &amp;Graduate::_count &lt;&lt; endl;
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span> 人数 :<span class="pl-pds">"</span></span> &lt;&lt; Person::_count &lt;&lt; endl;
+
+	Student::_count = <span class="pl-c1">0</span>;
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span> 人数 :<span class="pl-pds">"</span></span> &lt;&lt; Person::_count &lt;&lt; endl;
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/fee3bec0733a5ecbecddc5b8eb6274639252b77f0481d6d112b6f723721114e4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38376537373137366630323834633765386563393166646234383562653563342e706e67"><img src="https://camo.githubusercontent.com/fee3bec0733a5ecbecddc5b8eb6274639252b77f0481d6d112b6f723721114e4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38376537373137366630323834633765386563393166646234383562653563342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/87e77176f0284c7e8ec91fdb485be5c4.png" style="max-width: 100%;"></a></p>
+<h2>复杂的菱形继承及菱形虚拟继承</h2>
+<ul>
+<li><strong>单继承</strong>：一个子类只有一个直接父类时称这个继承关系为单继承</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/53b0797b93042dd2eeedd980cdef075f003b80addc7fb759c1ac2c945d48e7fc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39336430663136323462353934393666616462363833313162336530353437662e706e67"><img src="https://camo.githubusercontent.com/53b0797b93042dd2eeedd980cdef075f003b80addc7fb759c1ac2c945d48e7fc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39336430663136323462353934393666616462363833313162336530353437662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/93d0f1624b59496fadb68311b3e0547f.png" style="max-width: 100%;"></a></p>
+<ul>
+<li><strong>多继承</strong>：一个子类有两个或以上直接父类时称这个继承关系为多继承</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9f57460155633eb39ae090a0bda962d6ae367a0dff050cd45a796bb718f1d5ed/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36333736623734386330336534333366623936396439633864343532316338612e706e67"><img src="https://camo.githubusercontent.com/9f57460155633eb39ae090a0bda962d6ae367a0dff050cd45a796bb718f1d5ed/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36333736623734386330336534333366623936396439633864343532316338612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/6376b748c03e433fb969d9c8d4521c8a.png" style="max-width: 100%;"></a></p>
+<p><strong>菱形继承</strong>：菱形继承是多继承的一种特殊情况。</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d7e4f0db5d188c735dbacc470244db0b5ec2e9329a83d2096915e721ca1d6230/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35626232396164656138373434643931623434663330653436633038363635642e706e67"><img src="https://camo.githubusercontent.com/d7e4f0db5d188c735dbacc470244db0b5ec2e9329a83d2096915e721ca1d6230/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35626232396164656138373434643931623434663330653436633038363635642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/5bb29adea8744d91b44f30e46c08665d.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>两个派生类继承同一个基类而又有某个类同时继承者两个派生类，这种继承被称为<strong>菱形继承</strong>，或者钻石型继承。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/551ae42c185f4220ba190ab6d8382e8b4f5b5fde2e15b46b5d7fbf150828c200/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64353739366337663361303134636338396435303234353932323566373461372e706e67"><img src="https://camo.githubusercontent.com/551ae42c185f4220ba190ab6d8382e8b4f5b5fde2e15b46b5d7fbf150828c200/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64353739366337663361303134636338396435303234353932323566373461372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/d5796c7f3a014cc89d502459225f74a7.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>羊继承了动物的数据和函数，鸵同样继承了动物的数据和函数，当草泥马调用函数或者数据时，就会产生二义性。</p>
+</li>
+<li>
+<p><strong>草泥马</strong>继承自动物的函数和数据继承了两份，其实我们应该清楚，<strong>这份数据我们只需要一份就可以。</strong></p>
+</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">Person</span>
+{
+<span class="pl-k">public:</span>
+	string _name; <span class="pl-c"><span class="pl-c">//</span> 姓名</span>
+};
+<span class="pl-k">class</span> <span class="pl-en">Student</span> : <span class="pl-k">public</span> <span class="pl-en">Person</span>
+{
+<span class="pl-k">protected:</span>
+	<span class="pl-k">int</span> _num; <span class="pl-c"><span class="pl-c">//</span>学号</span>
+};
+<span class="pl-k">class</span> <span class="pl-en">Teacher</span> : <span class="pl-k">public</span> <span class="pl-en">Person</span>
+{
+<span class="pl-k">protected:</span>
+	<span class="pl-k">int</span> _id; <span class="pl-c"><span class="pl-c">//</span> 职工编号</span>
+};
+<span class="pl-k">class</span> <span class="pl-en">Assistant</span> : <span class="pl-k">public</span> <span class="pl-en">Student</span>, <span class="pl-k">public</span> <span class="pl-en">Teacher</span>
+{
+<span class="pl-k">protected:</span>
+	string _majorCourse; <span class="pl-c"><span class="pl-c">//</span> 主修课程</span>
+};
+<span class="pl-k">void</span> <span class="pl-en">Test</span>()
+{
+	<span class="pl-c"><span class="pl-c">//</span> 这样会有二义性无法明确知道访问的是哪一个</span>
+	Assistant a;
+	a.<span class="pl-smi">_name</span> = <span class="pl-s"><span class="pl-pds">"</span>peter<span class="pl-pds">"</span></span>;
+
+	<span class="pl-c"><span class="pl-c">//</span> 需要显示指定访问哪个父类的成员可以解决二义性问题，但是数据冗余问题无法解决</span>
+	a.<span class="pl-smi">Student</span>::_name = <span class="pl-s"><span class="pl-pds">"</span>xxx<span class="pl-pds">"</span></span>;
+	a.<span class="pl-smi">Teacher</span>::_name = <span class="pl-s"><span class="pl-pds">"</span>yyy<span class="pl-pds">"</span></span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c18cf7baf20c56aea70912355f1e9cb01e0409f9f610dfdac21f75ec779f5c74/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38656532623937633432656534353631626136366632643163333832653632352e706e67"><img src="https://camo.githubusercontent.com/c18cf7baf20c56aea70912355f1e9cb01e0409f9f610dfdac21f75ec779f5c74/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38656532623937633432656534353631626136366632643163333832653632352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/8ee2b97c42ee4561ba66f2d1c382e625.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>虚拟继承可以解决菱形继承的二义性和数据冗余的问题。如上面的继承关系，在Student和Teacher的继承Person时使用虚拟继承，即可解决问题。需要注意的是，虚拟继承不要在其他地方去使用。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b91aed02f9a6fa5072660a821ef3c72f9a3476e3b8bff2d4f193e21b74c49cfb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61373262366662633563373834376265383031653639363533656162343535302e706e67"><img src="https://camo.githubusercontent.com/b91aed02f9a6fa5072660a821ef3c72f9a3476e3b8bff2d4f193e21b74c49cfb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61373262366662633563373834376265383031653639363533656162343535302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/a72b6fbc5c7847be801e69653eab4550.png" style="max-width: 100%;"></a></p>
+<h3>虚拟继承解决数据冗余和二义性的原理</h3>
+<ul>
+<li>为了研究虚拟继承原理，我们给出了一个简化的菱形继承继承体系，再借助内存窗口观察对象成员的模型。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">A</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">int</span> _a;
+};
+
+<span class="pl-k">class</span> <span class="pl-en">B</span> : <span class="pl-k">public</span> <span class="pl-en">A</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">int</span> _b;
+	<span class="pl-k">int</span> _b1;
+	<span class="pl-k">int</span> _b2;
+
+};
+
+<span class="pl-k">class</span> <span class="pl-en">C</span> : <span class="pl-k">public</span> <span class="pl-en">A</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">int</span> _c;
+};
+<span class="pl-k">class</span> <span class="pl-en">D</span> : <span class="pl-k">public</span> <span class="pl-en">C</span>, <span class="pl-k">public</span> <span class="pl-en">B</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">int</span> _d;
+};
+
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>(){
+	D d;
+	d.<span class="pl-smi">B</span>::_a = <span class="pl-c1">1</span>;
+	d.<span class="pl-smi">C</span>::_a = <span class="pl-c1">2</span>;
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/305e5f46fb6c1da18c93928f1cc91b8fcc5714733f40ed1e6046c59a9665d063/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32333363393134303333396334643034393938663665383938353962613164662e706e67"><img src="https://camo.githubusercontent.com/305e5f46fb6c1da18c93928f1cc91b8fcc5714733f40ed1e6046c59a9665d063/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32333363393134303333396334643034393938663665383938353962613164662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/233c9140339c4d04998f6e89859ba1df.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>下图是菱形虚拟继承的内存对象成员模型：这里可以分析出D对象中将A放到的了对象组成的最下面，这个A同时属于B和C，那么B和C如何去找到公共的A呢？这里是通过了B和C的两个指针，指向的一张表。这两个指针叫虚基表指针，这两个表叫<strong>虚基表</strong>。虚基表中存的偏移量。通过<strong>偏移量</strong>可以找到下面的A。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">class</span> <span class="pl-en">A</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">int</span> _a;
+};
+
+<span class="pl-k">class</span> <span class="pl-en">B</span> : <span class="pl-k">virtual</span> public A
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">int</span> _b;
+	<span class="pl-k">int</span> _b1;
+	<span class="pl-k">int</span> _b2;
+
+};
+
+<span class="pl-k">class</span> <span class="pl-en">C</span> : <span class="pl-k">virtual</span> public A
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">int</span> _c;
+};
+<span class="pl-k">class</span> <span class="pl-en">D</span> : <span class="pl-k">public</span> <span class="pl-en">C</span>, <span class="pl-k">public</span> <span class="pl-en">B</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">int</span> _d;
+};</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c86a666cab99a478868faeb2a4ea4c4ca52024784ca9bc5182b2c8f9dcd77487/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35636636396566623732646334306465396566366134636634376430393662352e706e67"><img src="https://camo.githubusercontent.com/c86a666cab99a478868faeb2a4ea4c4ca52024784ca9bc5182b2c8f9dcd77487/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35636636396566623732646334306465396566366134636634376430393662352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/5cf69efb72dc40de9ef6a4cf47d096b5.png" style="max-width: 100%;"></a></p>
+<p>下面是上面的Person关系菱形虚拟继承的原理解释：</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9da7da38d9dd32fd4632ffc1f941c7dfad0991d42c5a6118ba00aa8415e87477/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35373931626137646565356534303065616137393534333161393664376363662e706e67"><img src="https://camo.githubusercontent.com/9da7da38d9dd32fd4632ffc1f941c7dfad0991d42c5a6118ba00aa8415e87477/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35373931626137646565356534303065616137393534333161393664376363662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/5791ba7dee5e400eaa795431a96d7ccf.png" style="max-width: 100%;"></a></p>
+<h2>继承的总结和反思</h2>
+<ol>
+<li>
+<p>很多人说C++语法复杂，其实多继承就是一个体现。有了多继承，就存在菱形继承，有了菱<br>
+形继承就有菱形虚拟继承，底层实现就很复杂。所以一般不建议设计出多继承，一定不要设<br>
+计出菱形继承。否则在复杂度及性能上都有问题。</p>
+</li>
+<li>
+<p>多继承可以认为是C++的缺陷之一，很多后来的xx语言都没有多继承，如Java。</p>
+</li>
+<li>
+<p><strong>继承和组合</strong></p>
+<ul>
+<li>public继承是一种<code class="notranslate">is-a</code>的关系。也就是说每个派生类对象都是一个基类对象。</li>
+<li>组合是一种<code class="notranslate">has-a</code>的关系。假设B组合了A，每个B对象中都有一个A对象。</li>
+<li>优先使用<strong>对象组合，而不是类继承</strong> 。</li>
+<li>继承允许你根据基类的实现来定义派生类的实现。这种通过生成派生类的复用通常被称为<strong>白箱复用</strong>(white-box reuse)。术语“白箱”是相对可视性而言：在继承方式中，基类的 内部细节对子类可见 。继承一定程度破坏了基类的封装，基类的改变，对派生类有很 大的影响。派生类和基类间的依赖关系很强，耦合度高。</li>
+<li>对象组合是类继承之外的另一种复用选择。新的更复杂的功能可以通过组装或组合对象 来获得。对象组合要求被组合的对象具有良好定义的接口。这种复用风格被称为<strong>黑箱复用</strong>(black-box reuse)，因为对象的内部细节是不可见的。对象只以“黑箱”的形式出现。 组合类之间没有很强的依赖关系，耦合度低。优先使用对象组合有助于你保持每个类被 封装。</li>
+<li>实际尽量多去用组合。组合的耦合度低，代码维护性好。不过继承也有用武之地的，有 些关系就适合继承那就用继承，另外要实现多态，也必须要继承。类之间的关系可以用 继承，可以用组合，就用组合。</li>
+</ul>
+</li>
+</ol>
+<h2>笔试面试题</h2>
+<h4>什么是菱形继承？菱形继承的问题是什么？</h4>
+<blockquote>
+<p>单继承：一个子类只有一个直接父类时称这个继承关系为单继承<br>
+多继承：一个子类有两个或以上直接父类时称这个继承关系为多继承<br>
+菱形继承：菱形继承是C++ 多继承的一种表现形式<br>
+菱形继承的主要问题是可能导致<strong>二义性和数据冗余</strong>。二义性发生在当最底层的派生类需要访问基类的成员时，由于存在多个继承路径，编译器可能无法确定应该使用哪个路径上的基类成员。数据冗余则是由于基类的数据成员在多个派生类中被多次拷贝，这不仅浪费存储空间，还可能导致数据的不一致。</p>
+</blockquote>
+<h4>什么是菱形虚拟继承？如何解决数据冗余和二义性的</h4>
+<blockquote>
+<p>菱形虚拟继承是为了解决菱形继承中的二义性和数据冗余问题而引入的一种机制。在菱形虚拟继承中，通过在基类继承时添加<code class="notranslate">virtual</code>关键字，确保在派生类中基类的数据成员只存在一份拷贝，从而避免了数据冗余。同时，虚基表的使用解决了二义性问题，确保在访问基类成员时能够明确找到正确的路径。</p>
+</blockquote>
+<blockquote>
+<p>解决方法：让 B 虚拟继承 A，C 虚拟继承 A。A 也就被称为虚基类。虚拟继承会让父类 A 的成员在最终子类 D 中只有一份。需要注意的是：虚拟继承不要在其他地方去使用。基本用不到。</p>
+</blockquote>
+<h4>继承和组合的区别？什么时候用继承？什么时候用组合？</h4>
+<blockquote>
+<p>继承允许一个类（派生类）继承另一个类（基类）的属性和方法。它体现的是一种“is-a”关系，即派生类是基类的一种特殊形式。继承主要用于实现代码重用和扩展基类功能。当需要创建一个新的类，而这个类与已有的类具有相似的功能时，可以使用继承。</p>
+</blockquote>
+<blockquote>
+<p>组合则是通过将已有的类的对象作为新类的成员来实现代码复用。它体现的是一种“has-a”关系，即新类包含一个或多个已有类的对象作为自己的部分。组合用于创建更复杂的对象，通过组合已有的对象来实现新的功能。当需要创建一个新的类，而这个类由多个已有的类的对象组合而成时，应使用组合。</p>
+</blockquote>
+<blockquote>
+<ul>
+<li>在选择使用继承还是组合时：</li>
+</ul>
+<ol>
+<li>如果新类与已有类之间存在“is-a”关系，即新类是已有类的一种特殊形式，那么应该使用继承。</li>
+<li>如果新类是由多个已有的类的对象组合而成，形成“has-a”关系，那么应该使用组合。</li>
+<li>对于大型程序，通常优先使用组合，因为它有助于保持每个类的封装性和独立性，避免类层次结构的过度扩张。</li>
+</ol>
+</blockquote></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

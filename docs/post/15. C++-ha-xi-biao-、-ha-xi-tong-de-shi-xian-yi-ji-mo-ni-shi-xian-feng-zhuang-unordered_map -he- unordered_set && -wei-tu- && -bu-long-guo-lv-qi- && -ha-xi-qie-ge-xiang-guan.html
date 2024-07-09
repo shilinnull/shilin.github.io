@@ -1,0 +1,2537 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## unordered系列关联式容器
+
+- 在C++98中，STL提供了底层为红黑树结构的一系列关联式容器，在查询时效率可达到$log_2N$，即最差情况下需要比较红黑树的高度次，当树中的节点非常多时，查询效率也不理想。">
+<meta property="og:title" content="15. C++哈希表、哈希桶的实现以及模拟实现封装unordered_map 和 unordered_set && 位图 && 布隆过滤器 && 哈希切割相关">
+<meta property="og:description" content="## unordered系列关联式容器
+
+- 在C++98中，STL提供了底层为红黑树结构的一系列关联式容器，在查询时效率可达到$log_2N$，即最差情况下需要比较红黑树的高度次，当树中的节点非常多时，查询效率也不理想。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/15.%20C%2B%2B-ha-xi-biao-%E3%80%81-ha-xi-tong-de-shi-xian-yi-ji-mo-ni-shi-xian-feng-zhuang-unordered_map%20-he-%20unordered_set%20%26%26%20-wei-tu-%20%26%26%20-bu-long-guo-lv-qi-%20%26%26%20-ha-xi-qie-ge-xiang-guan.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>15. C++哈希表、哈希桶的实现以及模拟实现封装unordered_map 和 unordered_set && 位图 && 布隆过滤器 && 哈希切割相关</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">15. C++哈希表、哈希桶的实现以及模拟实现封装unordered_map 和 unordered_set && 位图 && 布隆过滤器 && 哈希切割相关</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/17" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>unordered系列关联式容器</h2>
+<ul>
+<li>在C++98中，STL提供了底层为红黑树结构的一系列关联式容器，在查询时效率可达到$log_2N$，即最差情况下需要比较红黑树的高度次，当树中的节点非常多时，查询效率也不理想。最好的查询是，进行很少的比较次数就能够将元素找到，因此在<strong>C++11</strong>中，<strong>STL又提供了4个unordered系列的关联式容器</strong>，这四个容器与红黑树结构的关联式容器使用方式基本类似，只是其底层结构不同</li>
+</ul>
+<h2>unordered_map</h2>
+<p><a href="https://legacy.cplusplus.com/reference/unordered_map/unordered_map/" rel="nofollow">unordered_map在线文档说明</a></p>
+<ol>
+<li>unordered_map是存储&lt;key, value&gt;键值对的关联式容器，其允许通过keys快速的索引到与其对应的value。</li>
+<li>在unordered_map中，键值通常用于惟一地标识元素，而映射值是一个对象，其内容与此键关联。键和映射值的类型可能不同。</li>
+<li>在内部,unordered_map没有对&lt;kye, value&gt;按照任何特定的顺序排序, 为了能在常数范围内找到key所对应的value，unordered_map将相同哈希值的键值对放在相同的桶中。</li>
+<li>unordered_map容器通过key访问单个元素要比map快，但它通常在遍历元素子集的范围迭代方面效率较低。</li>
+<li>unordered_maps实现了直接访问操作符(operator[])，它允许使用key作为参数直接访问value。</li>
+<li>它的迭代器至少是前向迭代器。</li>
+</ol>
+<h3>unordered_map的接口说明</h3>
+<ol>
+<li>unordered_map的构造</li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/8f6a19fbdbcccc079255320cf9a8c3ac6602be91f0625666422af8c2a81dac05/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31626132376262663438346134333362383264386331666639316166353065652e706e67"><img src="https://camo.githubusercontent.com/8f6a19fbdbcccc079255320cf9a8c3ac6602be91f0625666422af8c2a81dac05/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31626132376262663438346134333362383264386331666639316166353065652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/1ba27bbf484a433b82d8c1ff91af50ee.png" style="max-width: 100%;"></a></p>
+<ol start="2">
+<li>unordered_map的容量</li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c97a5df43a25339e7d851c50833516ce05ee14c4017e34c49d3b3b175ed7adc9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61663863343634663839656434306331626638626432386139626564303963342e706e67"><img src="https://camo.githubusercontent.com/c97a5df43a25339e7d851c50833516ce05ee14c4017e34c49d3b3b175ed7adc9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61663863343634663839656434306331626638626432386139626564303963342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/af8c464f89ed40c1bf8bd28a9bed09c4.png" style="max-width: 100%;"></a></p>
+<ol start="3">
+<li>unordered_map的迭代器</li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2dbca7a580d46256d23eadd87ac30df5b8b2644549e6a4f41fd77ebbd531d7a9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63363765366638653763343834666566623064316436666661316339616536652e706e67"><img src="https://camo.githubusercontent.com/2dbca7a580d46256d23eadd87ac30df5b8b2644549e6a4f41fd77ebbd531d7a9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63363765366638653763343834666566623064316436666661316339616536652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/c67e6f8e7c484fefb0d1d6ffa1c9ae6e.png" style="max-width: 100%;"></a><br>
+4. unordered_map的元素访问</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/61ff0fb5a6017e01be2bd0642959aa75c04dabab3f0fbe69750287831bf166e9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66666636326235383763373334626134623762626130663330626462343262622e706e67"><img src="https://camo.githubusercontent.com/61ff0fb5a6017e01be2bd0642959aa75c04dabab3f0fbe69750287831bf166e9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66666636326235383763373334626134623762626130663330626462343262622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/fff62b587c734ba4b7bba0f30bdb42bb.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>注意：该函数中实际调用哈希桶的插入操作，用参数key与V()构造一个默认值往底层哈希桶中插入，如果key不在哈希桶中，插入成功，返回V()，插入失败，说明key已经在哈希桶中，将key对应的value返回。</li>
+</ul>
+<ol start="5">
+<li>unordered_map的查询</li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7b440cab643b042b7cf06daae5d8b772f805c841c0e42f3c948cb7e350f84f4d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34653433393166393033366134376561613164663864666162643861306464622e706e67"><img src="https://camo.githubusercontent.com/7b440cab643b042b7cf06daae5d8b772f805c841c0e42f3c948cb7e350f84f4d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34653433393166393033366134376561613164663864666162643861306464622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/4e4391f9036a47eaa1df8dfabd8a0ddb.png" style="max-width: 100%;"></a></p>
+<p>注意：unordered_map中key是不能重复的，因此count函数的返回值最大为1</p>
+<ol start="6">
+<li>unordered_map的修改操作</li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b0b80a091e5d651fb5ba1bfffee02452fd166c0ca46531468cdc812226d31e5e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61333139316236353035333234316565383962626130663464643535313062642e706e67"><img src="https://camo.githubusercontent.com/b0b80a091e5d651fb5ba1bfffee02452fd166c0ca46531468cdc812226d31e5e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61333139316236353035333234316565383962626130663464643535313062642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/a3191b65053241ee89bba0f4dd5510bd.png" style="max-width: 100%;"></a></p>
+<ol start="7">
+<li>unordered_map的桶操作</li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/bd070d0eeef901839e26aecb5927d80b8f435a4d519075f6d9bb445ec93ac86a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37636433666235336433326634646235623865663664363664396334636134312e706e67"><img src="https://camo.githubusercontent.com/bd070d0eeef901839e26aecb5927d80b8f435a4d519075f6d9bb445ec93ac86a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37636433666235336433326634646235623865663664363664396334636134312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/7cd3fb53d32f4db5b8ef6d66d9c4ca41.png" style="max-width: 100%;"></a></p>
+<h2>unordered_set</h2>
+<p><a href="https://legacy.cplusplus.com/reference/unordered_set/unordered_set/" rel="nofollow">参见 unordered_set在线文档说明</a></p>
+<h3>set 与 unordered_set的效率比较</h3>
+<div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">include</span><span class="pl-s"><span class="pl-pds">&lt;</span>unordered_map<span class="pl-pds">&gt;</span></span>
+#<span class="pl-k">include</span><span class="pl-s"><span class="pl-pds">&lt;</span>unordered_set<span class="pl-pds">&gt;</span></span>
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">const</span> <span class="pl-c1">size_t</span> N = <span class="pl-c1">100000</span>;
+
+	unordered_set&lt;<span class="pl-k">int</span>&gt; us;
+	set&lt;<span class="pl-k">int</span>&gt; s;
+
+	vector&lt;<span class="pl-k">int</span>&gt; v;
+	v.<span class="pl-c1">reserve</span>(N);
+	<span class="pl-c1">srand</span>(<span class="pl-c1">time</span>(<span class="pl-c1">0</span>));
+	<span class="pl-k">for</span> (<span class="pl-c1">size_t</span> i = <span class="pl-c1">0</span>; i &lt; N; ++i)
+	{
+		<span class="pl-c"><span class="pl-c">//</span>v.push_back(rand()); // N比较大时，重复值比较多</span>
+		<span class="pl-c"><span class="pl-c">//</span>v.push_back(rand()+i); // 重复值相对少</span>
+		v.<span class="pl-c1">push_back</span>(i); <span class="pl-c"><span class="pl-c">//</span> 没有重复，有序</span>
+	}
+	
+	<span class="pl-c1">size_t</span> begin1 = <span class="pl-c1">clock</span>();
+	<span class="pl-k">for</span> (<span class="pl-k">auto</span> e : v)
+	{
+		s.<span class="pl-c1">insert</span>(e);
+	}
+	<span class="pl-c1">size_t</span> end1 = <span class="pl-c1">clock</span>();
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>set insert:<span class="pl-pds">"</span></span> &lt;&lt; end1 - begin1 &lt;&lt; endl;
+
+	<span class="pl-c1">size_t</span> begin2 = <span class="pl-c1">clock</span>();
+	<span class="pl-k">for</span> (<span class="pl-k">auto</span> e : v)
+	{
+		us.<span class="pl-c1">insert</span>(e);
+	}
+	<span class="pl-c1">size_t</span> end2 = <span class="pl-c1">clock</span>();
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>unordered_set insert:<span class="pl-pds">"</span></span> &lt;&lt; end2 - begin2 &lt;&lt; endl;
+
+
+	<span class="pl-c1">size_t</span> begin3 = <span class="pl-c1">clock</span>();
+	<span class="pl-k">for</span> (<span class="pl-k">auto</span> e : v)
+	{
+		s.<span class="pl-c1">find</span>(e);
+	}
+	<span class="pl-c1">size_t</span> end3 = <span class="pl-c1">clock</span>();
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>set find:<span class="pl-pds">"</span></span> &lt;&lt; end3 - begin3 &lt;&lt; endl;
+
+	<span class="pl-c1">size_t</span> begin4 = <span class="pl-c1">clock</span>();
+	<span class="pl-k">for</span> (<span class="pl-k">auto</span> e : v)
+	{
+		us.<span class="pl-c1">find</span>(e);
+	}
+	<span class="pl-c1">size_t</span> end4 = <span class="pl-c1">clock</span>();
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>unordered_set find:<span class="pl-pds">"</span></span> &lt;&lt; end4 - begin4 &lt;&lt; endl &lt;&lt; endl;
+
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>插入数据个数：<span class="pl-pds">"</span></span> &lt;&lt; s.<span class="pl-c1">size</span>() &lt;&lt; endl;
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>插入数据个数：<span class="pl-pds">"</span></span> &lt;&lt; us.<span class="pl-c1">size</span>() &lt;&lt; endl &lt;&lt; endl;
+
+	<span class="pl-c1">size_t</span> begin5 = <span class="pl-c1">clock</span>();
+	<span class="pl-k">for</span> (<span class="pl-k">auto</span> e : v)
+	{
+		s.<span class="pl-c1">erase</span>(e);
+	}
+	<span class="pl-c1">size_t</span> end5 = <span class="pl-c1">clock</span>();
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>set erase:<span class="pl-pds">"</span></span> &lt;&lt; end5 - begin5 &lt;&lt; endl;
+
+	<span class="pl-c1">size_t</span> begin6 = <span class="pl-c1">clock</span>();
+	<span class="pl-k">for</span> (<span class="pl-k">auto</span> e : v)
+	{
+		us.<span class="pl-c1">erase</span>(e);
+	}
+	<span class="pl-c1">size_t</span> end6 = <span class="pl-c1">clock</span>();
+	cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>unordered_set erase:<span class="pl-pds">"</span></span> &lt;&lt; end6 - begin6 &lt;&lt; endl &lt;&lt; endl;
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p>根据测试结果可以得出以下结论：</p>
+<ul>
+<li>当处理数据量小时，map/set容器与<strong>unordered_map/unordered_set</strong>容器增删查改的效率差异不大。</li>
+<li>当处理数据量大时，map/set容器与<strong>unordered_map/unordered_set</strong>容器增删查改的效率相比，unordered系列容器的效率更高。</li>
+</ul>
+<h2>底层结构</h2>
+<ul>
+<li>unordered系列的关联式容器之所以效率比较高，是因为其底层使用了<strong>哈希结构</strong>。</li>
+</ul>
+<h2>哈希概念</h2>
+<ul>
+<li>
+<p>顺序结构以及平衡树中，元素关键码与其存储位置之间没有对应的关系，因此在查找一个元素时，必须要经过关键码的多次比较。顺序查找时间复杂度为O($N$)，平衡树中为树的高度，即O($log_2 N$)，搜索的效率取决于搜索过程中元素的比较次数。</p>
+</li>
+<li>
+<p>理想的搜索方法：可以不经过任何比较，一次直接从表中得到要搜索的元素。如果构造一种存储结构，通过某种函数(hashFunc)使元素的存储位置与它的关键码之间能够建立一 一<strong>映射的关系</strong>，那么在查找时通过该函数可以很快找到该元素。</p>
+</li>
+</ul>
+<p>映射的关系：</p>
+<ol>
+<li>直接定址法（关键字范围集中，量不大的情况）关键字 --&gt;<strong>存储位置是一对一的关系</strong>，<strong>不存在哈希冲突</strong></li>
+<li>除留余数法（关键字可以很分散，量可以很大））关键字 --&gt;<strong>存储位置是多对一的关系</strong>，<strong>存在哈希冲突</strong></li>
+</ol>
+<hr>
+<p><strong>当向该结构中：</strong></p>
+<ul>
+<li>
+<p><strong>插入元素</strong></p>
+<ul>
+<li>根据待插入元素的关键码，以此函数计算出该元素的存储位置并按此位置进行存放</li>
+</ul>
+</li>
+<li>
+<p><strong>搜索元素</strong></p>
+<ul>
+<li>对元素的关键码进行同样的计算，把求得的函数值当做元素的存储位置，在结构中按此位置取元素比较，若关键码相等，则搜索成功</li>
+</ul>
+</li>
+<li>
+<p><strong>删除元素</strong></p>
+<ul>
+<li>先对元素进行搜索，然后将状态设置成删除状态</li>
+<li>删除状态的意义：
+<ul>
+<li>再插入，这个位置可以覆盖值</li>
+<li>防止后面冲突的值出现找不到的情况，遇到删除状态，还是继续往后找</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>该方式即为哈希(散列)方法，哈希方法中使用的转换函数称为哈希(散列)函数，构造出来的结构称为哈希表(Hash Table)(或者称散列表)</p>
+</li>
+<li>
+<p>例如：数据集合{1，7，6，4，5，9}；</p>
+</li>
+<li>
+<p>哈希函数设置为：hash(key) = key % capacity; capacity为存储元素底层空间总的大小。</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2fb6279d3a733ceb729781600e7a899475dcbc8121fd837334fc3138a570906a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37343366373033386534366334613062616366396237613331656538626664312e706e67"><img src="https://camo.githubusercontent.com/2fb6279d3a733ceb729781600e7a899475dcbc8121fd837334fc3138a570906a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37343366373033386534366334613062616366396237613331656538626664312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/743f7038e46c4a0bacf9b7a31ee8bfd1.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>用该方法进行搜索不必进行多次关键码的比较，因此搜索的速度比较快</li>
+<li>问题：按照上述哈希方式，向集合中插入元素44，会出现什么问题？--&gt; <strong>哈希冲突</strong></li>
+</ul>
+<h2>哈希冲突</h2>
+<ul>
+<li>
+<p>对于两个数据元素的关键字$k_i$和 $k_j$(i != j)，有$k_i$ != $k_j$，但有：Hash($k_i$) ==Hash($k_j$)，即：不同关键字通过相同哈希哈数计算出相同的哈希地址，该种现象称为<strong>哈希冲突</strong>或<strong>哈希碰撞</strong>。</p>
+</li>
+<li>
+<p>把具有不同关键码而具有相同哈希地址的数据元素称为“同义词”。</p>
+</li>
+</ul>
+<p><strong>发生哈希冲突该如何处理呢？</strong></p>
+<h2>哈希函数</h2>
+<p>引起哈希冲突的一个原因可能是：哈希函数设计不够合理。</p>
+<ul>
+<li>哈希函数设计原则：
+<ul>
+<li>哈希函数的定义域必须包括需要存储的全部关键码，而如果散列表允许有m个地址时，其值域必须在0到m-1之间</li>
+<li>哈希函数计算出来的地址能均匀分布在整个空间中</li>
+<li>哈希函数应该比较简单</li>
+</ul>
+</li>
+</ul>
+<h2>常见哈希函数</h2>
+<ol>
+<li><strong>直接定址法</strong></li>
+</ol>
+<ul>
+<li>取关键字的某个线性函数为散列地址：Hash（Key）= A*Key + B</li>
+<li>优点：简单、均匀</li>
+<li>缺点：需要事先知道关键字的分布情况</li>
+<li>使用场景：适合查找比较小且连续的情况</li>
+</ul>
+<ol start="2">
+<li><strong>除留余数法</strong></li>
+</ol>
+<ul>
+<li>设散列表中允许的地址数为m，取一个不大于m，但最接近或者等于m的质数p作为除数，</li>
+<li>按照哈希函数：Hash(key) = key% p(p&lt;=m),将关键码转换成哈希地址</li>
+</ul>
+<ol start="3">
+<li><strong>平方取中法</strong></li>
+</ol>
+<ul>
+<li>假设关键字为1234，对它平方就是1522756，抽取中间的3位227作为哈希地址；</li>
+<li>再比如关键字为4321，对它平方就是18671041，抽取中间的3位671(或710)作为哈希地址平方取中法比较适合：不知道关键字的分布，而位数又不是很大的情况</li>
+</ul>
+<ol start="4">
+<li><strong>折叠法</strong></li>
+</ol>
+<ul>
+<li>折叠法是将关键字从左到右分割成位数相等的几部分(最后一部分位数可以短些)，然后将这几部分叠加求和，并按散列表表长，取后几位作为散列地址。</li>
+<li>折叠法适合事先不需要知道关键字的分布，适合关键字位数比较多的情况</li>
+</ul>
+<ol start="5">
+<li><strong>随机数法</strong></li>
+</ol>
+<ul>
+<li>选择一个随机函数，取关键字的随机函数值为它的哈希地址，即H(key) = random(key),其中random为随机数函数。<br>
+通常应用于关键字长度不等时采用此法</li>
+</ul>
+<ol start="6">
+<li><strong>数学分析法</strong></li>
+</ol>
+<ul>
+<li>设有n个d位数，每一位可能有r种不同的符号，这r种不同的符号在各位上出现的频率不一定相同，可能在某些位上分布比较均匀，每种符号出现的机会均等，在某些位上分布不均匀只有某几种符号经常出现。可根据散列表的大小，选择其中各种符号分布均匀的若干位作为散列地址。例如：</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4916f11848e4b773966fbdd112b6321fa6d5f47f82b8d29622a0d5a1dce23e96/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66356539636139373135623534363731396433653863316533363430623838662e706e67"><img src="https://camo.githubusercontent.com/4916f11848e4b773966fbdd112b6321fa6d5f47f82b8d29622a0d5a1dce23e96/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66356539636139373135623534363731396433653863316533363430623838662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/f5e9ca9715b546719d3e8c1e3640b88f.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>假设要存储某家公司员工登记表，如果用手机号作为关键字，那么极有可能前7位都是 相同的，那么我们可以选择后面的四位作为散列地址，如果这样的抽取工作还容易出现冲突，还可以对抽取出来的数字进行反转(如1234改成4321)、右环位移(如1234改成4123)、左环移位、前两数与后两数叠加(如1234改成12+34=46)等方法。</li>
+<li>数字分析法通常适合处理关键字位数比较大的情况，如果事先知道关键字的分布且关键字的若干位分布较均匀的情况</li>
+</ul>
+<p><strong>注意：哈希函数设计的越精妙，产生哈希冲突的可能性就越低，但是无法避免哈希冲突</strong></p>
+<h2>哈希冲突解决</h2>
+<p>解决哈希冲突两种常见的方法是：<strong>闭散列</strong>和<strong>开散列</strong></p>
+<h3>闭散列 —— 开放定址法</h3>
+<ul>
+<li>闭散列，也叫<strong>开放定址法</strong>，当发生哈希冲突时，如果哈希表未被装满，说明在哈希表种必然还有空位置，那么可以把产生冲突的元素存放到冲突位置的“下一个”空位置中去。</li>
+</ul>
+<h3>哈希表的插入</h3>
+<h4>线性探测</h4>
+<ul>
+<li>当发生哈希冲突时，从发生冲突的位置开始，依次向后探测，直到找到下一个空位置为止。</li>
+</ul>
+<p><strong>线性探测：从发生冲突的位置开始，依次向后探测，直到寻找到下一个空位置为止。</strong></p>
+<ul>
+<li>
+<p>通过哈希函数获取待插入元素在哈希表中的位置</p>
+</li>
+<li>
+<p>通过哈希函数获取待插入元素在哈希表中的位置 如果该位置中没有元素则直接插入新元素，如果该位置中有元素发生哈希冲突， 使用线性探测找到下一个空位置，插入新元素</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b534c741104dae3989b13680e4f2efa004e76913577b6ec48ca18cc49b8d4513/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33353963383632303361356534396365383262363631643339333562343063612e706e67"><img src="https://camo.githubusercontent.com/b534c741104dae3989b13680e4f2efa004e76913577b6ec48ca18cc49b8d4513/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33353963383632303361356534396365383262363631643339333562343063612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/359c86203a5e49ce82b661d3935b40ca.png" style="max-width: 100%;"></a></p>
+<p>我们将数据插入到有限的空间，那么空间中的元素越多，插入元素时产生冲突的概率也就越大，冲突多次后插入哈希表的元素，在查找时的效率必然也会降低。介于此，哈希表当中引入了负载因子（载荷因子）：</p>
+<ul>
+<li>
+<p><strong>负载因子 = 表中有效数据个数 / 空间的大小</strong></p>
+<ul>
+<li>负载因子越大，产出冲突的概率越高，增删查改的效率越低。</li>
+<li>负载因子越小，产出冲突的概率越低，增删查改的效率越高。</li>
+</ul>
+</li>
+<li>
+<p>但负载因子越小，也就意味着空间的利用率越低，此时大量的空间实际上都被浪费了。对于闭散列（开放定址法）来说，负载因子是特别重要的因素，一般控制在0.7~0.8以下，超过0.8会导致在查表时CPU缓存不命中（cache missing）按照指数曲线上升。</p>
+</li>
+<li>
+<p>因此，一些采用开放定址法的hash库，如JAVA的系统库限制了负载因子为0.75，当超过该值时，会对哈希表进行增容。</p>
+</li>
+</ul>
+<h4>二次探测</h4>
+<ul>
+<li>线性探测的缺陷是产生冲突的数据堆积在一块，这与其找下一个空位置有关系，因为找空位 置的方式就是挨着往后逐个去找，因此二次探测为了避免该问题，找下一个空位置的方法 为：$H_i$ = ($H_0$ + $i^2$ )% m, 或者：$H_i$ = ($H_0$ - $i^2$ )% m。其中：i = 1,2,3…， $H_0$是通过散列函数Hash(x)对元素的关键码 key 进行计算得到的位置，m是表 的大小。</li>
+</ul>
+<p>对于2.1中如果要插入44，产生冲突，使用解决后的情况为：</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5b9184241552c3a0bf69b6618e0fe16cc7b29d8ecb7d7a6814f16f1d2248f385/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38376638336537333461336534393536623261663531393231396466623933342e706e67"><img src="https://camo.githubusercontent.com/5b9184241552c3a0bf69b6618e0fe16cc7b29d8ecb7d7a6814f16f1d2248f385/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38376638336537333461336534393536623261663531393231396466623933342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/87f83e734a3e4956b2af519219dfb934.png" style="max-width: 100%;"></a></p>
+<p><strong>研究表明</strong>：当表的长度为质数且表装载因子a不超过0.5时，新的表项一定能够插入，而且任 何一个位置都不会被探查两次。因此只要表中有一半的空位置，就不会存在表满的问题。在 搜索时可以不考虑表装满的情况，但在插入时必须确保表的装载因子a不超过0.5，如果超出 必须考虑增容。</p>
+<p><strong>因此</strong>：比散列最大的缺陷就是空间利用率比较低，这也是哈希的缺陷。</p>
+<p><strong>线性探测的优点</strong>：实现非常简单。</p>
+<p><strong>线性探测的缺点</strong>：一旦发生冲突，所有的冲突连在一起，容易产生数据“堆积”，即不同关键码占据了可利用的空位置，使得寻找某关键码的位置需要多次比较（踩踏效应），导致搜索效率降低。</p>
+<hr>
+<ul>
+<li>向哈希表中插入数据的步骤如下：</li>
+</ul>
+<ol>
+<li>查看哈希表中是否存在该键值的键值对，若已存在则插入失败。</li>
+<li>判断是否需要调整哈希表的大小，若哈希表的大小为0，或负载因子过大都需要对哈希表的大小进行调整。</li>
+<li>将键值对插入哈希表。</li>
+<li>哈希表中的有效元素个数加一。</li>
+</ol>
+<ul>
+<li>其中，<strong>哈希表的调整方式</strong>如下：</li>
+</ul>
+<ol>
+<li>若哈希表的大小为0，则将哈希表的初始大小设置为10。</li>
+<li><strong>若哈希表的负载因子大于0.7，则先创建一个新的哈希表</strong>，该哈希表的大小为原哈希表的<strong>两倍</strong>，之后<strong>遍历原哈希表</strong>，<strong>将原哈希表中的数据插入到新哈希表</strong>，<strong>最后将原哈希表与新哈希表交换</strong>。</li>
+</ol>
+<p><strong>注意</strong>： 在将原哈希表的数据插入到新哈希表的过程中，不能只是简单的将原哈希表中的数据对应的挪到新哈希表中，而是需要根据新哈希表的大小重新计算每个数据在新哈希表中的位置，然后再进行插入。</p>
+<p>将键值对插入哈希表的具体步骤如下：</p>
+<ol>
+<li>通过哈希函数计算出对应的哈希地址。</li>
+<li>若产生哈希冲突，则从哈希地址处开始，采用线性探测向后寻找一个状态为<strong>EMPTY</strong>或<strong>DELETE</strong>的位置。</li>
+<li>将键值对插入到该位置，并将该位置的状态设置为<strong>EXIST</strong>。</li>
+</ol>
+<hr>
+<h2>哈希表的闭散列实现</h2>
+<h4>哈希表的结构</h4>
+<ol>
+<li>EMPTY（无数据的空位置）。</li>
+<li>EXIST（已存储数据）。</li>
+<li>DELETE（原本有数据，但现在被删除了）。</li>
+</ol>
+<p>我们可以用枚举定义这三个状态</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span> 状态</span>
+<span class="pl-k">enum</span> Status
+{
+	EMPTY, <span class="pl-c"><span class="pl-c">//</span> 空</span>
+	EXIST, <span class="pl-c"><span class="pl-c">//</span> 存在</span>
+	DELETE <span class="pl-c"><span class="pl-c">//</span> 删除</span>
+};</pre></div>
+<blockquote>
+<p>闭散列的哈希表中的每个位置存储的结构，应该包括所给数据和该位置的当前状态。</p>
+</blockquote>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span>哈希表每个位置存储的结构</span>
+<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">V</span>&gt;
+<span class="pl-k">struct</span> <span class="pl-en">HashData</span>
+{
+	pair&lt;K, V&gt; _kv; <span class="pl-c"><span class="pl-c">//</span> 键值对</span>
+	Status _status = EMPTY; <span class="pl-c"><span class="pl-c">//</span> 状态</span>
+};</pre></div>
+<blockquote>
+<p>而为了在插入元素时好计算当前哈希表的负载因子，我们还应该时刻存储整个哈希表中的有效元素个数，当负载因子过大时就应该进行哈希表的增容。</p>
+</blockquote>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span>哈希表</span>
+<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">V</span>&gt;
+<span class="pl-k">class</span> <span class="pl-en">HashTable</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-c"><span class="pl-c">//</span>...</span>
+<span class="pl-k">private:</span>
+	vector&lt;HashData&lt;K, V&gt;&gt; _tables; <span class="pl-c"><span class="pl-c">//</span>哈希表</span>
+	<span class="pl-c1">size_t</span> _n = <span class="pl-c1">0</span>; <span class="pl-c"><span class="pl-c">//</span>哈希表中的有效元素个数</span>
+};</pre></div>
+<h4>插入代码实现</h4>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">V</span>&gt;
+<span class="pl-k">struct</span> <span class="pl-en">HashData</span>
+{
+	pair&lt;K, V&gt; _kv; <span class="pl-c"><span class="pl-c">//</span> 键值对</span>
+	Status _status; <span class="pl-c"><span class="pl-c">//</span> 状态</span>
+};
+
+<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>&gt;
+<span class="pl-k">struct</span> <span class="pl-en">HashFunc</span>
+{
+	<span class="pl-c1">size_t</span> <span class="pl-en">operator</span>()(<span class="pl-k">const</span> K&amp; key)
+	{
+		<span class="pl-k">return</span> (<span class="pl-c1">size_t</span>)key;
+	}
+};
+
+
+<span class="pl-c"><span class="pl-c">//</span> 特化</span>
+<span class="pl-k">template</span>&lt;&gt;
+<span class="pl-k">struct</span> <span class="pl-en">HashFunc</span>&lt;string&gt;
+{
+	<span class="pl-c1">size_t</span> <span class="pl-en">operator</span>()(<span class="pl-k">const</span> string&amp; key)
+	{
+		<span class="pl-c1">size_t</span> hash = <span class="pl-c1">0</span>;
+		<span class="pl-k">for</span> (<span class="pl-k">auto</span> e : key)
+		{
+			hash *= <span class="pl-c1">31</span>; <span class="pl-c"><span class="pl-c">//</span> BKDR</span>
+			hash += e;
+		}
+		cout &lt;&lt; key &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>:<span class="pl-pds">"</span></span> &lt;&lt; hash &lt;&lt; endl;
+		<span class="pl-k">return</span> hash;
+	}
+};
+
+<span class="pl-c"><span class="pl-c">//</span> 插入方法</span>
+<span class="pl-k">bool</span> <span class="pl-en">Insert</span>(<span class="pl-k">const</span> pair&lt;K, V&gt;&amp; kv)
+{
+	<span class="pl-c"><span class="pl-c">//</span> 1、查看哈希表中是否存在该键值的键值对</span>
+	<span class="pl-k">if</span> (<span class="pl-c1">Find</span>(kv.<span class="pl-smi">first</span>))<span class="pl-c"><span class="pl-c">//</span> 哈希表中已经存在该键值的键值对（不允许数据冗余）</span>
+		<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+
+	<span class="pl-c"><span class="pl-c">//</span>2、判断是否需要调整哈希表的大小</span>
+	<span class="pl-k">if</span> (_tables.<span class="pl-c1">size</span>() == <span class="pl-c1">0</span>)
+		_tables.<span class="pl-c1">resize</span>(<span class="pl-c1">10</span>);
+	<span class="pl-k">else</span> <span class="pl-k">if</span> (_n * <span class="pl-c1">10</span> / _tables.<span class="pl-c1">size</span>() == <span class="pl-c1">7</span>)<span class="pl-c"><span class="pl-c">//</span> 负载因子大于0.7需要增容</span>
+	{
+		<span class="pl-c"><span class="pl-c">//</span> 2倍扩容</span>
+		<span class="pl-c1">size_t</span> newSize = _tables.<span class="pl-c1">size</span>() * <span class="pl-c1">2</span>;
+		<span class="pl-c"><span class="pl-c">//</span>a、创建一个新的哈希表，新哈希表的大小设置为原哈希表的2倍</span>
+		HashTable&lt;K, V, HashFun&gt; newHT;
+		newHT.<span class="pl-smi">_tables</span>.<span class="pl-c1">resize</span>(newSize);
+
+		<span class="pl-c"><span class="pl-c">//</span>b、遍历旧表,将原哈希表当中的数据插入到新哈希表</span>
+		<span class="pl-k">for</span> (<span class="pl-c1">size_t</span> i = <span class="pl-c1">0</span>; i &lt; _tables.<span class="pl-c1">size</span>(); i++)
+		{
+			<span class="pl-c"><span class="pl-c">//</span> 如果_tables[i]的位置有数据就进行再次映射</span>
+			<span class="pl-k">if</span> (_tables[i].<span class="pl-smi">_status</span> == EXIST)
+			{
+				newHT.<span class="pl-c1">Insert</span>(_tables[i].<span class="pl-smi">_kv</span>);
+			}
+			<span class="pl-c"><span class="pl-c">//</span> c、与旧表进行交换</span>
+			_tables.<span class="pl-c1">swap</span>(newHT.<span class="pl-smi">_tables</span>);
+		}
+	}<span class="pl-c"><span class="pl-c">//</span> 扩容 end...</span>
+
+	HashFun hf; <span class="pl-c"><span class="pl-c">//</span> 对于int来说是直接用值来比较，对于string类型使用BKDR方法来比较</span>
+
+	<span class="pl-c"><span class="pl-c">//</span> 3、将键值对插入哈希表</span>
+	<span class="pl-c"><span class="pl-c">//</span> a、通过哈希函数计算哈希地址，线性探测</span>
+	<span class="pl-c1">size_t</span> hashi = <span class="pl-c1">hf</span>(kv.<span class="pl-smi">first</span>) % _tables.<span class="pl-c1">size</span>(); <span class="pl-c"><span class="pl-c">//</span> 除数不能是capacity</span>
+
+	<span class="pl-c1">size_t</span> <span class="pl-c1">index</span> = hashi, i = <span class="pl-c1">1</span>;
+
+	<span class="pl-c"><span class="pl-c">//</span>b、找到一个状态为EMPTY或DELETE的位置</span>
+	<span class="pl-k">while</span> (_tables[hashi].<span class="pl-smi">_status</span> == EXIST)
+	{
+		<span class="pl-c1">index</span> = hashi + i;					<span class="pl-c"><span class="pl-c">//</span> 线性探测</span>
+		<span class="pl-c1">index</span> = hashi + i * i;				 <span class="pl-c"><span class="pl-c">//</span> 二次探测</span>
+		hashi %= _tables.<span class="pl-c1">size</span>();			 <span class="pl-c"><span class="pl-c">//</span> 防止下标超出哈希表范围</span>
+		i++;
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span>c、将数据插入该位置，并将该位置的状态设置为EXIST</span>
+	_tables[hashi].<span class="pl-smi">_kv</span> = kv;
+	_tables[hashi].<span class="pl-smi">_status</span> = EXIST;
+	
+	<span class="pl-c"><span class="pl-c">//</span>4、哈希表中的有效元素个数++</span>
+	++_n;
+	<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+}</pre></div>
+<hr>
+<h4>哈希表的查找</h4>
+<p>在哈希表中查找数据的步骤如下：</p>
+<ol>
+<li>先判断哈希表的大小是否为0，若为0则查找失败。</li>
+<li>通过哈希函数计算出对应的哈希地址。</li>
+<li>从哈希地址处开始，采用线性探测向后向后进行数据的查找，直到找到待查找的元素判定为查找成功，或找到一个状态为EMPTY的位置判定为查找失败。</li>
+</ol>
+<ul>
+<li><strong>注意</strong>： 在查找过程中，<strong>必须找到位置状态为EXIST</strong>，<strong>并且key值匹配的元素</strong>，才算查找成功。若仅仅是key值匹配，但该位置当前状态为DELETE，则还需继续进行查找，因为该位置的元素已经被删除了。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span> 查找方法</span>
+HashData&lt;K, V&gt;* <span class="pl-en">Find</span>(<span class="pl-k">const</span> K&amp; key)
+{
+	<span class="pl-k">if</span> (_tables.<span class="pl-c1">size</span>() == <span class="pl-c1">0</span>)
+		<span class="pl-k">return</span> <span class="pl-c1">nullptr</span>;
+
+	HashFun hf;
+
+	<span class="pl-c"><span class="pl-c">//</span> 计算位置</span>
+	<span class="pl-c1">size_t</span> hashi = <span class="pl-c1">hf</span>(key) % _tables.<span class="pl-c1">size</span>();
+	<span class="pl-c1">size_t</span> <span class="pl-c1">index</span> = hashi, i = <span class="pl-c1">1</span>;
+
+	<span class="pl-c"><span class="pl-c">//</span> 不为空就一直找</span>
+	<span class="pl-k">while</span> (_tables[hashi].<span class="pl-smi">_status</span> != EMPTY)
+	{
+		<span class="pl-c"><span class="pl-c">//</span>若该位置的状态为EXIST，并且key值匹配，则查找成功</span>
+		<span class="pl-k">if</span> (_tables[hashi].<span class="pl-smi">_status</span> == EXIST
+			&amp;&amp; _tables[hashi].<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span> == key)
+		{
+			<span class="pl-k">return</span> &amp;_tables[hashi];
+		}
+		<span class="pl-c1">index</span> = hashi + i;			<span class="pl-c"><span class="pl-c">//</span> 线性探测</span>
+		<span class="pl-c"><span class="pl-c">//</span> index = hashi + i * i;	// 二次探测</span>
+		hashi %= _tables.<span class="pl-c1">size</span>();    <span class="pl-c"><span class="pl-c">//</span> //防止下标超出哈希表范围</span>
+		++i;
+	}
+	<span class="pl-c"><span class="pl-c">//</span> 找不到的情况</span>
+	<span class="pl-k">return</span> <span class="pl-c1">nullptr</span>;
+}</pre></div>
+<h4>哈希表的删除</h4>
+<ul>
+<li><strong>采用闭散列处理哈希冲突时</strong>，<strong>不能随便物理删除哈希表中已有的元素，若直接删除元素 会影响其他元素的搜索</strong>。<strong>因此线性探测采用标记的伪删除法来删除一个元素。</strong></li>
+</ul>
+<p>在哈希表中删除数据的步骤如下：</p>
+<ol>
+<li>查看哈希表中是否存在该键值的键值对，若不存在则删除失败。</li>
+<li>若存在，则将该键值对所在位置的状态改为DELETE即可。</li>
+<li>哈希表中的有效元素个数减一。</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span> 伪删除法</span>
+<span class="pl-k">bool</span> <span class="pl-en">Erase</span>(<span class="pl-k">const</span> K&amp; key)
+{
+	<span class="pl-c"><span class="pl-c">//</span>1、查看哈希表中是否存在该键值的键值对</span>
+	HashData&lt;K, V&gt;* res = <span class="pl-c1">Find</span>(key);
+	<span class="pl-k">if</span> (res)
+	{
+		<span class="pl-c"><span class="pl-c">//</span>2、若存在，则将该键值对所在位置的状态改为DELETE即可</span>
+		res-&gt;<span class="pl-smi">_status</span> = DELETE;
+		--_n; <span class="pl-c"><span class="pl-c">//</span>3、哈希表中的有效元素个数减一</span>
+		<span class="pl-k">return</span> <span class="pl-c1">true</span>; <span class="pl-c"><span class="pl-c">//</span> 删除成功</span>
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">false</span>;    <span class="pl-c"><span class="pl-c">//</span> 删除失败</span>
+}</pre></div>
+<h3>开散列 —— 链地址法（拉链法、哈希桶）</h3>
+<h3>开散列的概念</h3>
+<ul>
+<li>开散列法又叫链地址法(开链法)，首先对关键码集合用散列函数计算散列地址，具有相同地址的关键码归于同一子集合，每一个子集合称为一个桶，各个桶中的元素通过一个单链表链 接起来，各链表的头结点存储在哈希表中。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/520eaee83aebe66cb1d7af74f69d3174f0c91a42bb9cb0380673a96ba58087ee/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36306238663037373931643834623132613563313639333166326233386639302e706e67"><img src="https://camo.githubusercontent.com/520eaee83aebe66cb1d7af74f69d3174f0c91a42bb9cb0380673a96ba58087ee/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36306238663037373931643834623132613563313639333166326233386639302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/60b8f07791d84b12a5c16931f2b38f90.png" style="max-width: 100%;"></a></p>
+<p>从上图可以看出，开散列中每个桶中放的都是发生哈希冲突的元素。</p>
+<h3>开散列增容</h3>
+<ul>
+<li>
+<p>桶的个数是一定的，随着元素的不断插入，每个桶中元素的个数不断增多，<strong>极端情况下，可能会导致一个桶中链表节点非常多，会影响的哈希表的性能</strong>，因此在一定条件下需要对哈希表进行增容，那该条件怎么确认呢？开散列最好的情况是：每个哈希桶中刚好挂一个节点， 再继续插入元素时，每一次都会发生哈希冲突，因此，在元素个数刚好等于桶的个数时，可以给哈希表增容。</p>
+</li>
+<li>
+<p>闭散列的开放定址法，负载因子不能超过1，一般建议控制在[0.0, 0.7]之间。</p>
+</li>
+<li>
+<p>开散列的哈希桶，负载因子可以超过1，一般建议控制在[0.0, 1.0]之间。</p>
+</li>
+</ul>
+<p>哈希桶的极端情况就是，所有元素全部产生冲突，最终都放到了同一个哈希桶中，此时该哈希表增删查改的效率就退化成了$O ( N )$</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/790267d932026e67c4348864168f7ef21a4ef4982161c009a5d99c5239834e63/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36363336353366353138343934306565383731333136626438356266393562302e706e67"><img src="https://camo.githubusercontent.com/790267d932026e67c4348864168f7ef21a4ef4982161c009a5d99c5239834e63/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36363336353366353138343934306565383731333136626438356266393562302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/663653f5184940ee871316bd85bf95b0.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这时，我们可以考虑将这个桶中的元素，由单链表结构改为红黑树结构，并将红黑树的根结点存储在哈希表中。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/58afdd444ff0da70559b017a38ab0993fe632048c1d0845604e63a0bc064e7ef/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35663264653838626266343634626339613761356133313331616335396233622e706e67"><img src="https://camo.githubusercontent.com/58afdd444ff0da70559b017a38ab0993fe632048c1d0845604e63a0bc064e7ef/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35663264653838626266343634626339613761356133313331616335396233622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/5f2de88bbf464bc9a7a5a3131ac59b3b.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>为了避免出现这种极端情况，当桶当中的元素个数超过一定长度，有些地方就会选择将该桶中的单链表结构换成<strong>红黑树结构</strong>，比如在JAVA中比较新一点的版本中，当桶当中的数据个数超过8时，就会将该桶当中的单链表结构换成<strong>红黑树</strong>结构，而当该桶当中的数据个数减少到8或8以下时，又会将该桶当中的红黑树结构换回单链表结构。</p>
+</li>
+<li>
+<p>但有些地方也会选择不做此处理，因为随着哈希表中数据的增多，该哈希表的负载因子也会逐渐增大，最终会触发哈希表的增容条件，此时该哈希表当中的数据会全部重新插入到另一个空间更大的哈希表，此时同一个桶当中冲突的数据个数也会减少，因此不做处理问题也不大。</p>
+</li>
+</ul>
+<h3>开散列与闭散列比较</h3>
+<ul>
+<li>开散列与闭散列比较 应用链地址法处理溢出，需要增设链接指针，似乎增加了存储开销。事实上： 由于开地址法必须保持大量的空闲空间以确保搜索效率，如二次探查法要求装载因子a &lt;= 0.7，而表项所占空间又比指针大的多，所以使用链地址法反而比开地址法节省存储空间。</li>
+</ul>
+<p><a href="https://www.cnblogs.com/-clq/archive/2012/05/31/2528153.html" rel="nofollow">字符串哈希算法</a></p>
+<h2>哈希表的开散列实现（哈希桶）</h2>
+<h3>哈希表的结构</h3>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>,<span class="pl-k">class</span> <span class="pl-en">V</span>&gt;
+<span class="pl-k">struct</span> <span class="pl-en">HashData</span>
+{
+	HashData&lt;K, V&gt;* _next;
+	pair&lt;K, V&gt; _kv;
+
+	<span class="pl-c"><span class="pl-c">//</span> 构造</span>
+	<span class="pl-en">HashData</span>(<span class="pl-k">const</span> pair&lt;K,V&gt; &amp;kv)
+		:_kv(kv)
+		,_next(<span class="pl-c1">nullptr</span>)
+	{}
+};</pre></div>
+<ul>
+<li>
+<p>与闭散列的哈希表不同的是，在实现开散列的哈希表时，我们不用为哈希表中的每个位置设置一个状态字段，因为在开散列的哈希表中，我们将哈希地址相同的元素都放到了同一个哈希桶中，并不需要经过探测寻找所谓的“下一个位置”。</p>
+</li>
+<li>
+<p>哈希表的开散列实现方式，在插入数据时也需要根据负载因子判断是否需要增容，所以我们也应该时刻存储整个哈希表中的有效元素个数，当负载因子过大时就应该进行哈希表的增容。</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span>哈希表</span>
+<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">V</span>&gt;
+<span class="pl-k">class</span> <span class="pl-en">HashTable</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-c"><span class="pl-c">//</span>...</span>
+<span class="pl-k">private:</span>
+	vector&lt;Node*&gt; _table; <span class="pl-c"><span class="pl-c">//</span>哈希表</span>
+	<span class="pl-c1">size_t</span> _n = <span class="pl-c1">0</span>; <span class="pl-c"><span class="pl-c">//</span>哈希表中的有效元素个数</span>
+};</pre></div>
+<h3>哈希表的插入</h3>
+<p>向哈希表中插入数据的步骤如下：</p>
+<ol>
+<li>查看哈希表中是否存在该键值的键值对，若已存在则插入失败。</li>
+<li>判断是否需要调整哈希表的大小，若哈希表的大小为0，或负载因子过大都需要对哈希表的大小进行调整。</li>
+<li>将键值对插入哈希表。</li>
+<li>哈希表中的有效元素个数加一。</li>
+</ol>
+<ul>
+<li>若哈希表的负载因子已经等于1了，则先创建一个新的哈希表，该哈希表的大小为原哈希表的两倍，之后遍历原哈希表，将原哈希表中的数据插入到新哈希表，最后将原哈希表与新哈希表交换即可。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e08a5fdddf64ed2bba655f6ed75b6200828e47c6ddaea45afae5d384039e0eba/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30333834653639306436656334633939613836656466343262616564356538652e706e67"><img src="https://camo.githubusercontent.com/e08a5fdddf64ed2bba655f6ed75b6200828e47c6ddaea45afae5d384039e0eba/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30333834653639306436656334633939613836656466343262616564356538652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/0384e690d6ec4c99a86edf42baed5e8e.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">bool</span> <span class="pl-en">Insert</span>(<span class="pl-k">const</span> pair&lt;K, V&gt;&amp; kv)
+{
+	<span class="pl-c"><span class="pl-c">//</span> 1、查看哈希表中是否存在该键值的键值对</span>
+	<span class="pl-k">if</span> (<span class="pl-c1">Find</span>(kv))
+		<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+
+	Hash hf;
+
+	<span class="pl-c"><span class="pl-c">//</span> 2、判断是否需要调整哈希表的大小</span>
+	<span class="pl-k">if</span> (_n == _tables.<span class="pl-c1">size</span>())<span class="pl-c"><span class="pl-c">//</span> 哈希表的大小为0，或负载因子超过1</span>
+	{
+		<span class="pl-c"><span class="pl-c">//</span>增容</span>
+		<span class="pl-c"><span class="pl-c">//</span>a、创建一个新的哈希表，新哈希表的大小设置为原哈希表的2倍（若哈希表大小为0，则将哈希表的初始大小设置为10）</span>
+		vector&lt;Node*&gt; newTables;
+		<span class="pl-c1">size_t</span> newsize = _tables.<span class="pl-c1">size</span>() == <span class="pl-c1">0</span> ? <span class="pl-c1">10</span> : _tables.<span class="pl-c1">size</span>() * <span class="pl-c1">2</span>;
+		newTables.<span class="pl-c1">resize</span>(newsize, <span class="pl-c1">nullptr</span>);
+		<span class="pl-c"><span class="pl-c">//</span> b、将原哈希表当中的结点插入到新哈希表</span>
+		<span class="pl-k">for</span> (<span class="pl-c1">size_t</span> i = <span class="pl-c1">0</span>; i &lt; _tables.<span class="pl-c1">size</span>(); i++)
+		{
+			<span class="pl-k">if</span> (_tables[i])<span class="pl-c"><span class="pl-c">//</span> 桶不为空</span>
+			{
+				Node* cur = _tables[i];  <span class="pl-c"><span class="pl-c">//</span>将该桶的结点取完为止</span>
+				<span class="pl-k">while</span> (cur)
+				{
+					Node* next = cur-&gt;<span class="pl-smi">_next</span>; <span class="pl-c"><span class="pl-c">//</span>记录cur的下一个结点</span>
+					<span class="pl-c1">size_t</span> <span class="pl-c1">index</span> = <span class="pl-c1">hf</span>(cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) % newTables.<span class="pl-c1">size</span>(); <span class="pl-c"><span class="pl-c">//</span> 通过哈希函数计算出对应的哈希桶编号index							cur-&gt;_next = newTables[index];</span>
+					newTables[<span class="pl-c1">index</span>] = cur; <span class="pl-c"><span class="pl-c">//</span> 将该结点头插到新哈希表中编号为index的哈希桶中</span>
+
+					cur = next; <span class="pl-c"><span class="pl-c">//</span> 取原哈希表中该桶的下一个结点</span>
+				}	
+				_tables[i] = <span class="pl-c1">nullptr</span>; <span class="pl-c"><span class="pl-c">//</span> 该桶取完后将该桶置空</span>
+			}
+		}
+
+	}
+
+	<span class="pl-c1">size_t</span> hashi = <span class="pl-c1">hf</span>(kv.<span class="pl-smi">first</span>) % _tables.<span class="pl-c1">size</span>();
+	Node* newnode = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(kv);
+
+	<span class="pl-c"><span class="pl-c">//</span> 头插</span>
+	newnode-&gt;<span class="pl-smi">_next</span> = _tables[hashi];
+	_tables[hashi] = newnode;
+
+	++_n;
+	<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+}</pre></div>
+<h3>哈希表的查找</h3>
+<p>在哈希表中查找数据的步骤如下：</p>
+<ol>
+<li>先判断哈希表的大小是否为0，若为0则查找失败。</li>
+<li>通过哈希函数计算出对应的哈希地址。</li>
+<li>通过哈希地址找到对应的哈希桶中的单链表，遍历单链表进行查找即可。</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate">Node* <span class="pl-en">Find</span>(<span class="pl-k">const</span> K&amp; key)
+{
+	Hash hf; <span class="pl-c"><span class="pl-c">//</span> 通过仿函数</span>
+
+	<span class="pl-k">if</span> (_tables.<span class="pl-c1">size</span>() == <span class="pl-c1">0</span>) <span class="pl-c"><span class="pl-c">//</span> 哈希表大小为0，查找失败</span>
+		<span class="pl-k">return</span> <span class="pl-c1">nullptr</span>;
+	<span class="pl-c1">size_t</span> hashi = <span class="pl-c1">hf</span>(key) % _tables.<span class="pl-c1">size</span>(); <span class="pl-c"><span class="pl-c">//</span> 通过哈希函数计算出对应的哈希桶编号</span>
+
+	<span class="pl-c"><span class="pl-c">//</span> 遍历哈希桶</span>
+	Node* cur = _tables[hashi];
+	<span class="pl-k">while</span> (cur)
+	{
+		<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span> == key) 
+			<span class="pl-k">return</span> cur;
+		cur = cur-&gt;<span class="pl-smi">_next</span>;
+	}
+
+	<span class="pl-k">return</span> <span class="pl-c1">nullptr</span>;
+}</pre></div>
+<h3>哈希表的删除</h3>
+<p>在哈希表中删除数据的步骤如下：</p>
+<ol>
+<li>通过哈希函数计算出对应的哈希桶编号。</li>
+<li>遍历对应的哈希桶，寻找待删除结点。</li>
+<li>若找到了待删除结点，则将该结点从单链表中移除并释放。</li>
+<li>删除结点后，将哈希表中的有效元素个数减一。</li>
+</ol>
+<ul>
+<li>注意： 不要先调用查找函数判断待删除结点是否存在，这样做如果待删除不在哈希表中那还好，但如果待删除结点在哈希表，那我们还需要重新在哈希表中找到该结点并删除，还不如一开始就直接在哈希表中找，找到了就删除。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">bool</span> <span class="pl-en">Erase</span>(<span class="pl-k">const</span> K&amp; key)
+{
+	Hash hf;
+
+	<span class="pl-c"><span class="pl-c">//</span>1、通过哈希函数计算出对应的哈希桶编号index（除数不能是capacity）</span>
+	<span class="pl-c1">size_t</span> hashi = <span class="pl-c1">hf</span>(key) % _tables.<span class="pl-c1">size</span>();
+
+	<span class="pl-c"><span class="pl-c">//</span>2、在编号为index的哈希桶中寻找待删除结点</span>
+	Node* prev = <span class="pl-c1">nullptr</span>;
+	Node* cur = _tables[hashi];
+	<span class="pl-k">while</span> (cur)
+	{
+		<span class="pl-c"><span class="pl-c">//</span>3、若找到了待删除结点，则删除该结点</span>
+		<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span> == key)
+		{
+			<span class="pl-k">if</span> (prev == <span class="pl-c1">nullptr</span>) <span class="pl-c"><span class="pl-c">//</span>待删除结点是哈希桶中的第一个结点</span>
+			{
+				_tables[hashi] = cur-&gt;<span class="pl-smi">_next</span>; <span class="pl-c"><span class="pl-c">//</span> 将第一个结点从该哈希桶中移除</span>
+			}
+			<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span> 待删除结点不是哈希桶的第一个结点</span>
+			{
+				prev-&gt;<span class="pl-smi">_next</span> = cur-&gt;<span class="pl-smi">_next</span>; <span class="pl-c"><span class="pl-c">//</span> 将该结点从哈希桶中移除</span>
+			}
+			<span class="pl-k">delete</span> cur;
+
+			--_n; <span class="pl-c"><span class="pl-c">//</span> 4、删除结点后，将哈希表中的有效元素个数减一</span>
+			<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+		}
+		<span class="pl-c"><span class="pl-c">//</span> 继续往后找</span>
+		prev = cur;
+		cur = cur-&gt;<span class="pl-smi">_next</span>;
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+}</pre></div>
+<hr>
+<h2>哈希表和哈希桶全部源码</h2>
+<div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">pragma</span> once
+#<span class="pl-k">include</span><span class="pl-s"><span class="pl-pds">&lt;</span>iostream<span class="pl-pds">&gt;</span></span>
+#<span class="pl-k">include</span><span class="pl-s"><span class="pl-pds">&lt;</span>string<span class="pl-pds">&gt;</span></span>
+#<span class="pl-k">include</span><span class="pl-s"><span class="pl-pds">&lt;</span>vector<span class="pl-pds">&gt;</span></span>
+#<span class="pl-k">include</span><span class="pl-s"><span class="pl-pds">&lt;</span>map<span class="pl-pds">&gt;</span></span>
+#<span class="pl-k">include</span><span class="pl-s"><span class="pl-pds">&lt;</span>set<span class="pl-pds">&gt;</span></span>
+
+<span class="pl-k">using</span> <span class="pl-k">namespace</span> <span class="pl-en">std</span><span class="pl-k">;</span>
+
+
+<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>&gt;
+<span class="pl-k">struct</span> <span class="pl-en">HashFunc</span>
+{
+	<span class="pl-c1">size_t</span> <span class="pl-en">operator</span>()(<span class="pl-k">const</span> K&amp; key)
+	{
+		<span class="pl-k">return</span> (<span class="pl-c1">size_t</span>)key;
+	}
+};
+
+
+<span class="pl-c"><span class="pl-c">//</span> 特化</span>
+<span class="pl-k">template</span>&lt;&gt;
+<span class="pl-k">struct</span> <span class="pl-en">HashFunc</span>&lt;string&gt;
+{
+	<span class="pl-c1">size_t</span> <span class="pl-en">operator</span>()(<span class="pl-k">const</span> string&amp; key)
+	{
+		<span class="pl-c1">size_t</span> hash = <span class="pl-c1">0</span>;
+		<span class="pl-k">for</span> (<span class="pl-k">auto</span> e : key)
+		{
+			hash *= <span class="pl-c1">31</span>; <span class="pl-c"><span class="pl-c">//</span> BKDR</span>
+			hash += e;
+		}
+		cout &lt;&lt; key &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>:<span class="pl-pds">"</span></span> &lt;&lt; hash &lt;&lt; endl;
+		<span class="pl-k">return</span> hash;
+	}
+};
+
+<span class="pl-k">namespace</span> <span class="pl-en">lsl_open_address</span>
+{
+	<span class="pl-c"><span class="pl-c">//</span> 状态</span>
+	<span class="pl-k">enum</span> Status
+	{
+		EMPTY, <span class="pl-c"><span class="pl-c">//</span> 空</span>
+		EXIST, <span class="pl-c"><span class="pl-c">//</span> 存在</span>
+		DELETE <span class="pl-c"><span class="pl-c">//</span> 删除</span>
+	};
+
+	<span class="pl-c"><span class="pl-c">//</span>哈希表每个位置存储的结构</span>
+	<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">V</span>&gt;
+	<span class="pl-k">struct</span> <span class="pl-en">HashData</span>
+	{
+		pair&lt;K, V&gt; _kv; <span class="pl-c"><span class="pl-c">//</span> 键值对</span>
+		Status _status = EMPTY; <span class="pl-c"><span class="pl-c">//</span> 状态</span>
+	};
+
+	<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">V</span>, <span class="pl-k">class</span> <span class="pl-en">HashFun</span> = HashFunc&lt;K&gt;&gt;
+	<span class="pl-k">class</span> <span class="pl-en">HashTable</span>
+	{
+	<span class="pl-k">public:</span>
+		<span class="pl-en">HashTable</span>()
+		{
+			_tables.<span class="pl-c1">resize</span>(<span class="pl-c1">10</span>);
+		}
+
+		<span class="pl-c"><span class="pl-c">//</span> 插入方法</span>
+		<span class="pl-k">bool</span> <span class="pl-en">Insert</span>(<span class="pl-k">const</span> pair&lt;K, V&gt;&amp; kv)
+		{
+			<span class="pl-c"><span class="pl-c">//</span> 1、查看哈希表中是否存在该键值的键值对</span>
+			<span class="pl-k">if</span> (<span class="pl-c1">Find</span>(kv.<span class="pl-smi">first</span>))<span class="pl-c"><span class="pl-c">//</span> 哈希表中已经存在该键值的键值对（不允许数据冗余）</span>
+				<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+
+			<span class="pl-c"><span class="pl-c">//</span>2、判断是否需要调整哈希表的大小</span>
+			<span class="pl-k">if</span> (_tables.<span class="pl-c1">size</span>() == <span class="pl-c1">0</span>)
+				_tables.<span class="pl-c1">resize</span>(<span class="pl-c1">10</span>);
+			<span class="pl-k">else</span> <span class="pl-k">if</span> (_n * <span class="pl-c1">10</span> / _tables.<span class="pl-c1">size</span>() == <span class="pl-c1">7</span>)<span class="pl-c"><span class="pl-c">//</span> 负载因子大于0.7需要增容</span>
+			{
+				<span class="pl-c"><span class="pl-c">//</span> 2倍扩容</span>
+				<span class="pl-c1">size_t</span> newSize = _tables.<span class="pl-c1">size</span>() * <span class="pl-c1">2</span>;
+				<span class="pl-c"><span class="pl-c">//</span>a、创建一个新的哈希表，新哈希表的大小设置为原哈希表的2倍</span>
+				HashTable&lt;K, V, HashFun&gt; newHT;
+				newHT.<span class="pl-smi">_tables</span>.<span class="pl-c1">resize</span>(newSize);
+
+				<span class="pl-c"><span class="pl-c">//</span>b、遍历旧表,将原哈希表当中的数据插入到新哈希表</span>
+				<span class="pl-k">for</span> (<span class="pl-c1">size_t</span> i = <span class="pl-c1">0</span>; i &lt; _tables.<span class="pl-c1">size</span>(); i++)
+				{
+					<span class="pl-c"><span class="pl-c">//</span> 如果_tables[i]的位置有数据就进行再次映射</span>
+					<span class="pl-k">if</span> (_tables[i].<span class="pl-smi">_status</span> == EXIST)
+					{
+						newHT.<span class="pl-c1">Insert</span>(_tables[i].<span class="pl-smi">_kv</span>);
+					}
+					<span class="pl-c"><span class="pl-c">//</span> c、与旧表进行交换</span>
+					_tables.<span class="pl-c1">swap</span>(newHT.<span class="pl-smi">_tables</span>);
+				}
+			}<span class="pl-c"><span class="pl-c">//</span> 扩容 end...</span>
+
+			HashFun hf; <span class="pl-c"><span class="pl-c">//</span> 对于int来说是直接用值来比较，对于string类型使用BKDR方法来比较</span>
+
+			<span class="pl-c"><span class="pl-c">//</span> 3、将键值对插入哈希表</span>
+			<span class="pl-c"><span class="pl-c">//</span> a、通过哈希函数计算哈希地址，线性探测</span>
+			<span class="pl-c1">size_t</span> hashi = <span class="pl-c1">hf</span>(kv.<span class="pl-smi">first</span>) % _tables.<span class="pl-c1">size</span>(); <span class="pl-c"><span class="pl-c">//</span> 除数不能是capacity</span>
+
+			<span class="pl-c1">size_t</span> <span class="pl-c1">index</span> = hashi, i = <span class="pl-c1">1</span>;
+
+			<span class="pl-c"><span class="pl-c">//</span>b、找到一个状态为EMPTY或DELETE的位置</span>
+			<span class="pl-k">while</span> (_tables[hashi].<span class="pl-smi">_status</span> == EXIST)
+			{
+				<span class="pl-c1">index</span> = hashi + i;					<span class="pl-c"><span class="pl-c">//</span> 线性探测</span>
+				<span class="pl-c1">index</span> = hashi + i * i;				 <span class="pl-c"><span class="pl-c">//</span> 二次探测</span>
+				hashi %= _tables.<span class="pl-c1">size</span>();			 <span class="pl-c"><span class="pl-c">//</span> 防止下标超出哈希表范围</span>
+				i++;
+			}
+
+			<span class="pl-c"><span class="pl-c">//</span>c、将数据插入该位置，并将该位置的状态设置为EXIST</span>
+			_tables[hashi].<span class="pl-smi">_kv</span> = kv;
+			_tables[hashi].<span class="pl-smi">_status</span> = EXIST;
+			
+			<span class="pl-c"><span class="pl-c">//</span>4、哈希表中的有效元素个数++</span>
+			++_n;
+			<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+		}
+
+		<span class="pl-c"><span class="pl-c">//</span> 查找方法</span>
+		HashData&lt;K, V&gt;* <span class="pl-en">Find</span>(<span class="pl-k">const</span> K&amp; key)
+		{
+			<span class="pl-k">if</span> (_tables.<span class="pl-c1">size</span>() == <span class="pl-c1">0</span>)
+				<span class="pl-k">return</span> <span class="pl-c1">nullptr</span>;
+
+			HashFun hf;
+
+			<span class="pl-c"><span class="pl-c">//</span> 计算位置</span>
+			<span class="pl-c1">size_t</span> hashi = <span class="pl-c1">hf</span>(key) % _tables.<span class="pl-c1">size</span>();
+			<span class="pl-c1">size_t</span> <span class="pl-c1">index</span> = hashi, i = <span class="pl-c1">1</span>;
+
+			<span class="pl-c"><span class="pl-c">//</span> 不为空就一直找</span>
+			<span class="pl-k">while</span> (_tables[hashi].<span class="pl-smi">_status</span> != EMPTY)
+			{
+				<span class="pl-c"><span class="pl-c">//</span>若该位置的状态为EXIST，并且key值匹配，则查找成功</span>
+				<span class="pl-k">if</span> (_tables[hashi].<span class="pl-smi">_status</span> == EXIST
+					&amp;&amp; _tables[hashi].<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span> == key)
+				{
+					<span class="pl-k">return</span> &amp;_tables[hashi];
+				}
+				<span class="pl-c1">index</span> = hashi + i;			<span class="pl-c"><span class="pl-c">//</span> 线性探测</span>
+				<span class="pl-c"><span class="pl-c">//</span> index = hashi + i * i;	// 二次探测</span>
+				hashi %= _tables.<span class="pl-c1">size</span>();    <span class="pl-c"><span class="pl-c">//</span> //防止下标超出哈希表范围</span>
+				++i;
+			}
+
+			<span class="pl-c"><span class="pl-c">//</span> 找不到的情况</span>
+			<span class="pl-k">return</span> <span class="pl-c1">nullptr</span>;
+		}
+
+		<span class="pl-c"><span class="pl-c">//</span> 伪删除法</span>
+		<span class="pl-k">bool</span> <span class="pl-en">Erase</span>(<span class="pl-k">const</span> K&amp; key)
+		{
+			<span class="pl-c"><span class="pl-c">//</span>1、查看哈希表中是否存在该键值的键值对</span>
+			HashData&lt;K, V&gt;* res = <span class="pl-c1">Find</span>(key);
+			<span class="pl-k">if</span> (res)
+			{
+				<span class="pl-c"><span class="pl-c">//</span>2、若存在，则将该键值对所在位置的状态改为DELETE即可</span>
+				res-&gt;<span class="pl-smi">_status</span> = DELETE;
+				--_n; <span class="pl-c"><span class="pl-c">//</span>3、哈希表中的有效元素个数减一</span>
+				<span class="pl-k">return</span> <span class="pl-c1">true</span>; <span class="pl-c"><span class="pl-c">//</span> 删除成功</span>
+			}
+			<span class="pl-k">return</span> <span class="pl-c1">false</span>;    <span class="pl-c"><span class="pl-c">//</span> 删除失败</span>
+		}
+
+		<span class="pl-k">void</span> <span class="pl-en">Print</span>()
+		{
+			<span class="pl-k">for</span> (<span class="pl-c1">size_t</span> i = <span class="pl-c1">0</span>; i &lt; _tables.<span class="pl-c1">size</span>(); i++)
+			{
+				<span class="pl-k">if</span> (_tables[i].<span class="pl-smi">_status</span> == EXIST)
+				{
+					<span class="pl-c"><span class="pl-c">//</span> printf("[%d]-&gt;%d\n", i, _tables[i].first);</span>
+					cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>[<span class="pl-pds">"</span></span> &lt;&lt; i &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>]-&gt;<span class="pl-pds">"</span></span> &lt;&lt; _tables[i].<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>:<span class="pl-pds">"</span></span> &lt;&lt; _tables[i].<span class="pl-smi">_kv</span>.<span class="pl-smi">second</span> &lt;&lt; endl;
+				}
+				<span class="pl-k">else</span> <span class="pl-k">if</span> (_tables[i].<span class="pl-smi">_status</span> == EMPTY)
+				{
+					<span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>[%d]-&gt;<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, i);
+				}
+				<span class="pl-k">else</span>
+				{
+					<span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>[%d]-&gt;E<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, i);
+				}
+			}
+			cout &lt;&lt; endl;
+		}
+
+	<span class="pl-k">private:</span>
+		vector&lt;HashData&lt;K, V&gt;&gt; _tables;
+		<span class="pl-c1">size_t</span> _n = <span class="pl-c1">0</span>;<span class="pl-c"><span class="pl-c">//</span> 存储的关键字的个数</span>
+	};
+}
+
+
+<span class="pl-k">namespace</span> <span class="pl-en">lsl_hash_bucket</span>
+{
+	<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>,<span class="pl-k">class</span> <span class="pl-en">V</span>&gt;
+	<span class="pl-k">struct</span> <span class="pl-en">HashData</span>
+	{
+		HashData&lt;K, V&gt;* _next;
+		pair&lt;K, V&gt; _kv;
+
+		<span class="pl-c"><span class="pl-c">//</span> 构造</span>
+		<span class="pl-en">HashData</span>(<span class="pl-k">const</span> pair&lt;K,V&gt; &amp;kv)
+			:_kv(kv)
+			,_next(<span class="pl-c1">nullptr</span>)
+		{}
+
+	};
+
+
+	<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">V</span>, <span class="pl-k">class</span> <span class="pl-en">Hash</span> = HashFunc&lt;K&gt;&gt;
+	<span class="pl-k">class</span> <span class="pl-en">HashTable</span>
+	{
+		<span class="pl-k">typedef</span> HashData&lt;K, V&gt; Node;
+	<span class="pl-k">public:</span>
+		<span class="pl-en">HashTable</span>()
+		{
+			_tables.<span class="pl-c1">resize</span>(<span class="pl-c1">10</span>);
+		}
+		<span class="pl-en">~HashTable</span>()
+		{
+			<span class="pl-k">for</span> (<span class="pl-k">int</span> i = <span class="pl-c1">0</span>; i &lt; _tables.<span class="pl-c1">size</span>(); i++)
+			{
+				Node* cur = _tables[i];
+				<span class="pl-k">while</span> (cur)
+				{
+					Node* next = cur-&gt;<span class="pl-smi">_next</span>;
+					<span class="pl-k">delete</span> cur;
+					cur = next;
+				}
+				_tables[i] = <span class="pl-c1">nullptr</span>;
+			}
+		}
+
+
+		Node* <span class="pl-en">Find</span>(<span class="pl-k">const</span> K&amp; key)
+		{
+			Hash hf; <span class="pl-c"><span class="pl-c">//</span> 通过仿函数</span>
+
+			<span class="pl-k">if</span> (_tables.<span class="pl-c1">size</span>() == <span class="pl-c1">0</span>) <span class="pl-c"><span class="pl-c">//</span> 哈希表大小为0，查找失败</span>
+				<span class="pl-k">return</span> <span class="pl-c1">nullptr</span>;
+			<span class="pl-c1">size_t</span> hashi = <span class="pl-c1">hf</span>(key) % _tables.<span class="pl-c1">size</span>(); <span class="pl-c"><span class="pl-c">//</span> 通过哈希函数计算出对应的哈希桶编号</span>
+
+			<span class="pl-c"><span class="pl-c">//</span> 遍历哈希桶</span>
+			Node* cur = _tables[hashi];
+			<span class="pl-k">while</span> (cur)
+			{
+				<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span> == key) 
+					<span class="pl-k">return</span> cur;
+				cur = cur-&gt;<span class="pl-smi">_next</span>;
+			}
+
+			<span class="pl-k">return</span> <span class="pl-c1">nullptr</span>;
+		}
+
+		<span class="pl-k">bool</span> <span class="pl-en">Insert</span>(<span class="pl-k">const</span> pair&lt;K, V&gt;&amp; kv)
+		{
+			<span class="pl-c"><span class="pl-c">//</span> 1、查看哈希表中是否存在该键值的键值对</span>
+			<span class="pl-k">if</span> (<span class="pl-c1">Find</span>(kv))
+				<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+
+			Hash hf;
+
+			<span class="pl-c"><span class="pl-c">//</span> 2、判断是否需要调整哈希表的大小</span>
+			<span class="pl-k">if</span> (_n == _tables.<span class="pl-c1">size</span>())<span class="pl-c"><span class="pl-c">//</span> 哈希表的大小为0，或负载因子超过1</span>
+			{
+				<span class="pl-c"><span class="pl-c">//</span>增容</span>
+				<span class="pl-c"><span class="pl-c">//</span>a、创建一个新的哈希表，新哈希表的大小设置为原哈希表的2倍（若哈希表大小为0，则将哈希表的初始大小设置为10）</span>
+				vector&lt;Node*&gt; newTables;
+				<span class="pl-c1">size_t</span> newsize = _tables.<span class="pl-c1">size</span>() == <span class="pl-c1">0</span> ? <span class="pl-c1">10</span> : _tables.<span class="pl-c1">size</span>() * <span class="pl-c1">2</span>;
+				newTables.<span class="pl-c1">resize</span>(newsize, <span class="pl-c1">nullptr</span>);
+				<span class="pl-c"><span class="pl-c">//</span> b、将原哈希表当中的结点插入到新哈希表</span>
+				<span class="pl-k">for</span> (<span class="pl-c1">size_t</span> i = <span class="pl-c1">0</span>; i &lt; _tables.<span class="pl-c1">size</span>(); i++)
+				{
+					<span class="pl-k">if</span> (_tables[i])<span class="pl-c"><span class="pl-c">//</span> 桶不为空</span>
+					{
+						Node* cur = _tables[i];  <span class="pl-c"><span class="pl-c">//</span>将该桶的结点取完为止</span>
+						<span class="pl-k">while</span> (cur)
+						{
+							Node* next = cur-&gt;<span class="pl-smi">_next</span>; <span class="pl-c"><span class="pl-c">//</span>记录cur的下一个结点</span>
+							<span class="pl-c1">size_t</span> <span class="pl-c1">index</span> = <span class="pl-c1">hf</span>(cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) % newTables.<span class="pl-c1">size</span>(); <span class="pl-c"><span class="pl-c">//</span> 通过哈希函数计算出对应的哈希桶编号index							cur-&gt;_next = newTables[index];</span>
+							newTables[<span class="pl-c1">index</span>] = cur; <span class="pl-c"><span class="pl-c">//</span> 将该结点头插到新哈希表中编号为index的哈希桶中</span>
+
+							cur = next; <span class="pl-c"><span class="pl-c">//</span> 取原哈希表中该桶的下一个结点</span>
+						}	
+						_tables[i] = <span class="pl-c1">nullptr</span>; <span class="pl-c"><span class="pl-c">//</span> 该桶取完后将该桶置空</span>
+					}
+				}
+
+			}
+
+			<span class="pl-c1">size_t</span> hashi = <span class="pl-c1">hf</span>(kv.<span class="pl-smi">first</span>) % _tables.<span class="pl-c1">size</span>();
+			Node* newnode = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(kv);
+
+			<span class="pl-c"><span class="pl-c">//</span> 头插</span>
+			newnode-&gt;<span class="pl-smi">_next</span> = _tables[hashi];
+			_tables[hashi] = newnode;
+
+			++_n;
+			<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+		}
+		
+		<span class="pl-k">bool</span> <span class="pl-en">Erase</span>(<span class="pl-k">const</span> K&amp; key)
+		{
+			Hash hf;
+
+			<span class="pl-c"><span class="pl-c">//</span>1、通过哈希函数计算出对应的哈希桶编号index（除数不能是capacity）</span>
+			<span class="pl-c1">size_t</span> hashi = <span class="pl-c1">hf</span>(key) % _tables.<span class="pl-c1">size</span>();
+
+			<span class="pl-c"><span class="pl-c">//</span>2、在编号为index的哈希桶中寻找待删除结点</span>
+			Node* prev = <span class="pl-c1">nullptr</span>;
+			Node* cur = _tables[hashi];
+			<span class="pl-k">while</span> (cur)
+			{
+				<span class="pl-c"><span class="pl-c">//</span>3、若找到了待删除结点，则删除该结点</span>
+				<span class="pl-k">if</span> (<span class="pl-c1">hf</span>(cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) == key)
+				{
+					<span class="pl-k">if</span> (prev == <span class="pl-c1">nullptr</span>) <span class="pl-c"><span class="pl-c">//</span>待删除结点是哈希桶中的第一个结点</span>
+					{
+						_tables[hashi] = cur-&gt;<span class="pl-smi">_next</span>; <span class="pl-c"><span class="pl-c">//</span> 将第一个结点从该哈希桶中移除</span>
+					}
+					<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span> 待删除结点不是哈希桶的第一个结点</span>
+					{
+						prev-&gt;<span class="pl-smi">_next</span> = cur-&gt;<span class="pl-smi">_next</span>; <span class="pl-c"><span class="pl-c">//</span> 将该结点从哈希桶中移除</span>
+					}
+					<span class="pl-k">delete</span> cur;
+
+					--_n; <span class="pl-c"><span class="pl-c">//</span> 4、删除结点后，将哈希表中的有效元素个数减一</span>
+					<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+				}
+				<span class="pl-c"><span class="pl-c">//</span> 继续往后找</span>
+				prev = cur;
+				cur = cur-&gt;<span class="pl-smi">_next</span>;
+			}
+			<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+		}
+	<span class="pl-k">private:</span>
+		vector&lt;Node*&gt; _tables;
+		<span class="pl-c1">size_t</span> _n = <span class="pl-c1">0</span>;
+	};
+
+}</pre></div>
+<h2>模拟实现封装unordered_map 和 unordered_set</h2>
+<h3>模板参数控制</h3>
+<blockquote>
+<p>unordered_set是K模型的容器，而unordered_map是KV模型的容器</p>
+</blockquote>
+<ul>
+<li>为了与原哈希表的模板参数进行区分，这里将哈希表的第二个模板参数的名字改为T。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">T</span>&gt;
+<span class="pl-k">class</span> <span class="pl-en">HashTable</span></pre></div>
+<ul>
+<li>如果使用的是<code class="notranslate">unordered_set</code>容器，那么传入哈希表的模板参数就是<strong>key</strong>和<strong>key</strong>。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>&gt;
+<span class="pl-k">class</span> <span class="pl-en">unordered_set</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-c"><span class="pl-c">//</span>...</span>
+<span class="pl-k">private:</span>
+	HashTable&lt;K, K&gt; _ht; <span class="pl-c"><span class="pl-c">//</span>传入底层哈希表的是K和K</span>
+};</pre></div>
+<ul>
+<li>但如果使用的是<code class="notranslate">unordered_map</code>容器，那么传入哈希表的模板参数就是<strong>key</strong>以及<strong>key</strong>和<strong>value</strong>构成的键值对。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">V</span>&gt;
+<span class="pl-k">class</span> <span class="pl-en">unordered_map</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-c"><span class="pl-c">//</span>...</span>
+<span class="pl-k">private:</span>
+	HashTable&lt;K, pair&lt;K, V&gt;&gt; _ht; <span class="pl-c"><span class="pl-c">//</span>传入底层哈希表的是K以及K和V构成的键值对</span>
+};</pre></div>
+<p>而哈希结点的模板参数也应该由原来的K、V变为T：</p>
+<ul>
+<li>上层容器是unordered_set时，传入的T是键值，哈希结点中存储的就是键值。</li>
+<li>上层容器是unordered_map时，传入的T是键值对，哈希结点中存储的就是键值对。</li>
+</ul>
+<p>更改模板参数后，哈希结点的定义如下：</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span>哈希结点的定义</span>
+<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">T</span>&gt;
+<span class="pl-k">struct</span> <span class="pl-en">HashData</span>
+{
+	HashData&lt;T&gt;* _next;
+	T _data;
+
+	<span class="pl-c"><span class="pl-c">//</span> 构造</span>
+	<span class="pl-en">HashData</span>(<span class="pl-k">const</span> T&amp; data)
+		:_data(data)
+		, _next(<span class="pl-c1">nullptr</span>)
+	{}
+};</pre></div>
+<h3>哈希表正向迭代器的实现</h3>
+<ul>
+<li>哈希表的正向迭代器实际上就是对哈希结点指针进行了封装，但是由于在实现++运算符重载时，可能需要在哈希表中去寻找下一个非空哈希桶，因此每一个正向迭代器中都应该存储哈希表的地址。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">T</span>, <span class="pl-k">class</span> <span class="pl-en">KeyOfT</span>, <span class="pl-k">class</span> <span class="pl-en">HashFunc</span> = Hash&lt;K&gt;&gt;
+<span class="pl-k">struct</span> <span class="pl-en">__HTIterator</span>
+{
+	<span class="pl-k">typedef</span> HashNode&lt;T&gt; Node; <span class="pl-c"><span class="pl-c">//</span>哈希结点的类型</span>
+	<span class="pl-k">typedef</span> HashTable&lt;K, T, KeyOfT, HashFunc&gt; HT; <span class="pl-c"><span class="pl-c">//</span>哈希表的类型</span>
+	<span class="pl-k">typedef</span> __HTIterator&lt;K, T, KeyOfT, HashFunc&gt; Self; <span class="pl-c"><span class="pl-c">//</span>正向迭代器的类型</span>
+
+	Node* _node; <span class="pl-c"><span class="pl-c">//</span>结点指针</span>
+	HT* _pht; <span class="pl-c"><span class="pl-c">//</span>哈希表的地址</span>
+	<span class="pl-c"><span class="pl-c">//</span> 构造</span>
+	<span class="pl-en">__HTIterator</span>(Node* node,HT* ht)
+		:_node(node)
+		,_pht(ht)
+	{}
+};</pre></div>
+<h4>接引用和-&gt;</h4>
+<div class="highlight highlight-source-c++"><pre class="notranslate">T&amp; <span class="pl-k">operator</span>*()
+{
+	<span class="pl-c"><span class="pl-c">//</span>返回哈希结点中数据的引用</span>
+	<span class="pl-k">return</span> _node-&gt;<span class="pl-smi">_data</span>;
+}
+T* <span class="pl-k">operator</span>-&gt;()
+{
+	<span class="pl-c"><span class="pl-c">//</span>返回哈希结点中数据的地址</span>
+	<span class="pl-k">return</span> &amp;_node-&gt;<span class="pl-smi">_data</span>; 
+}</pre></div>
+<h4>判断节点是否同一个</h4>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">bool</span> <span class="pl-k">operator</span>!=(<span class="pl-k">const</span> Self&amp; s) <span class="pl-k">const</span>
+{
+	<span class="pl-k">return</span> _node != s.<span class="pl-smi">_node</span>;
+} 
+
+<span class="pl-k">bool</span> <span class="pl-k">operator</span>==(<span class="pl-k">const</span> Self&amp; s) <span class="pl-k">const</span>
+{
+	<span class="pl-k">return</span> _node == s.<span class="pl-smi">_node</span>;
+}</pre></div>
+<h4>++运算符重载函数</h4>
+<ul>
+<li>若当前结点不是当前哈希桶中的最后一个结点，则++后走到当前哈希桶的下一个结点。</li>
+<li>若当前结点是当前哈希桶的最后一个结点，则++后走到下一个非空哈希桶的第一个结点。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span>前置++</span>
+Self&amp; <span class="pl-k">operator</span>++()
+{
+	<span class="pl-k">if</span> (_node-&gt;<span class="pl-smi">_next</span>) <span class="pl-c"><span class="pl-c">//</span>该结点不是当前哈希桶中的最后一个结点</span>
+	{
+		_node = _node-&gt;<span class="pl-smi">_next</span>; <span class="pl-c"><span class="pl-c">//</span>++后变为当前哈希桶中的下一个结点</span>
+	}
+	<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>该结点是当前哈希桶中的最后一个结点</span>
+	{
+		KeyOfT kot;
+		HashFunc hf;
+		<span class="pl-c1">size_t</span> <span class="pl-c1">index</span> = <span class="pl-c1">hf</span>(<span class="pl-c1">kot</span>(_node-&gt;<span class="pl-smi">_data</span>)) % _pht-&gt;<span class="pl-smi">_table</span>.<span class="pl-c1">size</span>(); <span class="pl-c"><span class="pl-c">//</span>通过哈希函数计算出当前所处哈希桶编号index（除数不能是capacity）</span>
+		<span class="pl-c1">index</span>++; <span class="pl-c"><span class="pl-c">//</span>从下一个位置开始找一个非空的哈希桶</span>
+		<span class="pl-k">while</span> (<span class="pl-c1">index</span> &lt; _pht-&gt;<span class="pl-smi">_table</span>.<span class="pl-c1">size</span>()) <span class="pl-c"><span class="pl-c">//</span>直到将整个哈希表找完</span>
+		{
+			<span class="pl-k">if</span> (_pht-&gt;<span class="pl-smi">_table</span>[<span class="pl-c1">index</span>]) <span class="pl-c"><span class="pl-c">//</span>当前哈希桶非空</span>
+			{
+				_node = _pht-&gt;<span class="pl-smi">_table</span>[<span class="pl-c1">index</span>]; <span class="pl-c"><span class="pl-c">//</span>++后变为当前哈希桶中的第一个结点</span>
+				<span class="pl-k">return</span> *<span class="pl-c1">this</span>;
+			}
+			<span class="pl-c1">index</span>++; <span class="pl-c"><span class="pl-c">//</span>当前哈希桶为空桶，找下一个哈希桶</span>
+		}
+		_node = <span class="pl-c1">nullptr</span>; <span class="pl-c"><span class="pl-c">//</span>哈希表中已经没有空桶了，++后变为nullptr</span>
+	}
+	<span class="pl-k">return</span> *<span class="pl-c1">this</span>;
+}</pre></div>
+<h3>HashTable.h</h3>
+<div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">pragma</span> once
+#<span class="pl-k">include</span><span class="pl-s"><span class="pl-pds">&lt;</span>iostream<span class="pl-pds">&gt;</span></span>
+#<span class="pl-k">include</span><span class="pl-s"><span class="pl-pds">&lt;</span>string<span class="pl-pds">&gt;</span></span>
+#<span class="pl-k">include</span><span class="pl-s"><span class="pl-pds">&lt;</span>vector<span class="pl-pds">&gt;</span></span>
+<span class="pl-k">using</span> <span class="pl-k">namespace</span> <span class="pl-en">std</span><span class="pl-k">;</span>
+<span class="pl-c"><span class="pl-c">//</span> 使用素数</span>
+<span class="pl-c1">size_t</span> <span class="pl-en">GetNextPrime</span>(<span class="pl-c1">size_t</span> prime)
+{
+	<span class="pl-k">const</span> <span class="pl-k">int</span> PRIMECOUNT = <span class="pl-c1">28</span>;
+	<span class="pl-k">static</span> <span class="pl-k">const</span> <span class="pl-c1">size_t</span> primeList[PRIMECOUNT] =
+	{
+		<span class="pl-c1">53ul</span>,         <span class="pl-c1">97ul</span>,        <span class="pl-c1">193ul</span>,       <span class="pl-c1">389ul</span>,      <span class="pl-c1">769ul</span>,
+		<span class="pl-c1">1543ul</span>,       <span class="pl-c1">3079ul</span>,      <span class="pl-c1">6151ul</span>,      <span class="pl-c1">12289ul</span>,    <span class="pl-c1">24593ul</span>,
+		<span class="pl-c1">49157ul</span>,      <span class="pl-c1">98317ul</span>,     <span class="pl-c1">196613ul</span>,    <span class="pl-c1">393241ul</span>,   <span class="pl-c1">786433ul</span>,
+		<span class="pl-c1">1572869ul</span>,    <span class="pl-c1">3145739ul</span>,   <span class="pl-c1">6291469ul</span>,   <span class="pl-c1">12582917ul</span>, <span class="pl-c1">25165843ul</span>,
+		<span class="pl-c1">50331653ul</span>,   <span class="pl-c1">100663319ul</span>, <span class="pl-c1">201326611ul</span>, <span class="pl-c1">402653189ul</span>,<span class="pl-c1">805306457ul</span>,
+		<span class="pl-c1">1610612741ul</span>, <span class="pl-c1">3221225473ul</span>, <span class="pl-c1">4294967291ul</span>
+	};
+	<span class="pl-c1">size_t</span> i = <span class="pl-c1">0</span>;
+	<span class="pl-k">for</span> (; i &lt; PRIMECOUNT; ++i)
+	{
+		<span class="pl-k">if</span> (primeList[i] &gt; prime)
+			<span class="pl-k">return</span> primeList[i];
+	}
+	<span class="pl-k">return</span> primeList[i];
+}
+
+<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>&gt;
+<span class="pl-k">struct</span> <span class="pl-en">Hash</span>
+{
+	<span class="pl-c1">size_t</span> <span class="pl-en">operator</span>()(<span class="pl-k">const</span> K&amp; key)
+	{
+		<span class="pl-k">return</span> (<span class="pl-c1">size_t</span>)key;
+	}
+};
+
+
+<span class="pl-c"><span class="pl-c">//</span> 特化</span>
+<span class="pl-k">template</span>&lt;&gt;
+<span class="pl-k">struct</span> <span class="pl-en">Hash</span>&lt;string&gt;
+{
+	<span class="pl-c1">size_t</span> <span class="pl-en">operator</span>()(<span class="pl-k">const</span> string&amp; key)
+	{
+		<span class="pl-c1">size_t</span> hash = <span class="pl-c1">0</span>;
+		<span class="pl-k">for</span> (<span class="pl-k">auto</span> e : key)
+		{
+			hash *= <span class="pl-c1">31</span>; <span class="pl-c"><span class="pl-c">//</span> BKDR</span>
+			hash += e;
+		}
+		cout &lt;&lt; key &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>:<span class="pl-pds">"</span></span> &lt;&lt; hash &lt;&lt; endl;
+		<span class="pl-k">return</span> hash;
+	}
+};
+
+
+<span class="pl-k">namespace</span> <span class="pl-en">lsl_open_address</span>
+{
+	<span class="pl-c"><span class="pl-c">//</span> 状态</span>
+	<span class="pl-k">enum</span> Status
+	{
+		EMPTY, <span class="pl-c"><span class="pl-c">//</span> 空</span>
+		EXIST, <span class="pl-c"><span class="pl-c">//</span> 存在</span>
+		DELETE <span class="pl-c"><span class="pl-c">//</span> 删除</span>
+	};
+
+	<span class="pl-c"><span class="pl-c">//</span>哈希表每个位置存储的结构</span>
+	<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">V</span>&gt;
+	<span class="pl-k">struct</span> <span class="pl-en">HashData</span>
+	{
+		pair&lt;K, V&gt; _kv; <span class="pl-c"><span class="pl-c">//</span> 键值对</span>
+		Status _status = EMPTY; <span class="pl-c"><span class="pl-c">//</span> 状态</span>
+	};
+
+
+	<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">V</span>, <span class="pl-k">class</span> <span class="pl-en">HashFun</span> = Hash&lt;K&gt;&gt;
+	<span class="pl-k">class</span> <span class="pl-en">HashTable</span>
+	{
+	<span class="pl-k">public:</span>
+		<span class="pl-en">HashTable</span>()
+		{
+			_tables.<span class="pl-c1">resize</span>(<span class="pl-c1">10</span>);
+		}
+
+		<span class="pl-c"><span class="pl-c">//</span> 插入方法</span>
+		<span class="pl-k">bool</span> <span class="pl-en">Insert</span>(<span class="pl-k">const</span> pair&lt;K, V&gt;&amp; kv)
+		{
+			<span class="pl-c"><span class="pl-c">//</span> 1、查看哈希表中是否存在该键值的键值对</span>
+			<span class="pl-k">if</span> (<span class="pl-c1">Find</span>(kv.<span class="pl-smi">first</span>))<span class="pl-c"><span class="pl-c">//</span> 哈希表中已经存在该键值的键值对（不允许数据冗余）</span>
+				<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+
+			<span class="pl-c"><span class="pl-c">//</span>2、判断是否需要调整哈希表的大小</span>
+			<span class="pl-k">if</span> (_tables.<span class="pl-c1">size</span>() == <span class="pl-c1">0</span>)
+				_tables.<span class="pl-c1">resize</span>(<span class="pl-c1">10</span>);
+			<span class="pl-k">else</span> <span class="pl-k">if</span> (_n * <span class="pl-c1">10</span> / _tables.<span class="pl-c1">size</span>() == <span class="pl-c1">7</span>)<span class="pl-c"><span class="pl-c">//</span> 负载因子大于0.7需要增容</span>
+			{
+				<span class="pl-c"><span class="pl-c">//</span> 2倍扩容</span>
+				<span class="pl-c1">size_t</span> newSize = _tables.<span class="pl-c1">size</span>() * <span class="pl-c1">2</span>;
+				<span class="pl-c"><span class="pl-c">//</span>a、创建一个新的哈希表，新哈希表的大小设置为原哈希表的2倍</span>
+				HashTable&lt;K, V, HashFun&gt; newHT;
+				newHT.<span class="pl-smi">_tables</span>.<span class="pl-c1">resize</span>(newSize);
+
+				<span class="pl-c"><span class="pl-c">//</span>b、遍历旧表,将原哈希表当中的数据插入到新哈希表</span>
+				<span class="pl-k">for</span> (<span class="pl-c1">size_t</span> i = <span class="pl-c1">0</span>; i &lt; _tables.<span class="pl-c1">size</span>(); i++)
+				{
+					<span class="pl-c"><span class="pl-c">//</span> 如果_tables[i]的位置有数据就进行再次映射</span>
+					<span class="pl-k">if</span> (_tables[i].<span class="pl-smi">_status</span> == EXIST)
+					{
+						newHT.<span class="pl-c1">Insert</span>(_tables[i].<span class="pl-smi">_kv</span>);
+					}
+					<span class="pl-c"><span class="pl-c">//</span> c、与旧表进行交换</span>
+					_tables.<span class="pl-c1">swap</span>(newHT.<span class="pl-smi">_tables</span>);
+				}
+			}<span class="pl-c"><span class="pl-c">//</span> 扩容 end...</span>
+
+			HashFun hf; <span class="pl-c"><span class="pl-c">//</span> 对于int来说是直接用值来比较，对于string类型使用BKDR方法来比较</span>
+
+			<span class="pl-c"><span class="pl-c">//</span> 3、将键值对插入哈希表</span>
+			<span class="pl-c"><span class="pl-c">//</span> a、通过哈希函数计算哈希地址，线性探测</span>
+			<span class="pl-c1">size_t</span> hashi = <span class="pl-c1">hf</span>(kv.<span class="pl-smi">first</span>) % _tables.<span class="pl-c1">size</span>(); <span class="pl-c"><span class="pl-c">//</span> 除数不能是capacity</span>
+
+			<span class="pl-c1">size_t</span> <span class="pl-c1">index</span> = hashi, i = <span class="pl-c1">1</span>;
+
+			<span class="pl-c"><span class="pl-c">//</span>b、找到一个状态为EMPTY或DELETE的位置</span>
+			<span class="pl-k">while</span> (_tables[hashi].<span class="pl-smi">_status</span> == EXIST)
+			{
+				<span class="pl-c1">index</span> = hashi + i;					<span class="pl-c"><span class="pl-c">//</span> 线性探测</span>
+				<span class="pl-c1">index</span> = hashi + i * i;				 <span class="pl-c"><span class="pl-c">//</span> 二次探测</span>
+				hashi %= _tables.<span class="pl-c1">size</span>();			 <span class="pl-c"><span class="pl-c">//</span> 防止下标超出哈希表范围</span>
+				i++;
+			}
+
+			<span class="pl-c"><span class="pl-c">//</span>c、将数据插入该位置，并将该位置的状态设置为EXIST</span>
+			_tables[hashi].<span class="pl-smi">_kv</span> = kv;
+			_tables[hashi].<span class="pl-smi">_status</span> = EXIST;
+
+			<span class="pl-c"><span class="pl-c">//</span>4、哈希表中的有效元素个数++</span>
+			++_n;
+			<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+		}
+
+		<span class="pl-c"><span class="pl-c">//</span> 查找方法</span>
+		HashData&lt;K, V&gt;* <span class="pl-en">Find</span>(<span class="pl-k">const</span> K&amp; key)
+		{
+			<span class="pl-k">if</span> (_tables.<span class="pl-c1">size</span>() == <span class="pl-c1">0</span>)
+				<span class="pl-k">return</span> <span class="pl-c1">nullptr</span>;
+
+			HashFun hf;
+
+			<span class="pl-c"><span class="pl-c">//</span> 计算位置</span>
+			<span class="pl-c1">size_t</span> hashi = <span class="pl-c1">hf</span>(key) % _tables.<span class="pl-c1">size</span>();
+			<span class="pl-c1">size_t</span> <span class="pl-c1">index</span> = hashi, i = <span class="pl-c1">1</span>;
+
+			<span class="pl-c"><span class="pl-c">//</span> 不为空就一直找</span>
+			<span class="pl-k">while</span> (_tables[hashi].<span class="pl-smi">_status</span> != EMPTY)
+			{
+				<span class="pl-c"><span class="pl-c">//</span>若该位置的状态为EXIST，并且key值匹配，则查找成功</span>
+				<span class="pl-k">if</span> (_tables[hashi].<span class="pl-smi">_status</span> == EXIST
+					&amp;&amp; _tables[hashi].<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span> == key)
+				{
+					<span class="pl-k">return</span> &amp;_tables[hashi];
+				}
+				<span class="pl-c1">index</span> = hashi + i;			<span class="pl-c"><span class="pl-c">//</span> 线性探测</span>
+				<span class="pl-c"><span class="pl-c">//</span> index = hashi + i * i;	// 二次探测</span>
+				hashi %= _tables.<span class="pl-c1">size</span>();    <span class="pl-c"><span class="pl-c">//</span> //防止下标超出哈希表范围</span>
+				++i;
+			}
+
+			<span class="pl-c"><span class="pl-c">//</span> 找不到的情况</span>
+			<span class="pl-k">return</span> <span class="pl-c1">nullptr</span>;
+		}
+
+		<span class="pl-c"><span class="pl-c">//</span> 伪删除法</span>
+		<span class="pl-k">bool</span> <span class="pl-en">Erase</span>(<span class="pl-k">const</span> K&amp; key)
+		{
+			<span class="pl-c"><span class="pl-c">//</span>1、查看哈希表中是否存在该键值的键值对</span>
+			HashData&lt;K, V&gt;* res = <span class="pl-c1">Find</span>(key);
+			<span class="pl-k">if</span> (res)
+			{
+				<span class="pl-c"><span class="pl-c">//</span>2、若存在，则将该键值对所在位置的状态改为DELETE即可</span>
+				res-&gt;<span class="pl-smi">_status</span> = DELETE;
+				--_n; <span class="pl-c"><span class="pl-c">//</span>3、哈希表中的有效元素个数减一</span>
+				<span class="pl-k">return</span> <span class="pl-c1">true</span>; <span class="pl-c"><span class="pl-c">//</span> 删除成功</span>
+			}
+			<span class="pl-k">return</span> <span class="pl-c1">false</span>;    <span class="pl-c"><span class="pl-c">//</span> 删除失败</span>
+		}
+
+		<span class="pl-k">void</span> <span class="pl-en">Print</span>()
+		{
+			<span class="pl-k">for</span> (<span class="pl-c1">size_t</span> i = <span class="pl-c1">0</span>; i &lt; _tables.<span class="pl-c1">size</span>(); i++)
+			{
+				<span class="pl-k">if</span> (_tables[i].<span class="pl-smi">_status</span> == EXIST)
+				{
+					<span class="pl-c"><span class="pl-c">//</span> printf("[%d]-&gt;%d\n", i, _tables[i].first);</span>
+					cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>[<span class="pl-pds">"</span></span> &lt;&lt; i &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>]-&gt;<span class="pl-pds">"</span></span> &lt;&lt; _tables[i].<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>:<span class="pl-pds">"</span></span> &lt;&lt; _tables[i].<span class="pl-smi">_kv</span>.<span class="pl-smi">second</span> &lt;&lt; endl;
+				}
+				<span class="pl-k">else</span> <span class="pl-k">if</span> (_tables[i].<span class="pl-smi">_status</span> == EMPTY)
+				{
+					<span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>[%d]-&gt;<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, i);
+				}
+				<span class="pl-k">else</span>
+				{
+					<span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>[%d]-&gt;E<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, i);
+				}
+			}
+			cout &lt;&lt; endl;
+		}
+
+	<span class="pl-k">private:</span>
+		vector&lt;HashData&lt;K, V&gt;&gt; _tables;
+		<span class="pl-c1">size_t</span> _n = <span class="pl-c1">0</span>;<span class="pl-c"><span class="pl-c">//</span> 存储的关键字的个数</span>
+	};
+}
+
+<span class="pl-k">namespace</span> <span class="pl-en">lsl_hash_bucket</span>
+{
+	<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">T</span>&gt;
+	<span class="pl-k">struct</span> <span class="pl-en">HashNode</span>
+	{
+		HashNode&lt;T&gt;* _next;
+		T _data;
+
+		<span class="pl-c"><span class="pl-c">//</span> 构造</span>
+		<span class="pl-en">HashNode</span>(<span class="pl-k">const</span> T&amp; data)
+			:_data(data)
+			, _next(<span class="pl-c1">nullptr</span>)
+		{}
+	};
+	<span class="pl-c"><span class="pl-c">//</span> 前置声明</span>
+	<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">T</span>, <span class="pl-k">class</span> <span class="pl-en">KeyOfT</span>, <span class="pl-k">class</span> <span class="pl-en">Hash</span>&gt;
+	<span class="pl-k">class</span> <span class="pl-en">HashTable</span>;
+
+	<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">T</span>, <span class="pl-k">class</span> <span class="pl-en">Ref</span>, <span class="pl-k">class</span> <span class="pl-en">Ptr</span>, <span class="pl-k">class</span> <span class="pl-en">KeyOfT</span>, <span class="pl-k">class</span> <span class="pl-en">Hash</span>&gt;
+	<span class="pl-k">struct</span> <span class="pl-en">__HTIterator</span>
+	{
+		<span class="pl-k">typedef</span> HashNode&lt;T&gt; Node;							 <span class="pl-c"><span class="pl-c">//</span> 哈希节点的类型</span>
+		<span class="pl-k">typedef</span> __HTIterator&lt;K, T, Ref, <span class="pl-c1">Ptr</span>, KeyOfT, Hash&gt; Self;	 <span class="pl-c"><span class="pl-c">//</span> 迭代器的类型</span>
+
+		<span class="pl-k">const</span> HashTable&lt;K, T, KeyOfT, Hash&gt;* _pht;			 <span class="pl-c"><span class="pl-c">//</span> 哈希表的地址</span>
+		Node* _node;									     <span class="pl-c"><span class="pl-c">//</span> 节点指针</span>
+
+		<span class="pl-c1">size_t</span> _hashi;
+
+
+		<span class="pl-c"><span class="pl-c">//</span> 构造</span>
+		<span class="pl-en">__HTIterator</span>(Node* node, HashTable&lt;K, T, KeyOfT, Hash&gt;* pht, <span class="pl-c1">size_t</span> hashi)
+			:_node(node)
+			, _pht(pht)
+			, _hashi(hashi)
+		{}
+
+		<span class="pl-en">__HTIterator</span>(Node* node, <span class="pl-k">const</span> HashTable&lt;K, T, KeyOfT, Hash&gt;* pht, <span class="pl-c1">size_t</span> hashi)
+			:_node(node)
+			, _pht(pht)
+			, _hashi(hashi)
+		{}
+
+		Ref <span class="pl-k">operator</span>*()
+		{
+			<span class="pl-c"><span class="pl-c">//</span>返回哈希结点中数据的引用</span>
+			<span class="pl-k">return</span> _node-&gt;<span class="pl-smi">_data</span>;
+		}
+
+		<span class="pl-c1">Ptr</span> <span class="pl-k">operator</span>-&gt;()
+		{
+			<span class="pl-c"><span class="pl-c">//</span>返回哈希结点中数据的地址</span>
+			<span class="pl-k">return</span> &amp;_node-&gt;<span class="pl-smi">_data</span>;
+		}
+
+		<span class="pl-k">bool</span> <span class="pl-k">operator</span>!=(<span class="pl-k">const</span> Self&amp; s) <span class="pl-k">const</span>
+		{
+			<span class="pl-k">return</span> _node != s.<span class="pl-smi">_node</span>;
+		}
+
+		<span class="pl-k">bool</span> <span class="pl-k">operator</span>==(<span class="pl-k">const</span> Self&amp; s) <span class="pl-k">const</span>
+		{
+			<span class="pl-k">return</span> _node == s.<span class="pl-smi">_node</span>;
+		}
+
+		<span class="pl-c"><span class="pl-c">//</span>前置++</span>
+		Self&amp; <span class="pl-k">operator</span>++()
+		{
+			<span class="pl-k">if</span> (_node-&gt;<span class="pl-smi">_next</span>)
+			{
+				<span class="pl-c"><span class="pl-c">//</span> 当前桶还有节点，走到下一个节点</span>
+				_node = _node-&gt;<span class="pl-smi">_next</span>;
+			}
+			<span class="pl-k">else</span>
+			{
+				<span class="pl-c"><span class="pl-c">//</span> 当前桶已经走完了，找下一个桶开始</span>
+				++_hashi;
+				<span class="pl-k">while</span> (_hashi &lt; _pht-&gt;<span class="pl-smi">_tables</span>.<span class="pl-c1">size</span>())
+				{
+					<span class="pl-k">if</span> (_pht-&gt;<span class="pl-smi">_tables</span>[_hashi])
+					{
+						_node = _pht-&gt;<span class="pl-smi">_tables</span>[_hashi];
+						<span class="pl-k">break</span>;
+					}
+
+					++_hashi;
+				}
+
+				<span class="pl-k">if</span> (_hashi == _pht-&gt;<span class="pl-smi">_tables</span>.<span class="pl-c1">size</span>())
+				{
+					_node = <span class="pl-c1">nullptr</span>;
+				}
+			}
+			<span class="pl-k">return</span> *<span class="pl-c1">this</span>;
+		}
+	};
+
+	<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">T</span>, <span class="pl-k">class</span> <span class="pl-en">KeyOfT</span>, <span class="pl-k">class</span> <span class="pl-en">Hash</span>&gt;
+	<span class="pl-k">class</span> <span class="pl-en">HashTable</span>
+	{
+		<span class="pl-k">typedef</span> HashNode&lt;T&gt; Node;
+
+		<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">T</span>, <span class="pl-k">class</span> <span class="pl-en">Ref</span>, <span class="pl-k">class</span> <span class="pl-en">Ptr</span>, <span class="pl-k">class</span> <span class="pl-en">KeyOfT</span>, <span class="pl-k">class</span> <span class="pl-en">Hash</span>&gt;
+		<span class="pl-k">friend</span> <span class="pl-k">struct</span> <span class="pl-en">__HTIterator</span>;
+
+	<span class="pl-k">public:</span>
+		<span class="pl-k">typedef</span> __HTIterator&lt;K, T, T&amp;, T*, KeyOfT, Hash&gt; iterator;
+		<span class="pl-k">typedef</span> __HTIterator&lt;K, T, <span class="pl-k">const</span> T&amp;, <span class="pl-k">const</span> T*, KeyOfT, Hash&gt; const_iterator;
+
+		iterator <span class="pl-en">begin</span>()
+		{
+			<span class="pl-k">for</span> (<span class="pl-c1">size_t</span> i = <span class="pl-c1">0</span>; i &lt; _tables.<span class="pl-c1">size</span>(); i++)
+			{
+				<span class="pl-k">if</span> (_tables[i])
+				{
+					<span class="pl-k">return</span> <span class="pl-c1">iterator</span>(_tables[i], <span class="pl-c1">this</span>, i);
+				}
+			}
+			<span class="pl-k">return</span> <span class="pl-c1">end</span>();
+		}
+
+		iterator <span class="pl-en">end</span>()
+		{
+			<span class="pl-k">return</span> <span class="pl-c1">iterator</span>(<span class="pl-c1">nullptr</span>, <span class="pl-c1">this</span>, -<span class="pl-c1">1</span>);
+		}
+
+		const_iterator <span class="pl-en">begin</span>() <span class="pl-k">const</span>
+		{
+			<span class="pl-k">for</span> (<span class="pl-c1">size_t</span> i = <span class="pl-c1">0</span>; i &lt; _tables.<span class="pl-c1">size</span>(); i++)
+			{
+				<span class="pl-k">if</span> (_tables[i])
+				{
+					<span class="pl-k">return</span> <span class="pl-c1">const_iterator</span>(_tables[i], <span class="pl-c1">this</span>, i);
+				}
+			}
+			<span class="pl-k">return</span> <span class="pl-c1">end</span>();
+		}
+
+		const_iterator <span class="pl-en">end</span>() <span class="pl-k">const</span>
+		{
+			<span class="pl-k">return</span> <span class="pl-c1">const_iterator</span>(<span class="pl-c1">nullptr</span>, <span class="pl-c1">this</span>, -<span class="pl-c1">1</span>);
+		}
+
+		<span class="pl-en">HashTable</span>()
+		{
+			_tables.<span class="pl-c1">resize</span>(<span class="pl-c1">GetNextPrime</span>(<span class="pl-c1">0</span>));
+		}
+
+		<span class="pl-en">~HashTable</span>()
+		{
+			<span class="pl-c"><span class="pl-c">//</span>将哈希表当中的结点一个个释放</span>
+			<span class="pl-k">for</span> (<span class="pl-c1">size_t</span> i = <span class="pl-c1">0</span>; i &lt; _tables.<span class="pl-c1">size</span>(); i++)
+			{
+				<span class="pl-k">if</span> (_tables[i])
+				{
+					Node* cur = _tables[i];
+					<span class="pl-k">while</span> (cur) <span class="pl-c"><span class="pl-c">//</span>将该桶的结点取完为止</span>
+					{
+						Node* next = cur-&gt;<span class="pl-smi">_next</span>; <span class="pl-c"><span class="pl-c">//</span>记录下一个结点</span>
+						<span class="pl-k">delete</span> cur;
+						cur = next;
+					}
+					_tables[i] = <span class="pl-c1">nullptr</span>;
+				}
+			}
+		}
+
+		<span class="pl-c"><span class="pl-c">//</span>赋值运算符重载函数</span>
+		HashTable&amp; <span class="pl-k">operator</span>=(HashTable ht)
+		{
+			<span class="pl-c"><span class="pl-c">//</span>交换哈希表中两个成员变量的数据</span>
+			_tables.<span class="pl-c1">swap</span>(ht.<span class="pl-smi">_table</span>);
+			<span class="pl-c1">swap</span>(_n, ht.<span class="pl-smi">_n</span>);
+
+			<span class="pl-k">return</span> *<span class="pl-c1">this</span>;
+		}
+
+		iterator <span class="pl-en">Find</span>(<span class="pl-k">const</span> K&amp; key)
+		{
+			Hash hf;
+			KeyOfT kot;
+
+			<span class="pl-c1">size_t</span> hashi = <span class="pl-c1">hf</span>(key) % _tables.<span class="pl-c1">size</span>();
+			Node* cur = _tables[hashi];
+			<span class="pl-k">while</span> (cur)
+			{
+				<span class="pl-k">if</span> (<span class="pl-c1">kot</span>(cur-&gt;<span class="pl-smi">_data</span>) == key)
+				{
+					<span class="pl-k">return</span> <span class="pl-c1">iterator</span>(cur, <span class="pl-c1">this</span>, hashi);
+				}
+
+				cur = cur-&gt;<span class="pl-smi">_next</span>;
+			}
+
+			<span class="pl-k">return</span> <span class="pl-c1">end</span>();
+		}
+
+		pair&lt;iterator, <span class="pl-k">bool</span>&gt; <span class="pl-en">Insert</span>(<span class="pl-k">const</span> T&amp; data)
+		{
+			Hash hf;
+			KeyOfT kot;
+
+			iterator it = <span class="pl-c1">Find</span>(<span class="pl-c1">kot</span>(data));
+			<span class="pl-k">if</span> (it != <span class="pl-c1">end</span>())
+				<span class="pl-k">return</span> <span class="pl-c1">make_pair</span>(it, <span class="pl-c1">false</span>);
+
+			<span class="pl-c"><span class="pl-c">//</span> 负载因子最大到1</span>
+			<span class="pl-k">if</span> (_n == _tables.<span class="pl-c1">size</span>())
+			{
+				vector&lt;Node*&gt; newTables;
+				newTables.<span class="pl-c1">resize</span>(_tables.<span class="pl-c1">size</span>() * <span class="pl-c1">2</span>, <span class="pl-c1">nullptr</span>);
+				<span class="pl-c"><span class="pl-c">//</span> 遍历旧表</span>
+				<span class="pl-k">for</span> (<span class="pl-c1">size_t</span> i = <span class="pl-c1">0</span>; i &lt; _tables.<span class="pl-c1">size</span>(); i++)
+				{
+					Node* cur = _tables[i];
+					<span class="pl-k">while</span> (cur)
+					{
+						Node* next = cur-&gt;<span class="pl-smi">_next</span>;
+
+						<span class="pl-c"><span class="pl-c">//</span> 挪动到映射的新表</span>
+						<span class="pl-c1">size_t</span> hashi = <span class="pl-c1">hf</span>(<span class="pl-c1">kot</span>(cur-&gt;<span class="pl-smi">_data</span>)) % newTables.<span class="pl-c1">size</span>();
+						cur-&gt;<span class="pl-smi">_next</span> = newTables[hashi];
+						newTables[hashi] = cur;
+
+						cur = next;
+					}
+
+					_tables[i] = <span class="pl-c1">nullptr</span>;
+				}
+
+				_tables.<span class="pl-c1">swap</span>(newTables);
+			}
+
+			<span class="pl-c1">size_t</span> hashi = <span class="pl-c1">hf</span>(<span class="pl-c1">kot</span>(data)) % _tables.<span class="pl-c1">size</span>();
+			Node* newnode = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(data);
+
+			<span class="pl-c"><span class="pl-c">//</span> 头插</span>
+			newnode-&gt;<span class="pl-smi">_next</span> = _tables[hashi];
+			_tables[hashi] = newnode;
+			++_n;
+
+			<span class="pl-k">return</span> <span class="pl-c1">make_pair</span>(<span class="pl-c1">iterator</span>(newnode, <span class="pl-c1">this</span>, hashi), <span class="pl-c1">true</span>);
+		}
+		<span class="pl-k">bool</span> <span class="pl-en">Erase</span>(<span class="pl-k">const</span> K&amp; key)
+		{
+			Hash hf; <span class="pl-c"><span class="pl-c">//</span> hf是要算的hash值，这里采用BKDR</span>
+			KeyOfT kot; <span class="pl-c"><span class="pl-c">//</span> kot是要怎么取值，比如set是直接就是key，map是要取pair的first</span>
+
+			<span class="pl-c"><span class="pl-c">//</span>1、通过哈希函数计算出对应的哈希桶编号index（除数不能是capacity）</span>
+			<span class="pl-c1">size_t</span> hashi = <span class="pl-c1">hf</span>(<span class="pl-c1">kot</span>(key)) % _tables.<span class="pl-c1">size</span>();
+
+			<span class="pl-c"><span class="pl-c">//</span>2、在编号为index的哈希桶中寻找待删除结点</span>
+			Node* prev = <span class="pl-c1">nullptr</span>;
+			Node* cur = _tables[hashi];
+			<span class="pl-k">while</span> (cur)
+			{
+				<span class="pl-c"><span class="pl-c">//</span>3、若找到了待删除结点，则删除该结点</span>
+				<span class="pl-k">if</span> (<span class="pl-c1">kot</span>(cur-&gt;<span class="pl-smi">_data</span>) == key)
+				{
+					<span class="pl-k">if</span> (prev == <span class="pl-c1">nullptr</span>) <span class="pl-c"><span class="pl-c">//</span>待删除结点是哈希桶中的第一个结点</span>
+					{
+						_tables[hashi] = cur-&gt;<span class="pl-smi">_next</span>; <span class="pl-c"><span class="pl-c">//</span> 将第一个结点从该哈希桶中移除</span>
+					}
+					<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span> 待删除结点不是哈希桶的第一个结点</span>
+					{
+						prev-&gt;<span class="pl-smi">_next</span> = cur-&gt;<span class="pl-smi">_next</span>; <span class="pl-c"><span class="pl-c">//</span> 将该结点从哈希桶中移除</span>
+					}
+					<span class="pl-k">delete</span> cur;
+
+					--_n; <span class="pl-c"><span class="pl-c">//</span> 4、删除结点后，将哈希表中的有效元素个数减一</span>
+					<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+				}
+				<span class="pl-c"><span class="pl-c">//</span> 继续往后找</span>
+				prev = cur;
+				cur = cur-&gt;<span class="pl-smi">_next</span>;
+			}
+			<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+		}
+	<span class="pl-k">private:</span>
+		vector&lt;Node*&gt; _tables;
+		<span class="pl-c1">size_t</span> _n = <span class="pl-c1">0</span>;
+	};
+}</pre></div>
+<h3>MyUnorderedSet.h</h3>
+<div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">include</span><span class="pl-s"><span class="pl-pds">"</span>HashTable.h<span class="pl-pds">"</span></span>
+<span class="pl-k">namespace</span> <span class="pl-en">lsl</span>
+{
+	<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">Hash</span> = Hash&lt;K&gt;&gt;
+	<span class="pl-k">class</span> <span class="pl-en">unordered_set</span>
+	{
+		<span class="pl-k">struct</span> <span class="pl-en">SetKeyOfT</span>
+		{
+			<span class="pl-k">const</span> K&amp; <span class="pl-en">operator</span>()(<span class="pl-k">const</span> K&amp; key)
+			{
+				<span class="pl-k">return</span> key;
+			}
+		};
+
+	<span class="pl-k">public:</span>
+		<span class="pl-c"><span class="pl-c">//</span>现在没有实例化，没办法到HashTable里面找iterator，所以typename就是告诉编译器这里是一个类型，实例化以后再去取</span>
+		<span class="pl-k">typedef</span> <span class="pl-k">typename</span> lsl_hash_bucket::HashTable&lt;K, K, SetKeyOfT, Hash&gt;::const_iterator iterator;
+		<span class="pl-k">typedef</span> <span class="pl-k">typename</span> lsl_hash_bucket::HashTable&lt;K, K, SetKeyOfT, Hash&gt;::const_iterator const_iterator;
+
+		const_iterator <span class="pl-en">begin</span>() <span class="pl-k">const</span>
+		{
+			<span class="pl-k">return</span> _ht.<span class="pl-c1">begin</span>();
+		}
+
+		const_iterator <span class="pl-en">end</span>() <span class="pl-k">const</span>
+		{
+			<span class="pl-k">return</span> _ht.<span class="pl-c1">end</span>();
+		}	
+
+		iterator <span class="pl-en">find</span>(<span class="pl-k">const</span> K&amp; key)
+		{
+			<span class="pl-k">return</span> _ht.<span class="pl-c1">Find</span>(key);
+		}
+
+		<span class="pl-k">bool</span> <span class="pl-en">erase</span>(<span class="pl-k">const</span> K&amp; key)
+		{
+			<span class="pl-k">return</span> _ht.<span class="pl-c1">Erase</span>(key);
+		}
+		
+		pair&lt;const_iterator, <span class="pl-k">bool</span>&gt; <span class="pl-en">insert</span>(<span class="pl-k">const</span> K&amp; key)
+		{
+			<span class="pl-k">auto</span> ret = _ht.<span class="pl-c1">Insert</span>(key);
+			<span class="pl-k">return</span> pair&lt;const_iterator, <span class="pl-k">bool</span>&gt;(<span class="pl-c1">const_iterator</span>(ret.<span class="pl-smi">first</span>.<span class="pl-smi">_node</span>, ret.<span class="pl-smi">first</span>.<span class="pl-smi">_pht</span>, ret.<span class="pl-smi">first</span>.<span class="pl-smi">_hashi</span>), ret.<span class="pl-smi">second</span>);
+		}
+
+	<span class="pl-k">private:</span>
+		lsl_hash_bucket::HashTable&lt;K, K, SetKeyOfT, Hash&gt; _ht;
+	};
+}</pre></div>
+<h3>MyUnorderedMap.h</h3>
+<div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">include</span><span class="pl-s"><span class="pl-pds">"</span>HashTable.h<span class="pl-pds">"</span></span>
+<span class="pl-k">namespace</span> <span class="pl-en">lsl</span>
+{
+	<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">V</span>, <span class="pl-k">class</span> <span class="pl-en">Hash</span> = Hash&lt;K&gt;&gt;
+	<span class="pl-k">class</span> <span class="pl-en">unordered_map</span>
+	{
+		<span class="pl-k">struct</span> <span class="pl-en">MapKeyOfT</span>
+		{
+			<span class="pl-k">const</span> K&amp; <span class="pl-en">operator</span>()(<span class="pl-k">const</span> pair&lt;K, V&gt;&amp; kv)
+			{
+				<span class="pl-k">return</span> kv.<span class="pl-smi">first</span>;
+			}
+		};
+	<span class="pl-k">public:</span>
+		<span class="pl-k">typedef</span> <span class="pl-k">typename</span> lsl_hash_bucket::HashTable&lt;K, pair&lt;<span class="pl-k">const</span> K, V&gt;, MapKeyOfT, Hash&gt;::iterator iterator;
+
+		iterator <span class="pl-en">begin</span>()
+		{
+			<span class="pl-k">return</span> _ht.<span class="pl-c1">begin</span>();
+		}
+
+		iterator <span class="pl-en">end</span>()
+		{
+			<span class="pl-k">return</span> _ht.<span class="pl-c1">end</span>();
+		}
+
+		pair&lt;iterator, <span class="pl-k">bool</span>&gt; <span class="pl-en">insert</span>(<span class="pl-k">const</span> pair&lt;K, V&gt;&amp; kv)
+		{
+			<span class="pl-k">return</span> _ht.<span class="pl-c1">Insert</span>(kv);
+		}
+
+		V&amp; <span class="pl-k">operator</span>[](<span class="pl-k">const</span> K&amp; key)
+		{
+			pair&lt;iterator, <span class="pl-k">bool</span>&gt; ret = _ht.<span class="pl-c1">Insert</span>(<span class="pl-c1">make_pair</span>(key, <span class="pl-c1">V</span>()));
+			<span class="pl-k">return</span> ret.<span class="pl-smi">first</span>-&gt;<span class="pl-smi">second</span>;
+		}
+
+		<span class="pl-k">const</span> V&amp; <span class="pl-k">operator</span>[](<span class="pl-k">const</span> K&amp; key) <span class="pl-k">const</span>
+		{
+			pair&lt;iterator, <span class="pl-k">bool</span>&gt; ret = _ht.<span class="pl-c1">Insert</span>(<span class="pl-c1">make_pair</span>(key, <span class="pl-c1">V</span>()));
+			<span class="pl-k">return</span> ret.<span class="pl-smi">first</span>-&gt;<span class="pl-smi">second</span>;
+		}
+
+		iterator <span class="pl-en">find</span>(<span class="pl-k">const</span> K&amp; key)
+		{
+			<span class="pl-k">return</span> _ht.<span class="pl-c1">Find</span>(key);
+		}
+
+		<span class="pl-k">bool</span> <span class="pl-en">erase</span>(<span class="pl-k">const</span> K&amp; key)
+		{
+			<span class="pl-k">return</span> _ht.<span class="pl-c1">Erase</span>(key);
+		}
+
+	<span class="pl-k">private:</span>
+		lsl_hash_bucket::HashTable&lt;K, pair&lt;<span class="pl-k">const</span> K, V&gt;, MapKeyOfT, Hash&gt; _ht;
+	};
+}</pre></div>
+<h3>扩容机制是素数？</h3>
+<ul>
+<li>除留余数法，最好模一个素数，如何每次快速取一个类似两倍关系的素数？</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span> 使用素数</span>
+<span class="pl-c1">size_t</span> <span class="pl-en">GetNextPrime</span>(<span class="pl-c1">size_t</span> prime)
+{
+	<span class="pl-k">const</span> <span class="pl-k">int</span> PRIMECOUNT = <span class="pl-c1">28</span>;
+	<span class="pl-k">static</span> <span class="pl-k">const</span> <span class="pl-c1">size_t</span> primeList[PRIMECOUNT] =
+	{
+		<span class="pl-c1">53ul</span>,         <span class="pl-c1">97ul</span>,        <span class="pl-c1">193ul</span>,       <span class="pl-c1">389ul</span>,      <span class="pl-c1">769ul</span>,
+		<span class="pl-c1">1543ul</span>,       <span class="pl-c1">3079ul</span>,      <span class="pl-c1">6151ul</span>,      <span class="pl-c1">12289ul</span>,    <span class="pl-c1">24593ul</span>,
+		<span class="pl-c1">49157ul</span>,      <span class="pl-c1">98317ul</span>,     <span class="pl-c1">196613ul</span>,    <span class="pl-c1">393241ul</span>,   <span class="pl-c1">786433ul</span>,
+		<span class="pl-c1">1572869ul</span>,    <span class="pl-c1">3145739ul</span>,   <span class="pl-c1">6291469ul</span>,   <span class="pl-c1">12582917ul</span>, <span class="pl-c1">25165843ul</span>,
+		<span class="pl-c1">50331653ul</span>,   <span class="pl-c1">100663319ul</span>, <span class="pl-c1">201326611ul</span>, <span class="pl-c1">402653189ul</span>,<span class="pl-c1">805306457ul</span>,
+		<span class="pl-c1">1610612741ul</span>, <span class="pl-c1">3221225473ul</span>, <span class="pl-c1">4294967291ul</span>
+	};
+	<span class="pl-c1">size_t</span> i = <span class="pl-c1">0</span>;
+	<span class="pl-k">for</span> (; i &lt; PRIMECOUNT; ++i)
+	{
+		<span class="pl-k">if</span> (primeList[i] &gt; prime)
+			<span class="pl-k">return</span> primeList[i];
+	}
+	<span class="pl-k">return</span> primeList[i];
+}</pre></div>
+<h2>位图</h2>
+<h3>位图概念</h3>
+<ul>
+<li>给40亿个不重复的无符号整数，没排过序。给一个无符号整数，如何快速判断一个数是否在<br>
+这40亿个数中。</li>
+</ul>
+<ol>
+<li>遍历，时间复杂度O($N$)</li>
+<li>排序(O($NlogN$))，利用二分查找: $logN$
+</li>
+<li>位图解决
+<ul>
+<li>数据是否在给定的整形数据中，结果是在或者不在，刚好是两种状态，那么可以使用一个二进制比特位来代表数据是否存在的信息，如果二进制比特位为1，代表存在，为0代表不存在。比如：</li>
+</ul>
+</li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3b3ce59b0e6fd6ba97fd9ae1c03c6274d657fdd27dd52293771c74f322a227c3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64666362313365303962373434333265386234663261623338313636326634362e706e67"><img src="https://camo.githubusercontent.com/3b3ce59b0e6fd6ba97fd9ae1c03c6274d657fdd27dd52293771c74f322a227c3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64666362313365303962373434333265386234663261623338313636326634362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/dfcb13e09b74432e8b4f2ab381662f46.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>只需要<strong>0.5GB</strong>的内存空间~~</li>
+</ul>
+<blockquote>
+<p>所谓位图，就是用每一位来存放某种状态，适用于海量数据，数据无重复的场景。通常是用来判断某个数据存不存在的。</p>
+</blockquote>
+<hr>
+<p><strong>映射x的时候</strong>：</p>
+<ul>
+<li>那么<code class="notranslate">x</code>在数组的第几个整形呢？ <code class="notranslate">i  =  x / 32</code></li>
+<li>那么<code class="notranslate">x</code>在数组的第几个位呢？ <code class="notranslate">i  =  x % 32</code></li>
+</ul>
+<h3>代码实现</h3>
+<h4>将x比特位置1</h4>
+<p><strong>在左移的时候不是方向，不管是大端机还是小端机，左移是向高位移动</strong></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/71c983b306b9cbc3b98707bb258a8a62d3046c02fbba51a67015f495d9b62eed/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38393835366131633836376234316435616334656130613862346434326162372e706e67"><img src="https://camo.githubusercontent.com/71c983b306b9cbc3b98707bb258a8a62d3046c02fbba51a67015f495d9b62eed/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38393835366131633836376234316435616334656130613862346434326162372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/89856a1c867b41d5ac4ea0a8b4d42ab7.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span> 将x比特位置1</span>
+<span class="pl-k">void</span> <span class="pl-en">set</span>(<span class="pl-c1">size_t</span> x)
+{
+	<span class="pl-c"><span class="pl-c">//</span> 计算第几个整形</span>
+	<span class="pl-c1">size_t</span> i = x / <span class="pl-c1">32</span>;
+	<span class="pl-c"><span class="pl-c">//</span> 计算第几个位</span>
+	<span class="pl-c1">size_t</span> j = x % <span class="pl-c1">32</span>;
+	<span class="pl-c"><span class="pl-c">//</span> 将第j位处理成1其他位不变</span>
+	_bits[i] |= (<span class="pl-c1">1</span> &lt;&lt; j);
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/643d2655437bf2949d59297023a92e549448c542ea422b338ad22e0d27d0f532/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65313038653763626165363534616537626435316264373038343166346161352e706e67"><img src="https://camo.githubusercontent.com/643d2655437bf2949d59297023a92e549448c542ea422b338ad22e0d27d0f532/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65313038653763626165363534616537626435316264373038343166346161352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/e108e7cbae654ae7bd51bd70841f4aa5.png" style="max-width: 100%;"></a></p>
+<h4>将x比特位置0</h4>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/82d6d2975e15f1798c14dd541b4ce6172e1e84d32cf02201ab7ee8338b213406/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31386161393933666664363234336639393132313830626462386332356362652e706e67"><img src="https://camo.githubusercontent.com/82d6d2975e15f1798c14dd541b4ce6172e1e84d32cf02201ab7ee8338b213406/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31386161393933666664363234336639393132313830626462386332356362652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/18aa993ffd6243f9912180bdb8c25cbe.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span> 将x比特位置0</span>
+<span class="pl-k">void</span> <span class="pl-en">reset</span>(<span class="pl-c1">size_t</span> x)
+{
+	<span class="pl-c"><span class="pl-c">//</span> 计算第几个整形</span>
+	<span class="pl-c1">size_t</span> i = x / <span class="pl-c1">32</span>;
+	<span class="pl-c"><span class="pl-c">//</span> 计算第几个位</span>
+	<span class="pl-c1">size_t</span> j = x % <span class="pl-c1">32</span>;
+	<span class="pl-c"><span class="pl-c">//</span> 将第j位处理成0其他位不变</span>
+	_bits[i] &amp;= ~(<span class="pl-c1">1</span> &lt;&lt; j);
+}</pre></div>
+<h4>检测位图中x是否为1</h4>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/76f9b0196ba7d88e634fd9bbc973dcbd6f12a44d78aa4e5f2a8c6445aae8f054/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63663565376262613166313134353239393462656533323065313237643462372e706e67"><img src="https://camo.githubusercontent.com/76f9b0196ba7d88e634fd9bbc973dcbd6f12a44d78aa4e5f2a8c6445aae8f054/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63663565376262613166313134353239393462656533323065313237643462372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/cf5e7bba1f11452994bee320e127d4b7.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span> 检测位图中x是否为1</span>
+<span class="pl-k">bool</span> <span class="pl-en">test</span>(<span class="pl-c1">size_t</span> x)
+{
+	<span class="pl-c"><span class="pl-c">//</span> 计算第几个整形</span>
+	<span class="pl-c1">size_t</span> i = x / <span class="pl-c1">32</span>;
+	<span class="pl-c"><span class="pl-c">//</span> 计算第几个位</span>
+	<span class="pl-c1">size_t</span> j = x % <span class="pl-c1">32</span>;
+	<span class="pl-c"><span class="pl-c">//</span> 检测第j位是否为1</span>
+	<span class="pl-k">return</span> _bits[i] &amp; (<span class="pl-c1">1</span> &lt;&lt; j);
+}</pre></div>
+<h4>全部代码实现</h4>
+<div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">pragma</span> once
+#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>iostream<span class="pl-pds">&gt;</span></span>
+#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>vector<span class="pl-pds">&gt;</span></span>
+
+<span class="pl-k">using</span> <span class="pl-k">namespace</span> <span class="pl-en">std</span><span class="pl-k">;</span>
+
+<span class="pl-k">namespace</span> <span class="pl-en">lsl</span>
+{
+	<span class="pl-k">template</span>&lt;<span class="pl-c1">size_t</span> N&gt;
+	<span class="pl-k">class</span> <span class="pl-en">bitset</span>
+	{
+	<span class="pl-k">public:</span>
+		<span class="pl-c"><span class="pl-c">//</span> 构造</span>
+		<span class="pl-en">bitset</span>()
+		{
+			<span class="pl-c"><span class="pl-c">//</span> _bits.resize((N &gt;&gt; 5) + 1, 0); // 可以这样写，但是要注意优先级</span>
+			_bits.<span class="pl-c1">resize</span>(N / <span class="pl-c1">32</span> + <span class="pl-c1">1</span>, <span class="pl-c1">0</span>);
+		}
+
+		<span class="pl-c"><span class="pl-c">//</span> 将x比特位置1</span>
+		<span class="pl-k">void</span> <span class="pl-en">set</span>(<span class="pl-c1">size_t</span> x)
+		{
+			<span class="pl-c"><span class="pl-c">//</span> 计算第几个整形</span>
+			<span class="pl-c"><span class="pl-c">//</span> size_t i = x &gt;&gt; 5; // 也可以这样写</span>
+			<span class="pl-c1">size_t</span> i = x / <span class="pl-c1">32</span>;
+			<span class="pl-c"><span class="pl-c">//</span> 计算第几个位</span>
+			<span class="pl-c1">size_t</span> j = x % <span class="pl-c1">32</span>;
+			<span class="pl-c"><span class="pl-c">//</span> 将第j位处理成1其他位不变</span>
+			_bits[i] |= (<span class="pl-c1">1</span> &lt;&lt; j);
+		}
+
+		<span class="pl-c"><span class="pl-c">//</span> 将x比特位置0</span>
+		<span class="pl-k">void</span> <span class="pl-en">reset</span>(<span class="pl-c1">size_t</span> x)
+		{
+			<span class="pl-c"><span class="pl-c">//</span> 计算第几个整形</span>
+			<span class="pl-c1">size_t</span> i = x / <span class="pl-c1">32</span>;
+			<span class="pl-c"><span class="pl-c">//</span> 计算第几个位</span>
+			<span class="pl-c1">size_t</span> j = x % <span class="pl-c1">32</span>;
+			<span class="pl-c"><span class="pl-c">//</span> 将第j位处理成0其他位不变</span>
+			_bits[i] &amp;= ~(<span class="pl-c1">1</span> &lt;&lt; j);
+		}
+
+		<span class="pl-c"><span class="pl-c">//</span> 检测位图中x是否为1</span>
+		<span class="pl-k">bool</span> <span class="pl-en">test</span>(<span class="pl-c1">size_t</span> x)
+		{
+			<span class="pl-c"><span class="pl-c">//</span> 计算第几个整形</span>
+			<span class="pl-c1">size_t</span> i = x / <span class="pl-c1">32</span>;
+			<span class="pl-c"><span class="pl-c">//</span> 计算第几个位</span>
+			<span class="pl-c1">size_t</span> j = x % <span class="pl-c1">32</span>;
+			<span class="pl-c"><span class="pl-c">//</span> 检测第j位是否为1</span>
+			<span class="pl-k">return</span> _bits[i] &amp; (<span class="pl-c1">1</span> &lt;&lt; j);
+		}
+
+	<span class="pl-k">private:</span>
+		vector&lt;<span class="pl-k">int</span>&gt; _bits;
+	};
+}</pre></div>
+<h3>位图的应用</h3>
+<ol>
+<li><strong>快速查找某个数据是否在一个集合中</strong></li>
+<li><strong>排序 + 去重</strong></li>
+<li><strong>求两个集合的交集、并集等</strong></li>
+<li><strong>操作系统中磁盘块标记</strong></li>
+</ol>
+<hr>
+<h2>布隆过滤器</h2>
+<h3>布隆过滤器提出</h3>
+<ul>
+<li>我们在使用新闻客户端看新闻时，它会给我们不停地推荐新的内容，它每次推荐时要去重，去掉 那些已经看过的内容。问题来了，新闻客户端推荐系统如何实现推送去重的？ 用服务器记录了用户看过的所有历史记录，当推荐系统推荐新闻时会从每个用户的历史记录里进行筛选，过滤掉那 些已经存在的记录。 如何快速查找呢？</li>
+</ul>
+<ol>
+<li>用哈希表存储用户记录，缺点：浪费空间</li>
+<li>用位图存储用户记录，缺点：位图一般只能处理整形，如果内容编号是字符串，就无法处理 了。</li>
+<li>将哈希与位图结合，即<strong>布隆过滤器</strong></li>
+</ol>
+<h3>布隆过滤器概念</h3>
+<ul>
+<li>布隆过滤器是由布隆（Burton Howard Bloom）在1970年提出的 一种紧凑型的、比较巧妙的概率型数据结构，特点是高效地插入和查询，可以用来告诉你 <strong>“某样东西一定不存在或者可能存在”</strong>，它是用多个哈希函数，将一个数据映射到位图结构中。此种方式不仅可以提升查询效率，也 可以节省大量的内存空间。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d5a96455d78af98fb92e3c48926a1f59353bf04144f8d5383a815a96bf1231ed/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61356532303033303438613934613533396165663033306639303563643838652e706e67"><img src="https://camo.githubusercontent.com/d5a96455d78af98fb92e3c48926a1f59353bf04144f8d5383a815a96bf1231ed/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61356532303033303438613934613533396165663033306639303563643838652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/a5e2003048a94a539aef030f905cd88e.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/30783211c69fe1b6e872004e5f778ec1fc72f7a112cce5a9b211f7ae3c1a6bb4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35353033303638633238306134393235613939393338646462353264613433352e706e67"><img src="https://camo.githubusercontent.com/30783211c69fe1b6e872004e5f778ec1fc72f7a112cce5a9b211f7ae3c1a6bb4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35353033303638633238306134393235613939393338646462353264613433352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/5503068c280a4925a99938ddb52da435.png" style="max-width: 100%;"></a></p>
+<h3>布隆过滤器的特点</h3>
+<ul>
+<li>当布隆过滤器判断一个数据存在可能是不准确的，因为这个数据对应的比特位可能被其他一个数据或多个数据占用了。</li>
+<li>当布隆过滤器判断一个数据不存在是准确的，因为如果该数据存在那么该数据对应的比特位都应该已经被设置为1了。</li>
+</ul>
+<h3>控制误判率</h3>
+<ul>
+<li>其中k为哈希函数个数，m为布隆过滤器长度，n为插入的元素个数，p为误判率。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b186c628e64339e9d6efb694f3b8472e6cc4d4e6f573f761fd22cb5c18747093/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35663064616531343134626134653265623365393732353864616632393530652e706e67"><img src="https://camo.githubusercontent.com/b186c628e64339e9d6efb694f3b8472e6cc4d4e6f573f761fd22cb5c18747093/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35663064616531343134626134653265623365393732353864616632393530652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/5f0dae1414ba4e2eb3e97258daf2950e.png" style="max-width: 100%;"></a></p>
+<p>我们这里可以大概估算一下，如果使用3个哈希函数，即k的值为3，值我们取0.7，那么 $m$ 和 $n$ 的关系大概是$m = 4 × n$，也就是布隆过滤器的长度应该是插入元素个数的4倍。</p>
+<h3>布隆过滤器的实现</h3>
+<ul>
+<li>
+<p>首先，布隆过滤器可以实现为一个模板类，因为插入布隆过滤器的元素不仅仅是字符串，也可以是其他类型的数据，只有调用者能够提供对应的哈希函数将该类型的数据转换成整型即可，但一般情况下布隆过滤器都是用来处理字符串的，所以这里可以将模板参数K的缺省类型设置为string。</p>
+</li>
+<li>
+<p>布隆过滤器中的成员一般也就是一个位图，我们可以在布隆过滤器这里设置一个非类型模板参数<strong>N</strong>，用于让调用者指定位图的长度。</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span>布隆过滤器</span>
+<span class="pl-k">template</span>&lt;<span class="pl-c1">size_t</span> N, <span class="pl-k">class</span> <span class="pl-en">K</span> = string, <span class="pl-k">class</span> <span class="pl-en">HashFunc1</span> = BKDRHash, <span class="pl-k">class</span> <span class="pl-en">HashFunc2</span> = APHash, <span class="pl-k">class</span> <span class="pl-en">HashFunc3</span> = DJBHash&gt;
+<span class="pl-k">class</span> <span class="pl-en">BloomFilter</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-c"><span class="pl-c">//</span>...</span>
+<span class="pl-k">private:</span>
+	lsl::bitset&lt;N&gt; _bs;
+};</pre></div>
+<ul>
+<li>
+<p>实例化布隆过滤器时需要调用者提供三个哈希函数，由于布隆过滤器一般处理的是字符串类型的数据，因此这里我们可以默认提供几个将字符串转换成整型的哈希函数。</p>
+</li>
+<li>
+<p>这里选取将字符串转换成整型的哈希函数，是经过测试后综合评分最高的BKDRHash、APHash和DJBHash，这三种哈希算法在多种场景下产生哈希冲突的概率是最小的。</p>
+</li>
+<li>
+<p>此时本来这三种哈希函数单独使用时产生冲突的概率就比较小，现在要让它们同时产生冲突概率就更小了。</p>
+</li>
+</ul>
+<p>代码：</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">struct</span> <span class="pl-en">BKDRHash</span>
+{
+	<span class="pl-c1">size_t</span> <span class="pl-en">operator</span>()(<span class="pl-k">const</span> string&amp; s)
+	{
+		<span class="pl-c1">size_t</span> value = <span class="pl-c1">0</span>;
+		<span class="pl-k">for</span> (<span class="pl-k">auto</span> ch : s)
+		{
+			value = value * <span class="pl-c1">131</span> + ch;
+		}
+		<span class="pl-k">return</span> value;
+	}
+};
+<span class="pl-k">struct</span> <span class="pl-en">APHash</span>
+{
+	<span class="pl-c1">size_t</span> <span class="pl-en">operator</span>()(<span class="pl-k">const</span> string&amp; s)
+	{
+		<span class="pl-c1">size_t</span> value = <span class="pl-c1">0</span>;
+		<span class="pl-k">for</span> (<span class="pl-c1">size_t</span> i = <span class="pl-c1">0</span>; i &lt; s.<span class="pl-c1">size</span>(); i++)
+		{
+			<span class="pl-k">if</span> ((i &amp; <span class="pl-c1">1</span>) == <span class="pl-c1">0</span>)
+			{
+				value ^= ((value &lt;&lt; <span class="pl-c1">7</span>) ^ s[i] ^ (value &gt;&gt; <span class="pl-c1">3</span>));
+			}
+			<span class="pl-k">else</span>
+			{
+				value ^= (~((value &lt;&lt; <span class="pl-c1">11</span>) ^ s[i] ^ (value &gt;&gt; <span class="pl-c1">5</span>)));
+			}
+		}
+		<span class="pl-k">return</span> value;
+	}
+};
+<span class="pl-k">struct</span> <span class="pl-en">DJBHash</span>
+{
+	<span class="pl-c1">size_t</span> <span class="pl-en">operator</span>()(<span class="pl-k">const</span> string&amp; s)
+	{
+		<span class="pl-k">if</span> (s.<span class="pl-c1">empty</span>())
+			<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+		<span class="pl-c1">size_t</span> value = <span class="pl-c1">5381</span>;
+		<span class="pl-k">for</span> (<span class="pl-k">auto</span> ch : s)
+		{
+			value += (value &lt;&lt; <span class="pl-c1">5</span>) + ch;
+		}
+		<span class="pl-k">return</span> value;
+	}
+};</pre></div>
+<h4>布隆过滤器的插入</h4>
+<ul>
+<li>布隆过滤器当中需要提供一个Set接口，用于插入元素到布隆过滤器当中。插入元素时，需要通过三个哈希函数分别计算出该元素对应的三个比特位，然后将位图中的这三个比特位设置为1即可。</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">Set</span>(<span class="pl-k">const</span> K&amp; key)
+{
+	<span class="pl-c"><span class="pl-c">//</span>计算出key对应的三个位</span>
+	<span class="pl-c1">size_t</span> hash1 = <span class="pl-c1">HashFunc1</span>()(key) % N;
+	<span class="pl-c1">size_t</span> hash2 = <span class="pl-c1">HashFunc2</span>()(key) % N;
+	<span class="pl-c1">size_t</span> hash3 = <span class="pl-c1">HashFunc3</span>()(key) % N;
+	<span class="pl-c"><span class="pl-c">//</span> 将位图中的这三个位设置成1</span>
+	_bs.<span class="pl-c1">set</span>(hash1);
+	_bs.<span class="pl-c1">set</span>(hash2);
+	_bs.<span class="pl-c1">set</span>(hash3);
+}</pre></div>
+<h4>布隆过滤器的查找</h4>
+<ul>
+<li>
+<p>检测时，需要通过三个哈希函数分别计算出该元素对应的三个比特位，然后判断位图中的这三个比特位是否被设置为1。</p>
+<ul>
+<li><strong>只要这三个比特位当中有一个比特位未被设置则说明该元素一定不存在。</strong></li>
+<li><strong>如果这三个比特位全部被设置，则返回true表示该元素存在（可能存在误判）。</strong></li>
+</ul>
+</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">bool</span> <span class="pl-en">Test</span>(<span class="pl-k">const</span> T&amp; key)
+{
+	<span class="pl-c"><span class="pl-c">//</span>依次判断key对应的三个位是否被设置</span>
+	<span class="pl-c1">size_t</span> hash1 = <span class="pl-c1">HashFunc1</span>()(key) % N;
+	<span class="pl-k">if</span> (_bs.<span class="pl-c1">test</span>(hash1) == <span class="pl-c1">false</span>)
+		<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+
+	<span class="pl-c1">size_t</span> hash2 = <span class="pl-c1">HashFunc2</span>()(key) % N;
+	<span class="pl-k">if</span> (_bs.<span class="pl-c1">test</span>(hash1) == <span class="pl-c1">false</span>)
+		<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+
+	<span class="pl-c1">size_t</span> hash3 = <span class="pl-c1">HashFunc3</span>()(key) % N;
+	<span class="pl-k">if</span> (_bs.<span class="pl-c1">test</span>(hash1) == <span class="pl-c1">false</span>)
+		<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+
+	<span class="pl-k">return</span> <span class="pl-c1">true</span>; <span class="pl-c"><span class="pl-c">//</span> 可能存在，但是可能存在误判</span>
+}</pre></div>
+<h4>布隆过滤器的删除</h4>
+<p>布隆过滤器一般<strong>不支持删除</strong>操作：</p>
+<ul>
+<li>因为布隆过滤器判断一个元素存在时可能存在误判，因此无法保证要删除的元素确实在布隆过滤器当中，此时将位图中对应的比特位清0会影响其他元素。</li>
+<li>此外，就算要删除的元素确实在布隆过滤器当中，也可能该元素映射的多个比特位当中有些比特位是与其他元素共用的，此时将这些比特位清0也会影响其他元素。</li>
+</ul>
+<blockquote>
+<p>如何让布隆过滤器支持删除？</p>
+</blockquote>
+<p>要让布隆过滤器支持删除，必须要做到以下两点：</p>
+<ol>
+<li>保证要删除的元素在布隆过滤器当中。比如刚才的呢称例子当中，如果通过调用Test函数得知要删除的昵称可能存在布隆过滤器当中后，可以进一步遍历存储昵称的文件，确认该昵称是否真正存在。</li>
+<li>保证删除后不会影响到其他元素。可以为位图中的每一个比特位设置一个对应的计数值，当插入元素映射到该比特位时将该比特位的<strong>计数值++</strong>，当删除元素时将该元素对应比特位的<strong>计数值–-</strong> 即可。</li>
+</ol>
+<blockquote>
+<p>可是布隆过滤器最终还是没有提供删除的接口，因为使用布隆过滤器本来就是要节省空间和提高效率的。在删除时需要遍历文件或磁盘中确认待删除元素确实存在，而文件IO和磁盘IO的速度相对内存来说是很慢的，并且为位图中的每个比特位额外设置一个计数器，就需要多用原位图几倍的存储空间，这个代价也是不小的。</p>
+</blockquote>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/a32c7530afe0bf6de3c7533519cd7a049ea030b7e9b2aa38f9545aede1276b31/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32626462656465616636633634336437393538633134373066333438353462662e706e67"><img src="https://camo.githubusercontent.com/a32c7530afe0bf6de3c7533519cd7a049ea030b7e9b2aa38f9545aede1276b31/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32626462656465616636633634336437393538633134373066333438353462662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/2bdbedeaf6c643d7958c1470f34854bf.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>缺陷：</li>
+</ul>
+<ol>
+<li>无法确认元素是否真正在布隆过滤器中</li>
+<li>存在计数回绕</li>
+</ol>
+<h4>布隆过滤器优点</h4>
+<ol>
+<li>增加和查询元素的时间复杂度为:O($K$), (K为哈希函数的个数，一般比较小)，与数据量大小无关</li>
+<li>哈希函数相互之间没有关系，方便硬件并行运算</li>
+<li>布隆过滤器不需要存储元素本身，在某些对保密要求比较严格的场合有很大优势</li>
+<li>在能够承受一定的误判时，布隆过滤器比其他数据结构有这很大的空间优势</li>
+<li>数据量很大时，布隆过滤器可以表示全集，其他数据结构不能</li>
+<li>使用同一组散列函数的布隆过滤器可以进行交、并、差运算</li>
+</ol>
+<h4>布隆过滤器缺陷</h4>
+<ol>
+<li>有误判率，即存在假阳性(False Position)，即不能准确判断元素是否在集合中(补救方法：再建立一个白名单，存储可能会误判的数据)</li>
+<li>不能获取元素本身</li>
+<li>一般情况下不能从布隆过滤器中删除元素</li>
+<li>如果采用计数方式删除，可能会存在计数回绕问题</li>
+</ol>
+<h3>布隆过滤器使用场景</h3>
+<ul>
+<li>
+<p>比如当我们首次访问某个网站时需要用手机号注册账号，而用户的各种数据实际都是存储在数据库当中的，也就是磁盘上面。</p>
+</li>
+<li>
+<p>当我们用手机号注册账号时，系统就需要判断你填入的手机号是否已经注册过，如果注册过则会提示用户注册失败。</p>
+</li>
+<li>
+<p>但这种情况下系统不可能直接去遍历磁盘当中的用户数据，判断该手机号是否被注册过，因为磁盘IO是很慢的，这会降低用户的体验。</p>
+</li>
+<li>
+<p>这种情况下就可以使用布隆过滤器，将所有注册过的手机号全部添加到布隆过滤器当中，当我们需要用手机号注册账号时，就可以直接去布隆过滤器当中进行查找。</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/fd92d0ae3fe27d67c589f435ff2c6e9ef50a4fe3cbdb7a14cfbd61be7ad5645e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39393738393663346437353634303837613332626637653132393830656136652e706e67"><img src="https://camo.githubusercontent.com/fd92d0ae3fe27d67c589f435ff2c6e9ef50a4fe3cbdb7a14cfbd61be7ad5645e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39393738393663346437353634303837613332626637653132393830656136652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/997896c4d7564087a32bf7e12980ea6e.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>如果在布隆过滤器中查找后发现该手机号不存在，则说明该手机号没有被注册过，此时就可以让用户进行注册，并且避免了磁盘IO。</li>
+<li>如果在布隆过滤器中查找后发现该手机号存在，此时还需要进一步访问磁盘进行复核，确认该手机号是否真的被注册过，因为布隆过滤器在判断元素存在时可能会误判。</li>
+<li>由于大部分情况下用户用一个手机号注册账号时，都是知道自己没有用该手机号注册过账号的，因此在布隆过滤器中查找后都是找不到的，此时就避免了进行磁盘IO。而只有布隆过滤器误判或用户忘记自己用该手机号注册过账号的情况下，才需要访问磁盘进行复核。</li>
+</ul>
+<h3>位图的应用</h3>
+<ol>
+<li>给定一个100亿个整数，设计算法找到只出现一次的整数？</li>
+</ol>
+<ul>
+<li>出现0次--&gt;00来代表</li>
+<li>出现1次--&gt;01来代表</li>
+<li>出现2次以上--&gt;10来代表</li>
+</ul>
+<hr>
+<ul>
+<li>存储100亿个整数大概需要40G的内存空间，因此题目中的100亿个整数肯定是存储在文件当中的，代码中直接从vector中读取数据是为了方便演示。</li>
+<li>为了能映射所有整数，位图的大小必须开辟为2^32位，也就是代码中的<strong>4294967295</strong>，因此开辟一个位图大概需要512M的内存空间，两个位图就要占用1G的内存空间，所以代码中选择在堆区开辟空间，若是在栈区开辟则会导致栈溢出。</li>
+</ul>
+<p>代码实现：</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">template</span>&lt;<span class="pl-c1">size_t</span> N&gt;
+<span class="pl-k">class</span> <span class="pl-en">twobitset</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">void</span> <span class="pl-en">set</span>(<span class="pl-c1">size_t</span> x)
+	{
+		<span class="pl-k">if</span> (_bs1.<span class="pl-c1">test</span>(x) == <span class="pl-c1">false</span> &amp;&amp; _bs2.<span class="pl-c1">test</span>(x) == <span class="pl-c1">false</span>) <span class="pl-c"><span class="pl-c">//</span> 00</span>
+		{
+			_bs2.<span class="pl-c1">set</span>(x); <span class="pl-c"><span class="pl-c">//</span> _bs1不需要动 _ba2设置成1</span>
+		}
+		<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span> if (_bs1.test(x) == false &amp;&amp; _bs2.test(x) == true) // 01</span>
+		{
+			_bs1.<span class="pl-c1">set</span>(x); <span class="pl-c"><span class="pl-c">//</span> 1</span>
+			_bs2.<span class="pl-c1">reset</span>(x); <span class="pl-c"><span class="pl-c">//</span> 0</span>
+		}
+	}
+
+	<span class="pl-k">void</span> <span class="pl-en">Print</span>()
+	{
+		<span class="pl-k">for</span> (<span class="pl-c1">size_t</span> i = <span class="pl-c1">0</span>; i &lt; N; i++)
+		{
+			<span class="pl-k">if</span> (_bs1.<span class="pl-c1">test</span>(i) == <span class="pl-c1">false</span> &amp;&amp; _bs2.<span class="pl-c1">test</span>(i) == <span class="pl-c1">true</span>) <span class="pl-c"><span class="pl-c">//</span> 01 --&gt;出现一次</span>
+			{
+				cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>1-&gt;<span class="pl-pds">"</span></span> &lt;&lt; i &lt;&lt; endl;
+			}
+			<span class="pl-k">else</span> <span class="pl-k">if</span> (_bs1.<span class="pl-c1">test</span>(i) == <span class="pl-c1">true</span> &amp;&amp; _bs2.<span class="pl-c1">test</span>(i) == <span class="pl-c1">false</span>) <span class="pl-c"><span class="pl-c">//</span>10 --&gt;出现两次以上</span>
+			{
+				cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>2-&gt;<span class="pl-pds">"</span></span> &lt;&lt; i &lt;&lt; endl;
+			}
+		}
+		cout &lt;&lt; endl;
+	}
+
+<span class="pl-k">private:</span>
+	bitset&lt;N&gt; _bs1;
+	bitset&lt;N&gt; _bs2;
+};</pre></div>
+<ol start="2">
+<li>给两个文件，分别有100亿个整数，我们只有1G内存，如何找到两个文件的交集？</li>
+</ol>
+<ul>
+<li>
+<p><strong>各自映射到一个位图，一个值在两个位图都存在，则是交集</strong></p>
+</li>
+<li>
+<p>方案一：（一个位图需要512M内存）</p>
+</li>
+</ul>
+<ol>
+<li>依次读取第一个文件中的所有整数，将其映射到一个位图。</li>
+<li>再读取另一个文件中的所有整数，判断在不在位图中，在就是交集，不在就不是交集。</li>
+</ol>
+<ul>
+<li>方案二：（两个位图刚好需要1G内存，满足要求）</li>
+</ul>
+<ol>
+<li>依次读取第一个文件中的所有整数，将其映射到位图1。</li>
+<li>依次读取另一个文件中的所有整数，将其映射到位图2。</li>
+</ol>
+<ul>
+<li>将位图1和位图2进行<strong>与</strong>操作，结果存储在位图1中，此时位图1当中映射的整数就是两个文件的交集。</li>
+<li>对于32位的整型，无论待处理的整数个数是多少，开辟的位图都必须有2^32<br>
+个比特位，也就是512M，因为我们要保证每一个整数都能够映射到位图当中，因此这里位图的空间消耗是固定的。</li>
+</ul>
+<ol start="3">
+<li>位图应用变形：1个文件有100亿个int，1G内存，设计算法找到出现次数不超过2次的整数</li>
+</ol>
+<ul>
+<li>出现0次--&gt;00来代表</li>
+<li>出现1次--&gt;01来代表</li>
+<li>出现2次--&gt;10来代表</li>
+<li>出现3次及以上--&gt;11来代表</li>
+</ul>
+<blockquote>
+<p>一个整数要表示四种状态也是只需要两个位就够了，此时当我们读取到重复的整数时，就可以让其对应的两个位按照00→01→10→11的顺序进行变化，最后状态是01或10的整数就是出现次数不超过2次的整数。</p>
+</blockquote>
+<p>代码实现：</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">template</span>&lt;<span class="pl-c1">size_t</span> N&gt;
+<span class="pl-k">class</span> <span class="pl-en">twobitset</span>
+{
+<span class="pl-k">public:</span>
+	<span class="pl-k">void</span> <span class="pl-en">set</span>(<span class="pl-c1">size_t</span> x)
+	{
+		<span class="pl-k">if</span> (_bs1.<span class="pl-c1">test</span>(x) == <span class="pl-c1">false</span> &amp;&amp; _bs2.<span class="pl-c1">test</span>(x) == <span class="pl-c1">false</span>) <span class="pl-c"><span class="pl-c">//</span> 00</span>
+		{
+			_bs2.<span class="pl-c1">set</span>(x); <span class="pl-c"><span class="pl-c">//</span> _bs1不需要动 _ba2设置成1</span>
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (_bs1.<span class="pl-c1">test</span>(x) == <span class="pl-c1">false</span> &amp;&amp; _bs2.<span class="pl-c1">test</span>(x) == <span class="pl-c1">true</span>) <span class="pl-c"><span class="pl-c">//</span> 01</span>
+		{
+			_bs1.<span class="pl-c1">set</span>(x); <span class="pl-c"><span class="pl-c">//</span> 1</span>
+			_bs2.<span class="pl-c1">reset</span>(x); <span class="pl-c"><span class="pl-c">//</span> 0</span>
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (_bs1.<span class="pl-c1">test</span>(x) == <span class="pl-c1">true</span> &amp;&amp; _bs2.<span class="pl-c1">test</span>(x) == <span class="pl-c1">false</span>) <span class="pl-c"><span class="pl-c">//</span> 10</span>
+		{
+			_bs1.<span class="pl-c1">set</span>(x); <span class="pl-c"><span class="pl-c">//</span> 1</span>
+			_bs2.<span class="pl-c1">set</span>(x); <span class="pl-c"><span class="pl-c">//</span> 1</span>
+		}
+	}
+
+	<span class="pl-k">void</span> <span class="pl-en">Print</span>()
+	{
+		<span class="pl-k">for</span> (<span class="pl-c1">size_t</span> i = <span class="pl-c1">0</span>; i &lt; N; i++)
+		{
+			<span class="pl-k">if</span> (_bs1.<span class="pl-c1">test</span>(i) == <span class="pl-c1">false</span> &amp;&amp; _bs2.<span class="pl-c1">test</span>(i) == <span class="pl-c1">true</span>) <span class="pl-c"><span class="pl-c">//</span> 01 --&gt;出现一次</span>
+			{
+				cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>1-&gt;<span class="pl-pds">"</span></span> &lt;&lt; i &lt;&lt; endl;
+			}
+			<span class="pl-k">else</span> <span class="pl-k">if</span> (_bs1.<span class="pl-c1">test</span>(i) == <span class="pl-c1">true</span> &amp;&amp; _bs2.<span class="pl-c1">test</span>(i) == <span class="pl-c1">false</span>) <span class="pl-c"><span class="pl-c">//</span>10 --&gt;出现两次</span>
+			{
+				cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>2-&gt;<span class="pl-pds">"</span></span> &lt;&lt; i &lt;&lt; endl;
+			}
+		}
+		cout &lt;&lt; endl;
+	}
+
+<span class="pl-k">private:</span>
+	bitset&lt;N&gt; _bs1;
+	bitset&lt;N&gt; _bs2;
+};</pre></div>
+<h3>布隆过滤器相关</h3>
+<ol>
+<li>给两个文件，分别有100亿个query，我们只有1G内存，如何找到两个文件的交集？给出近似算法。</li>
+</ol>
+<ul>
+<li>
+<p>允许存在一些误判，那么我们就可以用布隆过滤器</p>
+</li>
+<li>
+<p>先读取其中一个文件当中的query，将其全部映射到一个布隆过滤器当中。</p>
+</li>
+<li>
+<p>然后读取另一个文件当中的query，依次判断每个query是否在布隆过滤器当中，如果在则是交集，不在则不是交集。</p>
+</li>
+</ul>
+<h3>哈希切割相关</h3>
+<ol start="2">
+<li>给两个文件，分别有100亿个query，我们只有1G内存，如何找到两个文件的交集？给出精确算法。</li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/063ffff115d77db63c2c5833555a0580917c31ad4f1e6f0067f0b57596fb8adc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62303064303130636662323834393938623637303162666234316636303735662e706e67"><img src="https://camo.githubusercontent.com/063ffff115d77db63c2c5833555a0580917c31ad4f1e6f0067f0b57596fb8adc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62303064303130636662323834393938623637303162666234316636303735662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/b00d010cfb284998b6701bfb41f6075f.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>现在要求给出精确算法，那么就不能使用布隆过滤器了，此时需要用到哈希切分。</p>
+</li>
+<li>
+<p>假设平均每个query为20字节，那么100亿个query就是200G，由于我们只有1G内存，这里可以考虑将一个文件切分成400个小文件。</p>
+</li>
+<li>
+<p>这里我们将这两个文件分别叫做A文件和B文件，此时我们将A文件切分成了A0~A399共400个小文件，将B文件切分成了B0~B399共400个小文件。</p>
+</li>
+</ul>
+<p>在切分时需要选择一个哈希函数进行哈希切分，以切分A文件为例，切分时依次遍历A文件当中的每个query，通过哈希函数将每个query转换成一个整型 $i (0 &amp;lt;= i &amp;lt;= 399)$，然后将这个query写入到小文件Ai当中。对于B文件也是同样的道理，但切分A文件和B文件时必须采用的是同一个哈希函数。</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f687d03c7586d5193a6eda1785f3173c04ea03814ea6c257253f11f14a0677e9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39333661383234373832643934336161386564666239306335366666333962642e706e67"><img src="https://camo.githubusercontent.com/f687d03c7586d5193a6eda1785f3173c04ea03814ea6c257253f11f14a0677e9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39333661383234373832643934336161386564666239306335366666333962642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/936a824782d943aa8edfb90c56ff39bd.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>由于切分A文件和B文件时采用的是同一个哈希函数，因此A文件与B文件中相同的query计算出的 i ii 值都是相同的，最终就会分别进入到Ai和Bi文件中，这也是哈希切分的意义。</p>
+</li>
+<li>
+<p>我们就只需要分别找出A0与B0的交集、A1与B1的交集、…、A399与B399的交集，最终将这些交集和起来就是A文件和B文件的交集。</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7af30e16000a68a5a8ce5d032914ba17ca7ca02bce478f1e8500988453acde5e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62653536396461633461363234303765613161623335326136623430343734382e706e67"><img src="https://camo.githubusercontent.com/7af30e16000a68a5a8ce5d032914ba17ca7ca02bce478f1e8500988453acde5e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62653536396461633461363234303765613161623335326136623430343734382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/be569dac4a62407ea1ab352a6b404748.png" style="max-width: 100%;"></a></p>
+<p>那各个小文件之间又应该如何找交集呢？</p>
+<ul>
+<li>经过切分后理论上每个小文件的平均大小是512M，因此我们可以将其中一个小文件加载到内存，并放到一个set容器中，再遍历另一个小文件当中的query，依次判断每个query是否在set容器中，如果在则是交集，不在则不是交集。</li>
+<li>当哈希切分并不是平均切分，有可能切出来的小文件中有一些小文件的大小仍然大于1G，此时如果与之对应的另一个小文件可以加载到内存，则可以选择将另一个小文件中的query加载到内存，因为我们只需要将两个小文件中的一个加载到内存中就行了。</li>
+<li>但如果两个小文件的大小都大于1G，那我们可以考虑将这两个小文件再进行一次切分，将其切成更小的文件，方法与之前切分A文件和B文件的方法类似。</li>
+</ul>
+<p>将这些小文件看作一个个的哈希桶，将大文件中的query通过哈希函数映射到这些哈希桶中，如果是相同的query，则会产生哈希冲突进入到同一个小文件中。</p>
+<hr>
+<ol start="3">
+<li>给一个超过100G大小的log file，log中存着IP地址，设计算法找到出现次数最多的IP地址？如何找到top K的IP？如何直接用Linux系统命令实现？</li>
+</ol>
+<ul>
+<li>我们将这个log file叫做A文件，由于A文件的大小超过100G，这里可以考虑将A文件切分成200个小文件。</li>
+<li>在切分时选择一个哈希函数进行哈希切分，通过哈希函数将A文件中的每个IP地址转换成一个整型  $i（0 ≤ i ≤ 199）$，然后将这个IP地址写入到小文件Ai当中。<br>
+由于哈希切分时使用的是同一个哈希函数，因此相同的IP地址计算出的 i ii 值是相同的，最终这些相同的IP地址就会进入到同一个Ai小文件当中。</li>
+</ul>
+<p>经过哈希切分后得到的这些小文件，理论上就能够加载到内存当中了，如果个别小文件仍然太大那可以对其再进行一次哈希切分，总之让最后切分出来的小文件能够加载到内存。</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7614872ea8b10ce84bea71c2a6e335623baf4802c0c4d26dbeae1045209944fd/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36663463336634373033383034383936616563393730386661633963663361302e706e67"><img src="https://camo.githubusercontent.com/7614872ea8b10ce84bea71c2a6e335623baf4802c0c4d26dbeae1045209944fd/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36663463336634373033383034383936616563393730386661633963663361302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/6f4c3f4703804896aec9708fac9cf3a0.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>现在要找到出现次数最多的IP地址，就可以分别将各个小文件加载到内存中， 然后用一个<strong>map&lt;string, int&gt;</strong> 容器统计出每个小文件中各个IP地址出现的次数，然后比对各个小文件中出现次数最多的IP地址，最终就能够得到log file中出现次数最多的IP地址。</li>
+<li>如果要找到出现次数top K的IP地址，可以先将一个小文件加载到内存中，选出小文件中出现次数最多的K个IP地址建成一个小堆，然后再依次比对其他小文件中各个IP地址出现的次数，如果某个IP地址出现的次数大于堆顶IP地址出现的次数，则将该IP地址与堆顶的IP地址进行交换，然后再进行一次向下调整，使其仍为小堆，最终比对完所有小文件中的IP地址后，这个小堆当中的K个IP地址就是出现次数top K的IP地址。</li>
+</ul>
+<p>在Linux下我们可以使用此命令来完成：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">sort log_txt <span class="pl-k">|</span> uniq -c <span class="pl-k">|</span> sort -nrk1,1 <span class="pl-k">|</span> head -K</pre></div></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</html>

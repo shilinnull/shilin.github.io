@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## 红黑树的概念
+
+**红黑树**（英语：Red–black tree）是一种自平衡二叉查找树，是在计算机科学中用到的一种数据结构，典型用途是实现关联数组。">
+<meta property="og:title" content="14. 红黑树【C++实现】">
+<meta property="og:description" content="## 红黑树的概念
+
+**红黑树**（英语：Red–black tree）是一种自平衡二叉查找树，是在计算机科学中用到的一种数据结构，典型用途是实现关联数组。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/14.%20-hong-hei-shu-%E3%80%90C%2B%2B-shi-xian-%E3%80%91.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>14. 红黑树【C++实现】</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">14. 红黑树【C++实现】</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/16" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>红黑树的概念</h2>
+<p><strong>红黑树</strong>（英语：Red–black tree）是一种自平衡二叉查找树，是在计算机科学中用到的一种数据结构，典型用途是实现关联数组。它在1972年由鲁道夫·贝尔发明，被称为“对称二叉B树”，它现代的名字源于利奥尼达斯·J·吉巴斯和罗伯特·塞奇威克于1978年写的一篇论文。红黑树的结构复杂，但它的操作有着良好的最坏情况运行时间，并且在实践中高效：它可以在$O(logN)$时间内完成查找、插入和删除，这里的<em>n</em>是树中元素的数目。</p>
+<h2>红黑树的性质</h2>
+<ul>
+<li>红黑树是每个节点都带有颜色属性的二叉查找树，颜色为红色或黑色。在二叉查找树强制一般要求以外，对于任何有效的红黑树我们增加了如下的额外要求：</li>
+</ul>
+<ol>
+<li><strong>节点是红色或黑色。</strong></li>
+<li><strong>根是黑色。</strong></li>
+<li><strong>所有叶子都是黑色（叶子是NIL节点）。</strong></li>
+<li><strong>每个红色节点必须有两个黑色的子节点。（或者说从每个叶子到根的所有路径上不能有两个连续的红色节点。）（或者说不存在两个相邻的红色节点，相邻指两个节点是父子关系。）（或者说红色节点的父节点和子节点均是黑色的。）</strong></li>
+<li><strong>从任一节点到其每个叶子的所有简单路径都包含相同数目的黑色节点。</strong></li>
+</ol>
+<p>下面是一个具体的**红黑树（来自维基百科）**的图例：</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0d18b93cce2cde4cd322e15e84d43373821c242de6d439b3d46312ba73bd6e57/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33393838396465653861376534303233616364633432323531643035316130612e706e67"><img src="https://camo.githubusercontent.com/0d18b93cce2cde4cd322e15e84d43373821c242de6d439b3d46312ba73bd6e57/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33393838396465653861376534303233616364633432323531643035316130612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/39889dee8a7e4023acdc42251d051a0a.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>这些约束确保了红黑树的关键特性：从根到叶子的最长的可能路径不多于最短的可能路径的两倍长。结果是这个树大致上是平衡的。因为操作比如插入、删除和查找某个值的最坏情况时间都要求与树的高度成比例，这个在高度上的理论上限允许红黑树在最坏情况下都是高效的，而不同于普通的二叉查找树。</p>
+</li>
+<li>
+<p>要知道为什么这些性质确保了这个结果，注意到性质4导致了路径不能有两个毗连的红色节点就足够了。最短的可能路径都是黑色节点，最长的可能路径有交替的红色和黑色节点。因为根据性质5所有最长的路径都有相同数目的黑色节点，这就表明了没有路径能多于任何其他路径的两倍长。</p>
+</li>
+<li>
+<p>在很多树数据结构的表示中，一个节点有可能只有一个子节点，而叶子节点包含数据。用这种范例表示红黑树是可能的，但是这会改变一些性质并使算法复杂。为此，本文中我们使用“nil叶子”，如上图所示，它不包含数据而只充当树在此结束的指示。这些节点在绘图中经常被省略，导致了这些树好像同上述原则相矛盾，而实际上不是这样。与此有关的结论是所有节点都有两个子节点，尽管其中的一个或两个可能是空叶子。</p>
+</li>
+</ul>
+<h2>红黑树的操作</h2>
+<ul>
+<li>因为每一个红黑树也是一个特化的二叉查找树，因此红黑树上的只读操作与普通二叉查找树上的只读操作相同。然而，在红黑树上进行插入操作和删除操作会导致不再符合红黑树的性质。恢复红黑树的性质需要少量$O(logN)$的颜色变更（实际是非常快速的）和不超过三次树旋转（对于插入操作是两次）。虽然插入和删除很复杂，但操作时间仍可以保持为$O(logN)$次。</li>
+</ul>
+<h2>红黑树结点的定义</h2>
+<ul>
+<li>这里还是一样是使用三叉链，另外还引入了一个节点的颜色，通过调整节点的颜色来调整整棵树</li>
+<li>这里的节点颜色我使用枚举类型，方便表示</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">enum</span> Colour
+{
+	RED,
+	BLACK
+};
+
+<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">V</span>&gt;
+<span class="pl-k">struct</span> <span class="pl-en">RBTreeNode</span>
+{
+	<span class="pl-c"><span class="pl-c">//</span>三叉链</span>
+	RBTreeNode&lt;K, V&gt;* _left;
+	RBTreeNode&lt;K, V&gt;* _right;
+	RBTreeNode&lt;K, V&gt;* _parent;
+
+	<span class="pl-c"><span class="pl-c">//</span>存储的键值对</span>
+	pair&lt;K, V&gt; _kv;
+
+	<span class="pl-c"><span class="pl-c">//</span>结点的颜色</span>
+	Colour _col; <span class="pl-c"><span class="pl-c">//</span>红/黑</span>
+
+	<span class="pl-c"><span class="pl-c">//</span>构造函数</span>
+	<span class="pl-en">RBTreeNode</span>(<span class="pl-k">const</span> pair&lt;K, V&gt;&amp; kv)
+		:_left(<span class="pl-c1">nullptr</span>)
+		, _right(<span class="pl-c1">nullptr</span>)
+		, _parent(<span class="pl-c1">nullptr</span>)
+		, _kv(kv)
+		, _col(RED)
+	{}
+};</pre></div>
+<ul>
+<li>我们首先以二叉查找树的方法增加节点并标记它为<strong>红色</strong>。（如果设为黑色，就会导致根到叶子的路径上有一条路上，多一个额外的黑节点，这个是很难调整的。但是设为红色节点后，可能会导致出现两个连续红色节点的冲突，那么可以通过颜色调换（color flips）和树旋转来调整。）下面要进行什么操作取决于其他临近节点的颜色。同人类的家族树中一样，我们将使用术语叔父节点来指一个节点的父节点的兄弟节点。注意：</li>
+</ul>
+<ol>
+<li>性质1和性质3总是保持着。</li>
+<li>性质4只在增加红色节点、重绘黑色节点为红色，或做旋转时受到威胁。</li>
+<li>性质5只在增加黑色节点、重绘红色节点为黑色，或做旋转时受到威胁。</li>
+</ol>
+<h2>红黑树的插入</h2>
+<p>红黑树插入结点的逻辑分为三步：</p>
+<ol>
+<li>按二叉搜索树的插入方法，找到待插入位置。</li>
+<li>将待插入结点插入到树中。</li>
+<li>若插入结点的父结点是红色的，则需要对红黑树进行调整。</li>
+</ol>
+<p>因为新节点的默认颜色是红色，因此：如果其双亲节点的颜色是黑色，没有违反红黑树任何<br>
+性质，则不需要调整；但当新插入节点的双亲节点颜色为红色时，就违反了性质三不能有连<br>
+在一起的红色节点，此时需要对红黑树<strong>分情况</strong>来讨论：</p>
+<ul>
+<li>约定:cur为当前节点，p为父节点，g为祖父节点，u为叔叔节点</li>
+</ul>
+<h3>情况一：插入结点的叔叔存在，且叔叔的颜色是红色</h3>
+<ul>
+<li>我们可以将叔叔和父亲的节点变黑，爷爷节点变红</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/12f6ac2da8e36c340068fe81bc4977a2024b46ffbd3ae44117c1f42213a0b2e9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39336137643437316633663334303566383061663432373736326465383334632e706e67"><img src="https://camo.githubusercontent.com/12f6ac2da8e36c340068fe81bc4977a2024b46ffbd3ae44117c1f42213a0b2e9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39336137643437316633663334303566383061663432373736326465383334632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/93a7d471f3f3405f80af427762de834c.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/56d78d799df09b321e1d385e7550278b5909ced65f3aab65b9786fa0bb0de4bc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66316130646463623338383334303534616335386535633338393865356133632e706e67"><img src="https://camo.githubusercontent.com/56d78d799df09b321e1d385e7550278b5909ced65f3aab65b9786fa0bb0de4bc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66316130646463623338383334303534616335386535633338393865356133632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/f1a0ddcb38834054ac58e5c3898e5a3c.png" style="max-width: 100%;"></a></p>
+<h3>情况二: 插入结点的叔叔存在，且叔叔的颜色是黑色</h3>
+<ul>
+<li>如果<strong>插入的位置是父亲的左</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/748b346e7791bdf1a00777b5953e248f7d7c31dd7b235935136626401be8bd17/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34353837313031646663633434613333386236386630363537366430363930352e706e67"><img src="https://camo.githubusercontent.com/748b346e7791bdf1a00777b5953e248f7d7c31dd7b235935136626401be8bd17/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34353837313031646663633434613333386236386630363537366430363930352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/4587101dfcc44a338b68f06576d06905.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/dc055682405de857896c1f7f9abe9bc84810be3b760213bd9114ee8acc10c05e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33666362623935633934653634306564613366663539323138346663633337362e706e67"><img src="https://camo.githubusercontent.com/dc055682405de857896c1f7f9abe9bc84810be3b760213bd9114ee8acc10c05e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33666362623935633934653634306564613366663539323138346663633337362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/3fcbb95c94e640eda3ff592184fcc376.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>如果<strong>插入的位置是父亲的右</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/43c43ce6989908980ca72c5eab47d337e9c2ec173924e0510470ba7061d7c9fa/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33653431336430396363616334346634626233366337306463383365663037342e706e67"><img src="https://camo.githubusercontent.com/43c43ce6989908980ca72c5eab47d337e9c2ec173924e0510470ba7061d7c9fa/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33653431336430396363616334346634626233366337306463383365663037342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/3e413d09ccac44f4bb36c70dc83ef074.png" style="max-width: 100%;"></a></p>
+<h3>情况三: 插入结点的叔叔不存在</h3>
+<ul>
+<li>p左单旋</li>
+<li>g右单旋</li>
+<li>颜色调整</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/fe73056d92ff52d78cbec89319e806f7c8b3d9c508c4bd0ddd7e11bc723492d1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31393932303462363763396134666331616137373962303236346531663061322e706e67"><img src="https://camo.githubusercontent.com/fe73056d92ff52d78cbec89319e806f7c8b3d9c508c4bd0ddd7e11bc723492d1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31393932303462363763396134666331616137373962303236346531663061322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/199204b67c9a4fc1aa779b0264e1f0a2.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span>插入函数</span>
+pair&lt;Node*, <span class="pl-k">bool</span>&gt; <span class="pl-en">Insert</span>(<span class="pl-k">const</span> pair&lt;K, V&gt;&amp; kv)
+{
+	<span class="pl-k">if</span> (_root == <span class="pl-c1">nullptr</span>) <span class="pl-c"><span class="pl-c">//</span>若红黑树为空树，则插入结点直接作为根结点</span>
+	{
+		_root = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(kv);
+		_root-&gt;<span class="pl-smi">_col</span> = BLACK; <span class="pl-c"><span class="pl-c">//</span>根结点必须是黑色</span>
+		<span class="pl-k">return</span> <span class="pl-c1">make_pair</span>(_root, <span class="pl-c1">true</span>); <span class="pl-c"><span class="pl-c">//</span>插入成功</span>
+	}
+	<span class="pl-c"><span class="pl-c">//</span>1、按二叉搜索树的插入方法，找到待插入位置</span>
+	Node* cur = _root;
+	Node* parent = <span class="pl-c1">nullptr</span>;
+	<span class="pl-k">while</span> (cur)
+	{
+		<span class="pl-k">if</span> (kv.<span class="pl-smi">first</span> &lt; cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) <span class="pl-c"><span class="pl-c">//</span>待插入结点的key值小于当前结点的key值</span>
+		{
+			<span class="pl-c"><span class="pl-c">//</span>往该结点的左子树走</span>
+			parent = cur;
+			cur = cur-&gt;<span class="pl-smi">_left</span>;
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (kv.<span class="pl-smi">first</span> &gt; cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) <span class="pl-c"><span class="pl-c">//</span>待插入结点的key值大于当前结点的key值</span>
+		{
+			<span class="pl-c"><span class="pl-c">//</span>往该结点的右子树走</span>
+			parent = cur;
+			cur = cur-&gt;<span class="pl-smi">_right</span>;
+		}
+		<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>待插入结点的key值等于当前结点的key值</span>
+		{
+			<span class="pl-k">return</span> <span class="pl-c1">make_pair</span>(cur, <span class="pl-c1">false</span>); <span class="pl-c"><span class="pl-c">//</span>插入失败</span>
+		}
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span>2、将待插入结点插入到树中</span>
+	cur = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(kv); <span class="pl-c"><span class="pl-c">//</span>根据所给值构造一个结点</span>
+	Node* newnode = cur; <span class="pl-c"><span class="pl-c">//</span>记录新插入的结点（便于后序返回）</span>
+	<span class="pl-k">if</span> (kv.<span class="pl-smi">first</span> &lt; parent-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) <span class="pl-c"><span class="pl-c">//</span>新结点的key值小于parent的key值</span>
+	{
+		<span class="pl-c"><span class="pl-c">//</span>插入到parent的左边</span>
+		parent-&gt;<span class="pl-smi">_left</span> = cur;
+		cur-&gt;<span class="pl-smi">_parent</span> = parent;
+	}
+	<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>新结点的key值大于parent的key值</span>
+	{
+		<span class="pl-c"><span class="pl-c">//</span>插入到parent的右边</span>
+		parent-&gt;<span class="pl-smi">_right</span> = cur;
+		cur-&gt;<span class="pl-smi">_parent</span> = parent;
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span>3、若插入结点的父结点是红色的，则需要对红黑树进行调整</span>
+	<span class="pl-k">while</span> (parent &amp;&amp; parent-&gt;<span class="pl-smi">_col</span> == RED)
+	{
+		Node* grandfather = parent-&gt;<span class="pl-smi">_parent</span>; <span class="pl-c"><span class="pl-c">//</span>parent是红色，则其父结点一定存在</span>
+		<span class="pl-k">if</span> (parent == grandfather-&gt;<span class="pl-smi">_left</span>) <span class="pl-c"><span class="pl-c">//</span>parent是grandfather的左孩子</span>
+		{
+			Node* uncle = grandfather-&gt;<span class="pl-smi">_right</span>; <span class="pl-c"><span class="pl-c">//</span>uncle是grandfather的右孩子</span>
+			<span class="pl-k">if</span> (uncle &amp;&amp; uncle-&gt;<span class="pl-smi">_col</span> == RED) <span class="pl-c"><span class="pl-c">//</span>情况1：uncle存在且为红</span>
+			{
+				<span class="pl-c"><span class="pl-c">//</span>颜色调整</span>
+				parent-&gt;<span class="pl-smi">_col</span> = uncle-&gt;<span class="pl-smi">_col</span> = BLACK;
+				grandfather-&gt;<span class="pl-smi">_col</span> = RED;
+
+				<span class="pl-c"><span class="pl-c">//</span>继续往上处理</span>
+				cur = grandfather;
+				parent = cur-&gt;<span class="pl-smi">_parent</span>;
+			}
+			<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>情况2+情况3：uncle不存在 + uncle存在且为黑</span>
+			{
+				<span class="pl-k">if</span> (cur == parent-&gt;<span class="pl-smi">_left</span>)
+				{
+					<span class="pl-c1">RotateR</span>(grandfather); <span class="pl-c"><span class="pl-c">//</span>右单旋</span>
+
+					<span class="pl-c"><span class="pl-c">//</span>颜色调整</span>
+					grandfather-&gt;<span class="pl-smi">_col</span> = RED;
+					parent-&gt;<span class="pl-smi">_col</span> = BLACK;
+				}
+				<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>cur == parent-&gt;_right</span>
+				{
+					<span class="pl-c1">RotateLR</span>(grandfather); <span class="pl-c"><span class="pl-c">//</span>左右双旋</span>
+
+					<span class="pl-c"><span class="pl-c">//</span>颜色调整</span>
+					grandfather-&gt;<span class="pl-smi">_col</span> = RED;
+					cur-&gt;<span class="pl-smi">_col</span> = BLACK;
+				}
+				<span class="pl-k">break</span>; <span class="pl-c"><span class="pl-c">//</span>子树旋转后，该子树的根变成了黑色，无需继续往上进行处理</span>
+			}
+		}
+		<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>parent是grandfather的右孩子</span>
+		{
+			Node* uncle = grandfather-&gt;<span class="pl-smi">_left</span>; <span class="pl-c"><span class="pl-c">//</span>uncle是grandfather的左孩子</span>
+			<span class="pl-k">if</span> (uncle &amp;&amp; uncle-&gt;<span class="pl-smi">_col</span> == RED) <span class="pl-c"><span class="pl-c">//</span>情况1：uncle存在且为红</span>
+			{
+				<span class="pl-c"><span class="pl-c">//</span>颜色调整</span>
+				uncle-&gt;<span class="pl-smi">_col</span> = parent-&gt;<span class="pl-smi">_col</span> = BLACK;
+				grandfather-&gt;<span class="pl-smi">_col</span> = RED;
+
+				<span class="pl-c"><span class="pl-c">//</span>继续往上处理</span>
+				cur = grandfather;
+				parent = cur-&gt;<span class="pl-smi">_parent</span>;
+			}
+			<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>情况2+情况3：uncle不存在 + uncle存在且为黑</span>
+			{
+				<span class="pl-k">if</span> (cur == parent-&gt;<span class="pl-smi">_left</span>)
+				{
+					<span class="pl-c1">RotateRL</span>(grandfather); <span class="pl-c"><span class="pl-c">//</span>右左双旋</span>
+
+					<span class="pl-c"><span class="pl-c">//</span>颜色调整</span>
+					cur-&gt;<span class="pl-smi">_col</span> = BLACK;
+					grandfather-&gt;<span class="pl-smi">_col</span> = RED;
+				}
+				<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>cur == parent-&gt;_right</span>
+				{
+					<span class="pl-c1">RotateL</span>(grandfather); <span class="pl-c"><span class="pl-c">//</span>左单旋</span>
+
+					<span class="pl-c"><span class="pl-c">//</span>颜色调整</span>
+					grandfather-&gt;<span class="pl-smi">_col</span> = RED;
+					parent-&gt;<span class="pl-smi">_col</span> = BLACK;
+				}
+				<span class="pl-k">break</span>; <span class="pl-c"><span class="pl-c">//</span>子树旋转后，该子树的根变成了黑色，无需继续往上进行处理</span>
+			}
+		}
+	}
+	_root-&gt;<span class="pl-smi">_col</span> = BLACK; <span class="pl-c"><span class="pl-c">//</span>根结点的颜色为黑色（可能被情况一变成了红色，需要变回黑色）</span>
+	<span class="pl-k">return</span> <span class="pl-c1">make_pair</span>(newnode, <span class="pl-c1">true</span>); <span class="pl-c"><span class="pl-c">//</span>插入成功</span>
+}</pre></div>
+<h2>红黑树的验证</h2>
+<p>红黑树的检测分为两步：</p>
+<ol>
+<li>检测其是否满足二叉搜索树(中序遍历是否为有序序列)</li>
+<li>检测其是否满足红黑树的性质</li>
+</ol>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span>中序遍历</span>
+<span class="pl-k">void</span> <span class="pl-en">Inorder</span>()
+{
+	<span class="pl-c1">_Inorder</span>(_root);
+}
+<span class="pl-c"><span class="pl-c">//</span>中序遍历子函数</span>
+<span class="pl-k">void</span> <span class="pl-en">_Inorder</span>(Node* root)
+{
+	<span class="pl-k">if</span> (root == <span class="pl-c1">nullptr</span>)
+		<span class="pl-k">return</span>;
+	<span class="pl-c1">_Inorder</span>(root-&gt;<span class="pl-smi">_left</span>);
+	cout &lt;&lt; root-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>;
+	<span class="pl-c1">_Inorder</span>(root-&gt;<span class="pl-smi">_right</span>);
+}
+
+<span class="pl-c"><span class="pl-c">//</span>判断是否为红黑树</span>
+<span class="pl-k">bool</span> <span class="pl-en">ISRBTree</span>()
+{
+	<span class="pl-k">if</span> (_root == <span class="pl-c1">nullptr</span>) <span class="pl-c"><span class="pl-c">//</span>空树是红黑树</span>
+	{
+		<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+	}
+	<span class="pl-k">if</span> (_root-&gt;<span class="pl-smi">_col</span> == RED)
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>error：根结点为红色<span class="pl-pds">"</span></span> &lt;&lt; endl;
+		<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span>找最左路径作为黑色结点数目的参考值</span>
+	Node* cur = _root;
+	<span class="pl-k">int</span> BlackCount = <span class="pl-c1">0</span>;
+	<span class="pl-k">while</span> (cur)
+	{
+		<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_col</span> == BLACK)
+			BlackCount++;
+		cur = cur-&gt;<span class="pl-smi">_left</span>;
+	}
+
+	<span class="pl-k">int</span> count = <span class="pl-c1">0</span>;
+	<span class="pl-k">return</span> <span class="pl-c1">_ISRBTree</span>(_root, count, BlackCount);
+}
+<span class="pl-c"><span class="pl-c">//</span>判断是否为红黑树的子函数</span>
+<span class="pl-k">bool</span> <span class="pl-en">_ISRBTree</span>(Node* root, <span class="pl-k">int</span> count, <span class="pl-k">int</span> BlackCount)
+{
+	<span class="pl-k">if</span> (root == <span class="pl-c1">nullptr</span>) <span class="pl-c"><span class="pl-c">//</span>该路径已经走完了</span>
+	{
+		<span class="pl-k">if</span> (count != BlackCount)
+		{
+			cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>error：黑色结点的数目不相等<span class="pl-pds">"</span></span> &lt;&lt; endl;
+			<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+		}
+		<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+	}
+
+	<span class="pl-k">if</span> (root-&gt;<span class="pl-smi">_col</span> == RED &amp;&amp; root-&gt;<span class="pl-smi">_parent</span>-&gt;<span class="pl-smi">_col</span> == RED)
+	{
+		cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>error：存在连续的红色结点<span class="pl-pds">"</span></span> &lt;&lt; endl;
+		<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+	}
+	<span class="pl-k">if</span> (root-&gt;<span class="pl-smi">_col</span> == BLACK)
+	{
+		count++;
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">_ISRBTree</span>(root-&gt;<span class="pl-smi">_left</span>, count, BlackCount) &amp;&amp; <span class="pl-c1">_ISRBTree</span>(root-&gt;<span class="pl-smi">_right</span>, count, BlackCount);
+}</pre></div>
+<h3>红黑树的查找</h3>
+<ul>
+<li>红黑树的查找函数与二叉搜索树的查找方式一模一样，逻辑如下：</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span>查找函数</span>
+Node* <span class="pl-en">Find</span>(<span class="pl-k">const</span> K&amp; key)
+{
+	Node* cur = _root;
+	<span class="pl-k">while</span> (cur)
+	{
+		<span class="pl-k">if</span> (key &lt; cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) <span class="pl-c"><span class="pl-c">//</span>key值小于该结点的值</span>
+		{
+			cur = cur-&gt;<span class="pl-smi">_left</span>; <span class="pl-c"><span class="pl-c">//</span>在该结点的左子树当中查找</span>
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (key &gt; cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) <span class="pl-c"><span class="pl-c">//</span>key值大于该结点的值</span>
+		{
+			cur = cur-&gt;<span class="pl-smi">_right</span>; <span class="pl-c"><span class="pl-c">//</span>在该结点的右子树当中查找</span>
+		}
+		<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>找到了目标结点</span>
+		{
+			<span class="pl-k">return</span> cur; <span class="pl-c"><span class="pl-c">//</span>返回该结点</span>
+		}
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">nullptr</span>; <span class="pl-c"><span class="pl-c">//</span>查找失败</span>
+}</pre></div>
+<h2>红黑树的删除</h2>
+<blockquote>
+<p>我们知道删除需先找到“替代点”来替代删除点而被删除，也就是删除的是替代点，而替代点N的至少有一个子节点为NULL，那么，若N为红色，则两个子节点一定都为NULL（必须地），那么直接把N删了，不违反任何性质，ok，结束了；若N为黑色，另一个节点M不为NULL，则另一个节点M一定是红色的，且M的子节点都为NULL（按性质来的，不明白，自己分析一下）那么把N删掉，M占到N的位置，并改为黑色，不违反任何性质，ok，结束了；若N为黑色，另一个节点也为NULL，则把N删掉，该位置置为NULL，显然这个黑节点被删除了，破坏了性质5，那么要以N节点为起始点检索看看属于那种情况，并作相应的操作，另还需说明N为黑点（也许是NULL，也许不是，都一样），P为父节点，S为兄弟节点（这个我真想给兄弟节点叫B（brother）多好啊，不过人家图就是S我也不能改，在重画图，太浪费时间了！S也行呵呵，就当是sister也行，哈哈）分为以下5中情况：</p>
+</blockquote>
+<h3>情形1：S为红色（那么父节点P一定是黑，子节点一定是黑），N是P的左孩子（或者N是P的右孩子）。</h3>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/bf673c623f8fae2a5c1f78f72adcf77e6ebd2a38b86b0aa4b33263f89989b527/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36666538633561653335333134376365383837616133306632663964356238342e706e67"><img src="https://camo.githubusercontent.com/bf673c623f8fae2a5c1f78f72adcf77e6ebd2a38b86b0aa4b33263f89989b527/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36666538633561653335333134376365383837616133306632663964356238342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/6fe8c5ae353147ce887aa30f2f9d5b84.png" style="max-width: 100%;"></a></p>
+<p><strong>操作</strong>：P、S变色，并交换----相当于AVL中的右右中旋转即以P为中心S向左旋（或者是AVL中的左左中的旋转），未结束。</p>
+<p><strong>解析</strong>：我们知道P的左边少了一个黑节点，这样操作相当于在N头上又加了一个红节点----不违反任何性质，但是到通过N的路径仍少了一个黑节点，需要再把对N进行一次检索，并作相应的操作才可以平衡（暂且不管往下看）。</p>
+<h3>情形2：P、S及S的孩子们都为黑。</h3>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/742cb473cb87d9e58ee09d2154b68712d0660c1e280ed6c0c7de795f6bd1e5b3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30343963333263616364353234373037393562653039323466656535303663662e706e67"><img src="https://camo.githubusercontent.com/742cb473cb87d9e58ee09d2154b68712d0660c1e280ed6c0c7de795f6bd1e5b3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30343963333263616364353234373037393562653039323466656535303663662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/049c32cacd52470795be0924fee506cf.png" style="max-width: 100%;"></a></p>
+<p><strong>操作</strong>：S改为红色，未结束。<br>
+<strong>解析</strong>：S变为红色后经过S节点的路径的黑节点数目也减少了1，那个从P出发到其叶子节点到所有路径所包含的黑节点数目（记为num）相等了。但是这个num比之前少了1，因为左右子树中的黑节点数目都减少了！一般地，P是他父节点G的一个孩子，那么由G到其叶子节点的黑节点数目就不相等了，所以说没有结束，需把P当做新的起始点开始向上检索。</p>
+<h3>情形3：P为红（S一定为黑），S的孩子们都为黑。</h3>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f23a9c672512594ba72dd2271dd2a9c68730e4d3165a0f268412a89ed86c3ced/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37623233373030323063613934326334383435643334333439653732616330312e706e67"><img src="https://camo.githubusercontent.com/f23a9c672512594ba72dd2271dd2a9c68730e4d3165a0f268412a89ed86c3ced/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37623233373030323063613934326334383435643334333439653732616330312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/7b2370020ca942c4845d34349e72ac01.png" style="max-width: 100%;"></a></p>
+<p><strong>操作</strong>：P该为黑，S改为红，结束。</p>
+<p><strong>解析</strong>：这种情况最简单了，既然N这边少了一个黑节点，那么S这边就拿出了一个黑节点来共享一下，这样一来，S这边没少一个黑节点，而N这边便多了一个黑节点，这样就恢复了平衡<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/8f3bd7230d3d067c8cc3fd8e29c8696676c134040427cec885602a42f775d239/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38343930383065313936613134646565383631613032666265343264633234392e706e67"><img src="https://camo.githubusercontent.com/8f3bd7230d3d067c8cc3fd8e29c8696676c134040427cec885602a42f775d239/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38343930383065313936613134646565383631613032666265343264633234392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/849080e196a14dee861a02fbe42dc249.png" style="max-width: 100%;"></a></p>
+<h3>情形4：P任意色，S为黑，N是P的左孩子，S的右孩子SR为红，S的左孩子任意（或者是N是P的右孩子，S的左孩子为红，S的右孩子任意）。</h3>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5dd83695f64bd8ec7ac052e326ceffcaf9fbc93fabb3a74c59fc9d069615d588/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38623039333363353164666334326361613335653238663439346237373737352e706e67"><img src="https://camo.githubusercontent.com/5dd83695f64bd8ec7ac052e326ceffcaf9fbc93fabb3a74c59fc9d069615d588/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38623039333363353164666334326361613335653238663439346237373737352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/8b0933c51dfc42caa35e28f494b77775.png" style="max-width: 100%;"></a></p>
+<p><strong>操作</strong>：SR（SL）改为黑，P改为黑，S改为P的颜色，P、S变换--这里相对应于AVL中的右右中的旋转（或者是AVL中的左左旋转），结束。<br>
+<strong>解析</strong>：P、S旋转有变色，等于给N这边加了一个黑节点，P位置（是位置而不是P）的颜色不变，S这边少了一个黑节点；SR有红变黑，S这边又增加了一个黑节点；这样一来又恢复了平衡，结束。</p>
+<h3>情形5：P任意色，S为黑，N是P的左孩子，S的左孩子SL为红，S的右孩子SR为黑（或者N是P的有孩子，S的右孩子为红，S的左孩子为黑）。</h3>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2181b7d41b710f679f8cad9be115c76248f1a9ecd112e69213f925bb39b9a5ab/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66393635376534323837656634353165626436313836323639616161313062622e706e67"><img src="https://camo.githubusercontent.com/2181b7d41b710f679f8cad9be115c76248f1a9ecd112e69213f925bb39b9a5ab/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66393635376534323837656634353165626436313836323639616161313062622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/f9657e4287ef451ebd6186269aaa10bb.png" style="max-width: 100%;"></a></p>
+<p><strong>操作</strong>：SL（或SR）改为黑，S改为红，SL（SR）、S变换；此时就回到了情形4，SL（SR）变成了黑S，S变成了红SR（SL），做情形4的操作即可，这两次变换，其实就是对应AVL的右左的两次旋转（或者是AVL的左右的两次旋转）。<br>
+<strong>解析</strong>：这种情况如果你按情形4的操作的话，由于SR本来就是黑色，你无法弥补由于P、S的变换（旋转）给S这边造成的损失！所以我没先对S、SL进行变换之后就变为情形4的情况了。</p>
+<h3>代码实现：</h3>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span>删除函数</span>
+<span class="pl-k">bool</span> <span class="pl-en">Erase</span>(<span class="pl-k">const</span> K&amp; key)
+{
+	<span class="pl-c"><span class="pl-c">//</span>用于遍历二叉树</span>
+	Node* parent = <span class="pl-c1">nullptr</span>;
+	Node* cur = _root;
+	<span class="pl-c"><span class="pl-c">//</span>用于标记实际的待删除结点及其父结点</span>
+	Node* delParentPos = <span class="pl-c1">nullptr</span>;
+	Node* delPos = <span class="pl-c1">nullptr</span>;
+	<span class="pl-k">while</span> (cur)
+	{
+		<span class="pl-k">if</span> (key &lt; cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) <span class="pl-c"><span class="pl-c">//</span>所给key值小于当前结点的key值</span>
+		{
+			<span class="pl-c"><span class="pl-c">//</span>往该结点的左子树走</span>
+			parent = cur;
+			cur = cur-&gt;<span class="pl-smi">_left</span>;
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (key &gt; cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) <span class="pl-c"><span class="pl-c">//</span>所给key值大于当前结点的key值</span>
+		{
+			<span class="pl-c"><span class="pl-c">//</span>往该结点的右子树走</span>
+			parent = cur;
+			cur = cur-&gt;<span class="pl-smi">_right</span>;
+		}
+		<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>找到了待删除结点</span>
+		{
+			<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_left</span> == <span class="pl-c1">nullptr</span>) <span class="pl-c"><span class="pl-c">//</span>待删除结点的左子树为空</span>
+			{
+				<span class="pl-k">if</span> (cur == _root) <span class="pl-c"><span class="pl-c">//</span>待删除结点是根结点</span>
+				{
+					_root = _root-&gt;<span class="pl-smi">_right</span>; <span class="pl-c"><span class="pl-c">//</span>让根结点的右子树作为新的根结点</span>
+					<span class="pl-k">if</span> (_root)
+					{
+						_root-&gt;<span class="pl-smi">_parent</span> = <span class="pl-c1">nullptr</span>;
+						_root-&gt;<span class="pl-smi">_col</span> = BLACK; <span class="pl-c"><span class="pl-c">//</span>根结点为黑色</span>
+					}
+					<span class="pl-k">delete</span> cur; <span class="pl-c"><span class="pl-c">//</span>删除原根结点</span>
+					<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+				}
+				<span class="pl-k">else</span>
+				{
+					delParentPos = parent; <span class="pl-c"><span class="pl-c">//</span>标记实际删除结点的父结点</span>
+					delPos = cur; <span class="pl-c"><span class="pl-c">//</span>标记实际删除的结点</span>
+				}
+				<span class="pl-k">break</span>; <span class="pl-c"><span class="pl-c">//</span>进行红黑树的调整以及结点的实际删除</span>
+			}
+			<span class="pl-k">else</span> <span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_right</span> == <span class="pl-c1">nullptr</span>) <span class="pl-c"><span class="pl-c">//</span>待删除结点的右子树为空</span>
+			{
+				<span class="pl-k">if</span> (cur == _root) <span class="pl-c"><span class="pl-c">//</span>待删除结点是根结点</span>
+				{
+					_root = _root-&gt;<span class="pl-smi">_left</span>; <span class="pl-c"><span class="pl-c">//</span>让根结点的左子树作为新的根结点</span>
+					<span class="pl-k">if</span> (_root)
+					{
+						_root-&gt;<span class="pl-smi">_parent</span> = <span class="pl-c1">nullptr</span>;
+						_root-&gt;<span class="pl-smi">_col</span> = BLACK; <span class="pl-c"><span class="pl-c">//</span>根结点为黑色</span>
+					}
+					<span class="pl-k">delete</span> cur; <span class="pl-c"><span class="pl-c">//</span>删除原根结点</span>
+					<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+				}
+				<span class="pl-k">else</span>
+				{
+					delParentPos = parent; <span class="pl-c"><span class="pl-c">//</span>标记实际删除结点的父结点</span>
+					delPos = cur; <span class="pl-c"><span class="pl-c">//</span>标记实际删除的结点</span>
+				}
+				<span class="pl-k">break</span>; <span class="pl-c"><span class="pl-c">//</span>进行红黑树的调整以及结点的实际删除</span>
+			}
+			<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>待删除结点的左右子树均不为空</span>
+			{
+				<span class="pl-c"><span class="pl-c">//</span>替换法删除</span>
+				<span class="pl-c"><span class="pl-c">//</span>寻找待删除结点右子树当中key值最小的结点作为实际删除结点</span>
+				Node* minParent = cur;
+				Node* minRight = cur-&gt;<span class="pl-smi">_right</span>;
+				<span class="pl-k">while</span> (minRight-&gt;<span class="pl-smi">_left</span>)
+				{
+					minParent = minRight;
+					minRight = minRight-&gt;<span class="pl-smi">_left</span>;
+				}
+				cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span> = minRight-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>; <span class="pl-c"><span class="pl-c">//</span>将待删除结点的key改为minRight的key</span>
+				cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">second</span> = minRight-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">second</span>; <span class="pl-c"><span class="pl-c">//</span>将待删除结点的value改为minRight的value</span>
+				delParentPos = minParent; <span class="pl-c"><span class="pl-c">//</span>标记实际删除结点的父结点</span>
+				delPos = minRight; <span class="pl-c"><span class="pl-c">//</span>标记实际删除的结点</span>
+				<span class="pl-k">break</span>; <span class="pl-c"><span class="pl-c">//</span>进行红黑树的调整以及结点的实际删除</span>
+			}
+		}
+	}
+	<span class="pl-k">if</span> (delPos == <span class="pl-c1">nullptr</span>) <span class="pl-c"><span class="pl-c">//</span>delPos没有被修改过，说明没有找到待删除结点</span>
+	{
+		<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span>记录待删除结点及其父结点（用于后续实际删除）</span>
+	Node* del = delPos;
+	Node* delP = delParentPos;
+
+	<span class="pl-c"><span class="pl-c">//</span>调整红黑树</span>
+	<span class="pl-k">if</span> (delPos-&gt;<span class="pl-smi">_col</span> == BLACK) <span class="pl-c"><span class="pl-c">//</span>删除的是黑色结点</span>
+	{
+		<span class="pl-k">if</span> (delPos-&gt;<span class="pl-smi">_left</span>) <span class="pl-c"><span class="pl-c">//</span>待删除结点有一个红色的左孩子（不可能是黑色）</span>
+		{
+			delPos-&gt;<span class="pl-smi">_left</span>-&gt;<span class="pl-smi">_col</span> = BLACK; <span class="pl-c"><span class="pl-c">//</span>将这个红色的左孩子变黑即可</span>
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (delPos-&gt;<span class="pl-smi">_right</span>) <span class="pl-c"><span class="pl-c">//</span>待删除结点有一个红色的右孩子（不可能是黑色）</span>
+		{
+			delPos-&gt;<span class="pl-smi">_right</span>-&gt;<span class="pl-smi">_col</span> = BLACK; <span class="pl-c"><span class="pl-c">//</span>将这个红色的右孩子变黑即可</span>
+		}
+		<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>待删除结点的左右均为空</span>
+		{
+			<span class="pl-k">while</span> (delPos != _root) <span class="pl-c"><span class="pl-c">//</span>可能一直调整到根结点</span>
+			{
+				<span class="pl-k">if</span> (delPos == delParentPos-&gt;<span class="pl-smi">_left</span>) <span class="pl-c"><span class="pl-c">//</span>待删除结点是其父结点的左孩子</span>
+				{
+					Node* brother = delParentPos-&gt;<span class="pl-smi">_right</span>; <span class="pl-c"><span class="pl-c">//</span>兄弟结点是其父结点的右孩子</span>
+					<span class="pl-c"><span class="pl-c">//</span>情况一：brother为红色</span>
+					<span class="pl-k">if</span> (brother-&gt;<span class="pl-smi">_col</span> == RED)
+					{
+						delParentPos-&gt;<span class="pl-smi">_col</span> = RED;
+						brother-&gt;<span class="pl-smi">_col</span> = BLACK;
+						<span class="pl-c1">RotateL</span>(delParentPos);
+						<span class="pl-c"><span class="pl-c">//</span>需要继续处理</span>
+						brother = delParentPos-&gt;<span class="pl-smi">_right</span>; <span class="pl-c"><span class="pl-c">//</span>更新brother（否则在本循环中执行其他情况的代码会出错）</span>
+					}
+					<span class="pl-c"><span class="pl-c">//</span>情况二：brother为黑色，且其左右孩子都是黑色结点或为空</span>
+					<span class="pl-k">if</span> (((brother-&gt;<span class="pl-smi">_left</span> == <span class="pl-c1">nullptr</span>) || (brother-&gt;<span class="pl-smi">_left</span>-&gt;<span class="pl-smi">_col</span> == BLACK))
+						&amp;&amp; ((brother-&gt;<span class="pl-smi">_right</span> == <span class="pl-c1">nullptr</span>) || (brother-&gt;<span class="pl-smi">_right</span>-&gt;<span class="pl-smi">_col</span> == BLACK)))
+					{
+						brother-&gt;<span class="pl-smi">_col</span> = RED;
+						<span class="pl-k">if</span> (delParentPos-&gt;<span class="pl-smi">_col</span> == RED)
+						{
+							delParentPos-&gt;<span class="pl-smi">_col</span> = BLACK;
+							<span class="pl-k">break</span>;
+						}
+						<span class="pl-c"><span class="pl-c">//</span>需要继续处理</span>
+						delPos = delParentPos;
+						delParentPos = delPos-&gt;<span class="pl-smi">_parent</span>;
+					}
+					<span class="pl-k">else</span>
+					{
+						<span class="pl-c"><span class="pl-c">//</span>情况三：brother为黑色，且其左孩子是红色结点，右孩子是黑色结点或为空</span>
+						<span class="pl-k">if</span> ((brother-&gt;<span class="pl-smi">_right</span> == <span class="pl-c1">nullptr</span>) || (brother-&gt;<span class="pl-smi">_right</span>-&gt;<span class="pl-smi">_col</span> == BLACK))
+						{
+							brother-&gt;<span class="pl-smi">_left</span>-&gt;<span class="pl-smi">_col</span> = BLACK;
+							brother-&gt;<span class="pl-smi">_col</span> = RED;
+							<span class="pl-c1">RotateR</span>(brother);
+							<span class="pl-c"><span class="pl-c">//</span>需要继续处理</span>
+							brother = delParentPos-&gt;<span class="pl-smi">_right</span>; <span class="pl-c"><span class="pl-c">//</span>更新brother（否则执行下面情况四的代码会出错）</span>
+						}
+						<span class="pl-c"><span class="pl-c">//</span>情况四：brother为黑色，且其右孩子是红色结点</span>
+						brother-&gt;<span class="pl-smi">_col</span> = delParentPos-&gt;<span class="pl-smi">_col</span>;
+						delParentPos-&gt;<span class="pl-smi">_col</span> = BLACK;
+						brother-&gt;<span class="pl-smi">_right</span>-&gt;<span class="pl-smi">_col</span> = BLACK;
+						<span class="pl-c1">RotateL</span>(delParentPos);
+						<span class="pl-k">break</span>; <span class="pl-c"><span class="pl-c">//</span>情况四执行完毕后调整一定结束</span>
+					}
+				}
+				<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>delPos == delParentPos-&gt;_right //待删除结点是其父结点的左孩子</span>
+				{
+					Node* brother = delParentPos-&gt;<span class="pl-smi">_left</span>; <span class="pl-c"><span class="pl-c">//</span>兄弟结点是其父结点的左孩子</span>
+					<span class="pl-c"><span class="pl-c">//</span>情况一：brother为红色</span>
+					<span class="pl-k">if</span> (brother-&gt;<span class="pl-smi">_col</span> == RED) <span class="pl-c"><span class="pl-c">//</span>brother为红色</span>
+					{
+						delParentPos-&gt;<span class="pl-smi">_col</span> = RED;
+						brother-&gt;<span class="pl-smi">_col</span> = BLACK;
+						<span class="pl-c1">RotateR</span>(delParentPos);
+						<span class="pl-c"><span class="pl-c">//</span>需要继续处理</span>
+						brother = delParentPos-&gt;<span class="pl-smi">_left</span>; <span class="pl-c"><span class="pl-c">//</span>更新brother（否则在本循环中执行其他情况的代码会出错）</span>
+					}
+					<span class="pl-c"><span class="pl-c">//</span>情况二：brother为黑色，且其左右孩子都是黑色结点或为空</span>
+					<span class="pl-k">if</span> (((brother-&gt;<span class="pl-smi">_left</span> == <span class="pl-c1">nullptr</span>) || (brother-&gt;<span class="pl-smi">_left</span>-&gt;<span class="pl-smi">_col</span> == BLACK))
+						&amp;&amp; ((brother-&gt;<span class="pl-smi">_right</span> == <span class="pl-c1">nullptr</span>) || (brother-&gt;<span class="pl-smi">_right</span>-&gt;<span class="pl-smi">_col</span> == BLACK)))
+					{
+						brother-&gt;<span class="pl-smi">_col</span> = RED;
+						<span class="pl-k">if</span> (delParentPos-&gt;<span class="pl-smi">_col</span> == RED)
+						{
+							delParentPos-&gt;<span class="pl-smi">_col</span> = BLACK;
+							<span class="pl-k">break</span>;
+						}
+						<span class="pl-c"><span class="pl-c">//</span>需要继续处理</span>
+						delPos = delParentPos;
+						delParentPos = delPos-&gt;<span class="pl-smi">_parent</span>;
+					}
+					<span class="pl-k">else</span>
+					{
+						<span class="pl-c"><span class="pl-c">//</span>情况三：brother为黑色，且其右孩子是红色结点，左孩子是黑色结点或为空</span>
+						<span class="pl-k">if</span> ((brother-&gt;<span class="pl-smi">_left</span> == <span class="pl-c1">nullptr</span>) || (brother-&gt;<span class="pl-smi">_left</span>-&gt;<span class="pl-smi">_col</span> == BLACK))
+						{
+							brother-&gt;<span class="pl-smi">_right</span>-&gt;<span class="pl-smi">_col</span> = BLACK;
+							brother-&gt;<span class="pl-smi">_col</span> = RED;
+							<span class="pl-c1">RotateL</span>(brother);
+							<span class="pl-c"><span class="pl-c">//</span>需要继续处理</span>
+							brother = delParentPos-&gt;<span class="pl-smi">_left</span>; <span class="pl-c"><span class="pl-c">//</span>更新brother（否则执行下面情况四的代码会出错）</span>
+						}
+						<span class="pl-c"><span class="pl-c">//</span>情况四：brother为黑色，且其左孩子是红色结点</span>
+						brother-&gt;<span class="pl-smi">_col</span> = delParentPos-&gt;<span class="pl-smi">_col</span>;
+						delParentPos-&gt;<span class="pl-smi">_col</span> = BLACK;
+						brother-&gt;<span class="pl-smi">_left</span>-&gt;<span class="pl-smi">_col</span> = BLACK;
+						<span class="pl-c1">RotateR</span>(delParentPos);
+						<span class="pl-k">break</span>; <span class="pl-c"><span class="pl-c">//</span>情况四执行完毕后调整一定结束</span>
+					}
+				}
+			}
+		}
+	}
+	<span class="pl-c"><span class="pl-c">//</span>进行实际删除</span>
+	<span class="pl-k">if</span> (del-&gt;<span class="pl-smi">_left</span> == <span class="pl-c1">nullptr</span>) <span class="pl-c"><span class="pl-c">//</span>实际删除结点的左子树为空</span>
+	{
+		<span class="pl-k">if</span> (del == delP-&gt;<span class="pl-smi">_left</span>) <span class="pl-c"><span class="pl-c">//</span>实际删除结点是其父结点的左孩子</span>
+		{
+			delP-&gt;<span class="pl-smi">_left</span> = del-&gt;<span class="pl-smi">_right</span>;
+			<span class="pl-k">if</span> (del-&gt;<span class="pl-smi">_right</span>)
+				del-&gt;<span class="pl-smi">_right</span>-&gt;<span class="pl-smi">_parent</span> = delP;
+		}
+		<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>实际删除结点是其父结点的右孩子</span>
+		{
+			delP-&gt;<span class="pl-smi">_right</span> = del-&gt;<span class="pl-smi">_right</span>;
+			<span class="pl-k">if</span> (del-&gt;<span class="pl-smi">_right</span>)
+				del-&gt;<span class="pl-smi">_right</span>-&gt;<span class="pl-smi">_parent</span> = delP;
+		}
+	}
+	<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>实际删除结点的右子树为空</span>
+	{
+		<span class="pl-k">if</span> (del == delP-&gt;<span class="pl-smi">_left</span>) <span class="pl-c"><span class="pl-c">//</span>实际删除结点是其父结点的左孩子</span>
+		{
+			delP-&gt;<span class="pl-smi">_left</span> = del-&gt;<span class="pl-smi">_left</span>;
+			<span class="pl-k">if</span> (del-&gt;<span class="pl-smi">_left</span>)
+				del-&gt;<span class="pl-smi">_left</span>-&gt;<span class="pl-smi">_parent</span> = delP;
+		}
+		<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>实际删除结点是其父结点的右孩子</span>
+		{
+			delP-&gt;<span class="pl-smi">_right</span> = del-&gt;<span class="pl-smi">_left</span>;
+			<span class="pl-k">if</span> (del-&gt;<span class="pl-smi">_left</span>)
+				del-&gt;<span class="pl-smi">_left</span>-&gt;<span class="pl-smi">_parent</span> = delP;
+		}
+	}
+	<span class="pl-k">delete</span> del; <span class="pl-c"><span class="pl-c">//</span>实际删除结点</span>
+	<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+}</pre></div>
+<h2>实现红黑树全部源码</h2>
+<div class="highlight highlight-source-c++"><pre class="notranslate">#<span class="pl-k">pragma</span> once
+#<span class="pl-k">include</span><span class="pl-s"><span class="pl-pds">&lt;</span>iostream<span class="pl-pds">&gt;</span></span>
+
+<span class="pl-k">using</span> <span class="pl-k">namespace</span> <span class="pl-en">std</span><span class="pl-k">;</span>
+<span class="pl-c"><span class="pl-c">//</span>枚举定义结点的颜色</span>
+<span class="pl-k">enum</span> Colour
+{
+	RED,
+	BLACK
+};
+
+<span class="pl-c"><span class="pl-c">//</span>红黑树结点的定义</span>
+<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">V</span>&gt;
+<span class="pl-k">struct</span> <span class="pl-en">RBTreeNode</span>
+{
+	<span class="pl-c"><span class="pl-c">//</span>三叉链</span>
+	RBTreeNode&lt;K, V&gt;* _left;
+	RBTreeNode&lt;K, V&gt;* _right;
+	RBTreeNode&lt;K, V&gt;* _parent;
+
+	<span class="pl-c"><span class="pl-c">//</span>存储的键值对</span>
+	pair&lt;K, V&gt; _kv;
+
+	<span class="pl-c"><span class="pl-c">//</span>结点的颜色</span>
+	Colour _col; <span class="pl-c"><span class="pl-c">//</span>红/黑</span>
+
+	<span class="pl-c"><span class="pl-c">//</span>构造函数</span>
+	<span class="pl-en">RBTreeNode</span>(<span class="pl-k">const</span> pair&lt;K, V&gt;&amp; kv)
+		:_left(<span class="pl-c1">nullptr</span>)
+		, _right(<span class="pl-c1">nullptr</span>)
+		, _parent(<span class="pl-c1">nullptr</span>)
+		, _kv(kv)
+		, _col(RED)
+	{}
+};
+
+<span class="pl-c"><span class="pl-c">//</span>红黑树的实现</span>
+<span class="pl-k">template</span>&lt;<span class="pl-k">class</span> <span class="pl-en">K</span>, <span class="pl-k">class</span> <span class="pl-en">V</span>&gt;
+<span class="pl-k">class</span> <span class="pl-en">RBTree</span>
+{
+	<span class="pl-k">typedef</span> RBTreeNode&lt;K, V&gt; Node;
+<span class="pl-k">public:</span>
+	<span class="pl-c"><span class="pl-c">//</span>构造函数</span>
+	<span class="pl-en">RBTree</span>()
+		:_root(<span class="pl-c1">nullptr</span>)
+	{}
+
+	<span class="pl-c"><span class="pl-c">//</span>拷贝构造</span>
+	<span class="pl-en">RBTree</span>(<span class="pl-k">const</span> RBTree&lt;K, V&gt;&amp; t)
+	{
+		_root = <span class="pl-c1">_Copy</span>(t.<span class="pl-smi">_root</span>, <span class="pl-c1">nullptr</span>);
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span>赋值运算符重载（现代写法）</span>
+	RBTree&lt;K, V&gt;&amp; <span class="pl-k">operator</span>=(RBTree&lt;K, V&gt; t)
+	{
+		<span class="pl-c1">swap</span>(_root, t.<span class="pl-smi">_root</span>);
+		<span class="pl-k">return</span> *<span class="pl-c1">this</span>;
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span>析构函数</span>
+	<span class="pl-en">~RBTree</span>()
+	{
+		<span class="pl-c1">_Destroy</span>(_root);
+		_root = <span class="pl-c1">nullptr</span>;
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span>查找函数</span>
+	Node* <span class="pl-en">Find</span>(<span class="pl-k">const</span> K&amp; key)
+	{
+		Node* cur = _root;
+		<span class="pl-k">while</span> (cur)
+		{
+			<span class="pl-k">if</span> (key &lt; cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) <span class="pl-c"><span class="pl-c">//</span>key值小于该结点的值</span>
+			{
+				cur = cur-&gt;<span class="pl-smi">_left</span>; <span class="pl-c"><span class="pl-c">//</span>在该结点的左子树当中查找</span>
+			}
+			<span class="pl-k">else</span> <span class="pl-k">if</span> (key &gt; cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) <span class="pl-c"><span class="pl-c">//</span>key值大于该结点的值</span>
+			{
+				cur = cur-&gt;<span class="pl-smi">_right</span>; <span class="pl-c"><span class="pl-c">//</span>在该结点的右子树当中查找</span>
+			}
+			<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>找到了目标结点</span>
+			{
+				<span class="pl-k">return</span> cur; <span class="pl-c"><span class="pl-c">//</span>返回该结点</span>
+			}
+		}
+		<span class="pl-k">return</span> <span class="pl-c1">nullptr</span>; <span class="pl-c"><span class="pl-c">//</span>查找失败</span>
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span>插入函数</span>
+	pair&lt;Node*, <span class="pl-k">bool</span>&gt; <span class="pl-en">Insert</span>(<span class="pl-k">const</span> pair&lt;K, V&gt;&amp; kv)
+	{
+		<span class="pl-k">if</span> (_root == <span class="pl-c1">nullptr</span>) <span class="pl-c"><span class="pl-c">//</span>若红黑树为空树，则插入结点直接作为根结点</span>
+		{
+			_root = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(kv);
+			_root-&gt;<span class="pl-smi">_col</span> = BLACK; <span class="pl-c"><span class="pl-c">//</span>根结点必须是黑色</span>
+			<span class="pl-k">return</span> <span class="pl-c1">make_pair</span>(_root, <span class="pl-c1">true</span>); <span class="pl-c"><span class="pl-c">//</span>插入成功</span>
+		}
+		<span class="pl-c"><span class="pl-c">//</span>1、按二叉搜索树的插入方法，找到待插入位置</span>
+		Node* cur = _root;
+		Node* parent = <span class="pl-c1">nullptr</span>;
+		<span class="pl-k">while</span> (cur)
+		{
+			<span class="pl-k">if</span> (kv.<span class="pl-smi">first</span> &lt; cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) <span class="pl-c"><span class="pl-c">//</span>待插入结点的key值小于当前结点的key值</span>
+			{
+				<span class="pl-c"><span class="pl-c">//</span>往该结点的左子树走</span>
+				parent = cur;
+				cur = cur-&gt;<span class="pl-smi">_left</span>;
+			}
+			<span class="pl-k">else</span> <span class="pl-k">if</span> (kv.<span class="pl-smi">first</span> &gt; cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) <span class="pl-c"><span class="pl-c">//</span>待插入结点的key值大于当前结点的key值</span>
+			{
+				<span class="pl-c"><span class="pl-c">//</span>往该结点的右子树走</span>
+				parent = cur;
+				cur = cur-&gt;<span class="pl-smi">_right</span>;
+			}
+			<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>待插入结点的key值等于当前结点的key值</span>
+			{
+				<span class="pl-k">return</span> <span class="pl-c1">make_pair</span>(cur, <span class="pl-c1">false</span>); <span class="pl-c"><span class="pl-c">//</span>插入失败</span>
+			}
+		}
+
+		<span class="pl-c"><span class="pl-c">//</span>2、将待插入结点插入到树中</span>
+		cur = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(kv); <span class="pl-c"><span class="pl-c">//</span>根据所给值构造一个结点</span>
+		Node* newnode = cur; <span class="pl-c"><span class="pl-c">//</span>记录新插入的结点（便于后序返回）</span>
+		<span class="pl-k">if</span> (kv.<span class="pl-smi">first</span> &lt; parent-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) <span class="pl-c"><span class="pl-c">//</span>新结点的key值小于parent的key值</span>
+		{
+			<span class="pl-c"><span class="pl-c">//</span>插入到parent的左边</span>
+			parent-&gt;<span class="pl-smi">_left</span> = cur;
+			cur-&gt;<span class="pl-smi">_parent</span> = parent;
+		}
+		<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>新结点的key值大于parent的key值</span>
+		{
+			<span class="pl-c"><span class="pl-c">//</span>插入到parent的右边</span>
+			parent-&gt;<span class="pl-smi">_right</span> = cur;
+			cur-&gt;<span class="pl-smi">_parent</span> = parent;
+		}
+
+		<span class="pl-c"><span class="pl-c">//</span>3、若插入结点的父结点是红色的，则需要对红黑树进行调整</span>
+		<span class="pl-k">while</span> (parent &amp;&amp; parent-&gt;<span class="pl-smi">_col</span> == RED)
+		{
+			Node* grandfather = parent-&gt;<span class="pl-smi">_parent</span>; <span class="pl-c"><span class="pl-c">//</span>parent是红色，则其父结点一定存在</span>
+			<span class="pl-k">if</span> (parent == grandfather-&gt;<span class="pl-smi">_left</span>) <span class="pl-c"><span class="pl-c">//</span>parent是grandfather的左孩子</span>
+			{
+				Node* uncle = grandfather-&gt;<span class="pl-smi">_right</span>; <span class="pl-c"><span class="pl-c">//</span>uncle是grandfather的右孩子</span>
+				<span class="pl-k">if</span> (uncle &amp;&amp; uncle-&gt;<span class="pl-smi">_col</span> == RED) <span class="pl-c"><span class="pl-c">//</span>情况1：uncle存在且为红</span>
+				{
+					<span class="pl-c"><span class="pl-c">//</span>颜色调整</span>
+					parent-&gt;<span class="pl-smi">_col</span> = uncle-&gt;<span class="pl-smi">_col</span> = BLACK;
+					grandfather-&gt;<span class="pl-smi">_col</span> = RED;
+
+					<span class="pl-c"><span class="pl-c">//</span>继续往上处理</span>
+					cur = grandfather;
+					parent = cur-&gt;<span class="pl-smi">_parent</span>;
+				}
+				<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>情况2+情况3：uncle不存在 + uncle存在且为黑</span>
+				{
+					<span class="pl-k">if</span> (cur == parent-&gt;<span class="pl-smi">_left</span>)
+					{
+						<span class="pl-c1">RotateR</span>(grandfather); <span class="pl-c"><span class="pl-c">//</span>右单旋</span>
+
+						<span class="pl-c"><span class="pl-c">//</span>颜色调整</span>
+						grandfather-&gt;<span class="pl-smi">_col</span> = RED;
+						parent-&gt;<span class="pl-smi">_col</span> = BLACK;
+					}
+					<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>cur == parent-&gt;_right</span>
+					{
+						<span class="pl-c1">RotateLR</span>(grandfather); <span class="pl-c"><span class="pl-c">//</span>左右双旋</span>
+
+						<span class="pl-c"><span class="pl-c">//</span>颜色调整</span>
+						grandfather-&gt;<span class="pl-smi">_col</span> = RED;
+						cur-&gt;<span class="pl-smi">_col</span> = BLACK;
+					}
+					<span class="pl-k">break</span>; <span class="pl-c"><span class="pl-c">//</span>子树旋转后，该子树的根变成了黑色，无需继续往上进行处理</span>
+				}
+			}
+			<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>parent是grandfather的右孩子</span>
+			{
+				Node* uncle = grandfather-&gt;<span class="pl-smi">_left</span>; <span class="pl-c"><span class="pl-c">//</span>uncle是grandfather的左孩子</span>
+				<span class="pl-k">if</span> (uncle &amp;&amp; uncle-&gt;<span class="pl-smi">_col</span> == RED) <span class="pl-c"><span class="pl-c">//</span>情况1：uncle存在且为红</span>
+				{
+					<span class="pl-c"><span class="pl-c">//</span>颜色调整</span>
+					uncle-&gt;<span class="pl-smi">_col</span> = parent-&gt;<span class="pl-smi">_col</span> = BLACK;
+					grandfather-&gt;<span class="pl-smi">_col</span> = RED;
+
+					<span class="pl-c"><span class="pl-c">//</span>继续往上处理</span>
+					cur = grandfather;
+					parent = cur-&gt;<span class="pl-smi">_parent</span>;
+				}
+				<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>情况2+情况3：uncle不存在 + uncle存在且为黑</span>
+				{
+					<span class="pl-k">if</span> (cur == parent-&gt;<span class="pl-smi">_left</span>)
+					{
+						<span class="pl-c1">RotateRL</span>(grandfather); <span class="pl-c"><span class="pl-c">//</span>右左双旋</span>
+
+						<span class="pl-c"><span class="pl-c">//</span>颜色调整</span>
+						cur-&gt;<span class="pl-smi">_col</span> = BLACK;
+						grandfather-&gt;<span class="pl-smi">_col</span> = RED;
+					}
+					<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>cur == parent-&gt;_right</span>
+					{
+						<span class="pl-c1">RotateL</span>(grandfather); <span class="pl-c"><span class="pl-c">//</span>左单旋</span>
+
+						<span class="pl-c"><span class="pl-c">//</span>颜色调整</span>
+						grandfather-&gt;<span class="pl-smi">_col</span> = RED;
+						parent-&gt;<span class="pl-smi">_col</span> = BLACK;
+					}
+					<span class="pl-k">break</span>; <span class="pl-c"><span class="pl-c">//</span>子树旋转后，该子树的根变成了黑色，无需继续往上进行处理</span>
+				}
+			}
+		}
+		_root-&gt;<span class="pl-smi">_col</span> = BLACK; <span class="pl-c"><span class="pl-c">//</span>根结点的颜色为黑色（可能被情况一变成了红色，需要变回黑色）</span>
+		<span class="pl-k">return</span> <span class="pl-c1">make_pair</span>(newnode, <span class="pl-c1">true</span>); <span class="pl-c"><span class="pl-c">//</span>插入成功</span>
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span>删除函数</span>
+	<span class="pl-k">bool</span> <span class="pl-en">Erase</span>(<span class="pl-k">const</span> K&amp; key)
+	{
+		<span class="pl-c"><span class="pl-c">//</span>用于遍历二叉树</span>
+		Node* parent = <span class="pl-c1">nullptr</span>;
+		Node* cur = _root;
+		<span class="pl-c"><span class="pl-c">//</span>用于标记实际的待删除结点及其父结点</span>
+		Node* delParentPos = <span class="pl-c1">nullptr</span>;
+		Node* delPos = <span class="pl-c1">nullptr</span>;
+		<span class="pl-k">while</span> (cur)
+		{
+			<span class="pl-k">if</span> (key &lt; cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) <span class="pl-c"><span class="pl-c">//</span>所给key值小于当前结点的key值</span>
+			{
+				<span class="pl-c"><span class="pl-c">//</span>往该结点的左子树走</span>
+				parent = cur;
+				cur = cur-&gt;<span class="pl-smi">_left</span>;
+			}
+			<span class="pl-k">else</span> <span class="pl-k">if</span> (key &gt; cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>) <span class="pl-c"><span class="pl-c">//</span>所给key值大于当前结点的key值</span>
+			{
+				<span class="pl-c"><span class="pl-c">//</span>往该结点的右子树走</span>
+				parent = cur;
+				cur = cur-&gt;<span class="pl-smi">_right</span>;
+			}
+			<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>找到了待删除结点</span>
+			{
+				<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_left</span> == <span class="pl-c1">nullptr</span>) <span class="pl-c"><span class="pl-c">//</span>待删除结点的左子树为空</span>
+				{
+					<span class="pl-k">if</span> (cur == _root) <span class="pl-c"><span class="pl-c">//</span>待删除结点是根结点</span>
+					{
+						_root = _root-&gt;<span class="pl-smi">_right</span>; <span class="pl-c"><span class="pl-c">//</span>让根结点的右子树作为新的根结点</span>
+						<span class="pl-k">if</span> (_root)
+						{
+							_root-&gt;<span class="pl-smi">_parent</span> = <span class="pl-c1">nullptr</span>;
+							_root-&gt;<span class="pl-smi">_col</span> = BLACK; <span class="pl-c"><span class="pl-c">//</span>根结点为黑色</span>
+						}
+						<span class="pl-k">delete</span> cur; <span class="pl-c"><span class="pl-c">//</span>删除原根结点</span>
+						<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+					}
+					<span class="pl-k">else</span>
+					{
+						delParentPos = parent; <span class="pl-c"><span class="pl-c">//</span>标记实际删除结点的父结点</span>
+						delPos = cur; <span class="pl-c"><span class="pl-c">//</span>标记实际删除的结点</span>
+					}
+					<span class="pl-k">break</span>; <span class="pl-c"><span class="pl-c">//</span>进行红黑树的调整以及结点的实际删除</span>
+				}
+				<span class="pl-k">else</span> <span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_right</span> == <span class="pl-c1">nullptr</span>) <span class="pl-c"><span class="pl-c">//</span>待删除结点的右子树为空</span>
+				{
+					<span class="pl-k">if</span> (cur == _root) <span class="pl-c"><span class="pl-c">//</span>待删除结点是根结点</span>
+					{
+						_root = _root-&gt;<span class="pl-smi">_left</span>; <span class="pl-c"><span class="pl-c">//</span>让根结点的左子树作为新的根结点</span>
+						<span class="pl-k">if</span> (_root)
+						{
+							_root-&gt;<span class="pl-smi">_parent</span> = <span class="pl-c1">nullptr</span>;
+							_root-&gt;<span class="pl-smi">_col</span> = BLACK; <span class="pl-c"><span class="pl-c">//</span>根结点为黑色</span>
+						}
+						<span class="pl-k">delete</span> cur; <span class="pl-c"><span class="pl-c">//</span>删除原根结点</span>
+						<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+					}
+					<span class="pl-k">else</span>
+					{
+						delParentPos = parent; <span class="pl-c"><span class="pl-c">//</span>标记实际删除结点的父结点</span>
+						delPos = cur; <span class="pl-c"><span class="pl-c">//</span>标记实际删除的结点</span>
+					}
+					<span class="pl-k">break</span>; <span class="pl-c"><span class="pl-c">//</span>进行红黑树的调整以及结点的实际删除</span>
+				}
+				<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>待删除结点的左右子树均不为空</span>
+				{
+					<span class="pl-c"><span class="pl-c">//</span>替换法删除</span>
+					<span class="pl-c"><span class="pl-c">//</span>寻找待删除结点右子树当中key值最小的结点作为实际删除结点</span>
+					Node* minParent = cur;
+					Node* minRight = cur-&gt;<span class="pl-smi">_right</span>;
+					<span class="pl-k">while</span> (minRight-&gt;<span class="pl-smi">_left</span>)
+					{
+						minParent = minRight;
+						minRight = minRight-&gt;<span class="pl-smi">_left</span>;
+					}
+					cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span> = minRight-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span>; <span class="pl-c"><span class="pl-c">//</span>将待删除结点的key改为minRight的key</span>
+					cur-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">second</span> = minRight-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">second</span>; <span class="pl-c"><span class="pl-c">//</span>将待删除结点的value改为minRight的value</span>
+					delParentPos = minParent; <span class="pl-c"><span class="pl-c">//</span>标记实际删除结点的父结点</span>
+					delPos = minRight; <span class="pl-c"><span class="pl-c">//</span>标记实际删除的结点</span>
+					<span class="pl-k">break</span>; <span class="pl-c"><span class="pl-c">//</span>进行红黑树的调整以及结点的实际删除</span>
+				}
+			}
+		}
+		<span class="pl-k">if</span> (delPos == <span class="pl-c1">nullptr</span>) <span class="pl-c"><span class="pl-c">//</span>delPos没有被修改过，说明没有找到待删除结点</span>
+		{
+			<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+		}
+
+		<span class="pl-c"><span class="pl-c">//</span>记录待删除结点及其父结点（用于后续实际删除）</span>
+		Node* del = delPos;
+		Node* delP = delParentPos;
+
+		<span class="pl-c"><span class="pl-c">//</span>调整红黑树</span>
+		<span class="pl-k">if</span> (delPos-&gt;<span class="pl-smi">_col</span> == BLACK) <span class="pl-c"><span class="pl-c">//</span>删除的是黑色结点</span>
+		{
+			<span class="pl-k">if</span> (delPos-&gt;<span class="pl-smi">_left</span>) <span class="pl-c"><span class="pl-c">//</span>待删除结点有一个红色的左孩子（不可能是黑色）</span>
+			{
+				delPos-&gt;<span class="pl-smi">_left</span>-&gt;<span class="pl-smi">_col</span> = BLACK; <span class="pl-c"><span class="pl-c">//</span>将这个红色的左孩子变黑即可</span>
+			}
+			<span class="pl-k">else</span> <span class="pl-k">if</span> (delPos-&gt;<span class="pl-smi">_right</span>) <span class="pl-c"><span class="pl-c">//</span>待删除结点有一个红色的右孩子（不可能是黑色）</span>
+			{
+				delPos-&gt;<span class="pl-smi">_right</span>-&gt;<span class="pl-smi">_col</span> = BLACK; <span class="pl-c"><span class="pl-c">//</span>将这个红色的右孩子变黑即可</span>
+			}
+			<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>待删除结点的左右均为空</span>
+			{
+				<span class="pl-k">while</span> (delPos != _root) <span class="pl-c"><span class="pl-c">//</span>可能一直调整到根结点</span>
+				{
+					<span class="pl-k">if</span> (delPos == delParentPos-&gt;<span class="pl-smi">_left</span>) <span class="pl-c"><span class="pl-c">//</span>待删除结点是其父结点的左孩子</span>
+					{
+						Node* brother = delParentPos-&gt;<span class="pl-smi">_right</span>; <span class="pl-c"><span class="pl-c">//</span>兄弟结点是其父结点的右孩子</span>
+						<span class="pl-c"><span class="pl-c">//</span>情况一：brother为红色</span>
+						<span class="pl-k">if</span> (brother-&gt;<span class="pl-smi">_col</span> == RED)
+						{
+							delParentPos-&gt;<span class="pl-smi">_col</span> = RED;
+							brother-&gt;<span class="pl-smi">_col</span> = BLACK;
+							<span class="pl-c1">RotateL</span>(delParentPos);
+							<span class="pl-c"><span class="pl-c">//</span>需要继续处理</span>
+							brother = delParentPos-&gt;<span class="pl-smi">_right</span>; <span class="pl-c"><span class="pl-c">//</span>更新brother（否则在本循环中执行其他情况的代码会出错）</span>
+						}
+						<span class="pl-c"><span class="pl-c">//</span>情况二：brother为黑色，且其左右孩子都是黑色结点或为空</span>
+						<span class="pl-k">if</span> (((brother-&gt;<span class="pl-smi">_left</span> == <span class="pl-c1">nullptr</span>) || (brother-&gt;<span class="pl-smi">_left</span>-&gt;<span class="pl-smi">_col</span> == BLACK))
+							&amp;&amp; ((brother-&gt;<span class="pl-smi">_right</span> == <span class="pl-c1">nullptr</span>) || (brother-&gt;<span class="pl-smi">_right</span>-&gt;<span class="pl-smi">_col</span> == BLACK)))
+						{
+							brother-&gt;<span class="pl-smi">_col</span> = RED;
+							<span class="pl-k">if</span> (delParentPos-&gt;<span class="pl-smi">_col</span> == RED)
+							{
+								delParentPos-&gt;<span class="pl-smi">_col</span> = BLACK;
+								<span class="pl-k">break</span>;
+							}
+							<span class="pl-c"><span class="pl-c">//</span>需要继续处理</span>
+							delPos = delParentPos;
+							delParentPos = delPos-&gt;<span class="pl-smi">_parent</span>;
+						}
+						<span class="pl-k">else</span>
+						{
+							<span class="pl-c"><span class="pl-c">//</span>情况三：brother为黑色，且其左孩子是红色结点，右孩子是黑色结点或为空</span>
+							<span class="pl-k">if</span> ((brother-&gt;<span class="pl-smi">_right</span> == <span class="pl-c1">nullptr</span>) || (brother-&gt;<span class="pl-smi">_right</span>-&gt;<span class="pl-smi">_col</span> == BLACK))
+							{
+								brother-&gt;<span class="pl-smi">_left</span>-&gt;<span class="pl-smi">_col</span> = BLACK;
+								brother-&gt;<span class="pl-smi">_col</span> = RED;
+								<span class="pl-c1">RotateR</span>(brother);
+								<span class="pl-c"><span class="pl-c">//</span>需要继续处理</span>
+								brother = delParentPos-&gt;<span class="pl-smi">_right</span>; <span class="pl-c"><span class="pl-c">//</span>更新brother（否则执行下面情况四的代码会出错）</span>
+							}
+							<span class="pl-c"><span class="pl-c">//</span>情况四：brother为黑色，且其右孩子是红色结点</span>
+							brother-&gt;<span class="pl-smi">_col</span> = delParentPos-&gt;<span class="pl-smi">_col</span>;
+							delParentPos-&gt;<span class="pl-smi">_col</span> = BLACK;
+							brother-&gt;<span class="pl-smi">_right</span>-&gt;<span class="pl-smi">_col</span> = BLACK;
+							<span class="pl-c1">RotateL</span>(delParentPos);
+							<span class="pl-k">break</span>; <span class="pl-c"><span class="pl-c">//</span>情况四执行完毕后调整一定结束</span>
+						}
+					}
+					<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>delPos == delParentPos-&gt;_right //待删除结点是其父结点的左孩子</span>
+					{
+						Node* brother = delParentPos-&gt;<span class="pl-smi">_left</span>; <span class="pl-c"><span class="pl-c">//</span>兄弟结点是其父结点的左孩子</span>
+						<span class="pl-c"><span class="pl-c">//</span>情况一：brother为红色</span>
+						<span class="pl-k">if</span> (brother-&gt;<span class="pl-smi">_col</span> == RED) <span class="pl-c"><span class="pl-c">//</span>brother为红色</span>
+						{
+							delParentPos-&gt;<span class="pl-smi">_col</span> = RED;
+							brother-&gt;<span class="pl-smi">_col</span> = BLACK;
+							<span class="pl-c1">RotateR</span>(delParentPos);
+							<span class="pl-c"><span class="pl-c">//</span>需要继续处理</span>
+							brother = delParentPos-&gt;<span class="pl-smi">_left</span>; <span class="pl-c"><span class="pl-c">//</span>更新brother（否则在本循环中执行其他情况的代码会出错）</span>
+						}
+						<span class="pl-c"><span class="pl-c">//</span>情况二：brother为黑色，且其左右孩子都是黑色结点或为空</span>
+						<span class="pl-k">if</span> (((brother-&gt;<span class="pl-smi">_left</span> == <span class="pl-c1">nullptr</span>) || (brother-&gt;<span class="pl-smi">_left</span>-&gt;<span class="pl-smi">_col</span> == BLACK))
+							&amp;&amp; ((brother-&gt;<span class="pl-smi">_right</span> == <span class="pl-c1">nullptr</span>) || (brother-&gt;<span class="pl-smi">_right</span>-&gt;<span class="pl-smi">_col</span> == BLACK)))
+						{
+							brother-&gt;<span class="pl-smi">_col</span> = RED;
+							<span class="pl-k">if</span> (delParentPos-&gt;<span class="pl-smi">_col</span> == RED)
+							{
+								delParentPos-&gt;<span class="pl-smi">_col</span> = BLACK;
+								<span class="pl-k">break</span>;
+							}
+							<span class="pl-c"><span class="pl-c">//</span>需要继续处理</span>
+							delPos = delParentPos;
+							delParentPos = delPos-&gt;<span class="pl-smi">_parent</span>;
+						}
+						<span class="pl-k">else</span>
+						{
+							<span class="pl-c"><span class="pl-c">//</span>情况三：brother为黑色，且其右孩子是红色结点，左孩子是黑色结点或为空</span>
+							<span class="pl-k">if</span> ((brother-&gt;<span class="pl-smi">_left</span> == <span class="pl-c1">nullptr</span>) || (brother-&gt;<span class="pl-smi">_left</span>-&gt;<span class="pl-smi">_col</span> == BLACK))
+							{
+								brother-&gt;<span class="pl-smi">_right</span>-&gt;<span class="pl-smi">_col</span> = BLACK;
+								brother-&gt;<span class="pl-smi">_col</span> = RED;
+								<span class="pl-c1">RotateL</span>(brother);
+								<span class="pl-c"><span class="pl-c">//</span>需要继续处理</span>
+								brother = delParentPos-&gt;<span class="pl-smi">_left</span>; <span class="pl-c"><span class="pl-c">//</span>更新brother（否则执行下面情况四的代码会出错）</span>
+							}
+							<span class="pl-c"><span class="pl-c">//</span>情况四：brother为黑色，且其左孩子是红色结点</span>
+							brother-&gt;<span class="pl-smi">_col</span> = delParentPos-&gt;<span class="pl-smi">_col</span>;
+							delParentPos-&gt;<span class="pl-smi">_col</span> = BLACK;
+							brother-&gt;<span class="pl-smi">_left</span>-&gt;<span class="pl-smi">_col</span> = BLACK;
+							<span class="pl-c1">RotateR</span>(delParentPos);
+							<span class="pl-k">break</span>; <span class="pl-c"><span class="pl-c">//</span>情况四执行完毕后调整一定结束</span>
+						}
+					}
+				}
+			}
+		}
+		<span class="pl-c"><span class="pl-c">//</span>进行实际删除</span>
+		<span class="pl-k">if</span> (del-&gt;<span class="pl-smi">_left</span> == <span class="pl-c1">nullptr</span>) <span class="pl-c"><span class="pl-c">//</span>实际删除结点的左子树为空</span>
+		{
+			<span class="pl-k">if</span> (del == delP-&gt;<span class="pl-smi">_left</span>) <span class="pl-c"><span class="pl-c">//</span>实际删除结点是其父结点的左孩子</span>
+			{
+				delP-&gt;<span class="pl-smi">_left</span> = del-&gt;<span class="pl-smi">_right</span>;
+				<span class="pl-k">if</span> (del-&gt;<span class="pl-smi">_right</span>)
+					del-&gt;<span class="pl-smi">_right</span>-&gt;<span class="pl-smi">_parent</span> = delP;
+			}
+			<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>实际删除结点是其父结点的右孩子</span>
+			{
+				delP-&gt;<span class="pl-smi">_right</span> = del-&gt;<span class="pl-smi">_right</span>;
+				<span class="pl-k">if</span> (del-&gt;<span class="pl-smi">_right</span>)
+					del-&gt;<span class="pl-smi">_right</span>-&gt;<span class="pl-smi">_parent</span> = delP;
+			}
+		}
+		<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>实际删除结点的右子树为空</span>
+		{
+			<span class="pl-k">if</span> (del == delP-&gt;<span class="pl-smi">_left</span>) <span class="pl-c"><span class="pl-c">//</span>实际删除结点是其父结点的左孩子</span>
+			{
+				delP-&gt;<span class="pl-smi">_left</span> = del-&gt;<span class="pl-smi">_left</span>;
+				<span class="pl-k">if</span> (del-&gt;<span class="pl-smi">_left</span>)
+					del-&gt;<span class="pl-smi">_left</span>-&gt;<span class="pl-smi">_parent</span> = delP;
+			}
+			<span class="pl-k">else</span> <span class="pl-c"><span class="pl-c">//</span>实际删除结点是其父结点的右孩子</span>
+			{
+				delP-&gt;<span class="pl-smi">_right</span> = del-&gt;<span class="pl-smi">_left</span>;
+				<span class="pl-k">if</span> (del-&gt;<span class="pl-smi">_left</span>)
+					del-&gt;<span class="pl-smi">_left</span>-&gt;<span class="pl-smi">_parent</span> = delP;
+			}
+		}
+		<span class="pl-k">delete</span> del; <span class="pl-c"><span class="pl-c">//</span>实际删除结点</span>
+		<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span> 中序遍历</span>
+	<span class="pl-k">void</span> <span class="pl-en">InOrder</span>()
+	{
+		<span class="pl-c1">_InOrder</span>(_root);
+		cout &lt;&lt; endl;
+	}
+	
+	<span class="pl-c"><span class="pl-c">//</span> 检查是否为红黑树</span>
+	<span class="pl-k">bool</span> <span class="pl-en">IsBalance</span>()
+	{
+		<span class="pl-k">if</span> (_root == <span class="pl-c1">nullptr</span>)
+			<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+
+		<span class="pl-k">if</span> (_root-&gt;<span class="pl-smi">_col</span> == RED)
+			<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+
+		<span class="pl-c"><span class="pl-c">//</span>参考值</span>
+		<span class="pl-k">int</span> refVal = <span class="pl-c1">0</span>;
+		Node* cur = _root;
+		<span class="pl-k">while</span> (cur)
+		{
+			<span class="pl-k">if</span> (cur-&gt;<span class="pl-smi">_col</span> == BLACK)
+			{
+				++refVal;
+			}
+
+			cur = cur-&gt;<span class="pl-smi">_left</span>;
+		}
+
+		<span class="pl-k">int</span> blacknum = <span class="pl-c1">0</span>;
+		<span class="pl-k">return</span> <span class="pl-c1">Check</span>(_root, blacknum, refVal);
+	}
+
+<span class="pl-k">private:</span>
+	<span class="pl-c"><span class="pl-c">//</span>拷贝树</span>
+	Node* <span class="pl-en">_Copy</span>(Node* root, Node* parent)
+	{
+		<span class="pl-k">if</span> (root == <span class="pl-c1">nullptr</span>)
+		{
+			<span class="pl-k">return</span> <span class="pl-c1">nullptr</span>;
+		}
+		Node* copyNode = <span class="pl-k">new</span> <span class="pl-c1">Node</span>(root-&gt;<span class="pl-smi">_data</span>);
+		copyNode-&gt;<span class="pl-smi">_parent</span> = parent;
+		copyNode-&gt;<span class="pl-smi">_left</span> = <span class="pl-c1">_Copy</span>(root-&gt;<span class="pl-smi">_left</span>, copyNode);
+		copyNode-&gt;<span class="pl-smi">_right</span> = <span class="pl-c1">_Copy</span>(root-&gt;<span class="pl-smi">_right</span>, copyNode);
+		<span class="pl-k">return</span> copyNode;
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span>析构函数子函数</span>
+	<span class="pl-k">void</span> <span class="pl-en">_Destroy</span>(Node* root)
+	{
+		<span class="pl-k">if</span> (root == <span class="pl-c1">nullptr</span>)
+		{
+			<span class="pl-k">return</span>;
+		}
+		<span class="pl-c1">_Destroy</span>(root-&gt;<span class="pl-smi">_left</span>);
+		<span class="pl-c1">_Destroy</span>(root-&gt;<span class="pl-smi">_right</span>);
+		<span class="pl-k">delete</span> root;
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span>左单旋</span>
+	<span class="pl-k">void</span> <span class="pl-en">RotateL</span>(Node* parent)
+	{
+		Node* subR = parent-&gt;<span class="pl-smi">_right</span>;
+		Node* subRL = subR-&gt;<span class="pl-smi">_left</span>;
+		Node* parentParent = parent-&gt;<span class="pl-smi">_parent</span>;
+
+		<span class="pl-c"><span class="pl-c">//</span>建立subRL与parent之间的联系</span>
+		parent-&gt;<span class="pl-smi">_right</span> = subRL;
+		<span class="pl-k">if</span> (subRL)
+			subRL-&gt;<span class="pl-smi">_parent</span> = parent;
+
+		<span class="pl-c"><span class="pl-c">//</span>建立parent与subR之间的联系</span>
+		subR-&gt;<span class="pl-smi">_left</span> = parent;
+		parent-&gt;<span class="pl-smi">_parent</span> = subR;
+
+		<span class="pl-c"><span class="pl-c">//</span>建立subR与parentParent之间的联系</span>
+		<span class="pl-k">if</span> (parentParent == <span class="pl-c1">nullptr</span>)
+		{
+			_root = subR;
+			_root-&gt;<span class="pl-smi">_parent</span> = <span class="pl-c1">nullptr</span>;
+		}
+		<span class="pl-k">else</span>
+		{
+			<span class="pl-k">if</span> (parent == parentParent-&gt;<span class="pl-smi">_left</span>)
+			{
+				parentParent-&gt;<span class="pl-smi">_left</span> = subR;
+			}
+			<span class="pl-k">else</span>
+			{
+				parentParent-&gt;<span class="pl-smi">_right</span> = subR;
+			}
+			subR-&gt;<span class="pl-smi">_parent</span> = parentParent;
+		}
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span>右单旋</span>
+	<span class="pl-k">void</span> <span class="pl-en">RotateR</span>(Node* parent)
+	{
+		Node* subL = parent-&gt;<span class="pl-smi">_left</span>;
+		Node* subLR = subL-&gt;<span class="pl-smi">_right</span>;
+		Node* parentParent = parent-&gt;<span class="pl-smi">_parent</span>;
+
+		<span class="pl-c"><span class="pl-c">//</span>建立subLR与parent之间的联系</span>
+		parent-&gt;<span class="pl-smi">_left</span> = subLR;
+		<span class="pl-k">if</span> (subLR)
+			subLR-&gt;<span class="pl-smi">_parent</span> = parent;
+
+		<span class="pl-c"><span class="pl-c">//</span>建立parent与subL之间的联系</span>
+		subL-&gt;<span class="pl-smi">_right</span> = parent;
+		parent-&gt;<span class="pl-smi">_parent</span> = subL;
+
+		<span class="pl-c"><span class="pl-c">//</span>建立subL与parentParent之间的联系</span>
+		<span class="pl-k">if</span> (parentParent == <span class="pl-c1">nullptr</span>)
+		{
+			_root = subL;
+			_root-&gt;<span class="pl-smi">_parent</span> = <span class="pl-c1">nullptr</span>;
+		}
+		<span class="pl-k">else</span>
+		{
+			<span class="pl-k">if</span> (parent == parentParent-&gt;<span class="pl-smi">_left</span>)
+			{
+				parentParent-&gt;<span class="pl-smi">_left</span> = subL;
+			}
+			<span class="pl-k">else</span>
+			{
+				parentParent-&gt;<span class="pl-smi">_right</span> = subL;
+			}
+			subL-&gt;<span class="pl-smi">_parent</span> = parentParent;
+		}
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span>左右双旋</span>
+	<span class="pl-k">void</span> <span class="pl-en">RotateLR</span>(Node* parent)
+	{
+		<span class="pl-c1">RotateL</span>(parent-&gt;<span class="pl-smi">_left</span>);
+		<span class="pl-c1">RotateR</span>(parent);
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span>右左双旋</span>
+	<span class="pl-k">void</span> <span class="pl-en">RotateRL</span>(Node* parent)
+	{
+		<span class="pl-c1">RotateR</span>(parent-&gt;<span class="pl-smi">_right</span>);
+		<span class="pl-c1">RotateL</span>(parent);
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span> 根节点-&gt;当前节点这条路径的黑色节点的数量</span>
+	<span class="pl-k">bool</span> <span class="pl-en">Check</span>(Node* root, <span class="pl-k">int</span> blacknum, <span class="pl-k">const</span> <span class="pl-k">int</span> refVal)
+	{
+		<span class="pl-k">if</span> (root == <span class="pl-c1">nullptr</span>)
+		{
+			<span class="pl-c"><span class="pl-c">//</span>cout &lt;&lt; balcknum &lt;&lt; endl;</span>
+			<span class="pl-k">if</span> (blacknum != refVal)
+			{
+				cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>存在黑色节点数量不相等的路径<span class="pl-pds">"</span></span> &lt;&lt; endl;
+				<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+			}
+
+			<span class="pl-k">return</span> <span class="pl-c1">true</span>;
+		}
+
+		<span class="pl-k">if</span> (root-&gt;<span class="pl-smi">_col</span> == RED &amp;&amp; root-&gt;<span class="pl-smi">_parent</span>-&gt;<span class="pl-smi">_col</span> == RED)
+		{
+			cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>有连续的红色节点<span class="pl-pds">"</span></span> &lt;&lt; endl;
+
+			<span class="pl-k">return</span> <span class="pl-c1">false</span>;
+		}
+
+		<span class="pl-k">if</span> (root-&gt;<span class="pl-smi">_col</span> == BLACK)
+		{
+			++blacknum;
+		}
+
+		<span class="pl-k">return</span> <span class="pl-c1">Check</span>(root-&gt;<span class="pl-smi">_left</span>, blacknum, refVal)
+			&amp;&amp; <span class="pl-c1">Check</span>(root-&gt;<span class="pl-smi">_right</span>, blacknum, refVal);
+	}
+
+	<span class="pl-c"><span class="pl-c">//</span> 中序遍历</span>
+	<span class="pl-k">void</span> <span class="pl-en">_InOrder</span>(Node* root)
+	{
+		<span class="pl-k">if</span> (root == <span class="pl-c1">nullptr</span>)
+			<span class="pl-k">return</span>;
+
+		<span class="pl-c1">_InOrder</span>(root-&gt;<span class="pl-smi">_left</span>);
+		cout &lt;&lt; root-&gt;<span class="pl-smi">_kv</span>.<span class="pl-smi">first</span> &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>;
+		<span class="pl-c1">_InOrder</span>(root-&gt;<span class="pl-smi">_right</span>);
+	}
+
+	Node* _root; <span class="pl-c"><span class="pl-c">//</span>红黑树的根结点</span>
+};</pre></div>
+<h2>红黑树与AVL树的比较</h2>
+<ul>
+<li>红黑树和AVL树都是高效的平衡二叉树，增删改查的时间复杂度都是O($log_2 N$)，红黑树不追求绝对平衡，其只需保证最长路径不超过最短路径的2倍，相对而言，降低了插入和旋转的次数，</li>
+<li>所以在经常进行增删的结构中性能比AVL树更优，而且红黑树实现比较简单，所以实际运用中红黑树更多。</li>
+</ul></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</html>

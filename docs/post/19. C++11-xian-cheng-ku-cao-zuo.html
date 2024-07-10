@@ -89,7 +89,7 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <ul>
 <li>在C++11之前，涉及到多线程问题，都是和平台相关的，比如windows和linux下各有自己的接 口，这使得代码的可移植性比较差。C++11中最重要的特性就是对线程进行支持了，使得C++在并行编程时不需要依赖第三方库，而且在原子操作中还引入了原子类的概念。要使用标准库中的线程，必须包含<code class="notranslate">&lt;thread&gt;</code>头文件。<a href="https://legacy.cplusplus.com/reference/thread/thread/" rel="nofollow">C++11中线程类</a></li>
 </ul>
-<table role="table">
+<markdown-accessiblity-table><table role="table">
 <thead>
 <tr>
 <th>函数名</th>
@@ -122,7 +122,7 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <td>在创建线程对象后马上调用，用于把被创建线程与线程对象分离开，分离 的线程变为后台线程，创建的线程的"死活"就与主线程无关</td>
 </tr>
 </tbody>
-</table>
+</table></markdown-accessiblity-table>
 <ol>
 <li>
 <p>线程是操作系统中的一个概念，线程对象可以关联一个线程，用来控制线程以及获取线程的状态。</p>
@@ -498,7 +498,7 @@ mutex g_lock;
 <ul>
 <li>C++11提供的最基本的互斥量，该类的对象之间不能拷贝，也不能进行移动。<code class="notranslate">mutex</code>最常用的三个函数：</li>
 </ul>
-<table role="table">
+<markdown-accessiblity-table><table role="table">
 <thead>
 <tr>
 <th>函数名</th>
@@ -519,7 +519,7 @@ mutex g_lock;
 <td>尝试锁住互斥量，如果互斥量被其他线程占有，则当前线程也不会被阻塞</td>
 </tr>
 </tbody>
-</table>
+</table></markdown-accessiblity-table>
 <ul>
 <li>
 <p>注意，线程函数调用lock()时，可能会发生以下三种情况：</p>

@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## 一、为什么存在动态内存分配
+
+我们已经掌握的内存开辟方式有：
+
+```c
+int val = 20;	//在栈空间上开辟四个字节
+char arr[10] = {0};	//在栈空间上开辟10个字节的连续空间
+```
+
+但是上述的开辟空间的方式有两个特点：
+
+1. **空间开辟大小是固定的**
+2. **数组在申明的时候，必须指定数组的长度，它所需要的内存在编译时分配**
+
+-  那此时呢我们就希望有一种方式，可以在程序运行的过程中动态地去开辟当前程序所需要的内存空间，此时就需要使用到我们的【动态内存函数】了
+
+## 二、动态内存函数的介绍
+
+> 本文我总共会介绍三种动态内存函数，分别是`malloc()`、`calloc()`、`realloc()`，与之对应内存释放函数还有`free()`
+
+### 1、malloc和free
+
+【函数原型】：
+
+```c
+void* malloc (size_t size);
+```
+
+[malloc](https://legacy.cplusplus.com/reference/cstdlib/malloc/?kw=malloc)
+
+- 首先我们来看一下`malloc()`这个函数，它会向内存申请一块连续可用的空间，并返回指向这块空间的指针
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/9432b11ac4964955a8687e04ca8aae3e.png)
+
+【特点】：
+
+1. 如果开辟成功，则返回一个指向开辟好空间的指针
+2. 如果开辟失败，则返回一个`NULL`指针，因此malloc的返回值一定要做检查
+- 那么在什么情况下开辟失败呢？
+>申请的内存过大就会开辟失败，所以就要判断是不是空指针，然后再进行使用
+3. 返回值的类型是`void*` ，所以malloc函数并不知道开辟空间的类型，具体在使用的时候使用者自己来决定
+----
+>在内存中的布局是这样的：
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/199355bb723547b7866d3d0c7f54f403.png)
+
+----
+> 这里我们来举一个例子说明一下
+
+- 可以看到，我在使用一个动态开辟出来的内存时分配四步走（不止四步），首先使用到`malloc()`函数去向内存申请大小为40的空间，由于其返回值是一个`void*`的指针，可以接收任何类型的指针，所以这里我去做了一个强转，将这块空间强制类型转换为`int*`
+- 上面说到在开辟空间的时候会有失败的可能性，所以我们要去做一个异常判断，若是这个指针为空的话，表明我们完全没有申请到相应的空间，那这个时候再去对这块地址进行操作的话就会造成空指针异常的问题
+- 在明确这块空间被开辟出来后，我们要先去做一个初始化操作，在初始化后就是将其去进行一个打印的操作
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+int main()
+{
+	// 1.开辟空间
+	int* p = (int *)malloc(40);
+	
+	// 2.异常判断
+	if (NULL == p)
+	{
+		perror('malloc fail');
+		exit(-1);
+	}
+
+	// 3.初始化空间
+	for (int i = 0; i < 10; ++i)
+	{
+		*(p + i) = i + 1;
+	}
+
+	// 4.打印观察
+	for (int i = 0; i < 10; ++i)
+	{
+		printf('%d ', *(p + i));
+	}
+	return 0;
+}
+```
+
+- 我们通过调试来进行观察，便可以发现我们刚好将所开辟的40个空间存放了10个整型数据
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/9f7768a25d854dbf86ce9f70782b1249.png)
+
+
+1. 如果参数`size`为0，malloc的行为是标准是未定义的，取决于编译器。">
+<meta property="og:title" content="13. C生万物之动态内存管理">
+<meta property="og:description" content="## 一、为什么存在动态内存分配
+
+我们已经掌握的内存开辟方式有：
+
+```c
+int val = 20;	//在栈空间上开辟四个字节
+char arr[10] = {0};	//在栈空间上开辟10个字节的连续空间
+```
+
+但是上述的开辟空间的方式有两个特点：
+
+1. **空间开辟大小是固定的**
+2. **数组在申明的时候，必须指定数组的长度，它所需要的内存在编译时分配**
+
+-  那此时呢我们就希望有一种方式，可以在程序运行的过程中动态地去开辟当前程序所需要的内存空间，此时就需要使用到我们的【动态内存函数】了
+
+## 二、动态内存函数的介绍
+
+> 本文我总共会介绍三种动态内存函数，分别是`malloc()`、`calloc()`、`realloc()`，与之对应内存释放函数还有`free()`
+
+### 1、malloc和free
+
+【函数原型】：
+
+```c
+void* malloc (size_t size);
+```
+
+[malloc](https://legacy.cplusplus.com/reference/cstdlib/malloc/?kw=malloc)
+
+- 首先我们来看一下`malloc()`这个函数，它会向内存申请一块连续可用的空间，并返回指向这块空间的指针
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/9432b11ac4964955a8687e04ca8aae3e.png)
+
+【特点】：
+
+1. 如果开辟成功，则返回一个指向开辟好空间的指针
+2. 如果开辟失败，则返回一个`NULL`指针，因此malloc的返回值一定要做检查
+- 那么在什么情况下开辟失败呢？
+>申请的内存过大就会开辟失败，所以就要判断是不是空指针，然后再进行使用
+3. 返回值的类型是`void*` ，所以malloc函数并不知道开辟空间的类型，具体在使用的时候使用者自己来决定
+----
+>在内存中的布局是这样的：
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/199355bb723547b7866d3d0c7f54f403.png)
+
+----
+> 这里我们来举一个例子说明一下
+
+- 可以看到，我在使用一个动态开辟出来的内存时分配四步走（不止四步），首先使用到`malloc()`函数去向内存申请大小为40的空间，由于其返回值是一个`void*`的指针，可以接收任何类型的指针，所以这里我去做了一个强转，将这块空间强制类型转换为`int*`
+- 上面说到在开辟空间的时候会有失败的可能性，所以我们要去做一个异常判断，若是这个指针为空的话，表明我们完全没有申请到相应的空间，那这个时候再去对这块地址进行操作的话就会造成空指针异常的问题
+- 在明确这块空间被开辟出来后，我们要先去做一个初始化操作，在初始化后就是将其去进行一个打印的操作
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+int main()
+{
+	// 1.开辟空间
+	int* p = (int *)malloc(40);
+	
+	// 2.异常判断
+	if (NULL == p)
+	{
+		perror('malloc fail');
+		exit(-1);
+	}
+
+	// 3.初始化空间
+	for (int i = 0; i < 10; ++i)
+	{
+		*(p + i) = i + 1;
+	}
+
+	// 4.打印观察
+	for (int i = 0; i < 10; ++i)
+	{
+		printf('%d ', *(p + i));
+	}
+	return 0;
+}
+```
+
+- 我们通过调试来进行观察，便可以发现我们刚好将所开辟的40个空间存放了10个整型数据
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/9f7768a25d854dbf86ce9f70782b1249.png)
+
+
+1. 如果参数`size`为0，malloc的行为是标准是未定义的，取决于编译器。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/13.%20C-sheng-wan-wu-zhi-dong-tai-nei-cun-guan-li.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>13. C生万物之动态内存管理</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">13. C生万物之动态内存管理</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/38" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>一、为什么存在动态内存分配</h2>
+<p>我们已经掌握的内存开辟方式有：</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">val</span> <span class="pl-c1">=</span> <span class="pl-c1">20</span>;	<span class="pl-c">//在栈空间上开辟四个字节</span>
+<span class="pl-smi">char</span> <span class="pl-s1">arr</span>[<span class="pl-c1">10</span>] <span class="pl-c1">=</span> {<span class="pl-c1">0</span>};	<span class="pl-c">//在栈空间上开辟10个字节的连续空间</span></pre></div>
+<p>但是上述的开辟空间的方式有两个特点：</p>
+<ol>
+<li><strong>空间开辟大小是固定的</strong></li>
+<li><strong>数组在申明的时候，必须指定数组的长度，它所需要的内存在编译时分配</strong></li>
+</ol>
+<ul>
+<li>那此时呢我们就希望有一种方式，可以在程序运行的过程中动态地去开辟当前程序所需要的内存空间，此时就需要使用到我们的【动态内存函数】了</li>
+</ul>
+<h2>二、动态内存函数的介绍</h2>
+<blockquote>
+<p>本文我总共会介绍三种动态内存函数，分别是<code class="notranslate">malloc()</code>、<code class="notranslate">calloc()</code>、<code class="notranslate">realloc()</code>，与之对应内存释放函数还有<code class="notranslate">free()</code></p>
+</blockquote>
+<h3>1、malloc和free</h3>
+<p>【函数原型】：</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-en">malloc</span> (<span class="pl-smi">size_t</span> <span class="pl-s1">size</span>);</pre></div>
+<p><a href="https://legacy.cplusplus.com/reference/cstdlib/malloc/?kw=malloc" rel="nofollow">malloc</a></p>
+<ul>
+<li>首先我们来看一下<code class="notranslate">malloc()</code>这个函数，它会向内存申请一块连续可用的空间，并返回指向这块空间的指针</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/204ca37afc3c264280098ba454c29da6cdc8375364348d0458155de96ab316b8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39343332623131616334393634393535613836383765303463613861616533652e706e67"><img src="https://camo.githubusercontent.com/204ca37afc3c264280098ba454c29da6cdc8375364348d0458155de96ab316b8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39343332623131616334393634393535613836383765303463613861616533652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/9432b11ac4964955a8687e04ca8aae3e.png" style="max-width: 100%;"></a></p>
+<p>【特点】：</p>
+<ol>
+<li>如果开辟成功，则返回一个指向开辟好空间的指针</li>
+<li>如果开辟失败，则返回一个<code class="notranslate">NULL</code>指针，因此malloc的返回值一定要做检查</li>
+</ol>
+<ul>
+<li>那么在什么情况下开辟失败呢？</li>
+</ul>
+<blockquote>
+<p>申请的内存过大就会开辟失败，所以就要判断是不是空指针，然后再进行使用</p>
+</blockquote>
+<ol start="3">
+<li>返回值的类型是<code class="notranslate">void*</code> ，所以malloc函数并不知道开辟空间的类型，具体在使用的时候使用者自己来决定</li>
+</ol>
+<hr>
+<blockquote>
+<p>在内存中的布局是这样的：</p>
+</blockquote>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/38c84fa2b9d709250a582cffa3aaf3931bc0403464eb6cf19e5f8d52aa2566ef/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31393933353562623732333534376237383636643364306337663534663430332e706e67"><img src="https://camo.githubusercontent.com/38c84fa2b9d709250a582cffa3aaf3931bc0403464eb6cf19e5f8d52aa2566ef/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31393933353562623732333534376237383636643364306337663534663430332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/199355bb723547b7866d3d0c7f54f403.png" style="max-width: 100%;"></a></p>
+<hr>
+<blockquote>
+<p>这里我们来举一个例子说明一下</p>
+</blockquote>
+<ul>
+<li>可以看到，我在使用一个动态开辟出来的内存时分配四步走（不止四步），首先使用到<code class="notranslate">malloc()</code>函数去向内存申请大小为40的空间，由于其返回值是一个<code class="notranslate">void*</code>的指针，可以接收任何类型的指针，所以这里我去做了一个强转，将这块空间强制类型转换为<code class="notranslate">int*</code></li>
+<li>上面说到在开辟空间的时候会有失败的可能性，所以我们要去做一个异常判断，若是这个指针为空的话，表明我们完全没有申请到相应的空间，那这个时候再去对这块地址进行操作的话就会造成空指针异常的问题</li>
+<li>在明确这块空间被开辟出来后，我们要先去做一个初始化操作，在初始化后就是将其去进行一个打印的操作</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-k">#include</span> <span class="pl-s">&lt;stdlib.h&gt;</span>
+<span class="pl-k">#include</span> <span class="pl-s">&lt;string.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c">// 1.开辟空间</span>
+	<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">p</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span> <span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-c1">40</span>);
+	
+	<span class="pl-c">// 2.异常判断</span>
+	<span class="pl-k">if</span> (<span class="pl-c1">NULL</span> <span class="pl-c1">==</span> <span class="pl-s1">p</span>)
+	{
+		<span class="pl-en">perror</span>(<span class="pl-s">"malloc fail"</span>);
+		<span class="pl-en">exit</span>(<span class="pl-c1">-1</span>);
+	}
+
+	<span class="pl-c">// 3.初始化空间</span>
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">10</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+	{
+		<span class="pl-c1">*</span>(<span class="pl-s1">p</span> <span class="pl-c1">+</span> <span class="pl-s1">i</span>) <span class="pl-c1">=</span> <span class="pl-s1">i</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>;
+	}
+
+	<span class="pl-c">// 4.打印观察</span>
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">10</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-c1">*</span>(<span class="pl-s1">p</span> <span class="pl-c1">+</span> <span class="pl-s1">i</span>));
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>我们通过调试来进行观察，便可以发现我们刚好将所开辟的40个空间存放了10个整型数据</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/512cf389958234793e73aca8fdb1259fccb97bdce9b4061f113039aa359e2a79/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39663737363861323564383534646266383663653966373037383262313234392e706e67"><img src="https://camo.githubusercontent.com/512cf389958234793e73aca8fdb1259fccb97bdce9b4061f113039aa359e2a79/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39663737363861323564383534646266383663653966373037383262313234392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/9f7768a25d854dbf86ce9f70782b1249.png" style="max-width: 100%;"></a></p>
+<ol>
+<li>如果参数<code class="notranslate">size</code>为0，malloc的行为是标准是未定义的，取决于编译器。</li>
+</ol>
+<ul>
+<li>还有一个特点，单独再说一下，看了上面的函数解读后可以知道我们需要给<code class="notranslate">malloc()</code>函数传递进去一个size大小，它便会为我们开辟出指定的空间，但若是我们传递的参数为0的话，就显得很荒唐。</li>
+<li>举个例子：就好比你向别人借钱，如果你说要借50、100那还算正常，但是说 “我要借0元”，那对方就会感觉到很奇怪，他到底要给你些什么东西呢？那编译器其实也是一样的，不过呢，既然你去要东西了，它还是会给你点什么。<strong>通过调试可以观察到虽然我们没有申请到任何的东西，但是呢却有了这么一块地址</strong>，这还是要看不同的编译器，反正在VS下还是会给你一个反应的</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e2c6428923eaaf4e6c738bd11e1e7dd98041cca905983c8e191beebbcf7fedf2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37663030666665323264393834386463386366663666333366306434636664312e706e67"><img src="https://camo.githubusercontent.com/e2c6428923eaaf4e6c738bd11e1e7dd98041cca905983c8e191beebbcf7fedf2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37663030666665323264393834386463386366663666333366306434636664312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/7f00ffe22d9848dc8cff6f33f0d4cfd1.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>malloc申请的空间是怎么释放的呢？</p>
+<ul>
+<li>free释放（主动）</li>
+<li>程序退出后malloc申请的空间，也会被操作系统回收的（被动）</li>
+</ul>
+</li>
+<li></li>
+<li>
+<p>正常情况下，谁申请的空间，谁释放</p>
+</li>
+<li>
+<p>万一自己不释放，也要交代给别人</p>
+</li>
+</ul>
+<blockquote>
+<p>所以下面我们就介绍<code class="notranslate">free</code></p>
+</blockquote>
+<p>【函数原型】：</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">free</span> (<span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-s1">ptr</span>);</pre></div>
+<p><a href="https://legacy.cplusplus.com/reference/cstdlib/free/?kw=free" rel="nofollow">free</a></p>
+<ul>
+<li>然后我们来看看这个函数，它主要用来<strong>释放动态开辟的内存</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b00e39f25c6b56623022cd32d2f2d7ed1ed00d692098d5d62cd4b7118b1bd421/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63366235653834343636396634646463616634636633663135373664383337612e706e67"><img src="https://camo.githubusercontent.com/b00e39f25c6b56623022cd32d2f2d7ed1ed00d692098d5d62cd4b7118b1bd421/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63366235653834343636396634646463616634636633663135373664383337612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/c6b5e844669f4ddcaf4cf3f1576d837a.png" style="max-width: 100%;"></a></p>
+<p>【特点】：</p>
+<ol>
+<li><strong>如果参数 ptr 指向的空间不是动态开辟的，那free函数的行为是未定义的</strong></li>
+<li><strong>如果参数 ptr 是NULL指针，则函数什么事都不做</strong></li>
+</ol>
+<ul>
+<li>所以我们在刚才那段代码的下面应该再加上一个<code class="notranslate">free(p)</code>才行，但是这样真的就可以了吗？</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">free</span>(<span class="pl-s1">p</span>);</pre></div>
+<ul>
+<li>我们可以通过调试来观察一下，当执行完这句代码后初始化的<code class="notranslate">1 ~ 10</code>变成了一些随机值，这也就意味着我们一开始申请的这块空间还给操作系统了，所以里面所存放的这些内容都销毁了，不过从上面对于这个函数的解读中我们可以看出即使我们将这块空间还给操作系统了，但是这块申请空间的地址还是在的</li>
+<li>那么也就意味着这个指针p现在变成【<strong>野指针</strong>】了，变得非常危险</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/20cf66b4b7eed740e87d10622f9cf9bfeeb0ebc417fa53b48cc7d98c5f3a88bd/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35653436306665336266663034663066393839396435323561336436366435322e706e67"><img src="https://camo.githubusercontent.com/20cf66b4b7eed740e87d10622f9cf9bfeeb0ebc417fa53b48cc7d98c5f3a88bd/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35653436306665336266663034663066393839396435323561336436366435322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/5e460fe3bff04f0f9899d525a3d66d52.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>若是我们想化解这个危机的话，可以在<code class="notranslate">free(p)</code>之后再将其置为NULL即可，此时就无法再找到之前的那块地址了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/cd281cc4f07700534ca8127cf8d063a55a047b477b7b2331b3e955e85c80b908/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32373437323032636332626534346362386536373865376262623332366362622e706e67"><img src="https://camo.githubusercontent.com/cd281cc4f07700534ca8127cf8d063a55a047b477b7b2331b3e955e85c80b908/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32373437323032636332626534346362386536373865376262623332366362622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/2747202cc2be44cb8e678e7bbb326cbb.png" style="max-width: 100%;"></a></p>
+<hr>
+<p>【注意实现】：</p>
+<ul>
+<li>malloc和free都声明在 <code class="notranslate">stdlib.h</code>头文件中，记得要引头文件</li>
+<li><strong>每次在使用【malloc】申请完一块空间后，一定要去做一个判空，预防申请失败的情况。而且在使用完这块空间后还要将其归还给操作系统，并且将指针所指向的这块地址置为空，防止野指针</strong></li>
+</ul>
+<h3>2、calloc</h3>
+<p>【函数原型】：</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-en">calloc</span> (<span class="pl-smi">size_t</span> <span class="pl-s1">num</span>, <span class="pl-smi">size_t</span> <span class="pl-s1">size</span>);</pre></div>
+<p><a href="https://legacy.cplusplus.com/reference/cstdlib/calloc/?kw=calloc" rel="nofollow">calloc</a></p>
+<ul>
+<li>C语言还提供了一个函数叫<code class="notranslate">calloc</code>，<code class="notranslate">calloc</code>函数也用来动态内存分配。原型如下：</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1f3738e0c2f0db7fbfff03e03a81856146445aa0bdb47aca8a72b69fc290c117/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36633362663037393336313234393132623866346633393761653235386365312e706e67"><img src="https://camo.githubusercontent.com/1f3738e0c2f0db7fbfff03e03a81856146445aa0bdb47aca8a72b69fc290c117/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36633362663037393336313234393132623866346633393761653235386365312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/6c3bf07936124912b8f4f397ae258ce1.png" style="max-width: 100%;"></a></p>
+<p>【特点】：</p>
+<ol>
+<li>函数的功能是<strong>为 num 个大小为 size 的元素开辟一块空间，并且把空间的每个字节初始化为0</strong></li>
+<li>与函数 <code class="notranslate">malloc</code> 的区别只在于 <strong>calloc 会在返回地址之前把申请的空间的每个字节初始化为全0</strong></li>
+</ol>
+<ul>
+<li>一样，我们可以通过调试来进行观察，与<code class="notranslate">malloc</code>不同的地方在于当我们申请到10个大小为4字节的空间后，发现这10个数据均为0，即在申请的同时就已经为初始化好了，不需要我们自己再去初始化</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1bf36c5781f9ce53cd4262bd1ea96fd3f518b02afa5c06134f6402f91dda4362/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35633033663834383031613434663265616639333666306161376530663237632e706e67"><img src="https://camo.githubusercontent.com/1bf36c5781f9ce53cd4262bd1ea96fd3f518b02afa5c06134f6402f91dda4362/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35633033663834383031613434663265616639333666306161376530663237632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/5c03f84801a44f2eaf936f0aa7e0f27c.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>如果还是觉得有点不可思议的话，我们可以再通过内存去仔细看看</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c93fc83ba474db252f5e20f8aff2ed1d247d3cf42e6790182b61d6c3368fd505/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64323332366139643362353134343362393439633463616537343737643930652e706e67"><img src="https://camo.githubusercontent.com/c93fc83ba474db252f5e20f8aff2ed1d247d3cf42e6790182b61d6c3368fd505/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64323332366139643362353134343362393439633463616537343737643930652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/d2326a9d3b51443b949c4cae7477d90e.png" style="max-width: 100%;"></a></p>
+<ul>
+<li><strong>所以如何我们对申请的内存空间的内容要求初始化，那么可以很方便的使用calloc函数来完成任务</strong></li>
+</ul>
+<h3>3、realloc</h3>
+<blockquote>
+<p>最后再来讲讲动态内存函数【realloc】</p>
+</blockquote>
+<p>【函数原型】：</p>
+<ul>
+<li><code class="notranslate">ptr</code>是要调整的内存地址、<code class="notranslate">size</code>是调整之后新大小、返回值为<strong>调整之后的内存起始位置</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-en">realloc</span> (<span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-s1">ptr</span>, <span class="pl-smi">size_t</span> <span class="pl-s1">size</span>);</pre></div>
+<p><a href="https://legacy.cplusplus.com/reference/cstdlib/realloc/?kw=realloc" rel="nofollow">realloc</a></p>
+<ul>
+<li>realloc函数的出现让动态内存管理更加灵活，有时会我们发现过去<strong>申请的空间太小了</strong>，有时候我们又会觉得<strong>申请的空间过大了</strong>，那为了合理的使用内存，我们一定会对内存的大小做灵活的调整。那 realloc 函数就可以做到对动态开辟内存大小的调整</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6f3f0dd8c84478b3af7d474ea43cc25aace01f49fa5ac2f8ff07dd5d57004c2e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62383037363561366665613534383362393830343339313963626364636536332e706e67"><img src="https://camo.githubusercontent.com/6f3f0dd8c84478b3af7d474ea43cc25aace01f49fa5ac2f8ff07dd5d57004c2e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62383037363561366665613534383362393830343339313963626364636536332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/b80765a6fea5483b98043919cbcdce63.png" style="max-width: 100%;"></a></p>
+<blockquote>
+<p>具体地我们来看一下要如何去使用这个<code class="notranslate">realloc()</code>进行一个扩容</p>
+</blockquote>
+<ul>
+<li>可以看到，在下面我首先申请了5个整型空间的大小，对其做了初始化之后就去做了一个扩容，要扩容的地址即为<code class="notranslate">p</code>，扩充后的容量便是10个整型数据</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">p</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>) <span class="pl-c1">*</span> <span class="pl-c1">5</span>);
+	<span class="pl-k">if</span> (<span class="pl-c1">NULL</span> <span class="pl-c1">==</span> <span class="pl-s1">p</span>)
+	{
+		<span class="pl-en">perror</span>(<span class="pl-s">"malloc"</span>);
+		<span class="pl-k">return</span> <span class="pl-c1">1</span>;
+	}
+	
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">5</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-c1">*</span>(<span class="pl-s1">p</span> <span class="pl-c1">+</span> <span class="pl-s1">i</span>) <span class="pl-c1">=</span> <span class="pl-s1">i</span>;
+	}
+	<span class="pl-c">//扩容</span>
+	<span class="pl-s1">p</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-en">realloc</span>(<span class="pl-s1">p</span>, <span class="pl-c1">20</span> <span class="pl-c1">*</span> <span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>));
+	<span class="pl-c">//释放</span>
+	<span class="pl-en">free</span>(<span class="pl-s1">p</span>);
+	<span class="pl-s1">p</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+	
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>不过呢，我这里还要讲一下这个<code class="notranslate">realloc</code>到底是怎么进行扩容的，因为它有一个扩容机制，分为【本地扩容】和【异地扩容】</li>
+</ul>
+<h4>3.1 realloc扩容机制：【本地扩容】和【异地扩容】</h4>
+<ul>
+<li><strong>本地扩容</strong>，即在本地就有足够的空间可以扩容，此时直接在后面续上新的空间即可</li>
+<li><strong>异地扩容</strong>：当后边没有足够的空间可以扩容，realloc函数会找一个满足空间大小的<strong>新的连续空间</strong>。把旧的空间的数据，拷贝到新空间的前面的位置，并且把旧的空间释放掉（无需手动释放），同时返回新的空间的地址</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0305bca1d923708ec85d31de49285a97a89c95157908a2e0bf0e3a1d54c35827/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63373439373462383565306234396337613064343339346465326163306235642e706e67"><img src="https://camo.githubusercontent.com/0305bca1d923708ec85d31de49285a97a89c95157908a2e0bf0e3a1d54c35827/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63373439373462383565306234396337613064343339346465326163306235642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/c74974b85e0b49c7a0d4394de2ac0b5d.png" style="max-width: 100%;"></a></p>
+<hr>
+<p>【注意事项】：</p>
+<ul>
+<li>这里我还要讲一个注意点，如果在扩容的时候失败了怎么办呢？此时<code class="notranslate">realloc</code>就会返回一个空指针</li>
+<li>但是当我们上面对这个指针p所指向的地址进行扩充后，又将其赋值给了自己，若真像我们上面所扩容失败返回空指针的情况，此时再去使用p的时候就会出现【空指针异常】的问题</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-s1">p</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-en">realloc</span>(<span class="pl-s1">p</span>, <span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>) <span class="pl-c1">*</span> <span class="pl-c1">10</span>);</pre></div>
+<ul>
+<li>对于这个问题，我们的解决办法一般是这样的，定义一个新的指针<code class="notranslate">tmp</code>去指向这块空间，再扩容结束后再去判断一下这个指针是否<code class="notranslate">NULL</code>，若是为NULL的话代表扩容失败，此时应该打印错误信息然后结束程序，不要再往下执行了，而是当这个地址不为空的时候再将让原先的指针<code class="notranslate">p</code>指向它，让我们从头至尾都在维护同一个指针</li>
+<li>因此我们在扩容之后应该再去加上这么一个判断才行，在赋值完后别忘了把临时的<code class="notranslate">tmp</code>指针置为空，防止其变为【野指针】</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">tmp</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-en">realloc</span>(<span class="pl-s1">p</span>, <span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>) <span class="pl-c1">*</span> <span class="pl-c1">10</span>);
+<span class="pl-k">if</span> (<span class="pl-s1">tmp</span> <span class="pl-c1">==</span> <span class="pl-c1">NULL</span>)
+{
+	<span class="pl-en">perror</span>(<span class="pl-s">"fail realloc"</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">1</span>;
+}
+<span class="pl-s1">p</span> <span class="pl-c1">=</span> <span class="pl-s1">tmp</span>;
+<span class="pl-s1">tmp</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;	</pre></div>
+<ul>
+<li>
+<p>首先是本地扩容，可以看到<code class="notranslate">realloc</code>返回的地址就是原先开辟出来那块空间的首地址</p>
+</li>
+<li>
+<p>然后是异地扩容，<strong>我们可以将需要扩充后的容量调大</strong>，这样后续的容量就会不够了，此时编译器便会在内存中再去找一块合适大小的空间，然后将原先的5个整型数据先拷贝过去，然后再在其后开辟出剩余的空间，最后再释放掉原先的那块空间</p>
+</li>
+</ul>
+<h2>三、常见的动态内存错误</h2>
+<blockquote>
+<p>在介绍完几个动态内存函数之后，我们再来分析一下【常见的动态内存错误】</p>
+</blockquote>
+<h3>1、对NULL指针的解引用操作</h3>
+<p><strong>代码：</strong></p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">void</span> <span class="pl-en">test</span>()
+{
+    <span class="pl-k">int</span> *p = (<span class="pl-k">int</span> *)<span class="pl-c1">malloc</span>(INT_MAX / <span class="pl-c1">4</span>);
+    *p = <span class="pl-c1">20</span>;	<span class="pl-c"><span class="pl-c">//</span>如果p的值是NULL，就会有问题</span>
+    <span class="pl-c1">free</span>(p);
+}</pre></div>
+<p><strong>分析：</strong></p>
+<ul>
+<li>首先看到第一个，你要知道的是<code class="notranslate">INT_MAX</code>是什么。它是一个宏定义，表示int类型（整型）能够表示的最大值，其值为<strong>2147483647</strong>，那在上面讲<code class="notranslate">malloc</code>的时候我们有说到过，若是需要申请的空间过大的话可能就会导致申请失败的问题，所以这里很致命的一个错误就是在申请空间之后没有去及时判断是否申请成功</li>
+<li>可以看到编译器也是给我们报出了一个Warning警告说：⚠ 取消对NULL指针的引用</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3f731b57ef05c2737b75cf92cda300ba5286f444063c58ce0c7bffe9d14b8a08/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31373563333333303134336134363739383064306366643430646433643339362e6a706567237069635f63656e746572"><img src="https://camo.githubusercontent.com/3f731b57ef05c2737b75cf92cda300ba5286f444063c58ce0c7bffe9d14b8a08/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31373563333333303134336134363739383064306366643430646433643339362e6a706567237069635f63656e746572" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/175c3330143a467980d0cfd40dd3d396.jpeg#pic_center" style="max-width: 100%;"></a><br>
+<strong>改进：</strong></p>
+<ul>
+<li>此时我们就可以对代码去做一个改进，对malloc之后的返回值做一个判断</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">test</span>()
+{
+    <span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">p</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-c1">INT_MAX</span> / <span class="pl-c1">4</span>);
+    <span class="pl-k">if</span> (<span class="pl-c1">NULL</span> <span class="pl-c1">==</span> <span class="pl-s1">p</span>)
+    {
+        <span class="pl-en">perror</span>(<span class="pl-s">"fail malloc"</span>);
+        <span class="pl-en">exit</span>(<span class="pl-c1">-1</span>);
+    }
+    <span class="pl-c1">*</span><span class="pl-s1">p</span> <span class="pl-c1">=</span> <span class="pl-c1">20</span>;<span class="pl-c">//如果p的值是NULL，就会有问题</span>
+    <span class="pl-en">free</span>(<span class="pl-s1">p</span>);
+}</pre></div>
+<ul>
+<li>这个时候我们就可以看到没有警告再报出来了</li>
+</ul>
+<h3>2、对动态开辟空间的越界访问</h3>
+<p><strong>代码：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">p</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-c1">40</span>);
+	<span class="pl-k">if</span> (<span class="pl-c1">NULL</span> <span class="pl-c1">==</span> <span class="pl-s1">p</span>)
+	{
+		<span class="pl-en">perror</span>(<span class="pl-s">"malloc"</span>);
+		<span class="pl-k">return</span> <span class="pl-c1">1</span>;
+	}
+
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> &lt;= <span class="pl-c1">10</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-c1">*</span>(<span class="pl-s1">p</span> <span class="pl-c1">+</span> <span class="pl-s1">i</span>) <span class="pl-c1">=</span> <span class="pl-c1">0</span>;	<span class="pl-c">// 当i == 10时便会越界</span>
+	}
+	<span class="pl-en">free</span>(<span class="pl-s1">p</span>);
+	<span class="pl-s1">p</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><strong>分析：</strong></p>
+<ul>
+<li>接下去我们来看这个越界访问的问题，首先我们使用<code class="notranslate">malloc</code>向堆区申请了10个字节的空间，但是呢在下面对这块空间进行访问的时候却访问了11个整型的大小，此时一定会造成访问越界的问题</li>
+<li>但是呢口说无凭，我们一样通过调试来进行一个观察，不过这里在进行循环的时候<code class="notranslate">i</code>没有到100的话是不会出问题的，所以为了方便调试我们需要去设置一个【<strong>条件断点</strong>】，将<code class="notranslate">i</code>从【9】开始执行，这样我们很快就能观察到结果了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5f0c801d2c55fa2da8c1e9eb1cbee8cfbddb6c5e1ab1bcc89f30db129c9e03c5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62613137383231366333396234333836393464343938303161386531376561342e706e67"><img src="https://camo.githubusercontent.com/5f0c801d2c55fa2da8c1e9eb1cbee8cfbddb6c5e1ab1bcc89f30db129c9e03c5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62613137383231366333396234333836393464343938303161386531376561342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/ba178216c39b438694d49801a8e17ea4.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>然后我们便可以通过调试去进行观察了，可以看到<code class="notranslate">i</code>并没有到达11，而是直接跳出了当前循环，然后在<code class="notranslate">free()</code>的时候就出现了问题，一般我们在一些其他地方观察不到的问题就会在free()的地方显现出来，因为此时是要去释放掉我们的这块申请的空间了，便会引发一些异常</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e0667d47a03f5a4ff2f6535930da42167473d0099c1c885a29f33c03560eebf2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34323662623563333132353734663339386533366365366130326530613066662e706e67"><img src="https://camo.githubusercontent.com/e0667d47a03f5a4ff2f6535930da42167473d0099c1c885a29f33c03560eebf2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34323662623563333132353734663339386533366365366130326530613066662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/426bb5c312574f398e36ce6a02e0a0ff.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>其实我们可以将<code class="notranslate">*(p + i) = 0</code>修改成<code class="notranslate">p[i] = 0</code>，利用<code class="notranslate">[]</code>操作符对某个下标进行访问，此时我们可以看到编译器就报出了警告说<strong>索引"10"超出了“0"至”9"的有效范围</strong>，因此合法的下标索引即为<code class="notranslate">0 ~ 9</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/70ff0a1b30ed05e0fd7c6f06ab49157671db2e7383b1232d73651e855006aa46/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64323133646437366332623334653863613939646432346366376634383731392e706e67"><img src="https://camo.githubusercontent.com/70ff0a1b30ed05e0fd7c6f06ab49157671db2e7383b1232d73651e855006aa46/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64323133646437366332623334653863613939646432346366376634383731392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/d213dd76c2b34e8ca99dd24cf7f48719.png" style="max-width: 100%;"></a></p>
+<p><strong>改进：</strong></p>
+<ul>
+<li>代码修改这一块的话我们只需要在申请空间的时候保证申请到足够的、正确的容量即可</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">p</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-c1">100</span> <span class="pl-c1">*</span> <span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>));</pre></div>
+<ul>
+<li>这个时候我们就可以看到没有警告再报出来了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f9589159cc9872eaa0f0656b7e9882f8b1c5025903604893cc9b53fa77e98b6b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31316431623538636161313334303034626164623233636439393933366461392e706e67"><img src="https://camo.githubusercontent.com/f9589159cc9872eaa0f0656b7e9882f8b1c5025903604893cc9b53fa77e98b6b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31316431623538636161313334303034626164623233636439393933366461392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/11d1b58caa134004badb23cd99936da9.png" style="max-width: 100%;"></a></p>
+<h3>3、对非动态开辟内存进行free释放</h3>
+<p><strong>代码：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">test</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+	<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">p</span> <span class="pl-c1">=</span> <span class="pl-c1">&amp;</span><span class="pl-s1">a</span>;
+	<span class="pl-en">free</span>(<span class="pl-s1">p</span>);	<span class="pl-c">//ok?</span>
+}</pre></div>
+<p><strong>分析：</strong></p>
+<ul>
+<li>接下去再来看第三个，这里是对非动态开辟的内存进行<code class="notranslate">free()</code>释放，那我们在介绍<code class="notranslate">free()</code>的时候说到它只能释放由【malloc】、【calloc】、【realloc】所开辟出来的空间，这些空间都是在堆区上进行申请的，但是我们在普通的函数中所创建的普通变量无非是栈区或者静态区的，它们的释放工作并不是由<code class="notranslate">free()</code>来完成的，因此强行去这样做的话就会造成了一个很大的问题</li>
+<li>可以看到一样出现了我们刚才那样类似的问题</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/06e8dd33249f160dcc197c1f8c9245ed59b49572f3d20f7efb43dabe049eb333/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62356365363239646364333534626238623330663161383937663536316561352e706e67"><img src="https://camo.githubusercontent.com/06e8dd33249f160dcc197c1f8c9245ed59b49572f3d20f7efb43dabe049eb333/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62356365363239646364333534626238623330663161383937663536316561352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/b5ce629dcd354bb8b30f1a897f561ea5.png" style="max-width: 100%;"></a></p>
+<p><strong>改进：</strong></p>
+<ul>
+<li>本代码并没有什么通用的改进办法，如果不想出现问题的话就不要<code class="notranslate">free()</code>普通栈区上的变量即可，或者按照常规去动态申请然后在进行<code class="notranslate">free()</code></li>
+</ul>
+<h3>4、使用free释放一块动态开辟内存的一部分</h3>
+<p><strong>代码：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">test</span>()
+{
+    <span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">p</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-c1">100</span>);
+    <span class="pl-k">if</span> (<span class="pl-c1">NULL</span> <span class="pl-c1">==</span> <span class="pl-s1">p</span>)
+    {
+        <span class="pl-en">perror</span>(<span class="pl-s">"malloc fail"</span>);
+        <span class="pl-k">return</span> <span class="pl-c1">1</span>;
+    }
+    <span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">10</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+    {
+        <span class="pl-s1">p</span><span class="pl-c1">++</span>;
+    }
+    <span class="pl-en">free</span>(<span class="pl-s1">p</span>);    <span class="pl-c">//p不再指向动态内存的起始位置</span>
+}</pre></div>
+<p><strong>分析：</strong></p>
+<ul>
+<li>本题的情境是这样的，我们在堆区申请了100个字节后，让指针p指向这块地址的起始位置，然后让其偏移了10个整型的位置，即40B的大小，<strong>那么此时指针p其实就指向了当前这一块地址的中间位置</strong>，那么此时再去<code class="notranslate">free</code>的时候其实就会出问题</li>
+<li>因为该函数在释放动态申请的内存时需要从这块地址其实位置开始，然后释放制定的字节数，若是从某个中间位置开始的话就不对了</li>
+</ul>
+<p>从下图可以看出，因为<code class="notranslate">free()</code>函数需要做到申请多少释放多少，所以当其释放了一部分之后，就不够了，便造成了访问内存错误的问题<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d5b8b816292392964c88b69dc8a4871a5e2d2e8d9bd506973d8aac78106d56f2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34376466633264346264323134316332623061336530336264383861326438642e706e67"><img src="https://camo.githubusercontent.com/d5b8b816292392964c88b69dc8a4871a5e2d2e8d9bd506973d8aac78106d56f2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34376466633264346264323134316332623061336530336264383861326438642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/47dfc2d4bd2141c2b0a3e03bd88a2d8d.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以看到，此时若是去<code class="notranslate">free()</code>的话就会出现警告，很明显这个<code class="notranslate">debug_heap.cpp</code>就是【堆】这一块出的问题</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b0a121ebd0584ded2673692488f5cd6487f4dfabdfff51f7e77c74d3ff10cfd8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32343763623231653335653334646362393662356430393637303636316636312e706e67"><img src="https://camo.githubusercontent.com/b0a121ebd0584ded2673692488f5cd6487f4dfabdfff51f7e77c74d3ff10cfd8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32343763623231653335653334646362393662356430393637303636316636312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/247cb21e35e34dcb96b5d09670661f61.png" style="max-width: 100%;"></a></p>
+<p><strong>改进：</strong></p>
+<ul>
+<li>要如何改进的话就会不要去<code class="notranslate">free()</code>一块动态开辟出来内存的一部分，而是要从起始地址开始释放，申请多少释放多少</li>
+</ul>
+<h3>5、对同一块动态内存多次释放</h3>
+<p><strong>代码：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">test</span>()
+{
+    <span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">p</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-c1">100</span>);
+    <span class="pl-c">//使用...</span>
+    <span class="pl-en">free</span>(<span class="pl-s1">p</span>);
+
+    <span class="pl-c">//...</span>
+    <span class="pl-en">free</span>(<span class="pl-s1">p</span>);	<span class="pl-c">//重复释放</span>
+}</pre></div>
+<p><strong>分析：</strong></p>
+<ul>
+<li>这一点的话就是在我们释放完一块内存空间后忘了，然后再去对其进行了一次释放，这种操作的话其实也是很危险的，当我们在第一次释放的时候p所指向的<strong>那块空间的使用权已经还给操作系统了</strong>，但是呢我们并没有对这个指针<code class="notranslate">p</code>做置空的操作，于是它还指向那块空间所在的地址，不过里面的内容已经是随机的了，那么这个指针就是一个【<strong>野指针</strong>】</li>
+<li>此时再对其做一个<code class="notranslate">free()</code>的操作，就会造成操作野指针的问题</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c2ffa24c779105aa63ff0ed3a24f7826ab5f7f404e2e3e3979a260e7a69f1ee4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30336461613532383861333634323933396130393035316335326133636562302e706e67"><img src="https://camo.githubusercontent.com/c2ffa24c779105aa63ff0ed3a24f7826ab5f7f404e2e3e3979a260e7a69f1ee4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30336461613532383861333634323933396130393035316335326133636562302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/03daa5288a3642939a09051c52a3ceb0.png" style="max-width: 100%;"></a></p>
+<p><strong>改进：</strong></p>
+<ul>
+<li>此时我们就可以对代码去做一个简单的改进，在第一次<code class="notranslate">free</code>后将指针p置为NULL即可，此刻若是后面再去<code class="notranslate">free</code>的话，就不会出现问题了，因为当我们传递NULL作为参数的时候，<code class="notranslate">free(NULL)</code>便不会去做任何的事情</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">test</span>()
+{
+    <span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">p</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-c1">100</span>);
+    <span class="pl-c">//使用...</span>
+    <span class="pl-en">free</span>(<span class="pl-s1">p</span>);
+    <span class="pl-s1">p</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;   <span class="pl-c">// 将不使用的指针置为NULL</span>
+    <span class="pl-c">//...</span>
+    <span class="pl-en">free</span>(<span class="pl-s1">p</span>);	<span class="pl-c">//重复释放</span>
+}</pre></div>
+<h3>6、动态开辟内存忘记释放（内存泄漏）</h3>
+<p><strong>代码：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">test</span>()
+{
+	<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">p</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-c1">100</span>);
+	<span class="pl-k">if</span> (<span class="pl-c1">NULL</span> <span class="pl-c1">!=</span> <span class="pl-s1">p</span>)
+	{
+		<span class="pl-c1">*</span><span class="pl-s1">p</span> <span class="pl-c1">=</span> <span class="pl-c1">20</span>;
+	}
+}</pre></div>
+<p><strong>分析：</strong></p>
+<ul>
+<li>那最后一个呢就是我们最常见的，在动态开辟内存后忘记去释放了，例如上面有一个<code class="notranslate">test()</code>函数，函数内部去申请了100个字节的数据，并为其做了一个初始化，此时main函数就正常地去调用它，但是呢这中间却没有任何地<code class="notranslate">free()</code>释放操作，就会存在【内存泄漏】的问题</li>
+</ul>
+<p>那么可以既然函数内部没有做释放的话我在调用结束后去<code class="notranslate">free</code>一下这个p不就好了？</p>
+<ul>
+<li>这句话其实就存在很大的问题，对于一个在一个函数创建的变量，是处在当前这个函数所维护的栈帧中的，所以当这个函数调用结束后局部变量就会随着栈帧的销毁而不复存在，那此时我们再想去<code class="notranslate">free()</code>释放这块空间的时候，是无法访问到这个指针<code class="notranslate">p</code>的。因此要释放的话只能在函数内部进行才可以</li>
+</ul>
+<p><strong>改进：</strong></p>
+<ul>
+<li>那改进这一块的话我们只需要在函数调用结束前去将其释放即可，不过别忘了在<code class="notranslate">free()</code>之后要将指针置为NULL防止野指针</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">test</span>()
+{
+	<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">p</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-c1">100</span>);
+	<span class="pl-k">if</span> (<span class="pl-c1">NULL</span> <span class="pl-c1">!=</span> <span class="pl-s1">p</span>)
+	{
+		<span class="pl-c1">*</span><span class="pl-s1">p</span> <span class="pl-c1">=</span> <span class="pl-c1">20</span>;
+	}
+	
+	<span class="pl-en">free</span>(<span class="pl-s1">p</span>);
+	<span class="pl-s1">p</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+}</pre></div>
+<ul>
+<li>所以当我们在使用动态内存的时候，一定要保证在【malloc】之后及时【free】，此时才能保证不会内存泄漏</li>
+</ul>
+<blockquote>
+<p>但是它们两个成对出现就一定不会出现问题吗？</p>
+</blockquote>
+<ul>
+<li>我们来看看下面这段代码，可以看到中间有一个<code class="notranslate">if(1)</code>的条件判断，我们知道这个条件是天然成立的，然后看到当这个条件成立后就会执行<code class="notranslate">return</code>语句，那么当前这个函数就会结束了，此时并没有运行到<code class="notranslate">free(p)</code>这句话</li>
+<li>即使是存在【malloc】和【free】成对出现的情况下，可能也无法百分百保证不会产生内存泄漏的问题，所以还是需要我们在写程序的时候多注意细节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">test</span>()
+{
+	<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">p</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-c1">100</span>);
+	<span class="pl-k">if</span> (<span class="pl-c1">NULL</span> <span class="pl-c1">!=</span> <span class="pl-s1">p</span>)
+	{
+		<span class="pl-c1">*</span><span class="pl-s1">p</span> <span class="pl-c1">=</span> <span class="pl-c1">20</span>;
+	}
+	<span class="pl-k">if</span> (<span class="pl-c1">1</span>)
+		<span class="pl-k">return</span>;		<span class="pl-c">// 因为某些条件中途return了, 没到free()</span>
+
+	<span class="pl-en">free</span>(<span class="pl-s1">p</span>);
+}</pre></div>
+<h2>四、笔试题</h2>
+<h3>题目一</h3>
+<p><strong>代码：</strong></p>
+<ul>
+<li>下面这段代码，其总共有2处错误，你可试着自己分析一下</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">GetMemory</span>(<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">p</span>)
+{
+	<span class="pl-s1">p</span> <span class="pl-c1">=</span> (<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-c1">100</span>);
+}
+<span class="pl-smi">void</span> <span class="pl-en">Test</span>(<span class="pl-smi">void</span>)
+{
+	<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">str</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+	<span class="pl-en">GetMemory</span>(<span class="pl-s1">str</span>);
+	<span class="pl-en">strcpy</span>(<span class="pl-s1">str</span>, <span class="pl-s">"hello world\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s1">str</span>);
+}</pre></div>
+<p><strong>分析：</strong></p>
+<p>错误1: 非法访问内存</p>
+<ul>
+<li>当str传递给p的时候，p是str的临时拷贝，有自己独立的空间，当<code class="notranslate">GetMemory()</code>函数内部申请了空间后，<strong>地址是放在p中的，str依然是NULL</strong>。当<code class="notranslate">GetMemory()</code>函数返回之后，<code class="notranslate">strcpy()</code>在拷贝的时候便会形成非法访问内存</li>
+</ul>
+<p>错误2: 内存泄漏</p>
+<ul>
+<li>在GetMemory()函数内部，动态申请了，但是没有即使使用<code class="notranslate">free</code>释放，会造成内存泄漏的问题</li>
+</ul>
+<hr>
+<ul>
+<li>那我们可以到VS中来看一下是否存在这样的问题，于是在一编译之后，就可以看到有⚠Waring的出现，说是这个<code class="notranslate">str可能是“0”</code>，那这个<code class="notranslate">str</code>它可是一个指针，那为0的话也就意味着它是一个【空指针】，那去访问空指针的话也是非常危险的一件事</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0d6e0313dda67862e20bbf1751d796e5c209a2d7c64a9f029b406d1e763bb52f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39386131316634656430323334616233383765333635393336343564323339342e706e67"><img src="https://camo.githubusercontent.com/0d6e0313dda67862e20bbf1751d796e5c209a2d7c64a9f029b406d1e763bb52f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39386131316634656430323334616233383765333635393336343564323339342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/98a11f4ed0234ab387e36593645d2394.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>接下去我们再通过调试去进行观察就可以很直观地发现，在进入<code class="notranslate">GetMemory()</code>函数进行动态开辟内存后，虽然<code class="notranslate">p</code>指向了那块地址，但是与外界的<code class="notranslate">str</code>却毫无关系，因此即使我们将其作为参数传入，也无法改变其为NULL的事实，那么此时再将其作为参数传递进<code class="notranslate">strcpy()</code>和<code class="notranslate">printf()</code>函数后，便会造成【空指针异常】的问题</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ce000fe382a82967242a8547636207fcc1cab136a670695a50ab5b76b1ce6274/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64336232323965373133356434366439616264363761616232636539633834662e706e67"><img src="https://camo.githubusercontent.com/ce000fe382a82967242a8547636207fcc1cab136a670695a50ab5b76b1ce6274/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64336232323965373133356434366439616264363761616232636539633834662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/d3b229e7135d46d9abd67aab2ce9c84f.png" style="max-width: 100%;"></a></p>
+<p><strong>改进：</strong></p>
+<blockquote>
+<p>那我们如何对这个代码去进行改进呢？因为我们想要使得函数内部指针的变化带动外部的变化，在C语言中我们可以使用【传址】的形式去进行</p>
+</blockquote>
+<ul>
+<li>可以看到，此处我将<code class="notranslate">&amp;str</code>进行传递，然后在函数的形参部分使用二级的字符指针<code class="notranslate">char**</code>来进行接收，此时内部的在使用<code class="notranslate">*p</code>的时候就等同于是外部的<code class="notranslate">str</code>，它们便指向了同一块内存地址，此时再去使用<code class="notranslate">strcpy()</code>和<code class="notranslate">printf()</code>这两个函数的时候就不会引发【空指针异常】的问题了</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">GetMemory</span>(<span class="pl-smi">char</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">p</span>)
+{
+	<span class="pl-c1">*</span><span class="pl-s1">p</span> <span class="pl-c1">=</span> (<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-c1">100</span>);
+}
+
+<span class="pl-smi">void</span> <span class="pl-en">Test</span>(<span class="pl-smi">void</span>)
+{
+	<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">str</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+	<span class="pl-en">GetMemory</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">str</span>);
+	<span class="pl-en">strcpy</span>(<span class="pl-s1">str</span>, <span class="pl-s">"hello world\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s1">str</span>);
+
+	<span class="pl-c">// 释放</span>
+	<span class="pl-en">free</span>(<span class="pl-s1">str</span>);
+	<span class="pl-s1">str</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+}</pre></div>
+<ul>
+<li>然后再去调试就可以发现，没什么大问题了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5ce6ba36e879fcbd555cff49033e952803d8be9a83d7af947940e719205057cf/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38333863343662646632343034653164393331326166653464633663303064612e706e67"><img src="https://camo.githubusercontent.com/5ce6ba36e879fcbd555cff49033e952803d8be9a83d7af947940e719205057cf/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38333863343662646632343034653164393331326166653464633663303064612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/838c46bdf2404e1d9312afe4dc6c00da.png" style="max-width: 100%;"></a></p>
+<h3>题目二</h3>
+<p><strong>代码：</strong></p>
+<ul>
+<li>下面这段代码，其总共有1处错误，你可试着自己分析一下</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-en">GetMemory</span>(<span class="pl-smi">void</span>)
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">p</span>[] <span class="pl-c1">=</span> <span class="pl-s">"hello world"</span>;
+	<span class="pl-k">return</span> <span class="pl-s1">p</span>;
+}
+
+<span class="pl-smi">void</span> <span class="pl-en">Test</span>(<span class="pl-smi">void</span>)
+{
+	<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">str</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+	<span class="pl-s1">str</span> <span class="pl-c1">=</span> <span class="pl-en">GetMemory</span>();
+	<span class="pl-en">printf</span>(<span class="pl-s1">str</span>);
+}</pre></div>
+<p><strong>分析：</strong></p>
+<p>错误: 返回栈空间地址问题：</p>
+<ul>
+<li><code class="notranslate">p</code>代表字符数组的首元素地址，外部的str接收到了这个地址，然后再去打印这块地址中的内容，但是字符数组p属于【局部变量】，局部变量的会在栈区开辟函数栈帧，当函数调用结束的时候就把这块空间的使用权还给操作系统了，<strong>虽然这块地址还是在的，但是里面的内容已经销毁了，再去访问的话就会造成非法访问的问题</strong></li>
+</ul>
+<hr>
+<ul>
+<li>通过调试我们可以观察到，虽然在调用完<code class="notranslate">GetMemoy()</code>函数后，str接收到了内部的<code class="notranslate">hello world</code>，但是在打印的时候出了问题，这个<code class="notranslate">p</code>除了函数的作用域后就销毁了，不过呢在销毁之前【return】了一下，所以外界的<code class="notranslate">str</code>可以接收到这个p所指向的地址，但是在打印str的时候，<code class="notranslate">p</code>所指向的那块空间就销毁了，此时再去打印的话就看到了<code class="notranslate">[烫烫烫...]</code>这些字样，因为这块空间已经变成了一块未分配的空间，那我们知道那些未分配的地址均是<code class="notranslate">[ccccc]</code>，转变为中文字符即为<code class="notranslate">[烫烫烫...]</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b2693bb8f7985e873166a45a4d1780127ae9fee343934cd443a715350e1c0cb2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34366137323933663136383534643230623830636464303132326663376137302e706e67"><img src="https://camo.githubusercontent.com/b2693bb8f7985e873166a45a4d1780127ae9fee343934cd443a715350e1c0cb2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34366137323933663136383534643230623830636464303132326663376137302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/46a7293f16854d20b80cdd0122fc7a70.png" style="max-width: 100%;"></a></p>
+<p><strong>改进1：</strong></p>
+<blockquote>
+<p>那想要去解决上述的这个问题，其实很简单，我们只要在让这个p不要存放在栈区即可，要让其存放在【静态区】，那里面的东西是从程序开始到结束都会留存着的，具体的内存分布在下一节会详细展开</p>
+</blockquote>
+<ul>
+<li>我们只需要将其改为指针即可，此时这个指针<code class="notranslate">p</code>就指向了一个常量字符串，而对于常量字符串来说是不可改变的，其也是存放在内存中的【静态区】</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">p</span> <span class="pl-c1">=</span> <span class="pl-s">"hello world"</span>;</pre></div>
+<ul>
+<li>不过更加准确的写法应该是这样，<code class="notranslate">p</code>为一个常量指针，其所指向的内容是不可修改的</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">p</span> <span class="pl-c1">=</span> <span class="pl-s">"hello world"</span>;</pre></div>
+<ul>
+<li>然后我们去调试一下就可以发现，当函数结束后<code class="notranslate">str</code>指向了和指针<code class="notranslate">p</code>相同的那块空间，并且因为它们所指向的是一个常量字符串，它也存放在静态区，是不会消失的，因此我们在打印的时候就没有任何问题</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/aee698fe03c6c671923d2c49855b96d9302617a96cd854b7e65acbd161655572/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30343230313864646530323234386562616364343964626533653862643533372e706e67"><img src="https://camo.githubusercontent.com/aee698fe03c6c671923d2c49855b96d9302617a96cd854b7e65acbd161655572/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30343230313864646530323234386562616364343964626533653862643533372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/042018dde02248ebacd49dbe3e8bd537.png" style="max-width: 100%;"></a></p>
+<p><strong>改进2：</strong></p>
+<ul>
+<li>除了上面那种改法外，我们还可以将代码改成下面这样，在前面加上一个<code class="notranslate">static</code>做修饰，此时它就是一个静态数组，那和常量字符串一样也是存在于【静态区】中</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">static</span> <span class="pl-smi">char</span> <span class="pl-s1">p</span>[] <span class="pl-c1">=</span> <span class="pl-s">"hello world"</span>;</pre></div>
+<ul>
+<li>此时一样去调试观察可以发现我们可以正常地将<code class="notranslate">hello world</code>打印出来</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b78742d21fbb467bed980a6b26144d8b9dc04cc8d65ea26c674807a88dd91237/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39303664306461633632386534613335616230363036346664623231343664342e706e67"><img src="https://camo.githubusercontent.com/b78742d21fbb467bed980a6b26144d8b9dc04cc8d65ea26c674807a88dd91237/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39303664306461633632386534613335616230363036346664623231343664342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/906d0dac628e4a35ab06064fdb2146d4.png" style="max-width: 100%;"></a></p>
+<p><strong>对比分析返回局部变量：</strong></p>
+<blockquote>
+<p>可能对于本题一开始的错误 — — 不可返回局部变量，有些同学还没有理解，我这里这里再举一个例子来对比分析一下</p>
+</blockquote>
+<ul>
+<li>可以看到，下面有个指针函数<code class="notranslate">Test()</code>，其返回了一个局部变量的地址，此时外面拿一个指针去接收了一下这块地址，并且将其里面的内容给打印了出来，可以注意到这里我在接收到值后立马就做了打印，那如果我在这中间做点其他事呢，例如再做一个其他的打印，此时发生的结果会不会不一样呢？</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-en">Test</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+	<span class="pl-k">return</span> <span class="pl-c1">&amp;</span><span class="pl-s1">a</span>;	<span class="pl-c">// 返回局部变量的地址</span>
+}
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>(<span class="pl-smi">void</span>)
+{
+	<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">pa</span> <span class="pl-c1">=</span> <span class="pl-en">Test</span>();
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-c1">*</span><span class="pl-s1">pa</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"haha\n"</span>);		<span class="pl-c">// 先打印haha的话就看不到10了，printf()函数的栈帧覆盖了原来的pa</span>
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>
+<p>首先我们来看上面这一种，即在接收到局部变量的地址后立即去做一个打印，此时我们可以看到还是可以访问到这个变量<code class="notranslate">a</code>的值是10</p>
+</li>
+<li>
+<p>但是呢，若我在返回后没有立马去进行打印的话，此时就可以很直观得观察到局部变量<code class="notranslate">a</code>在出了当前函数的栈帧后已经销毁了，所以我们打印出来的并不是【10】，而是【5】，仔细观察调试窗口中，指针<code class="notranslate">pa</code>所指向的那块空间中的值变成了【9248991】，完全可以说是一个随机值</p>
+</li>
+<li>
+<p>刚才我们可以获取到这个10的原因是编译器的问题，可能我们在Linux上去运行的话结果就不是这样了，因为有些编译器在当前函数结束后不会立即释放掉，而是会等待一会；不过有些编译器呢却会理解销毁掉当前所创建的函数栈帧，此时内部所创建的局部变量也就会随之消失了</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/face2c598a2a57ec83fde2e01d03ec332cf23fb672296d56d144c273ee69a3ce/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61383432636434663964643734336635383639636237366133323735636663382e706e67"><img src="https://camo.githubusercontent.com/face2c598a2a57ec83fde2e01d03ec332cf23fb672296d56d144c273ee69a3ce/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61383432636434663964643734336635383639636237366133323735636663382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/a842cd4f9dd743f5869cb76a3275cfc8.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4e005f82214de74c48eec7a0ab8db4d5bc4845843503befc55503a19342db0c2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32306139623661356638336534666336613861633333393664343436303237302e706e67"><img src="https://camo.githubusercontent.com/4e005f82214de74c48eec7a0ab8db4d5bc4845843503befc55503a19342db0c2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32306139623661356638336534666336613861633333393664343436303237302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/20a9b6a5f83e4fc6a8ac3396d4460270.png" style="max-width: 100%;"></a></p>
+<h3>题目三</h3>
+<p><strong>代码：</strong></p>
+<ul>
+<li>下面这段代码，其总共有1处错误，你可试着自己分析一下</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">GetMemory</span>(<span class="pl-smi">char</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">p</span>, <span class="pl-smi">int</span> <span class="pl-s1">num</span>)
+{
+	<span class="pl-c1">*</span><span class="pl-s1">p</span> <span class="pl-c1">=</span> (<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-s1">num</span>);
+}
+<span class="pl-smi">void</span> <span class="pl-en">Test</span>(<span class="pl-smi">void</span>)
+{
+	<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">str</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+	<span class="pl-en">GetMemory</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">str</span>, <span class="pl-c1">100</span>);
+	<span class="pl-en">strcpy</span>(<span class="pl-s1">str</span>, <span class="pl-s">"hello"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s1">str</span>);
+}</pre></div>
+<p><strong>分析：</strong></p>
+<p>错误: 内存泄漏</p>
+<ul>
+<li>可以看到上面这段代码和我们第一题改进后的代码非常类似，就是在传参的时候所传递了一个需要开辟的内存字节数，可能你会觉得这段代码没有任何的问题，但是呢其确实是存在一个非常大的隐患，即<strong>在调用GetMemory()函数申请内存空间后没有及时使用free()进行释放，造成了内存泄漏的问题</strong></li>
+</ul>
+<p><strong>改进：</strong></p>
+<ul>
+<li>代码的修改很简答，学到这里了，相信你对于内存泄漏该如何处理应该是非常熟悉了，那就是将动态申请的那块空间<code class="notranslate">free</code>掉即可，最后别忘了将其置空</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">Test</span>(<span class="pl-smi">void</span>)
+{
+	<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">str</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+	<span class="pl-en">GetMemory</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">str</span>, <span class="pl-c1">100</span>);
+	<span class="pl-en">strcpy</span>(<span class="pl-s1">str</span>, <span class="pl-s">"hello"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s1">str</span>);
+
+	<span class="pl-en">free</span>(<span class="pl-s1">str</span>);
+	<span class="pl-s1">str</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+}</pre></div>
+<h3>题目四</h3>
+<p><strong>代码：</strong></p>
+<ul>
+<li>下面这段代码，其总共有1处错误，你可试着自己分析一下</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">Test</span>(<span class="pl-smi">void</span>)
+{
+	<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">str</span> <span class="pl-c1">=</span> (<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-c1">100</span>);
+	<span class="pl-en">strcpy</span>(<span class="pl-s1">str</span>, <span class="pl-s">"hello"</span>);
+	<span class="pl-en">free</span>(<span class="pl-s1">str</span>);
+
+	<span class="pl-k">if</span> (<span class="pl-s1">str</span> <span class="pl-c1">!=</span> <span class="pl-c1">NULL</span>)
+	{
+		<span class="pl-en">strcpy</span>(<span class="pl-s1">str</span>, <span class="pl-s">"world"</span>);
+		<span class="pl-en">printf</span>(<span class="pl-s1">str</span>);
+	}
+}</pre></div>
+<p><strong>分析：</strong></p>
+<p>错误：非法内存访问</p>
+<ul>
+<li>在使用free()释放完str这块空间的之后，虽然这个地址中所存放的内容销毁了，但是这块地址还是存在的，此时这个str就变成了野指针，指向了一块随机的地址，<strong>这块地址是不为空的</strong>，所以会进入if条件判断，那么在使用strcpy()的时候就造成了非法内存访问</li>
+<li>本题我们通过画图来进行讲解，在一开始我们动态申请了100个字节的空间，然后往这块空间中放入了<code class="notranslate">hello</code>这个字符串，接着立马进行了<code class="notranslate">free()</code>释放，那我们之前有说过一块动态申请的空间若是释放了的话，虽然空间销毁了，但是指针还是留存着那块空间的地址，此时这个<code class="notranslate">str</code>即为一个野指针，指向了一块未分配空间的地址，而且有着100个字节的大小，所以其是不为空的</li>
+<li>那么接下去所做的操作就是非法的了，又往这块空间存放了<code class="notranslate">world</code>这个字符串，这也就形成了【非法访问内存】，虽然去运行不存在问题，但是这块空间的使用权并不是我们的，这才有【非法】这么一说</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/bb366b0d5974279bdf395cc8c2ec3dc60fe52848611648719182ffab0dbee220/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35323332333830393936306334363035396639663364333665336630653066622e706e67"><img src="https://camo.githubusercontent.com/bb366b0d5974279bdf395cc8c2ec3dc60fe52848611648719182ffab0dbee220/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35323332333830393936306334363035396639663364333665336630653066622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/52323809960c46059f9f3d36e3f0e0fb.png" style="max-width: 100%;"></a></p>
+<p><strong>改进：</strong></p>
+<ul>
+<li>我们只需要在<code class="notranslate">free(str)</code>后将其置空即可，因为在将一块空间还给操作系统后，本身我们不再拥有这块空间的使用权了，后面的操作都是非法的，但若时间我们将其置为NULL之后，这个指针也就忘记了它之前所指向的地址，此时进不了下面的这个<code class="notranslate">if</code>分支了，那逻辑也就正确了</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">Test</span>(<span class="pl-smi">void</span>)
+{
+	<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">str</span> <span class="pl-c1">=</span> (<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-c1">100</span>);
+	<span class="pl-en">strcpy</span>(<span class="pl-s1">str</span>, <span class="pl-s">"hello"</span>);
+	<span class="pl-en">free</span>(<span class="pl-s1">str</span>);
+	<span class="pl-s1">str</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+
+	<span class="pl-k">if</span> (<span class="pl-s1">str</span> <span class="pl-c1">!=</span> <span class="pl-c1">NULL</span>)
+	{
+		<span class="pl-en">strcpy</span>(<span class="pl-s1">str</span>, <span class="pl-s">"world"</span>);
+		<span class="pl-en">printf</span>(<span class="pl-s1">str</span>);
+	}
+}</pre></div>
+<ul>
+<li>以上题目出自一本书《高质量C/C++编程》，大家有兴趣的可以看一下</li>
+<li>还有一些代码，是nice校招笔试题里的原题</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9f18f92d011daed66f3f49c5f0b04211407832dfbbdbc66a3e80d7cd78f1f857/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65626236613265343865613834376433626235666163396633653933313338622e706e67"><img src="https://camo.githubusercontent.com/9f18f92d011daed66f3f49c5f0b04211407832dfbbdbc66a3e80d7cd78f1f857/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65626236613265343865613834376433626235666163396633653933313338622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/ebb6a2e48ea847d3bb5fac9f3e93138b.png" style="max-width: 100%;"></a></p>
+<h2>五、C/C++程序的内存分布原理</h2>
+<ul>
+<li>对于一个C/C++，你所做写的所有代码其实和内存相关的，例如你在函数内部创建一个变量，它就会在【栈区】上创建栈帧来进行存放这个变量，如果你通过<code class="notranslate">malloc</code>向【堆区】申请了一块空间并试图往里写点东西的时候，此时堆区就会多出来一块已经分配了的空间。</li>
+</ul>
+<ol>
+<li>栈区（stack）：在执行函数时，函数内局部变量的存储单元都可以在栈上创建，函数执行结束时这些存储单元自动被释放。栈内存分配运算内置于处理器的指令集中，效率很高，但是分配的内存容量有限。 栈区主要存放运行函数而分配的局部变量、函数参数、返回数据、返回地址等。</li>
+<li>堆区（heap）：一般由程序员分配释放， 若程序员不释放，程序结束时可能由OS回收 。分配方式类似于链表。堆区主要进行动态内存分配，堆区的内存大小不固定，可以根据需要动态分配和释放</li>
+<li>数据段 / 静态区（static）存放全局变量、静态数据。程序结束后由系统释放。其在程序编译时就确定了变量的存储空间大小和内存地址，具有固定的大小和位置</li>
+<li>代码段：存储程序指令（代码）的一块内存区域，也被称为文本段（Text Segment），代码段通常是只读的，因为程序指令一般不应该被修改，代码段中存放函数体（类成员函数和全局函数）的二进制代码</li>
+</ol>
+<blockquote>
+<p>我们这里结合具体的代码来观察一下</p>
+</blockquote>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">globalVar</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+<span class="pl-k">static</span> <span class="pl-smi">int</span> <span class="pl-s1">staticGlobalVar</span> <span class="pl-c1">=</span> <span class="pl-c1">2</span>;
+
+<span class="pl-smi">void</span> <span class="pl-en">test</span>()
+{
+	<span class="pl-k">static</span> <span class="pl-smi">int</span> <span class="pl-s1">staticVar</span> <span class="pl-c1">=</span> <span class="pl-c1">3</span>;
+	
+	<span class="pl-smi">int</span> <span class="pl-s1">localVar</span> <span class="pl-c1">=</span> <span class="pl-c1">4</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">num1</span>[<span class="pl-c1">5</span>] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>,<span class="pl-c1">4</span>,<span class="pl-c1">5</span> };
+	<span class="pl-smi">char</span> <span class="pl-s1">str</span>[] <span class="pl-c1">=</span> <span class="pl-s">"abcd"</span>;
+	<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span> <span class="pl-c1">=</span> <span class="pl-s">"abcd"</span>;
+
+	<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">ptr1</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>) <span class="pl-c1">*</span> <span class="pl-c1">4</span>);
+	<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">ptr2</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-en">calloc</span>(<span class="pl-c1">4</span>, <span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>));
+	<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">ptr3</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-en">realloc</span>(<span class="pl-s1">ptr2</span>, <span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>) <span class="pl-c1">*</span> <span class="pl-c1">8</span>);
+
+	<span class="pl-en">free</span>(<span class="pl-s1">ptr1</span>);
+	<span class="pl-en">free</span>(<span class="pl-s1">ptr3</span>);
+}</pre></div>
+<p>具体地我们可以通过下图来进行观察：</p>
+<ul>
+<li>可以看到这里在外部我创建了一个全局变量以及静态变量，它们都是存放在【数据段 / 静态区】的，以及函数test中的<code class="notranslate">staticVar</code>，虽然它是一个函数当中所创建的变量，但是因为前面加上了一个<code class="notranslate">static</code>作为修饰，所以它所存放的地址也是【数据段 / 静态区】</li>
+<li>接下去是【栈区】，这个很明显，即为在函数内部所创建的临时变量，可以看到无论这个变量是怎样进行初始化的，其本身就会在栈区开辟出相应的栈帧</li>
+<li>然后是【堆区】，即为本文我们所讲到的三个动态内存函数<code class="notranslate">malloc()</code>、<code class="notranslate">calloc()</code>、<code class="notranslate">realloc()</code>，只要是所涉及的内存分配，都是在堆区中开辟的</li>
+<li>最后的话便是【代码段】，这一块可能接触地比较少一些，也很少听到，上面有讲到，代码段是只读的，里面存放的都是一些指令，或者为一些只读的常量。那我们看到这里的<code class="notranslate">abcd</code>，就是一个常量字符串，它就是不可修改的，因此是存放在【代码段】</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4abb448a03cc094a5d5e039e75523da2bc0c94c2ecf30325e57d1e3aff7876fb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39323032386431623734353334303833386236663631366565356631313661612e706e67"><img src="https://camo.githubusercontent.com/4abb448a03cc094a5d5e039e75523da2bc0c94c2ecf30325e57d1e3aff7876fb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39323032386431623734353334303833386236663631366565356631313661612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/92028d1b745340838b6f616ee5f116aa.png" style="max-width: 100%;"></a></p>
+<blockquote>
+<p>动态内存管理就到这里结束了！</p>
+</blockquote>
+<hr>
+<h2>六、柔性数组</h2>
+<blockquote>
+<p>在本文的最后呢，我们再来讲一下有关【柔性数组】的相关知识</p>
+</blockquote>
+<h3>1、概念与声明</h3>
+<p>【概念】：C99 中，结构中的最后一个元素允许是未知大小的数组，这就叫做『柔性数组』成员。</p>
+<ul>
+<li>例如说下面这一个结构体，它最后一个成员便是数组，那么此时这个数组<code class="notranslate">a</code>就被称作为是【柔性数组】</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">typedef</span> <span class="pl-k">struct</span> <span class="pl-smi">st_type</span>
+{
+	<span class="pl-smi">int</span> <span class="pl-c1">i</span>;
+	<span class="pl-smi">int</span> <span class="pl-c1">a</span>[<span class="pl-c1">0</span>];	<span class="pl-c">//柔性数组成员</span>
+}<span class="pl-smi">type_a</span>;</pre></div>
+<ul>
+<li>不过呢，上面这样去声明一个数组在某些编译器中可能会报错，所以可以写成像下面这个样子，<strong>此时这个数组的大小就是不确定，随时可以去进行调整</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">typedef</span> <span class="pl-k">struct</span> <span class="pl-smi">st_type</span>
+{
+	<span class="pl-smi">int</span> <span class="pl-c1">i</span>;
+	<span class="pl-smi">int</span> <span class="pl-c1">a</span>[];	<span class="pl-c">//柔性数组成员</span>
+}<span class="pl-smi">type_a</span>;</pre></div>
+<h3>2、柔性数组的特点分析</h3>
+<p><strong>1、sizeof 返回的这种结构大小不包括柔性数组的内存</strong></p>
+<ul>
+<li>计算结构体大小的时候每个成员的大小都是要计算在内，不过呢在看下图的执行结果中我们可以知道这个数组的大小完全是不计算在内的，完全就像隐形了一样</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/22ff00f0c0c393e41c4565fe42f8ea9aa233e8adfb45fa2df89d91e37eb1e3fa/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33356537646133623037663734306465393266643937343631336265366235662e706e67"><img src="https://camo.githubusercontent.com/22ff00f0c0c393e41c4565fe42f8ea9aa233e8adfb45fa2df89d91e37eb1e3fa/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33356537646133623037663734306465393266643937343631336265366235662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/35e7da3b07f740de92fd974613be6b5f.png" style="max-width: 100%;"></a></p>
+<p><strong>2、结构中的柔性数组成员前面必须至少一个其他成员</strong></p>
+<ul>
+<li>也就是说在这个结构体中只有数组a这么一个成员，但是呢它又是属于当前结构体中的最后一个也是唯一的成员，因为其为【柔性数组】，那若是连其他成员都没有的话这个结构体的大小就没有了，即没有空间了。这其实是很荒唐的一件事，<strong>若是这个结构体的内存空间都没有了的话，谈何为这个柔性数组去分配空间呢？</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">typedef</span> <span class="pl-k">struct</span> <span class="pl-smi">st_type</span>
+{
+	<span class="pl-smi">int</span> <span class="pl-c1">a</span>[];	<span class="pl-c">//柔性数组成员</span>
+}<span class="pl-smi">type_a</span>;</pre></div>
+<p><strong>3、包含柔性数组成员的结构用malloc()函数进行内存的动态分配，并且分配的内存应该大于结构的大小，以适应柔性数组的预期大小</strong></p>
+<ul>
+<li>这里的话我们就要来说到有关【柔性数组】的一个使用了。这里我们要去申请两块空间，一个是整个结构体的大小，一个则是和这个柔性数组的大小，此处我首先为这个数组申请了10个字节的空间，再加上结构体本身的大小，才是我们要为结构体去申请的内存空间</li>
+<li>当申请到足够的空间后，我们便可以去初始化并看看这个柔性数组是否可以被正常地使用</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">struct</span> <span class="pl-smi">st_type</span>
+{
+	<span class="pl-smi">int</span> <span class="pl-c1">i</span>;
+	<span class="pl-smi">int</span> <span class="pl-c1">a</span>[<span class="pl-c1">0</span>];	<span class="pl-c">//柔性数组成员</span>
+};
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c">// 1.开辟空间</span>
+	<span class="pl-k">struct</span> <span class="pl-smi">st_type</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span> <span class="pl-c1">=</span> (<span class="pl-k">struct</span> <span class="pl-smi">st_type</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-k">struct</span> <span class="pl-smi">st_type</span>) <span class="pl-c1">+</span> <span class="pl-c1">10</span> <span class="pl-c1">*</span> <span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>));<span class="pl-c">//44</span>
+	<span class="pl-k">if</span> (<span class="pl-c1">NULL</span> <span class="pl-c1">==</span> <span class="pl-s1">ps</span>)
+	{
+		<span class="pl-en">perror</span>(<span class="pl-s">"fail malloc"</span>);
+		<span class="pl-k">return</span> <span class="pl-c1">1</span>;
+	}
+
+	<span class="pl-c">// 2.初始化空间</span>
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">10</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span>] <span class="pl-c1">=</span> <span class="pl-s1">i</span>;
+	}
+
+	<span class="pl-c">// 3.打印</span>
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">10</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span>]);
+	}
+
+	<span class="pl-c">// 4.释放</span>
+	<span class="pl-en">free</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-s1">ps</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>通过观察运行结果我们可以发现，的确是可以正常去进行使用的，其实和普通数组没什么两样</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/abf9f48c4fba9b42f7208926e5fa5815c1f860955b9f51a0bc626647e9bbab82/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30376631313265626435353434633335616461353963323164363639366431312e706e67"><img src="https://camo.githubusercontent.com/abf9f48c4fba9b42f7208926e5fa5815c1f860955b9f51a0bc626647e9bbab82/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30376631313265626435353434633335616461353963323164363639366431312e706e67" alt="加粗样式" data-canonical-src="https://img-blog.csdnimg.cn/07f112ebd5544c35ada59c21d6696d11.png" style="max-width: 100%;"></a><br>
+**</p>
+<blockquote>
+<p>当然，就上面这样还体现不出柔性数组的特征，我们要动态地去改变这个数组的大小</p>
+</blockquote>
+<ul>
+<li>那此时我们便可以去做一个扩容的操作，使用到上面所学习的<code class="notranslate">realloc()</code>函数去进行操作即可</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">type_a</span><span class="pl-c1">*</span> <span class="pl-s1">tmp</span> <span class="pl-c1">=</span> (<span class="pl-smi">type_a</span><span class="pl-c1">*</span>)<span class="pl-en">realloc</span>(<span class="pl-s1">s</span>, <span class="pl-k">sizeof</span>(<span class="pl-smi">type_a</span>) <span class="pl-c1">+</span> <span class="pl-c1">20</span> <span class="pl-c1">*</span> <span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>));
+<span class="pl-k">if</span> (<span class="pl-c1">NULL</span> <span class="pl-c1">==</span> <span class="pl-s1">tmp</span>)
+{
+	<span class="pl-en">perror</span>(<span class="pl-s">"fail realloc"</span>);
+	<span class="pl-en">exit</span>(<span class="pl-c1">-1</span>);
+}</pre></div>
+<ul>
+<li>那此时呢我们就可以对新增容后的这一块空间去进行初始化的操作</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">struct</span> <span class="pl-smi">st_type</span>
+{
+	<span class="pl-smi">int</span> <span class="pl-c1">i</span>;
+	<span class="pl-smi">int</span> <span class="pl-c1">a</span>[<span class="pl-c1">0</span>];	<span class="pl-c">//柔性数组成员</span>
+};
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c">// 1.开辟空间</span>
+	<span class="pl-k">struct</span> <span class="pl-smi">st_type</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span> <span class="pl-c1">=</span> (<span class="pl-k">struct</span> <span class="pl-smi">st_type</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-k">struct</span> <span class="pl-smi">st_type</span>) <span class="pl-c1">+</span> <span class="pl-c1">10</span> <span class="pl-c1">*</span> <span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>));<span class="pl-c">//44</span>
+	<span class="pl-k">if</span> (<span class="pl-c1">NULL</span> <span class="pl-c1">==</span> <span class="pl-s1">ps</span>)
+	{
+		<span class="pl-en">perror</span>(<span class="pl-s">"fail malloc"</span>);
+		<span class="pl-k">return</span> <span class="pl-c1">1</span>;
+	}
+
+	<span class="pl-c">// 2.初始化空间</span>
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">10</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span>] <span class="pl-c1">=</span> <span class="pl-s1">i</span>;
+	}
+
+	<span class="pl-c">// 3.打印</span>
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">10</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span>]);
+	}
+
+	<span class="pl-k">struct</span> <span class="pl-smi">st_type</span><span class="pl-c1">*</span> <span class="pl-s1">tmp</span> <span class="pl-c1">=</span> (<span class="pl-k">struct</span> <span class="pl-smi">st_type</span><span class="pl-c1">*</span>)<span class="pl-en">realloc</span>(<span class="pl-s1">ps</span>, <span class="pl-k">sizeof</span>(<span class="pl-k">struct</span> <span class="pl-smi">st_type</span>) <span class="pl-c1">+</span> <span class="pl-c1">20</span> <span class="pl-c1">*</span> <span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>));
+	<span class="pl-k">if</span> (<span class="pl-c1">NULL</span> <span class="pl-c1">==</span> <span class="pl-s1">tmp</span>)
+	{
+		<span class="pl-en">perror</span>(<span class="pl-s">"fail realloc"</span>);
+		<span class="pl-en">exit</span>(<span class="pl-c1">-1</span>);
+	}
+	<span class="pl-k">else</span> 
+	{
+		<span class="pl-s1">ps</span> <span class="pl-c1">=</span> <span class="pl-s1">tmp</span>;
+	}
+
+	<span class="pl-c">// 2.初始化空间</span>
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">20</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span>] <span class="pl-c1">=</span> <span class="pl-c1">'W'</span>;
+	}
+
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">20</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%c "</span>, <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span>]);
+	}
+
+
+	<span class="pl-c">// 4.释放</span>
+	<span class="pl-en">free</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-s1">ps</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>可以观察到，这个柔性数组确实产生了扩容，后面新增了我们再次初始化的数据</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/436d89c681c81b130397821ef20477e56f505bd1dcad50e007b145e268aadc3d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38373361626365333835393734353832626132313632643538623662383435612e706e67"><img src="https://camo.githubusercontent.com/436d89c681c81b130397821ef20477e56f505bd1dcad50e007b145e268aadc3d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38373361626365333835393734353832626132313632643538623662383435612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/873abce385974582ba2162d58b6b845a.png" style="max-width: 100%;"></a></p>
+<p>既然结构体的中的数组大小都增大了，那么这个结构体的大小会发生改变吗？</p>
+<ul>
+<li>这点相信你也想看看，不过通过观察我们可以发现其是不会发生变化的，因为在一开始讲柔性数组的时候我们就有说到过，无论数组的大小是多少，均是不算在结构体的大小内的</li>
+</ul>
+<h3>3、对比：柔性数组的优势</h3>
+<blockquote>
+<p>其实对于上面的这一种柔性数组实现，还可以像下面这样去进行设计</p>
+</blockquote>
+<ul>
+<li>此时我将结构体中的数组定义成了一个字符型指针</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">typedef</span> <span class="pl-k">struct</span> <span class="pl-smi">st_type</span>
+{
+	<span class="pl-smi">int</span> <span class="pl-c1">i</span>;
+	<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-c1">a</span>;	
+}<span class="pl-smi">type_a</span>;</pre></div>
+<ul>
+<li>然后一样利用<code class="notranslate">malloc</code>的形式去申请内存空间，不过这里结构体的空间和数组的空间是分开申请的，只有当结构体的内存空间申请完后，我们才去确立这个数组的大小</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">type_a</span><span class="pl-c1">*</span> <span class="pl-s1">s</span> <span class="pl-c1">=</span> (<span class="pl-smi">type_a</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-s1">type_a</span>));
+<span class="pl-k">if</span> (<span class="pl-c1">NULL</span> <span class="pl-c1">==</span> <span class="pl-s1">s</span>)
+{
+	<span class="pl-en">perror</span>(<span class="pl-s">"fail malloc"</span>);
+	<span class="pl-en">exit</span>(<span class="pl-c1">-1</span>);
+}
+<span class="pl-s1">s</span><span class="pl-c1">-&gt;</span><span class="pl-c1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">100</span>;
+
+<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">tmp</span> <span class="pl-c1">=</span> (<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-smi">char</span>) <span class="pl-c1">*</span> <span class="pl-c1">10</span>);
+<span class="pl-k">if</span> (<span class="pl-c1">NULL</span> <span class="pl-c1">==</span> <span class="pl-s1">tmp</span>)
+{
+	<span class="pl-en">perror</span>(<span class="pl-s">"fail malloc"</span>);
+	<span class="pl-en">exit</span>(<span class="pl-c1">-1</span>);
+}
+<span class="pl-s1">s</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span> <span class="pl-c1">=</span> <span class="pl-s1">tmp</span>;</pre></div>
+<ul>
+<li>接下去的话也是一样切进行初始化、打印、扩容等操作即可</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">struct</span> <span class="pl-smi">st_type</span>
+{
+    <span class="pl-smi">int</span> <span class="pl-c1">i</span>;
+    <span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-c1">a</span>;    <span class="pl-c">//柔性数组成员</span>
+};
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+    <span class="pl-c">// 1.开辟空间</span>
+    <span class="pl-k">struct</span> <span class="pl-smi">st_type</span><span class="pl-c1">*</span> <span class="pl-s1">s</span> <span class="pl-c1">=</span> (<span class="pl-k">struct</span> <span class="pl-smi">st_type</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-k">struct</span> <span class="pl-smi">st_type</span>)); <span class="pl-c">// 分配结构体空间</span>
+    <span class="pl-k">if</span> (<span class="pl-c1">NULL</span> <span class="pl-c1">==</span> <span class="pl-s1">s</span>)
+    {
+        <span class="pl-en">perror</span>(<span class="pl-s">"fail malloc"</span>);
+        <span class="pl-k">return</span> <span class="pl-c1">1</span>;
+    }
+
+    <span class="pl-s1">s</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>) <span class="pl-c1">*</span> <span class="pl-c1">10</span>); <span class="pl-c">// 为柔性数组成员分配内存空间</span>
+    <span class="pl-k">if</span> (<span class="pl-c1">NULL</span> <span class="pl-c1">==</span> <span class="pl-s1">s</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>)
+    {
+        <span class="pl-en">perror</span>(<span class="pl-s">"fail malloc"</span>);
+        <span class="pl-en">free</span>(<span class="pl-s1">s</span>);
+        <span class="pl-k">return</span> <span class="pl-c1">1</span>;
+    }
+
+    <span class="pl-s1">s</span><span class="pl-c1">-&gt;</span><span class="pl-c1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">100</span>;
+    <span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">10</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+    {
+        <span class="pl-s1">s</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span>] <span class="pl-c1">=</span> <span class="pl-s1">i</span>;
+    }
+
+    <span class="pl-c">// 3.打印</span>
+    <span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">10</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+    {
+        <span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">s</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span>]);
+    }
+
+    <span class="pl-c">// 4.增加</span>
+    <span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">tmp</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-en">realloc</span>(<span class="pl-s1">s</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>, <span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>) <span class="pl-c1">*</span> <span class="pl-c1">20</span>); <span class="pl-c">// 使用原指针进行扩展内存空间</span>
+    <span class="pl-k">if</span> (<span class="pl-c1">NULL</span> <span class="pl-c1">==</span> <span class="pl-s1">tmp</span>)
+    {
+        <span class="pl-en">perror</span>(<span class="pl-s">"fail malloc"</span>);
+        <span class="pl-k">return</span> <span class="pl-c1">1</span>;
+    }
+    <span class="pl-k">else</span>
+    {
+        <span class="pl-s1">s</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span> <span class="pl-c1">=</span> <span class="pl-s1">tmp</span>;
+    }
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>然后去运行就可以发现，也是同样可以正常使用这数组的，完全用不到像【柔性数组】那样的东西，使用我们平常这样的写法也是可以的</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9bf25de71400306916cbcdfd17ea460d86830a271a24d5ead5cb79a559ceb776/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31336461653937373364343734396634613333313931393537613935616439632e706e67"><img src="https://camo.githubusercontent.com/9bf25de71400306916cbcdfd17ea460d86830a271a24d5ead5cb79a559ceb776/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31336461653937373364343734396634613333313931393537613935616439632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/13dae9773d4749f4a33191957a95ad9c.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>那此时这个结构体的内存分布就是下面这样的，有一个结构体指针指向了一块内存空间，里面存放了两个结构体成员，分别是<code class="notranslate">i</code>和<code class="notranslate">a</code>，其中后者是一个字符型指针，又指向了内存中的一块连续区域，它们都是在堆中的<code class="notranslate">malloc</code>出来的</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7aec6c72a7ea27e2d8560e3ca4ef3790e84075f130a6d45c58f4a733cb00e94d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39396637363833613831663234643264623538303063663739616663376431642e706e67"><img src="https://camo.githubusercontent.com/7aec6c72a7ea27e2d8560e3ca4ef3790e84075f130a6d45c58f4a733cb00e94d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39396637363833613831663234643264623538303063663739616663376431642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/99f7683a81f24d2db5800cf79afc7d1d.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>在开辟内存空间后要及时释放，这样才不会造成【内存泄漏】的问题，但是我们观察一下这个释放的过程，你是否有觉得繁琐吗？</li>
+<li>而且我们再进行释放的时候，必须要先释放数组a所指向的那块空间，然后再释放结构体的这块空间，因为如果你先释放结构体所在的这块空间的话，里面的指针<code class="notranslate">a</code>就找不到了</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">// 释放</span>
+<span class="pl-en">free</span>(<span class="pl-s1">s</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>);
+<span class="pl-s1">s</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+<span class="pl-en">free</span>(<span class="pl-s1">s</span>);
+<span class="pl-s1">s</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;</pre></div>
+<blockquote>
+<p>最后我们再来对比分析一下这两种方法的区别</p>
+</blockquote>
+<p>【对比分析】：</p>
+<p>从下图来分析两种形式我们可以观察到三个不同点：</p>
+<ul>
+<li>对于柔性数组来说都是一次<code class="notranslate">malloc</code>一次<code class="notranslate">free</code>；</li>
+<li>对于动态数组来说都是两次<code class="notranslate">malloc</code>两次<code class="notranslate">free</code>；</li>
+<li>柔性数组所在的结构体内存空间都是连续的；动态数组所在的结构体内存空间不一定是连续的，因为两次【malloc】的地址可能不一样；</li>
+</ul>
+<p>第一个好处是：<strong>方便内存释放</strong></p>
+<ul>
+<li>如果我们的代码是在一个给别人用的函数中，你在里面做了二次内存分配，并把整个结构体返回给用户。用户调用free可以释放结构体，但是用户并不知道这个结构体内的成员也需要free，所以你不能指望用户来发现这个事。所以，<strong>如果我们把结构体的内存以及其成员要的内存一次性分配好了，并返回给用户一个结构体指针，用户做一次free就可以把所有的内存也给释放掉</strong></li>
+</ul>
+<p>第二个好处是：<strong>这样有利于访问速度</strong></p>
+<ul>
+<li>连续的内存有益于提高访问速度，也有益于减少内存碎片，因为当前在多次<code class="notranslate">malloc</code>之后，内存中就会产生多个内存碎片，所以我们应该尽量减少<code class="notranslate">malloc</code>和<code class="notranslate">free</code>的此处。不过呢，我个人觉得也没多大区别了，反正你跑不了要用做偏移量的加法来寻址</li>
+</ul></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

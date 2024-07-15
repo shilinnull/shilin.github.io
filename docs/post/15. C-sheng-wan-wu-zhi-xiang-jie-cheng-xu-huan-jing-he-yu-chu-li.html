@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## 一、程序的翻译环境和执行环境
+
+在**ANSI C**的任何一种实现中，存在两个不同的环境
+
+> 第1种是`翻译环境`，在这个环境中源代码被转换为**可执行的机器指令**。">
+<meta property="og:title" content="15. C生万物之详解程序环境和预处理">
+<meta property="og:description" content="## 一、程序的翻译环境和执行环境
+
+在**ANSI C**的任何一种实现中，存在两个不同的环境
+
+> 第1种是`翻译环境`，在这个环境中源代码被转换为**可执行的机器指令**。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/15.%20C-sheng-wan-wu-zhi-xiang-jie-cheng-xu-huan-jing-he-yu-chu-li.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>15. C生万物之详解程序环境和预处理</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">15. C生万物之详解程序环境和预处理</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/40" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>一、程序的翻译环境和执行环境</h2>
+<p>在<strong>ANSI C</strong>的任何一种实现中，存在两个不同的环境</p>
+<blockquote>
+<p>第1种是<code class="notranslate">翻译环境</code>，在这个环境中源代码被转换为<strong>可执行的机器指令</strong>。<br>
+第2种是<code class="notranslate">执行环境</code>，它用于实际<strong>执行代码</strong>。</p>
+</blockquote>
+<p>我们先来笼统地讲一下这两个环境，在第二模块再进行细讲</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/8e0c2606cea9fde2da23630e31c5a716b8496b87a7c2169d1758ff0d031bf82c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37663232363238623061666234353765623162643332626136666262366635302e706e67"><img src="https://camo.githubusercontent.com/8e0c2606cea9fde2da23630e31c5a716b8496b87a7c2169d1758ff0d031bf82c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37663232363238623061666234353765623162643332626136666262366635302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/7f22628b0afb457eb1bd32ba6fbb6f50.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>首先对于一个【test.c】的源文件来收，我们要将代码执行的结果输出到屏幕上，就需要有一个可执行程序【.exe】</li>
+<li>在【.c】文件转变为【.exe】文件的这段过程叫做翻译环境，翻译环境分为编译和链接两部分，而对于编译来说，又可以进行细分为【预编译】、【编译】和【汇编】三个组成部分；当经过翻译环境之后，就会生成一个<code class="notranslate">test.exe</code>的可执行文件</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/77e4e2298e1f0d38a99f8564ea54b6a1cafe18b6c25b5414bb8796fa7d9884f6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39323464363632383437383534306334383435346363323439363930303761392e706e67"><img src="https://camo.githubusercontent.com/77e4e2298e1f0d38a99f8564ea54b6a1cafe18b6c25b5414bb8796fa7d9884f6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39323464363632383437383534306334383435346363323439363930303761392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/924d6628478540c48454cc24969007a9.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>此时再到运行环境，通过将程序读入内存，调用堆栈【stack】，存储函数的局部变量和返回地址，来计算出程序的运行结果，若是有打印语句就将结果打印在屏幕上</li>
+</ul>
+<h2>二、详解编译+链接</h2>
+<blockquote>
+<p>接下去我们来详细说说翻译翻译环境，也就是【编译】+【链接】的部分</p>
+</blockquote>
+<h3>1、前言小知识</h3>
+<ul>
+<li>
+<p>上一模块说到过。每个源文件【.c】都会经过编译器处理生成目标文件。多个目标文件又会经过链接器的处理以及链接库链接生成可执行程序</p>
+</li>
+<li>
+<p>但是一定有同学对这个链接库有所疑问，我们来看一段代码</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/562c1e7fe422b2b50e45cacdcd1e6447c0547d0aba1419cc50c1be4649ed0d13/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36326130623939373537633234626266623033363461616538383739393734632e706e67"><img src="https://camo.githubusercontent.com/562c1e7fe422b2b50e45cacdcd1e6447c0547d0aba1419cc50c1be4649ed0d13/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36326130623939373537633234626266623033363461616538383739393734632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/62a0b99757c24bbfb0364aae8879974c.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以看到，对于这个我们写C语言时经常使用的<code class="notranslate">printf()</code>，它就被称为是库函数，包含在<code class="notranslate">stdio.h</code>这个头文件中</li>
+<li>而对于库函数来说是存放在链接库里的。当程序里要使用来自外部的函数时，在链接时就应该把他们<strong>所依赖的链接库</strong>链接进来</li>
+</ul>
+<hr>
+<ul>
+<li>若是要讲到【编译】【链接】这两块内容，有一点知识你一定要知道，也就是我们日常编写C/C++代码所使用的<strong>IDE——VS2019</strong>，它叫做【集成开发环境】，通常是包含了<code class="notranslate">编辑</code>、<code class="notranslate">编译</code>、<code class="notranslate">链接</code>、<code class="notranslate">调试</code>这些功能，可能你会认为它就是一个软件，带有这些功能，这样理解其实是不够细致的</li>
+<li>对于<code class="notranslate">编辑</code>功能来说有【编辑器】</li>
+<li>对于<code class="notranslate">编译</code>功能来说有【编译器】，VS2019为<code class="notranslate">cl.exe</code></li>
+<li>对于<code class="notranslate">链接</code>功能来说有【链接器】，VS2019为<code class="notranslate">link.exe</code></li>
+<li>对于<code class="notranslate">调试</code>功能来说有【调试器】</li>
+</ul>
+<p>所以可以直接用【cl.exe】和【link.exe】进行编译和链接</p>
+<h3>2、翻译环境【important】</h3>
+<blockquote>
+<p>接下去我们正式来说说翻译环境中的【编译】和【链接】。在这一小节我，我将使用到Linux下的<code class="notranslate">CentOS7</code>这个操作系统进行讲解会使用到Linux中的<strong>编辑器vim和编译器gcc</strong></p>
+</blockquote>
+<h4>2.1 编译</h4>
+<p>下面两个【.c】文件是我们讲解中需要使用到的</p>
+<blockquote>
+<p>add.c</p>
+</blockquote>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+
+<span class="pl-smi">int</span> <span class="pl-en">Add</span>(<span class="pl-smi">int</span> <span class="pl-s1">x</span>, <span class="pl-smi">int</span> <span class="pl-s1">y</span>)
+{
+	<span class="pl-k">return</span> <span class="pl-s1">x</span> <span class="pl-c1">+</span> <span class="pl-s1">y</span>;
+}</pre></div>
+<blockquote>
+<p>test.c</p>
+</blockquote>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">"add.c"</span>
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">20</span>;
+
+	<span class="pl-smi">int</span> <span class="pl-s1">c</span> <span class="pl-c1">=</span> <span class="pl-en">Add</span>(<span class="pl-s1">a</span>, <span class="pl-s1">b</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"c = %d\n"</span>, <span class="pl-s1">c</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>首先来Linux中看一下这两个文件</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5f1c02cdfac0a0c5c6f91968519a6682118f01b60280ec454b39a343ae6e19a1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30336438663765333135636434323636396536346432653566666331393435302e706e67"><img src="https://camo.githubusercontent.com/5f1c02cdfac0a0c5c6f91968519a6682118f01b60280ec454b39a343ae6e19a1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30336438663765333135636434323636396536346432653566666331393435302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/03d8f7e315cd42669e64d2e5ffc19450.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>接下去可以通过gcc编译一下【test.c】这个源文件</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6c6f2df2394d720ac8240f80b1c7214788cc60485452aabe898c5cf99c34744c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38393265313764663637353934633138616165336462666332653162653637302e706e67"><img src="https://camo.githubusercontent.com/6c6f2df2394d720ac8240f80b1c7214788cc60485452aabe898c5cf99c34744c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38393265313764663637353934633138616165336462666332653162653637302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/892e17df67594c18aae3dbfc2e1be670.png" style="max-width: 100%;"></a></p>
+<h5>① 预编译【进行宏替换】</h5>
+<ul>
+<li>好，接下去我们来说说预编译阶段，预编译也叫<strong>预处理</strong>。上面的【a.out】这个可执行文件是链接之后产生的文件，但是我们不想让它这么快到链接阶段，到预编译阶段就可以停下来了，因为在使用<code class="notranslate">gcc</code>进行编译的时候要进行一个改变</li>
+<li>在<code class="notranslate">gcc</code>编译的时候，后面加上一个<code class="notranslate">-E</code>的选项，就可以使文件在编译的过程中预编译完就可以停下来了。后面的<code class="notranslate">-o</code>选项表示output输出的意思，也就是将预编译结束后代码所呈现的内容放到【test.i】这个文件中去</li>
+</ul>
+<div class="highlight highlight-source-shell"><pre class="notranslate">gcc -E test.c -o test.i</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/8d10dbdbea871233dfe2e6c1ac6777277020d66e1aefbf7074fe715950cee978/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64663734623933396131363234643339613638353766656133636238393431342e706e67"><img src="https://camo.githubusercontent.com/8d10dbdbea871233dfe2e6c1ac6777277020d66e1aefbf7074fe715950cee978/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64663734623933396131363234643339613638353766656133636238393431342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/df74b939a1624d39a6857fea3cb89414.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>到这里就可以看到我们熟悉的<code class="notranslate">main</code>函数了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9209de797e8b536b0cbf1111f2dab8538e1100240a45e44873607f7cdfdca0fb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65373962333965393430306334633335386436653330336639616432336237652e706e67"><img src="https://camo.githubusercontent.com/9209de797e8b536b0cbf1111f2dab8538e1100240a45e44873607f7cdfdca0fb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65373962333965393430306334633335386436653330336639616432336237652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/e79b39e9400c4c358d6e303f9ad23b7e.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>此时往上滑就可以看到这个预编译后的文件中有一堆的代码。其实这些代码都是头文件<code class="notranslate">stdio.h</code>中的内容，这里的【test.i】只是将这个头文件展开了而已</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f641f665b03feb46871df6786d4160ea080ddd8fd8c121b38cf7cc2dfee3985e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33633264373737336264666634303938626565373465663331393938313134332e706e67"><img src="https://camo.githubusercontent.com/f641f665b03feb46871df6786d4160ea080ddd8fd8c121b38cf7cc2dfee3985e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33633264373737336264666634303938626565373465663331393938313134332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/3c2d7773bdff4098bee74ef319981143.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>现在我在原先【test.c】的文件中新增一些内容，加上一些<strong>注释</strong>和一个<strong>宏定义</strong>（后面讲）</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">"add.c"</span>
+
+<span class="pl-c">//下面是一个宏定义</span>
+<span class="pl-k">#define</span> <span class="pl-c1">MAX</span> 100;
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{                                                                                         
+    <span class="pl-smi">int</span> <span class="pl-s1">m</span>  <span class="pl-c1">=</span> <span class="pl-c1">MAX</span>;
+    <span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;                                        
+    <span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">20</span>;                                        
+                                                       
+    <span class="pl-smi">int</span> <span class="pl-s1">c</span> <span class="pl-c1">=</span> <span class="pl-en">Add</span>(<span class="pl-s1">a</span>,<span class="pl-s1">b</span>);                                  
+    <span class="pl-en">printf</span>(<span class="pl-s">"ret = %d\n"</span>,<span class="pl-s1">c</span> <span class="pl-c1">+</span> <span class="pl-s1">m</span>);                              
+                                                       
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;                                          
+}   </pre></div>
+<ul>
+<li>然后再对这个文件进行预编译然后打开就可以看到我们在编译之前加的注释就没有了，又可以观察到在main函数中的·<code class="notranslate">m = MAX</code>就被替换成了<code class="notranslate">m = 100</code>，因为我们在前面定义了<code class="notranslate">MAX为100</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9d85c6f434b9850f74a82b55641740119ee7e2be4b1a847d1a63ea96fc914621/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33396539613833363239376634353732396164306136626237313130346165322e706e67"><img src="https://camo.githubusercontent.com/9d85c6f434b9850f74a82b55641740119ee7e2be4b1a847d1a63ea96fc914621/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33396539613833363239376634353732396164306136626237313130346165322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/39e9a836297f45729ad0a6bb71104ae2.png" style="max-width: 100%;"></a></p>
+<p>所以我们可以得出在预编译阶段编译器会执行的事情</p>
+<ul>
+<li><strong>展开头文件</strong></li>
+<li><strong>注释的删除</strong></li>
+<li><strong>宏定义的符号替换</strong></li>
+</ul>
+<h5>② 编译【生成汇编】</h5>
+<ul>
+<li>接下去我们来看看编译阶段会做什么事情。既然gcc在编译的时候可以在【预编译】之后停下来，那也可以在编译之后停下来，只要在<code class="notranslate">gcc</code>后加一个<code class="notranslate">-S</code>即可。这里我们对上面预编译之后产生的【test.i】去进行一个编译</li>
+</ul>
+<div class="highlight highlight-source-shell"><pre class="notranslate">gcc -S test.i</pre></div>
+<ul>
+<li>
+<p>在编译之后就可以发现多出了一个【.s】为后缀的文件</p>
+</li>
+<li>
+<p>可以看到，是一些我们看不懂的东西，但是这相比二进制文本来其实仔细看是可以看出点猫腻，如果你学过[《编译原理》这门课程的话其实就完全看得懂，因为很多都是一些<strong>基本指令和寄存器</strong>，所以就可以看出这是【汇编代码】</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2b7848a081bae66068dea18bf4dc59b3581a3d1817b52ffc1189a0c1f2b39f56/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38333135303731323130316634663535393963356238303363306531393563312e706e67"><img src="https://camo.githubusercontent.com/2b7848a081bae66068dea18bf4dc59b3581a3d1817b52ffc1189a0c1f2b39f56/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38333135303731323130316634663535393963356238303363306531393563312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/83150712101f4f5599c5b803c0e195c1.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>所以在程序进行编译的的时候就会进行如下四步操作。也就是将<code class="notranslate">C语言的代码</code>转换为<code class="notranslate">汇编代码</code></li>
+<li><strong>语法分析</strong></li>
+<li><strong>词法分析</strong></li>
+<li><strong>语义分析</strong></li>
+<li><strong>符号汇总</strong></li>
+</ul>
+<hr>
+<p><strong>编译过程：</strong> 扫描程序–&gt;语法分析–&gt;语义分析–&gt;源代码优化–&gt;代码生成器–&gt;目标代码优化</p>
+<ol>
+<li>【扫描程序】进行词法分析，从左向右，从上往下扫描源程序字符，识别出各个单词，确定单词类型</li>
+<li>【语法分析】是根据语法规则，将输入的语句构建出分析树，或者语法树，也就是我们答案中提到的分析树<code class="notranslate">parse tree</code>或者语法树<code class="notranslate">syntax tree</code></li>
+<li>【语义分析】是根据上下文分析函数返回值类型是否对应这种语义检测，可以理解语法分析就是描述一个句子主宾谓是否符合规则，而语义用于检测句子的意思是否是正确的</li>
+<li>【目标代码生成】是把中间代码变换成为特定机器上的低级语言代码</li>
+</ol>
+<p><strong>上面这些东西你可以不用知道，这些都是在《汇编原理》中进行学习的，比较偏向底层</strong></p>
+<h5>③ 汇编【生成机器可识别代码】</h5>
+<ul>
+<li>程序在经过<code class="notranslate">预编译</code>、<code class="notranslate">编译</code>之后，就来到了【汇编】阶段，在这个阶段中结束后就会生成一个【test.o】的目标文件，对于这个目标文件来说我们在VS中进行编译之后也是可以看得到的，它叫做【test.obj】</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/85c91bb374cefbb0a0b7e9fca57d133a4578386488a2d131cf36ab388b538a89/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66646236326636326538656634653133613033613036346631353962316163632e706e67"><img src="https://camo.githubusercontent.com/85c91bb374cefbb0a0b7e9fca57d133a4578386488a2d131cf36ab388b538a89/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66646236326636326538656634653133613033613036346631353962316163632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/fdb62f62e8ef4e13a03a064f159b1acc.png" style="max-width: 100%;"></a></p>
+<p>要如何生成这个【test.o】呢？也是一样，修改gcc的编译模式即可。这次是加上<code class="notranslate">-c</code>选项</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">gcc -c test.s</pre></div>
+<ul>
+<li>
+<p>然后就生成了这个【test.o】的目标文件</p>
+</li>
+<li>
+<p>我们还是一样去打开看看.。但是可以看到，都是一堆乱码（其实这是二进制代码，看不懂很正常）</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/eb5340019098612496104f279dbca74faee2f04752797b3e9abfec9b681aecd1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61326265633962326262646434633634383439336662373139626134663464642e706e67"><img src="https://camo.githubusercontent.com/eb5340019098612496104f279dbca74faee2f04752797b3e9abfec9b681aecd1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61326265633962326262646434633634383439336662373139626134663464642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/a2bec9b2bbdd4c648493fb719ba4f4dd.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>其实对于之前生成过的【test】我们也可以进行一个浏览</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/bd46a6fe70f1bfe6db3fcef83ab689e167fe82e2d037f0727acee67932e94237/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64386632313839376231326634623730626633613032376161393530306166372e706e67"><img src="https://camo.githubusercontent.com/bd46a6fe70f1bfe6db3fcef83ab689e167fe82e2d037f0727acee67932e94237/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64386632313839376231326634623730626633613032376161393530306166372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/d8f21897b12f4b70bf3a027aa9500af7.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以看到，对于【test】来说出现的也是一对二进制代码，那我们是都可以对它们做一个联系呢？</li>
+<li>这个时候就可以讲讲我上面说到过的<code class="notranslate">符号汇总</code>了，其实对于【test.o】和【test】这两个文件来说都属于可执行文件，而对于可执行文件来说都是由二进制代码组成的，因为编译器对我们上面<code class="notranslate">编译</code>时产生的汇编代码进行了一个符号汇总，那对于汇编代码来说我们已经是有点心生忌惮了，那将它们进行汇总之后其实就变成了上面这个模样</li>
+</ul>
+<p>最后我们就可以得出在汇编阶段编译器会完成的工作</p>
+<ul>
+<li>将汇编指令转换为二进制指令（需要特定的文本阅读器）</li>
+<li>形成符号表（没错，就这个功能）</li>
+</ul>
+<h4>2.2 链接【生成可执行文件或库文件】</h4>
+<ul>
+<li>在这一块，我们要将上面的代码做一个修改，现在要在加一个【.h】的头文件，将【add】函数进行一个分割</li>
+</ul>
+<blockquote>
+<p>add.h</p>
+</blockquote>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#pragma</span> once
+<span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+
+<span class="pl-c">//以下是一个宏定义</span>
+<span class="pl-k">#define</span> <span class="pl-c1">MAX</span> 100
+<span class="pl-smi">int</span> <span class="pl-en">Add</span>(<span class="pl-smi">int</span> <span class="pl-s1">x</span>, <span class="pl-smi">int</span> <span class="pl-s1">y</span>);</pre></div>
+<blockquote>
+<p>add.c</p>
+</blockquote>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">Add</span>(<span class="pl-smi">int</span> <span class="pl-s1">x</span>, <span class="pl-smi">int</span> <span class="pl-s1">y</span>)
+{
+	<span class="pl-k">return</span> <span class="pl-s1">x</span> <span class="pl-c1">+</span> <span class="pl-s1">y</span>;
+}</pre></div>
+<blockquote>
+<p>test.c</p>
+</blockquote>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">"add.h"</span>
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">20</span>;
+
+	<span class="pl-smi">int</span> <span class="pl-s1">c</span> <span class="pl-c1">=</span> <span class="pl-en">Add</span>(<span class="pl-s1">a</span>, <span class="pl-s1">b</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"c = %d\n"</span>, <span class="pl-s1">c</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>在上面我们都是对一个源文件进行编译，因为在【test.c】中我包含了【add.c】的文件，但是现在相当于是Add()这个函数已经独立出去了，它有自己的专属【.h】头文件，因此我们在使用gcc进行编译的时候要带上两个源文件，<strong>因为我们在使用gcc进行编译的时候，需要告诉它我们的代码都写在哪里了</strong></li>
+</ul>
+<div class="highlight highlight-source-shell"><pre class="notranslate">gcc add.c test.c</pre></div>
+<ul>
+<li><strong>若是写成下面这样，gcc便识别不出Add()函数！！！</strong></li>
+</ul>
+<div class="highlight highlight-source-shell"><pre class="notranslate">gcc test.c</pre></div>
+<ul>
+<li>来看一下运行结果，产生的a.out。接着执行一下这个可执行文件，就是我们最终的结果了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/680e9d7334da1c308736fa98e0f1f1fe9a326639d2a5815bfbc74af06837cca2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39303833376664376265653034363238386462343637383262376164616164342e706e67"><img src="https://camo.githubusercontent.com/680e9d7334da1c308736fa98e0f1f1fe9a326639d2a5815bfbc74af06837cca2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39303833376664376265653034363238386462343637383262376164616164342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/90837fd7bee046288db46782b7adaad4.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>上面这些其实就是在进行一个<code class="notranslate">合并段表</code>的操作，并且将两个目标文件中的符号表进行一个重定位的操作，假设【add.o】这个目标文件中的Add函数名的地址为<code class="notranslate">0x100</code>，【test.o】的目标文件中从【add.h】中获取到Add的函数名为<code class="notranslate">0x000</code>，然后还有main函数的函数名的地址为<code class="notranslate">0x200</code></li>
+<li>因为两个目标文件中的有重复的函数名Add，所以会进行一个符号表的重定位操作，取那个有效的地址<code class="notranslate">0x100</code>，当所有段表都合并完后便形成了一个【可执行文件】。</li>
+</ul>
+<h3>3、运行环境</h3>
+<blockquote>
+<p>接着我们来聊聊程序的运行环境，这一块的话因为内容过于复杂，有太多底层的细节，因此不在这里讲解</p>
+</blockquote>
+<p>程序执行的过程</p>
+<ol>
+<li>程序必须<strong>载入内存</strong>中。在有操作系统的环境中：一般这个由操作系统完成。在独立的环境中，程序的载入必须由手工安排，也可能是通过可执行代码置入只读内存来完成。</li>
+<li>程序的执行便开始。接着便<strong>调用main函数</strong>。</li>
+<li>开始执行程序代码。这个时候程序将使用一个运行时<strong>堆栈</strong>（stack），存储函数的局部变量和返回地址。程序同时也可以使用静态（static）内存，存储于静态内存中的变量在程序的整个执行过程一直保留他们的值。</li>
+<li><strong>终止程序</strong>。正常终止main函数；也有可能是意外终止</li>
+</ol>
+<hr>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6d250ade7370c05665b5f6745a7a727cc1782e97fc3551ad1c01cba201c994b6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34633837616235356530313534376661383832313230633032643233383532352e706e67"><img src="https://camo.githubusercontent.com/6d250ade7370c05665b5f6745a7a727cc1782e97fc3551ad1c01cba201c994b6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34633837616235356530313534376661383832313230633032643233383532352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/4c87ab55e01547fa882120c02d238525.png" style="max-width: 100%;"></a></p>
+<h3>4、两道笔试题</h3>
+<p>由多个源文件组成的C程序，经过编辑、预处理、编译、链接等阶段会生成最终的可执行程序。下面哪个阶段可以发现被调用的函数未定义？( )</p>
+<pre class="notranslate"><code class="notranslate">A.预处理
+B.编译
+C.链接
+D.执行
+</code></pre>
+<p>【答案】：C</p>
+<p>【解析】：</p>
+<blockquote>
+<p><strong>预处理</strong>只会处理<code class="notranslate">#</code>开头的语句，<strong>编译</strong>阶段只校验<code class="notranslate">语法</code>，链接时才会去找实体，所以是链接时出错的，故选C。这里附上每个步骤的具体操作方式：</p>
+</blockquote>
+<ol>
+<li><strong>预处理</strong>：相当于根据预处理指令组装新的C/C++程序。经过预处理，会产生一个没有头文件（都已经被展开了）、宏定义（都已经替换了），没有条件编译指令（该屏蔽的都屏蔽掉了），没有特殊符号的输出文件，这个文件的含义同原本的文件无异，只是内容上有所不同。</li>
+<li><strong>编译</strong>：将预处理完的文件逐一进行一系列词法分析、语法分析、语义分析及优化后，产生相应的汇编代码文件。编译是针对单个文件编译的，只校验本文件的语法是否有问题，不负责寻找实体。</li>
+<li><strong>链接</strong>：通过链接器将一个个目标文件（或许还会有库文件）链接在一起生成一个完整的可执行程序。 链接程序的主要工作就是将有关的目标文件彼此相连接，也就是将在一个文件中引用的符号同该符号在另外一个文件中的定义连接起来，使得所有的这些目标文件成为一个能够被操作系统装入执行的统一整体。<strong>在此过程中会发现被调用的函数未被定义</strong>。需要注意的是，链接阶段只会链接调用了的函数/全局变量，如果存在一个不存在实体的声明（函数声明、全局变量的外部声明），但没有被调用，依然是可以正常编译执行的</li>
+</ol>
+<hr>
+<p>test.c文件中包括如下语句：</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-c1">INT_PTR</span> int*
+<span class="pl-k">typedef</span> <span class="pl-smi">int</span><span class="pl-c1">*</span><span class="pl-smi">int_ptr</span>;
+<span class="pl-smi">INT_PTR</span> <span class="pl-s1">a</span>,<span class="pl-s1">b</span>;
+<span class="pl-smi">int_ptr</span> <span class="pl-s1">c</span>,<span class="pl-s1">d</span>;</pre></div>
+<p>件中定义的四个变量，哪个变量不是指针类型？( )</p>
+<pre class="notranslate"><code class="notranslate">A.a
+B.b
+C.c
+D.d
+</code></pre>
+<p>【答案】：B</p>
+<p>【解析】：</p>
+<blockquote>
+<p>预处理的#define是查找替换，所以替换过后的语句是<code class="notranslate">int* a, b;</code></p>
+</blockquote>
+<p>我们到Linux来看看，更加清晰</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/8cc4d3ca0d39812369c753acfe131bd75a85b7b335f5e66cd8d9697ed09b9772/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34376134346438386531613334326531383934663031376237626366643035622e706e67"><img src="https://camo.githubusercontent.com/8cc4d3ca0d39812369c753acfe131bd75a85b7b335f5e66cd8d9697ed09b9772/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34376134346438386531613334326531383934663031376237626366643035622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/47a44d88e1a342e1894f017b7bcfd05b.png" style="max-width: 100%;"></a></p>
+<p>其中b只是一个<strong>int变量</strong>，如果要让b也是指针，必须写成<code class="notranslate">int *a, *b;</code> 而typedef没有这个问题，<strong>c、d都是指针</strong></p>
+<h2>三、预处理详解</h2>
+<h3>1、预定义符号</h3>
+<blockquote>
+<p>在C语言中，有一些预定义的符号，当我们需要查询当前文件的相关信息时，就可以使用这个预定义符号</p>
+</blockquote>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">__FILE__</span>      <span class="pl-c">//进行编译的源文件</span>
+<span class="pl-s1">__LINE__</span>      <span class="pl-c">//文件当前的行号</span>
+<span class="pl-smi">__DATE__</span>      <span class="pl-c">//文件被编译的日期</span>
+<span class="pl-s1">__TIME__</span>      <span class="pl-c">//文件被编译的时间</span>
+<span class="pl-s1">__STDC__</span>      <span class="pl-c">//如果编译器遵循ANSI C，其值为1，否则未定义</span></pre></div>
+<ul>
+<li>我们可以到VS中来看看</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">__FILE__</span>);		<span class="pl-c">//进行编译的源文件</span>
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-s1">__LINE__</span>);		<span class="pl-c">//文件当前的行号</span>
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">__DATE__</span>);		<span class="pl-c">//被编译的日期</span>
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">__TIME__</span>);		<span class="pl-c">//被编译的时间</span>
+	<span class="pl-c">//printf("%s\n", __STDC__);		//因VS2019没有遵循ANSI C --&gt; 报错</span>
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/65881f6b32d7d04f25434d335db8fef3f4d34151d0888b8987ff6ab665d942f2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66373532363534393363303434643535616464663462316131396532653065612e706e67"><img src="https://camo.githubusercontent.com/65881f6b32d7d04f25434d335db8fef3f4d34151d0888b8987ff6ab665d942f2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66373532363534393363303434643535616464663462316131396532653065612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/f75265493c044d55addf4b1a19e2e0ea.png" style="max-width: 100%;"></a></p>
+<h3>2、#define</h3>
+<blockquote>
+<p>讲预处理，那#define肯定要将，这个相信大家都用到过</p>
+</blockquote>
+<h4>2.1 #define定义标识符</h4>
+<ul>
+<li>首先来说说#define如何去定义标识符</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-s1">name</span> stuff</pre></div>
+<ul>
+<li>首先这个应该是大家最熟悉的，那就是定义一个MAX，其值为1000</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-c1">MAX</span> 1000</pre></div>
+<ul>
+<li>这个是为 register这个关键字，创建一个简短的名字、</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-s1">reg</span> register</pre></div>
+<ul>
+<li>下面这个可能你就没见过了，这里是定义一个死循环。也就是我们在写代码的时候，直接写<code class="notranslate">do_forever;</code>那就表示此为一个死循环</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-s1">do_forever</span> for(;;)</pre></div>
+<ul>
+<li>下面这个可谓是大家的福音，我们在写switch语句时候，都要写case子句，但是老会忘了写<code class="notranslate">break;</code>，从而造成了一个case穿透的效果。所以下面这个标识符的定义就使我们在写case子句的时候，自动就可以把<code class="notranslate">break</code>语句加上，此时就方便了许多</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-c1">CASE</span> break;case</pre></div>
+<ul>
+<li>当然，如果我们要替换的内容过长，也是可以的，比如说写个printf语句时，若是一行写不下了，可以在每行后面都假一个反斜杠【\】</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-c1">DEBUG_PRINT</span> printf("file:%s\tline:%d\t \
+                          date:%s\ttime:%s\n" ,\
+                          __FILE__,__LINE__ ,  \
+                          __DATE__,__TIME__ )</pre></div>
+<hr>
+<p>注意：在#define定义标识符的时候，后面不要加<code class="notranslate">;</code></p>
+<ul>
+<li>举个很简单的例子，若是下面的1000后面加上了<code class="notranslate">;</code>，那么在程序使用的时候就会出现错误</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-c1">MAX</span> 1000;
+<span class="pl-k">#define</span> <span class="pl-c1">MAX</span> 1000;</pre></div>
+<ul>
+<li>比如我们来看看下面的场景</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f3c3ee747f12f68e99e4dcdd6fd48dc17f4c4aed7f03034bf4f6f5bec798931b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38393731366530636638666234336238383134626663333562326434343239312e706e67"><img src="https://camo.githubusercontent.com/f3c3ee747f12f68e99e4dcdd6fd48dc17f4c4aed7f03034bf4f6f5bec798931b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38393731366530636638666234336238383134626663333562326434343239312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/89716e0cf8fb43b8814bfc35b2d44291.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以看到，对于加还是没有分号【;】的情况，还是很明显的，加了分号就会报错</li>
+<li>为什么呢？因为对于分号【;】而言，表示一条语句的结束，此时在预编译结束后，MAX就会被替换成了1000；那此时再加上MAX后面的【;】，此时就会出现两个分号，那就是两条语句，但是在这个if语句中我们只是将其当做一句话来执行，所以没有加大括号<code class="notranslate">{}</code>,所以这才产生了报错</li>
+<li>我们可以到Linux中来详细看看。可以看到，确实是被替换成了<code class="notranslate">1000;;</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/69b069c6adc6767b540893e6a3b77d06a253fe7cfe05e36794a458826fa29e8c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36646439633739646633643034373461396537623830366238643262666339642e706e67"><img src="https://camo.githubusercontent.com/69b069c6adc6767b540893e6a3b77d06a253fe7cfe05e36794a458826fa29e8c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36646439633739646633643034373461396537623830366238643262666339642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/6dd9c79df3d0474a9e7b806b8d2bfc9d.png" style="max-width: 100%;"></a></p>
+<h4>2.2 #define定义宏</h4>
+<blockquote>
+<p>#define除了定义标识符之外，还可以定义【宏】，它和函数很类似，也就是将参数替换到文本中</p>
+</blockquote>
+<p>下面是宏的申明方式：</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-en">name</span>( <span class="pl-s1">parament</span><span class="pl-c1">-</span><span class="pl-s1">list</span> ) stuff
+<span class="pl-c">//其中的 parament-list 是一个由逗号隔开的符号表，它们可能出现在stuff中</span></pre></div>
+<p>注：① 参数列表的左括号必须与name紧邻，如果两者之间有任何空白存在，参数列表就会被解释为stuff的一部分。</p>
+<ul>
+<li>然后我们来看看具体的【宏】该如何去定义</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">/*宏*/</span>
+<span class="pl-k">#define</span> <span class="pl-en">SQUARE</span>(<span class="pl-s1">x</span>) x * x
+
+<span class="pl-c">/*函数*/</span>
+<span class="pl-smi">int</span> <span class="pl-en">GetSquare</span>(<span class="pl-smi">int</span> <span class="pl-s1">x</span>)		
+{
+	<span class="pl-k">return</span> <span class="pl-s1">x</span> <span class="pl-c1">*</span> <span class="pl-s1">x</span>;
+}
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">x</span> <span class="pl-c1">=</span> <span class="pl-c1">5</span>;
+	<span class="pl-c">//int ret = GetSquare(x);</span>
+	<span class="pl-smi">int</span> <span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-en">SQUARE</span>(<span class="pl-s1">x</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"ret = %d\n"</span>, <span class="pl-s1">ret</span>);
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>可以看到，对于求解一个数的平方，我们若是使用函数去完成的话就是将需要求解的数字作为参数传入进入，然后在做一个返回值接受即可；</li>
+<li>但是对于宏定义而言，我们不是这么去做的，这么我们不需要指定返回值，不过函数名称还是需要的， 对于形参中变量也无需定义类型，直接<code class="notranslate">SQUARE(x)</code>即可，而后面你只要记住如何去运算就可以了吗，也就相当于我们的函数体。在【预处理】结束之后，<strong>就会进行一个宏的替换</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d96ecd439d3a3ad5b8ddcd0b9c96ed7126571e570a51d6fc909a6d0d93b75df9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31343964623866616630336634333331383238393831353136633966383438622e706e67"><img src="https://camo.githubusercontent.com/d96ecd439d3a3ad5b8ddcd0b9c96ed7126571e570a51d6fc909a6d0d93b75df9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31343964623866616630336634333331383238393831353136633966383438622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/149db8faf03f4331828981516c9f848b.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>可以看到确实是进行了宏替换，最后算出来的结果和函数算出来的结果也是一样的，均为25</p>
+</li>
+<li>
+<p>但是这么去写宏定义其实是不对的，因为会存在一个问题</p>
+</li>
+<li>
+<p>若是我在传值的时候这么写呢<code class="notranslate">int ret = SQUARE(5 + 1);</code>此时在进行宏替换的时候就会替换成这样<code class="notranslate">int ret = 5 + 1 * 5 + 1;</code>此时中间的1 * 5就会先进行一个运算，然后再和两边去进行一个相加，最后算出来的结果便是【11】，而不是我们想要的【36】</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f8355839d0f784cfef6dc36dcdb7306e132b14fb1b16658a89eee93550fae7a9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30616430303936316135386534366263386635323861326430653965363064362e706e67"><img src="https://camo.githubusercontent.com/f8355839d0f784cfef6dc36dcdb7306e132b14fb1b16658a89eee93550fae7a9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30616430303936316135386534366263386635323861326430653965363064362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/0ad00961a58e46bc8f528a2d0e9e60d6.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这其实是运算的优先级问题，所以我们在定义宏时面对这样的优先级问题应该对需要运算的内容外面加上括号</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-en">SQUARE</span>(<span class="pl-s1">x</span>) (x) * (x)		//加上括号避免运算优先级</pre></div>
+<ul>
+<li>我们来看看加上括号后的结果。可以看到确实就变成了我们想要的【36】</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/98aab203cd27a920dfa3e223858a6ef45be709e2ecd6d07c119cc24b013ddbb8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34383637323731336164383534653936383666353334326364323136383932312e706e67"><img src="https://camo.githubusercontent.com/98aab203cd27a920dfa3e223858a6ef45be709e2ecd6d07c119cc24b013ddbb8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34383637323731336164383534653936383666353334326364323136383932312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/48672713ad854e9686f5342cd2168921.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>但是别高兴得太早，对于这种加括号的行为可不能一劳永逸，我们再来看看下面这个宏定义</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-en">DOUBLE</span>(<span class="pl-s1">x</span>) (x) + (x)		//计算一个数的两倍</pre></div>
+<ul>
+<li>此时我这样去传参的时候就会出现问题</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span> <span class="pl-c1">*</span> <span class="pl-en">DOUBLE</span>((<span class="pl-c1">5</span>));		<span class="pl-c">//10 * (5 + 5) = 100</span></pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/fb2074d2bbc9f3791bc8c1f77f5b2a8c8ffa0f1062c5914f56d941bb46b6ebdb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33333936343732663263356334343136393664373031343831333138323131302e706e67"><img src="https://camo.githubusercontent.com/fb2074d2bbc9f3791bc8c1f77f5b2a8c8ffa0f1062c5914f56d941bb46b6ebdb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33333936343732663263356334343136393664373031343831333138323131302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/3396472f2c5c441696d7014813182110.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以看到运行结果算出来并不是我们想要的100，而是在进行了宏替换之后运算出来为55</li>
+<li>我们通过查看一下【预编译】后的<code class="notranslate">test.i</code>文件来看看是如何进行宏替换的</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/64138dc9e7f5b520a636faeacc382052a1d25b53027a50472108467499fcad23/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32376534633735363363626534356337396165303435303135643361646461302e706e67"><img src="https://camo.githubusercontent.com/64138dc9e7f5b520a636faeacc382052a1d25b53027a50472108467499fcad23/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32376534633735363363626534356337396165303435303135643361646461302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/27e4c7563cbe45c79ae045015d3adda0.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>很明显可以看到，在进行【预编译】后进行了宏替换，但是前面的10却和5先进行了一个相乘，算出来50后加上一个5，此时就可以知道为什么算出来的值为【55】了</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-en">DOUBLE</span>(<span class="pl-s1">x</span>) ((x) + (x))		//在外面再加一个括号即可</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/64c76877e8e194c7e6fe6a2c3be11de3ecbba5a142fd9e20bf456e487fefa152/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32353437656138653966303134343162396165623063383233346233333865312e706e67"><img src="https://camo.githubusercontent.com/64c76877e8e194c7e6fe6a2c3be11de3ecbba5a142fd9e20bf456e487fefa152/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32353437656138653966303134343162396165623063383233346233333865312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/2547ea8e9f01441b9aeb0c8234b338e1.png" style="max-width: 100%;"></a></p>
+<h4>2.3 #define替换规则</h4>
+<blockquote>
+<p>在上面说完了#define去定义【标识符】和【宏】，我们来总结一下#define的定义规则</p>
+</blockquote>
+<p>在程序中扩展#define定义符号和宏时，需要涉及几个步骤</p>
+<ol>
+<li>在调用宏时，首先对<strong>参数</strong>进行检查，看看是否包含任何<strong>由#define定义的符号</strong>。如果是，它们首先被替换。</li>
+<li>替换文本随后被插入到程序中<strong>原来文本的位置</strong>。对于宏，参数名被他们的值所替换。</li>
+<li>最后，<strong>再次</strong>对结果文件进行扫描，看看它是否包含任何由#define定义的符号。如果是，就<strong>重复上</strong>述处理过程</li>
+</ol>
+<p>注意：</p>
+<ol>
+<li><strong>宏参数和#define 定义中可以出现其他#define定义的符号。但是对于宏，不能出现递归。</strong></li>
+<li><strong>当预处理器搜索#define定义的符号的时候，字符串常量的内容并不被搜索。</strong></li>
+</ol>
+<h4>2.4 # 和 双#</h4>
+<blockquote>
+<p>讲到#define，正好我再来补充一点很奇怪的小知识，也就是 <code class="notranslate"># </code>和<code class="notranslate">##</code> 这两个用来辅助字符串进行连接的</p>
+</blockquote>
+<p>【#】 ：把参数插入到字符串中</p>
+<p>【##】 ：把两个字符串拼接在一起</p>
+<hr>
+<ul>
+<li>首先我们来看看最简单的字符串拼接操作。可以看到下面两种操作都可以打印出<code class="notranslate">hello world</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/8f0878b26985b1488a8d07013a1133a68952786c5eb9a2a18f91ebcd3226319c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66333061323534626464333334626434396130326130393435386430616432362e706e67"><img src="https://camo.githubusercontent.com/8f0878b26985b1488a8d07013a1133a68952786c5eb9a2a18f91ebcd3226319c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66333061323534626464333334626434396130326130393435386430616432362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/f30a254bdd334bd49a02a09458d0ad26.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>所以我们就发现对于字符串而言是具有自动拼接的功能。接下去我们进入正题</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+<span class="pl-en">printf</span>(<span class="pl-s">"the value of a is %d\n"</span>, <span class="pl-s1">a</span>);
+
+<span class="pl-smi">char</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">'x'</span>;                                                                                     
+<span class="pl-en">printf</span>(<span class="pl-s">"the value of b is %c\n"</span>, <span class="pl-s1">b</span>);
+
+<span class="pl-smi">float</span> <span class="pl-s1">c</span> <span class="pl-c1">=</span> <span class="pl-c1">3.14f</span>;
+<span class="pl-en">printf</span>(<span class="pl-s">"the value of c is %f\n"</span>, <span class="pl-s1">c</span>);</pre></div>
+<ul>
+<li>对于上面这段代码，我们可以分别打印出下面的三条语句，对于a, b, c三个变量分别有不同的数据类型</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e947d9ffc0f797b809438eec1976c982b13e92627fb584b7917c256c8795b6a5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35386563373966313334626634366335626430313563306239393963333434652e706e67"><img src="https://camo.githubusercontent.com/e947d9ffc0f797b809438eec1976c982b13e92627fb584b7917c256c8795b6a5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35386563373966313334626634366335626430313563306239393963333434652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/58ec79f134bf46c5bd015c0b999c344e.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>现在我们要将其转换为【宏】来进行操作，该怎么做呢？对该如何进行传参呢？</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-en">PRINT</span>(<span class="pl-s1">value</span>, <span class="pl-s1">format</span>) printf("the value is " format "\n", value);
+<span class="pl-en">PRINT</span>(<span class="pl-s1">a</span>, <span class="pl-s">"%d"</span>);</pre></div>
+<ul>
+<li>可以看到，通过字符串的拼接，我们实现了格式化打印的效果</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/cddd14cea26f4356c7c2536b5a5b4a1bfe1131072429b5dfa0bb37c9e4d9b4f0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61396137663961326665306634356564396436633739616434666533396463362e706e67"><img src="https://camo.githubusercontent.com/cddd14cea26f4356c7c2536b5a5b4a1bfe1131072429b5dfa0bb37c9e4d9b4f0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61396137663961326665306634356564396436633739616434666533396463362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/a9a7f9a2fe0f45ed9d6c79ad4fe39dc6.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>但是可以看到少了点什么？是的，中间的【of a】不见了，但是我们通过宏传参的值是一个整型，无法和字符串进行一个拼接，那此时我们就要使用到【#】，将参数插入到字符串中</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-en">PRINT</span>(<span class="pl-s1">value</span>, <span class="pl-s1">format</span>) printf("the value of "#value" is " format "\n", value);</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3a171511233060d3b6962949db22bac8cc2abb7f36d6afe30027994905b50216/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64303230376333386538343134386662616631306564323666613232366361622e706e67"><img src="https://camo.githubusercontent.com/3a171511233060d3b6962949db22bac8cc2abb7f36d6afe30027994905b50216/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64303230376333386538343134386662616631306564323666613232366361622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/d0207c38e84148fbaf10ed26fa226cab.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以看到，原先的数值a，确实变成了字符串的形式与两边的<code class="notranslate">"the value of "</code>和<code class="notranslate">" is "</code>进行了一个拼接，达到了我们需要的效果</li>
+</ul>
+<hr>
+<ul>
+<li>接下去我们来说说【##】的用法，它可以直接将把两个字符串拼接在一起</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-en">CAT</span>(<span class="pl-c1">A</span>, <span class="pl-c1">B</span>) A##B
+<span class="pl-smi">int</span> <span class="pl-s1">CentOS</span> <span class="pl-c1">=</span> <span class="pl-c1">7</span>;
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">CAT</span>(<span class="pl-s1">Cent</span>, <span class="pl-c1">OS</span>));</pre></div>
+<ul>
+<li>可以看到，我们使用<code class="notranslate">##</code>将<code class="notranslate">Cent</code>和<code class="notranslate">OS</code>拼接在了一起，而且我定义了<code class="notranslate">CentOS = 7</code>，因此打印出来便是【7】</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3f607c51b63915c2630c696c33a8e365de8d3fbef5b4a02a99cc9d7c98cbfb27/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63646464316136383465386434366562383433383632653130333735376563312e706e67"><img src="https://camo.githubusercontent.com/3f607c51b63915c2630c696c33a8e365de8d3fbef5b4a02a99cc9d7c98cbfb27/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63646464316136383465386434366562383433383632653130333735376563312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/cddd1a684e8d46eb843862e103757ec1.png" style="max-width: 100%;"></a></p>
+<h4>2.5 带副作用的宏参数</h4>
+<blockquote>
+<p>当宏参数在宏的定义中出现超过一次的时候，如果参数带有副作用，那么你在使用这个宏的时候就可能 <strong>出现危险</strong>，导致不可预测的后果。副作用就是表达式求值的时候出现的永久性效果</p>
+</blockquote>
+<ul>
+<li>上面我们学习了如何使用#define去定义宏，在学习的过程中你应该也能感受到，虽然宏比函数来的方便许多，但是在使用的时候却有很多要注意的小细节，就像加括号的问题，若是疏忽的话就会导致最终的结果出现问题</li>
+<li>我们之前在学习变量递增的时候有说到过<code class="notranslate">a++</code>和<code class="notranslate">++a</code>的区别，一个是后置++，另一个则是前置++，而它们与<code class="notranslate">a+1</code>又有所不同</li>
+</ul>
+<blockquote>
+<p>x+1;//不带副作用</p>
+<p>x++;//带有副作用</p>
+</blockquote>
+<ul>
+<li>我们通过具体的案例来看看。可以观察到，对于<code class="notranslate">a + 1</code>执行完后，a自身的值不会发生变化；但是在<code class="notranslate">++c</code>执行完后，c的值却发生了变化。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/40aa9db3e3748eb496712116d171bb3bbc9e78a8b69166ecb0f9a6bc658d981e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32316335323339643735353934633638626534373637373334353438373161622e706e67"><img src="https://camo.githubusercontent.com/40aa9db3e3748eb496712116d171bb3bbc9e78a8b69166ecb0f9a6bc658d981e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32316335323339643735353934633638626534373637373334353438373161622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/21c5239d75594c68be476773454871ab.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>不仅如此，对于<code class="notranslate">char ch = getchar()</code>来说，会从缓冲区读取一个字符给到ch，但此时缓冲区也会少了一个字符，这就造成了问题；对于<code class="notranslate">fgetc()</code>这样的文件操作来说在获取文件中一个字符后，文件指针就会往后偏移一位，此时文件指针的变化就会导致我们下一次读取的时候位置就会进行改变</li>
+</ul>
+<hr>
+<p><strong>所以我们再来说说这种代码对于宏的危害</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-en">MAX</span>(<span class="pl-s1">a</span>, <span class="pl-s1">b</span>) ((a) &gt; (b) ? (a) : (b))
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">3</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">4</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">max</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+
+	<span class="pl-s1">max</span> <span class="pl-c1">=</span> <span class="pl-en">MAX</span>(<span class="pl-c1">++</span><span class="pl-s1">a</span>, <span class="pl-c1">++</span><span class="pl-s1">b</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"max = %d, a = %d, b = %d\n"</span>, <span class="pl-s1">max</span>, <span class="pl-s1">a</span>, <span class="pl-s1">b</span>);  
+}</pre></div>
+<ul>
+<li>你可以算出上面这段代码的执行结果是多少吗？【5 4 5】【5 5 4】【6 5 4】【6 4 6】到底是哪个呢？</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c81869f9c494cf71b1be150e9d620c8c453061edf9b58f400a68c0f29399ac28/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36643435333239363161616234306335616436393965306539666631313865662e706e67"><img src="https://camo.githubusercontent.com/c81869f9c494cf71b1be150e9d620c8c453061edf9b58f400a68c0f29399ac28/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36643435333239363161616234306335616436393965306539666631313865662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/6d4532961aab40c5ad699e0e9ff118ef.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们可以进入【预编译】阶段看看宏定义是如何替换的</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1ce6454ca0dd183d73ecdf7131b40d72168bb167030c0e8e51f9bd0a1362d9d6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32613361666531663463646334366565623231623232323565316332376461632e706e67"><img src="https://camo.githubusercontent.com/1ce6454ca0dd183d73ecdf7131b40d72168bb167030c0e8e51f9bd0a1362d9d6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32613361666531663463646334366565623231623232323565316332376461632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/2a3afe1f4cdc46eeb21b2225e1c27dac.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以看出，本身就会造成结果变化的前置++，若是在放入宏中，就会造成更多不变的因素。所以我们平时在使用宏的时候一定要小心谨慎</li>
+</ul>
+<h4>2.6 宏和函数的对比</h4>
+<blockquote>
+<p>在学习了【宏】之后，你一定会疑惑我们该何时去使用<code class="notranslate">宏</code>，又该何时去使用函数呢？我们再来对比一下它与函数之间的区别</p>
+</blockquote>
+<ul>
+<li>可以看到，对于下面这段代码，我们去求解一个数的最大值使用了【函数】和【宏】两种形式，可以看到对于宏来说要写很多的括号，函数看起来更加清晰美观一些，那为什么不去使用函数呢？而要去使用【宏】</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+
+<span class="pl-k">#define</span> <span class="pl-en">MAX</span>(<span class="pl-s1">a</span>, <span class="pl-s1">b</span>) ((a) &gt; (b) ? (a) : (b))
+
+<span class="pl-smi">int</span> <span class="pl-en">Max</span>(<span class="pl-smi">int</span> <span class="pl-s1">x</span>, <span class="pl-smi">int</span> <span class="pl-s1">y</span>)
+{
+    <span class="pl-k">return</span> (<span class="pl-s1">x</span> <span class="pl-c1">&gt;</span> <span class="pl-s1">y</span> ? <span class="pl-s1">x</span> :<span class="pl-s1">y</span>);
+}
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>(<span class="pl-smi">void</span>)
+{
+    <span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+    <span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">20</span>;
+
+    <span class="pl-smi">int</span> <span class="pl-s1">max1</span> <span class="pl-c1">=</span> <span class="pl-en">MAX</span>(<span class="pl-s1">a</span>, <span class="pl-s1">b</span>);
+    <span class="pl-en">printf</span>(<span class="pl-s">"宏求解的最大值为：%d\n"</span>, <span class="pl-s1">max1</span>);
+
+    <span class="pl-smi">int</span> <span class="pl-s1">max2</span> <span class="pl-c1">=</span> <span class="pl-en">Max</span>(<span class="pl-s1">a</span>, <span class="pl-s1">b</span>);                                                                             
+    <span class="pl-en">printf</span>(<span class="pl-s">"函数求解的最大值为：%d\n"</span>, <span class="pl-s1">max2</span>);
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p>原因主要有以下三点</p>
+<ol>
+<li><strong>宏比函数在程序的规模和速度方面更胜一筹</strong>。<br>
+函数需要调用、计算、然后再返回，宏只需要进行计算即可</li>
+</ol>
+<ul>
+<li>我们可以通过【反汇编】来看看其实就很明显可以看出【宏】在计算的时候确实比函数要来的快多了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e43af2a4c03a6521862deda782d264f5a36bae28a75cb1731ab868f72c601bfb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33643061313761656665373234666238616435656331643438383738623234342e706e67"><img src="https://camo.githubusercontent.com/e43af2a4c03a6521862deda782d264f5a36bae28a75cb1731ab868f72c601bfb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33643061313761656665373234666238616435656331643438383738623234342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/3d0a17aefe724fb8ad5ec1d48878b244.png" style="max-width: 100%;"></a></p>
+<ol start="2">
+<li><strong>更为重要的是函数的参数必须声明为特定的类型</strong>。<strong>宏则与类型无关的</strong>。</li>
+</ol>
+<p>函数只能在类型合适的表达式上使用。反之这个宏怎可以适用于整形、长整型、浮点型等可以用于&gt;来比较的类型。</p>
+<ul>
+<li>可以看到当我们要修改宏的参数时，写字符型也可以可以的，甚至是一个表达式；但是对于函数来讲，就已经定死了，若是要进行一个修改，那么需要调用的函数形参类型也必须进行一个修改</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e006e2d2696f04a66ac3e74145cbbb6c3c6d968ba3f886bdfb94e58efd6f75e7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61633064323363626165386334343961616461623134366339623665346539622e706e67"><img src="https://camo.githubusercontent.com/e006e2d2696f04a66ac3e74145cbbb6c3c6d968ba3f886bdfb94e58efd6f75e7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61633064323363626165386334343961616461623134366339623665346539622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/ac0d23cbae8c449aadab146c9b6e4e9b.png" style="max-width: 100%;"></a></p>
+<ol start="3">
+<li><strong>宏有时候可以做函数做不到的事情</strong></li>
+</ol>
+<ul>
+<li>我们在学习动态内存开辟的时候知道了如何使用<code class="notranslate">malloc()</code>去动态申请内存。</li>
+<li>在申请整型数组的时候就要使用<code class="notranslate">sizeof(int)</code>；在使用申请字符型数组的时候就要使用<code class="notranslate">sizeof(char)</code>；在使用申请浮点型数组的时候就要使用<code class="notranslate">sizeof(float)</code>；每次都要重新去写一下，其实是降低了开发效率。于是就有同学想到使用函数去进行一个封装，这样就可以做到只是修改一下就好了，可是呢又想到了函数无法传类型，于是又束手无策了。但是呢，此时我们的【宏】就可以实现这一块逻辑</li>
+</ul>
+<hr>
+<ul>
+<li>这么看下来宏好像真的蛮好的，但是在日常的开发中，大家为什么还是会使用函数呢？因为宏也具有它的缺陷</li>
+</ul>
+<p><strong>宏的缺点</strong></p>
+<ol>
+<li>每次使用宏的时候，一份宏定义的代码将插入到程序中。除非宏比较短，否则可能大幅度增加程序的长度。【宏可以使用反斜杠换到下一行继续写，可以像函数一样写很多】</li>
+<li>宏是没法调试的。【这点是致命的】</li>
+<li>宏由于类型无关，也就不够严谨。 【任何类型都可以传入】</li>
+<li>宏可能会带来运算符优先级的问题，导致程容易出现错。【加括号太麻烦了！！！】</li>
+</ol>
+<hr>
+<p>讲完了函数和宏之后，感觉有点散乱，我们通过表格来对比一下</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2efe189d22b47c456909fe244de0c568857a98376e29550179310131cce5d8ab/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35616663333466343136386334633265626439636334393130373365653439642e706e67"><img src="https://camo.githubusercontent.com/2efe189d22b47c456909fe244de0c568857a98376e29550179310131cce5d8ab/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35616663333466343136386334633265626439636334393130373365653439642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/5afc34f4168c4c2ebd9cc491073ee49d.png" style="max-width: 100%;"></a></p>
+<h4>2.7 命名规则</h4>
+<blockquote>
+<p>接下去我们来讲讲对于【宏】和【函数】的一些命名规则。因为对于函数和宏虽然存在很多的差别，但是呢在整体上还来还是比较类似，在开发的过程中也可能会存在混淆。所以我们在对它们进行命名的时候应该做一个规定</p>
+</blockquote>
+<ul>
+<li>把宏名全部大写</li>
+<li>函数名不要全部大写</li>
+</ul>
+<h3>3、#undef</h3>
+<p><strong>功能：移除一个宏定义</strong></p>
+<p><strong>语法：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-c1">NAME</span>
+<span class="pl-c">//... 代码 —— 可以使用NAME</span>
+
+<span class="pl-k">#undef</span> NAME
+<span class="pl-c">//... 代码 —— 无法使用NAME</span></pre></div>
+<ul>
+<li>来看看具体例子</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-c1">MAX</span> 100
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-c1">MAX</span>);
+<span class="pl-k">#undef</span> MAX
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d"</span>, <span class="pl-c1">MAX</span>);
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e10632ab3d147fa502fc906a561864e643df2cbb21a57982a88e29cbac56caf0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37643038303336383863666334333632396639643636616131393539613163322e706e67"><img src="https://camo.githubusercontent.com/e10632ab3d147fa502fc906a561864e643df2cbb21a57982a88e29cbac56caf0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37643038303336383863666334333632396639643636616131393539613163322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/7d0803688cfc43629f9d66aa1959a1c2.png" style="max-width: 100%;"></a></p>
+<h3>4、命令行定义</h3>
+<blockquote>
+<ul>
+<li>许多C 的编译器提供了一种能力，允许在命令行中定义符号。用于启动编译过程。</li>
+<li>例如：当我们根据同一个源文件要编译出一个程序的不同版本的时候，这个特性有点用处。（假设一个地方需要一个正常大小的数组，我们给正常的即可，但是另一个地方却需要很大的空间，此时就不够用了）</li>
+</ul>
+</blockquote>
+<p>我们来具体的案例中看看</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+  	<span class="pl-smi">int</span> <span class="pl-s1">a</span>[<span class="pl-s1">sz</span>];
+  	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+  	<span class="pl-k">for</span>(<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">sz</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+    {
+        <span class="pl-s1">a</span>[<span class="pl-s1">i</span>] <span class="pl-c1">=</span> <span class="pl-s1">i</span>;
+  	}
+                                                                                                    
+  	<span class="pl-k">for</span>(<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">sz</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+    {
+        <span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">a</span>[<span class="pl-s1">i</span>]);
+    }
+    <span class="pl-en">printf</span>(<span class="pl-s">"\n"</span>);
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>对于上面这段代码，很明显的错误可以看到程序发现了我没有定义这个sz，学习了宏定义后相信你应该知道该如何去作了。但是呢经过上面我讲到的情景，若是我们定义一个数组的大小，在这个程序中已经声明好了，那可能放到一些数据量大的地方就跑不过了（不考虑动态开辟）</li>
+<li>所以此时就可以使用到【命令行定义】这个东西了，也就是这个sz我不在这里定义，而是放在命令行进行编译的时候去定义，命令如下所示</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-s1">gcc</span> <span class="pl-c1">-</span><span class="pl-c1">D</span> <span class="pl-s1">sz</span><span class="pl-c1">=</span><span class="pl-c1">10</span> <span class="pl-s1">源文件</span>   <span class="pl-c">//这里注意不能写成sz = 10，不能加空格</span></pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/a7f907bbca605bf54fa6750212765b0b2f4f0afce63e934e189bfb874cd3d6a3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39326532643938666230653334643738396365346331643830383739613964372e706e67"><img src="https://camo.githubusercontent.com/a7f907bbca605bf54fa6750212765b0b2f4f0afce63e934e189bfb874cd3d6a3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39326532643938666230653334643738396365346331643830383739613964372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/92e2d98fb0e34d789ce4c1d80879a9d7.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>然后我们就可以在编译的时候为<code class="notranslate">sz</code>定义不同的值了，使程序变得很有弹性</li>
+</ul>
+<h3>5、条件编译</h3>
+<blockquote>
+<p>接下去我们来聊聊条件编译，对于这一块虽然我们平时不怎么用，但是在实际的开发中用得还是比较多的，因此需要有一些了解</p>
+</blockquote>
+<ul>
+<li>日常我们在编写程序的时候，都会写一些调试类的代码去检查自己的代码是否正确，在检查完后当这份代码用不到时你就会觉得 ——&gt; <strong>删除可惜，保留又碍事</strong></li>
+</ul>
+<p>于是就有了我们现在所讲的条件编译:</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">1.</span>
+<span class="pl-k">#if</span> <span class="pl-s1">常量表达式</span>
+<span class="pl-c">//...</span>
+<span class="pl-k">#endif</span>
+<span class="pl-c">//常量表达式由预处理器求值。</span>
+<span class="pl-s1">如</span>：
+<span class="pl-k">#define</span> <span class="pl-s1">__DEBUG__</span> 1
+<span class="pl-k">#if</span> <span class="pl-s1">__DEBUG__</span>
+<span class="pl-c">//..</span>
+<span class="pl-k">#endif</span>
+
+<span class="pl-c1">2.</span><span class="pl-s1">多个分支的条件编译</span>
+<span class="pl-k">#if</span> <span class="pl-s1">常量表达式</span>
+<span class="pl-c">//...</span>
+<span class="pl-k">#elif</span> <span class="pl-s1">常量表达式</span>
+<span class="pl-c">//...</span>
+<span class="pl-k">#else</span>
+<span class="pl-c">//...</span>
+<span class="pl-k">#endif</span>
+
+<span class="pl-c1">3.</span><span class="pl-s1">判断是否被定义</span>
+<span class="pl-k">#if</span> defined(<span class="pl-s1">symbol</span>)
+<span class="pl-k">#ifdef</span> <span class="pl-s1">symbol</span>
+<span class="pl-k">#if</span> !defined(<span class="pl-s1">symbol</span>)
+<span class="pl-k">#ifndef</span> <span class="pl-s1">symbol</span>
+
+<span class="pl-c1">4.</span><span class="pl-s1">嵌套指令</span>
+<span class="pl-k">#if</span> defined(<span class="pl-c1">OS_UNIX</span>)
+<span class="pl-k">#ifdef</span> <span class="pl-c1">OPTION1</span>
+<span class="pl-en">unix_version_option1</span>();
+<span class="pl-k">#endif</span>
+<span class="pl-k">#ifdef</span> <span class="pl-c1">OPTION2</span>
+<span class="pl-en">unix_version_option2</span>();
+<span class="pl-k">#endif</span>
+<span class="pl-k">#elif</span> defined(<span class="pl-c1">OS_MSDOS</span>)
+<span class="pl-k">#ifdef</span> <span class="pl-c1">OPTION2</span>
+<span class="pl-en">msdos_version_option2</span>();
+<span class="pl-k">#endif</span>
+<span class="pl-k">#endif</span></pre></div>
+<h3>6、文件包含</h3>
+<blockquote>
+<p>我们已经知道， #include 指令可以使另外一个文件被编译。就像它实际出现于 #include 指令的地方一样</p>
+</blockquote>
+<p>这种替换的方式很简单：</p>
+<ul>
+<li>预处理器先删除这条指令，并用包含文件的内容替换。这样一个源文件被包含10次，那就实际被编译10次</li>
+</ul>
+<h4>6.1 头文件被包含的方式</h4>
+<p>本地文件包含</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">"filename"</span></pre></div>
+<ul>
+<li>【查找策略】：先在源文件所在目录下查找，如果该头文件未找到，编译器就像查找库函数头文件一样在标准位置查找头文件。如果还是找不到，就提示编译错误 —— 简单来说，会<strong>查找两次</strong></li>
+<li>这种包含一般都是我们自己写的头文件</li>
+</ul>
+<hr>
+<ul>
+<li><strong>Linux</strong>环境的标准头文件的路径：</li>
+</ul>
+<div class="highlight highlight-source-shell"><pre class="notranslate">/usr/include</pre></div>
+<ul>
+<li><strong>VS</strong>环境的标准头文件的路径：</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate">C:\P<span class="pl-s1">rogram</span> <span class="pl-en">Files</span> (<span class="pl-s1">x86</span>)\M<span class="pl-s1">icrosoft</span> <span class="pl-s1">Visual</span> <span class="pl-s1">Studio</span> <span class="pl-c1">12.0</span>\V<span class="pl-c1">C</span>\i<span class="pl-s1">nclude</span>
+<span class="pl-c">//这是VS2013的默认路径</span></pre></div>
+<ul>
+<li><strong>注意按照自己的安装路径去找</strong></li>
+</ul>
+<hr>
+<ul>
+<li>库文件包含</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;filename.h&gt;</span></pre></div>
+<ul>
+<li>这种头文件的我们用的应该是最多的，例如<code class="notranslate">stdio.h</code>和<code class="notranslate">stdlib.h</code>等等这种标准库中的头文件</li>
+</ul>
+<blockquote>
+<p>既然第一种方式会查找两次，对于库文件也可以使用 “” 的形式包含？<br>
+答案是：<strong>可以，但是没必要，这样做查找的效率就低了一些，对于任何头文件都要去查找两次，而且也不容易区分是库文件还是本地文件了</strong></p>
+</blockquote>
+<p>【总结一下】：</p>
+<p>用 <code class="notranslate">#include &lt;filename.h&gt; </code>格式来引用<strong>标准库的头文件</strong>（编译器将从标准库目录开始搜索，只查找一次）<br>
+用 <code class="notranslate">#include “filename.h” </code>格式来引用<strong>非标准库的头文件</strong>（编译器将从用户的工作目录开始搜索，会查找两次）</p>
+<h4>6.2 嵌套文件包含</h4>
+<blockquote>
+<p>接下来说说对于嵌套文件的包含</p>
+</blockquote>
+<ul>
+<li>在我们进行开发的时候，那代码都是上万行的，很这许多的<code class="notranslate">.h</code>和<code class="notranslate">.c</code>文件，所以有很多<code class="notranslate">.h</code>的头文件就可能会被大家重复包含，就像是下面这种情况</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/85eecf10e50fe4f66eb05729a35b7daf979fa77c9b1160846fb13693f75a0984/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65303861386662653538653434373563396530386262303164636432333434612e706e67"><img src="https://camo.githubusercontent.com/85eecf10e50fe4f66eb05729a35b7daf979fa77c9b1160846fb13693f75a0984/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65303861386662653538653434373563396530386262303164636432333434612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/e08a8fbe58e4475c9e08bb01dcd2344a.png" style="max-width: 100%;"></a></p>
+<ol>
+<li>comm.h和comm.c是公共模块。</li>
+<li>test1.h和test1.c使用了公共模块。</li>
+<li>test2.h和test2.c使用了公共模块。</li>
+<li>test.h和test.c使用了test1模块和test2模块。</li>
+</ol>
+<p><strong>这样最终程序中就会出现两份comm.h的内容。这样就造成了文件内容的重复</strong></p>
+<ul>
+<li>那我们要如何去解决这个问题呢？ 答：使用上面所学的【条件编译】</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">// test.c                                                       </span>
+<span class="pl-k">#include</span> <span class="pl-s">"add.h"</span>
+<span class="pl-k">#include</span> <span class="pl-s">"add.h"</span>
+<span class="pl-k">#include</span> <span class="pl-s">"add.h"</span>
+<span class="pl-k">#include</span> <span class="pl-s">"add.h"</span>
+<span class="pl-k">#include</span> <span class="pl-s">"add.h"</span>
+
+<span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>                                                   
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+   <span class="pl-en">printf</span>(<span class="pl-s">"haha\n"</span>);
+   <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>在于上面的<code class="notranslate">test13.c</code>文件中可以看到我包含了五次<code class="notranslate">add.h</code>这个头文件。但是我在头文件中用到了条件编译，只要这个【TEST_H】被#define定义过了之后，那这个头文件就不会再被包含了</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//add.h</span>
+<span class="pl-k">#ifdef</span> <span class="pl-s1">__TEST_H__</span>
+<span class="pl-k">#define</span> <span class="pl-s1">__TEST_H_</span>
+<span class="pl-c">//                                                 </span>
+<span class="pl-smi">int</span> <span class="pl-en">Add</span>(<span class="pl-smi">int</span> <span class="pl-s1">x</span>, <span class="pl-smi">int</span> <span class="pl-s1">y</span>);
+<span class="pl-c">//</span>
+<span class="pl-k">#endif</span></pre></div>
+<ul>
+<li>我们可以来看一下【预处理】后的结果</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/fa3653c44e5d4b8fc7fd5fe48c6ede0f681c3933f96fdf0462c3f0b8be8e5c60/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32363361376132313263303834323635613865323632383130393331623137362e706e67"><img src="https://camo.githubusercontent.com/fa3653c44e5d4b8fc7fd5fe48c6ede0f681c3933f96fdf0462c3f0b8be8e5c60/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32363361376132313263303834323635613865323632383130393331623137362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/263a7a212c084265a8e262810931b176.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>或者我们还有另外一种方式可以使头文件被重复包含</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#pragma</span> once	//用得较多</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/bca139659f070bb1771891ba5f7059367661727edf0554dc71c1cfe41dcc13c3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63653162306362343865313634646639623137643162313932363365633731392e706e67"><img src="https://camo.githubusercontent.com/bca139659f070bb1771891ba5f7059367661727edf0554dc71c1cfe41dcc13c3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63653162306362343865313634646639623137643162313932363365633731392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/ce1b0cb48e164df9b17d1b19263ec719.png" style="max-width: 100%;"></a></p>
+<h2>四、其他预处理指令</h2>
+<p>不做介绍，自己去了解一下即可。</p>
+<ul>
+<li>#error</li>
+<li>#pragma</li>
+<li>#line</li>
+</ul>
+<blockquote>
+<p>参考《C语言深度解剖》学习</p>
+</blockquote>
+<h3>模拟实现offsetof</h3>
+<ul>
+<li>首先我们再来看看<code class="notranslate">offsetof</code>是怎么用的</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-k">#include</span> <span class="pl-s">&lt;stddef.h&gt;</span>
+<span class="pl-c">// 大小为12</span>
+<span class="pl-k">struct</span> <span class="pl-smi">S</span>
+{
+	<span class="pl-smi">char</span> <span class="pl-c1">c1</span>;
+	<span class="pl-smi">int</span> <span class="pl-c1">i</span>;
+	<span class="pl-smi">char</span> <span class="pl-c1">c2</span>;
+};
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"c1为%d\n"</span>, offsetof(<span class="pl-k">struct</span> <span class="pl-smi">S</span>, <span class="pl-c1">c1</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"i为%d\n"</span>, offsetof(<span class="pl-k">struct</span> <span class="pl-smi">S</span>, <span class="pl-c1">i</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"c2为%d\n"</span>, offsetof(<span class="pl-k">struct</span> <span class="pl-smi">S</span>, <span class="pl-c1">c2</span>));
+
+	<span class="pl-en">printf</span>(<span class="pl-s">"S结构体大小为%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-k">struct</span> <span class="pl-smi">S</span>));
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b77a91c1ec7a0c7f38776a4b2dbd98710323da12407c4741a1e939e1d5067b07/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33343865623161306664383934303338383630666338663962333830616462332e706e67"><img src="https://camo.githubusercontent.com/b77a91c1ec7a0c7f38776a4b2dbd98710323da12407c4741a1e939e1d5067b07/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33343865623161306664383934303338383630666338663962333830616462332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/348eb1a0fd894038860fc8f9b380adb3.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们是这样的思路：</li>
+<li>首先定义一个宏参数 ，然后将<code class="notranslate">0</code>强制类型转换成<code class="notranslate">type</code>类型，然后找对应的<code class="notranslate">mem</code>在取这个的地址，再强制类型转换成<code class="notranslate">size_t</code>类型就可以了</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-en">OFFSETOF</span>(<span class="pl-s1">type</span>,<span class="pl-s1">mem</span>) (size_t)&amp;(((type*)0)-&gt;mem)
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"c1为%d\n"</span>, <span class="pl-en">OFFSETOF</span>(<span class="pl-s1">struct</span> <span class="pl-c1">S</span>, <span class="pl-s1">c1</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"i为%d\n"</span>, <span class="pl-en">OFFSETOF</span>(<span class="pl-s1">struct</span> <span class="pl-c1">S</span>, <span class="pl-s1">i</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"c2为%d\n"</span>, <span class="pl-en">OFFSETOF</span>(<span class="pl-s1">struct</span> <span class="pl-c1">S</span>, <span class="pl-s1">c2</span>));
+	<span class="pl-c">//printf("c1为%d\n", offsetof(struct S, c1));</span>
+	<span class="pl-c">//printf("i为%d\n", offsetof(struct S, i));</span>
+	<span class="pl-c">//printf("c2为%d\n", offsetof(struct S, c2));</span>
+
+	<span class="pl-en">printf</span>(<span class="pl-s">"S结构体大小为%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-k">struct</span> <span class="pl-smi">S</span>));
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>也可以看到完成了模拟实现</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/50c2373bcdcdbf632f75307e1e7a73e3f47142c37d1738ac604c5a8078c398d2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32306261633066373161376434656564383662346433663964303936333964372e706e67"><img src="https://camo.githubusercontent.com/50c2373bcdcdbf632f75307e1e7a73e3f47142c37d1738ac604c5a8078c398d2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32306261633066373161376434656564383662346433663964303936333964372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/20bac0f71a7d4eed86b4d3f9d09639d7.png" style="max-width: 100%;"></a></p></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

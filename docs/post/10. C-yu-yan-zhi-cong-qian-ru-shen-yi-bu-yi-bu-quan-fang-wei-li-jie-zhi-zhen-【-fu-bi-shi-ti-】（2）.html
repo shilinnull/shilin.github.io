@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="
+
+
+## 一、回调函数是什么？
+- 回调函数就是一个`通过函数指针调用的函数`。">
+<meta property="og:title" content="10. C语言之从浅入深一步一步全方位理解指针【附笔试题】（2）">
+<meta property="og:description" content="
+
+
+## 一、回调函数是什么？
+- 回调函数就是一个`通过函数指针调用的函数`。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/10.%20C-yu-yan-zhi-cong-qian-ru-shen-yi-bu-yi-bu-quan-fang-wei-li-jie-zhi-zhen-%E3%80%90-fu-bi-shi-ti-%E3%80%91%EF%BC%882%EF%BC%89.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>10. C语言之从浅入深一步一步全方位理解指针【附笔试题】（2）</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">10. C语言之从浅入深一步一步全方位理解指针【附笔试题】（2）</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/35" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>一、回调函数是什么？</h2>
+<ul>
+<li>回调函数就是一个<code class="notranslate">通过函数指针调用的函数</code>。</li>
+<li>如果你把函数的指针（地址）作为参数传递给另一个函数，当这个指针被用来调用其所指向的函数时，被调用的函数就是回调函数。
+<ul>
+<li>回调函数<code class="notranslate">不是</code>由该函数的实现方直接调用，而是在<code class="notranslate">特定的事件或条件发生时由另外的一方调用的</code>，用于对该事件或条件进行响应。</li>
+</ul>
+</li>
+</ul>
+<p>我们首先对上面的计算器来进行举例：</p>
+<ul>
+<li>首先我们看到最一开始的计算器是不是很冗余，我们可以使用这个回调函数进行简化</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+
+<span class="pl-en">menu</span>()
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"*************************\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"********1:add 2:sub****** \n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"********3:mul 4:div******\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"********0:exit     ******\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"*************************\n"</span>);
+}
+
+<span class="pl-smi">int</span> <span class="pl-en">add</span>(<span class="pl-smi">int</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">b</span>)
+{
+	<span class="pl-k">return</span> <span class="pl-s1">a</span> <span class="pl-c1">+</span> <span class="pl-s1">b</span>;
+}
+<span class="pl-smi">int</span> <span class="pl-en">sub</span>(<span class="pl-smi">int</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">b</span>)
+{
+	<span class="pl-k">return</span> <span class="pl-s1">a</span> <span class="pl-c1">-</span> <span class="pl-s1">b</span>;
+}
+<span class="pl-smi">int</span> <span class="pl-en">mul</span>(<span class="pl-smi">int</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">b</span>)
+{
+	<span class="pl-k">return</span> <span class="pl-s1">a</span> <span class="pl-c1">*</span> <span class="pl-s1">b</span>;
+}
+<span class="pl-smi">int</span> <span class="pl-en">div</span>(<span class="pl-smi">int</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">b</span>)
+{
+	<span class="pl-k">return</span> <span class="pl-s1">a</span> / <span class="pl-s1">b</span>;
+}
+
+<span class="pl-smi">void</span> <span class="pl-en">calc</span>(<span class="pl-smi">int</span> (<span class="pl-c1">*</span><span class="pl-s1">pf</span>)(<span class="pl-smi">int</span>, <span class="pl-smi">int</span>))
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">ret</span>, <span class="pl-s1">x</span>, <span class="pl-s1">y</span>;
+	<span class="pl-en">printf</span>(<span class="pl-s">"输入操作数："</span>);
+	<span class="pl-en">scanf</span>(<span class="pl-s">"%d %d"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">x</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">y</span>);
+	<span class="pl-s1">ret</span> <span class="pl-c1">=</span> (<span class="pl-c1">*</span><span class="pl-s1">pf</span>)(<span class="pl-s1">x</span>, <span class="pl-s1">y</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"ret = %d\n"</span>, <span class="pl-s1">ret</span>);
+}
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">input</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+	<span class="pl-k">do</span>
+	{
+		<span class="pl-en">menu</span>();
+		<span class="pl-en">printf</span>(<span class="pl-s">"请选择："</span>);
+		<span class="pl-en">scanf</span>(<span class="pl-s">"%d"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">input</span>);
+		<span class="pl-k">switch</span> (<span class="pl-s1">input</span>)
+		{
+		<span class="pl-k">case</span> <span class="pl-c1">1</span>:
+			<span class="pl-en">calc</span>(<span class="pl-s1">add</span>);
+			<span class="pl-k">break</span>;
+		<span class="pl-k">case</span> <span class="pl-c1">2</span>:
+			<span class="pl-en">calc</span>(<span class="pl-s1">sub</span>);
+			<span class="pl-k">break</span>;
+		<span class="pl-k">case</span> <span class="pl-c1">3</span>:
+			<span class="pl-en">calc</span>(<span class="pl-s1">mul</span>);
+			<span class="pl-k">break</span>;
+		<span class="pl-k">case</span> <span class="pl-c1">4</span>:
+			<span class="pl-en">calc</span>(<span class="pl-s1">div</span>);
+			<span class="pl-k">break</span>;
+		<span class="pl-k">case</span> <span class="pl-c1">0</span>:
+			<span class="pl-en">printf</span>(<span class="pl-s">"退出程序\n"</span>);
+			<span class="pl-k">break</span>;
+		<span class="pl-k">default</span>:
+			<span class="pl-en">printf</span>(<span class="pl-s">"选择错误\n"</span>);
+			<span class="pl-k">break</span>;
+		}
+	} <span class="pl-k">while</span> (<span class="pl-s1">input</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>我们都是通过这个函数指针来调用函数</li>
+</ul>
+<p><strong>图解：</strong><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/85882930b9c811d4876ceb922ff460b0ace828b6d8923881055aff29738bbcc6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35303638346433666231343434646330383163303131616130373531613530642e706e67"><img src="https://camo.githubusercontent.com/85882930b9c811d4876ceb922ff460b0ace828b6d8923881055aff29738bbcc6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35303638346433666231343434646330383163303131616130373531613530642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/50684d3fb1444dc081c011aa0751a50d.png" style="max-width: 100%;"></a></p>
+<blockquote>
+<p>就好像是老板把任务分配给组长，组长再分配给组员实现内容~~</p>
+</blockquote>
+<h2>二、qsort使用举例</h2>
+<ul>
+<li>
+<p>qsort是一个库函数，用来对数据进行排序，可以排任意类型的数据</p>
+</li>
+<li>
+<p>我们打开<a href="https://legacy.cplusplus.com/" rel="nofollow">cplusplus</a>网站搜索<a href="https://legacy.cplusplus.com/reference/cstdlib/qsort/?kw=qsort" rel="nofollow">qsort</a></p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1603ac38f1e936546565cb5d9a1b7dddb8acf443044145be04027bcf5b2e1872/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f39333531653964383034366134663539383336336462383163336231633833642e706e67"><img src="https://camo.githubusercontent.com/1603ac38f1e936546565cb5d9a1b7dddb8acf443044145be04027bcf5b2e1872/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f39333531653964383034366134663539383336336462383163336231633833642e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/9351e9d8046a4f598363db81c3b1c83d.png" style="max-width: 100%;"></a></p>
+<p>这个qsort函数有4个参数：</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">qsort</span>(<span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-s1">base</span>, 
+			   <span class="pl-smi">size_t</span> <span class="pl-s1">num</span>, 
+			   <span class="pl-smi">size_t</span> <span class="pl-s1">size</span>,
+		   	   <span class="pl-smi">int</span> (<span class="pl-c1">*</span><span class="pl-s1">compar</span>)(<span class="pl-k">const</span> <span class="pl-smi">void</span><span class="pl-c1">*</span>, <span class="pl-k">const</span> <span class="pl-smi">void</span><span class="pl-c1">*</span>));</pre></div>
+<ul>
+<li>第一个参数是指向待排序的第一个元素</li>
+<li>第二个参数是待排序的元素个数</li>
+<li>第三个参数是待排序的数组元素的大小（单位是字节）</li>
+<li>第四个参数是比较两个元素</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p>这里有个void*的指针类型，这个指针类型是<code class="notranslate">通用指针类型</code>,这个指针类型可以接收任意类型数据的地址，就可以理解成指针垃圾桶，谁的地址都可以往里扔~~</p>
+</li>
+<li>
+<p>是一个无具体类型的指针，所以就不能+1，也不能解引用</p>
+</li>
+</ul>
+<hr>
+<p>我们也介绍完了这个函数，我们来使用排序一下整形数组</p>
+<p><strong>写出我们的主函数：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">arr</span>[] <span class="pl-c1">=</span> { <span class="pl-c1">3</span>,<span class="pl-c1">2</span>,<span class="pl-c1">5</span>,<span class="pl-c1">6</span>,<span class="pl-c1">8</span>,<span class="pl-c1">7</span>,<span class="pl-c1">9</span>,<span class="pl-c1">1</span>,<span class="pl-c1">4</span> };
+	<span class="pl-smi">int</span> <span class="pl-s1">sz</span> <span class="pl-c1">=</span> <span class="pl-k">sizeof</span>(<span class="pl-smi">arr</span>) / <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>[<span class="pl-c1">0</span>]);
+	
+	<span class="pl-en">qsort</span>(<span class="pl-s1">arr</span>, <span class="pl-s1">sz</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>[<span class="pl-c1">0</span>]), <span class="pl-s1">cmp_int</span>);
+	
+	<span class="pl-k">for</span> (<span class="pl-smi">size_t</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">sz</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">arr</span>[<span class="pl-s1">i</span>]);
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>下面这里就剩下一个比较函数了，怎么写呢？我们再来看一个网站上面的介绍~~</li>
+<li>这个函数能够比较e1和e2指向的两个元素，并给出返回值~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/74270ca5758bf5d91faf8f7685209b04c639469edcc93a39f2dec2e86526a5ec/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f38616163626331363063613934613064626430623465353035626165633530342e706e67"><img src="https://camo.githubusercontent.com/74270ca5758bf5d91faf8f7685209b04c639469edcc93a39f2dec2e86526a5ec/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f38616163626331363063613934613064626430623465353035626165633530342e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/8aacbc160ca94a0dbd0b4e505baec504.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们也就按照上面的案例来写~~</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">cmp_int</span>(<span class="pl-k">const</span> <span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-s1">e1</span>, <span class="pl-k">const</span> <span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-s1">e2</span>)
+{
+	<span class="pl-k">return</span> <span class="pl-c1">*</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-s1">e1</span> <span class="pl-c1">-</span> <span class="pl-c1">*</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-s1">e2</span>;
+}</pre></div>
+<ul>
+<li>现在我们来看已经完美排序了~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/8de100a65ab8a579f7441ae1555e01b3f9bc3425aa543ecad38bfd2fe9798f35/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f36336232663534633131633134333166623534323165313836373834623234642e706e67"><img src="https://camo.githubusercontent.com/8de100a65ab8a579f7441ae1555e01b3f9bc3425aa543ecad38bfd2fe9798f35/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f36336232663534633131633134333166623534323165313836373834623234642e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/63b2f54c11c1431fb5421e186784b24d.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>那么对于整形数据也可以排序了，是不是也可以对字符/字符串类型排序，对结构体也可以进行排序</p>
+</li>
+<li>
+<p>首先我们对于名字进行排序，对于名字排序，名字是个字符串，不能使用大小于号来进行比较，我们需要用到strcmp函数来进行比较，打开cplusplus网站搜索<a href="https://legacy.cplusplus.com/reference/cstring/strcmp/?kw=strcmp" rel="nofollow">stcmp</a>，发现这个函数的返回值也是整形，和qsort基本一样，我们使用的时候可以直接<code class="notranslate">return</code></p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f8386f4cbfaa3d9b45c415b46bc7b492d7b200f17da5fe2a7d7a11c106bf2552/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39626233623037393134656534316636396538633431366531646661383930652e706e67"><img src="https://camo.githubusercontent.com/f8386f4cbfaa3d9b45c415b46bc7b492d7b200f17da5fe2a7d7a11c106bf2552/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39626233623037393134656534316636396538633431366531646661383930652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/9bb3b07914ee41f69e8c416e1dfa890e.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>首先写出我们的结构体和主函数</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">struct</span> <span class="pl-smi">Stu</span>
+{
+	<span class="pl-smi">char</span> <span class="pl-c1">name</span>[<span class="pl-c1">20</span>];
+	<span class="pl-smi">int</span> <span class="pl-c1">age</span>;
+};
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">struct</span> <span class="pl-smi">Stu</span> <span class="pl-s1">s</span>[] <span class="pl-c1">=</span> { {<span class="pl-s">"zhangsan"</span>,<span class="pl-c1">20</span> },{<span class="pl-s">"lisi"</span>,<span class="pl-c1">18</span>},{<span class="pl-s">"wangwu"</span>,<span class="pl-c1">30</span>} };
+
+	<span class="pl-en">qsort</span>(<span class="pl-s1">s</span>, <span class="pl-k">sizeof</span>(<span class="pl-smi">s</span>) / <span class="pl-k">sizeof</span>(<span class="pl-s1">s</span>[<span class="pl-c1">0</span>]), <span class="pl-k">sizeof</span>(<span class="pl-s1">s</span>[<span class="pl-c1">0</span>]), <span class="pl-s1">stu_cmp_by_name</span>);
+
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-k">sizeof</span>(<span class="pl-smi">s</span>) / <span class="pl-k">sizeof</span>(<span class="pl-s1">s</span>[<span class="pl-c1">0</span>]); <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%s %d\n"</span>, <span class="pl-s1">s</span>[<span class="pl-s1">i</span>].<span class="pl-c1">name</span>, <span class="pl-s1">s</span>[<span class="pl-s1">i</span>].<span class="pl-c1">age</span>);
+	}
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>然后对于比较函数我们可以这样写</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">stu_cmp_by_name</span>(<span class="pl-k">const</span> <span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-s1">e1</span>, <span class="pl-k">const</span> <span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-s1">e2</span>)
+{
+	<span class="pl-k">return</span> <span class="pl-en">strcmp</span>(((<span class="pl-k">struct</span> <span class="pl-smi">Stu</span><span class="pl-c1">*</span>)<span class="pl-s1">e1</span>)<span class="pl-c1">-&gt;</span><span class="pl-c1">name</span>,((<span class="pl-k">struct</span> <span class="pl-smi">Stu</span><span class="pl-c1">*</span>)<span class="pl-s1">e2</span>)<span class="pl-c1">-&gt;</span><span class="pl-c1">name</span>);
+}</pre></div>
+<ul>
+<li>排序的时候是按照字典里的字符顺序排的</li>
+<li>可以看到，已经排序完成了~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ca246fd58d111ab1767b028e93920e3499f395702680f5543229e610e29b4f8a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62303032353536626164363234353565393066393232643631343232666433382e706e67"><img src="https://camo.githubusercontent.com/ca246fd58d111ab1767b028e93920e3499f395702680f5543229e610e29b4f8a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62303032353536626164363234353565393066393232643631343232666433382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/b002556bad62455e90f922d61422fd38.png" style="max-width: 100%;"></a></p>
+<hr>
+<ul>
+<li>那么回到上面，我们也可以对结构体的整形数据进行排序，也就是年龄</li>
+<li>我们直接写出来</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">struct</span> <span class="pl-smi">Stu</span>
+{
+	<span class="pl-smi">char</span> <span class="pl-c1">name</span>[<span class="pl-c1">20</span>];
+	<span class="pl-smi">int</span> <span class="pl-c1">age</span>;
+};
+
+<span class="pl-smi">int</span> <span class="pl-en">stu_cmp_by_age</span>(<span class="pl-k">const</span> <span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-s1">e1</span>, <span class="pl-k">const</span> <span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-s1">e2</span>)
+{
+	<span class="pl-k">return</span> ((<span class="pl-k">struct</span> <span class="pl-smi">Stu</span><span class="pl-c1">*</span>)<span class="pl-s1">e1</span>)<span class="pl-c1">-&gt;</span><span class="pl-c1">age</span> <span class="pl-c1">-</span> ((<span class="pl-k">struct</span> <span class="pl-smi">Stu</span><span class="pl-c1">*</span>)<span class="pl-s1">e2</span>)<span class="pl-c1">-&gt;</span><span class="pl-c1">age</span>;
+}
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">struct</span> <span class="pl-smi">Stu</span> <span class="pl-s1">s</span>[] <span class="pl-c1">=</span> { {<span class="pl-s">"zhangsan"</span>,<span class="pl-c1">20</span> },{<span class="pl-s">"lisi"</span>,<span class="pl-c1">18</span>},{<span class="pl-s">"wangwu"</span>,<span class="pl-c1">30</span>} };
+
+	<span class="pl-en">qsort</span>(<span class="pl-s1">s</span>, <span class="pl-k">sizeof</span>(<span class="pl-smi">s</span>) / <span class="pl-k">sizeof</span>(<span class="pl-s1">s</span>[<span class="pl-c1">0</span>]), <span class="pl-k">sizeof</span>(<span class="pl-s1">s</span>[<span class="pl-c1">0</span>]), <span class="pl-s1">stu_cmp_by_age</span>);
+
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-k">sizeof</span>(<span class="pl-smi">s</span>) / <span class="pl-k">sizeof</span>(<span class="pl-s1">s</span>[<span class="pl-c1">0</span>]); <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%s %d\n"</span>, <span class="pl-s1">s</span>[<span class="pl-s1">i</span>].<span class="pl-c1">name</span>, <span class="pl-s1">s</span>[<span class="pl-s1">i</span>].<span class="pl-c1">age</span>);
+	}
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>可以看到，对于年龄的排序也是可以排序成功的</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d4f8a0866c1b26303c1d25e4ab2b1790f8e414397f8a7154c3bcdce26838f656/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39363938396366633532636134373862393661663561306135623764346634392e706e67"><img src="https://camo.githubusercontent.com/d4f8a0866c1b26303c1d25e4ab2b1790f8e414397f8a7154c3bcdce26838f656/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39363938396366633532636134373862393661663561306135623764346634392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/96989cfc52ca478b96af5a0a5b7d4f49.png" style="max-width: 100%;"></a></p>
+<h2>三、qsort函数的模拟实现</h2>
+<blockquote>
+<p>qsort可以排序整形数据/字符数据/结构体数据...<br>
+可以使用qsort函数对数据进行排序</p>
+</blockquote>
+<p>使用回调函数，模拟实现qsort（采用冒泡的方式）。</p>
+<ul>
+<li>
+<p>今天我们使用冒泡排序，来实现一个对任意类型能够排序的函数</p>
+</li>
+<li>
+<p>我们先来实现一个整形的冒泡排序，然后再进行改造~~</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">bubble_sort</span>(<span class="pl-smi">int</span> <span class="pl-s1">arr</span>[], <span class="pl-smi">int</span> <span class="pl-s1">sz</span>)
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-k">for</span> ( <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">sz</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+		<span class="pl-k">for</span> (<span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">j</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">sz</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span> <span class="pl-c1">-</span> <span class="pl-s1">i</span>; <span class="pl-s1">j</span><span class="pl-c1">++</span>)
+		{
+			<span class="pl-k">if</span> (<span class="pl-s1">arr</span>[<span class="pl-s1">j</span>] <span class="pl-c1">&gt;</span> <span class="pl-s1">arr</span>[<span class="pl-s1">j</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>])
+			{
+				<span class="pl-smi">int</span> <span class="pl-s1">tmp</span> <span class="pl-c1">=</span> <span class="pl-s1">arr</span>[<span class="pl-s1">j</span>];
+				<span class="pl-s1">arr</span>[<span class="pl-s1">j</span>] <span class="pl-c1">=</span> <span class="pl-s1">arr</span>[<span class="pl-s1">j</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>];
+				<span class="pl-s1">arr</span>[<span class="pl-s1">j</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>] <span class="pl-c1">=</span> <span class="pl-s1">tmp</span>;
+			}
+
+		}
+	}
+}
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">arr</span>[] <span class="pl-c1">=</span> { <span class="pl-c1">3</span>,<span class="pl-c1">2</span>,<span class="pl-c1">5</span>,<span class="pl-c1">6</span>,<span class="pl-c1">8</span>,<span class="pl-c1">7</span>,<span class="pl-c1">9</span>,<span class="pl-c1">1</span>,<span class="pl-c1">4</span> };
+	<span class="pl-smi">int</span> <span class="pl-s1">sz</span> <span class="pl-c1">=</span> <span class="pl-k">sizeof</span>(<span class="pl-smi">arr</span>) / <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>[<span class="pl-c1">0</span>]);
+
+	<span class="pl-en">bubble_sort</span>(<span class="pl-s1">arr</span>, <span class="pl-s1">sz</span>);
+
+	<span class="pl-k">for</span> (<span class="pl-smi">size_t</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">sz</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">arr</span>[<span class="pl-s1">i</span>]);
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p>接下来我们开始<strong>改造</strong>~~</p>
+<ol>
+<li>改造参数  -- 让这个函数能够接受任意类型的数据</li>
+<li>改造比较方法 -- 让函数能够在排序时，比较不同类型的数据</li>
+<li>交换的代码也需要修改</li>
+</ol>
+<hr>
+<ul>
+<li>
+<p>e1是一个指针，存放了要比较元素的地址<br>
+e2是一个指针，存放了要比较元素的地址<br>
+e1指向的元素大于e2指向的元素，返回&gt;0的数字<br>
+e1指向的元素等于e2指向的元素，返回0<br>
+e1指向的元素小于e2指向的元素，返回&lt;0的数字</p>
+</li>
+<li>
+<p>我们来看完整代码</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">print_arr</span>(<span class="pl-smi">int</span> <span class="pl-s1">arr</span>[], <span class="pl-smi">int</span> <span class="pl-s1">sz</span>)	
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-k">for</span> (<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">sz</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">arr</span>[<span class="pl-s1">i</span>]);
+	}
+}
+
+<span class="pl-smi">void</span> <span class="pl-en">Swap</span>(<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">buf1</span>, <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">buf2</span>, <span class="pl-smi">size_t</span> <span class="pl-s1">size</span>)
+{
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">size</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-smi">char</span> <span class="pl-s1">tmp</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">buf1</span>;
+		<span class="pl-c1">*</span><span class="pl-s1">buf1</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">buf2</span>;
+		<span class="pl-c1">*</span><span class="pl-s1">buf2</span> <span class="pl-c1">=</span> <span class="pl-s1">tmp</span>;
+		<span class="pl-c1">++</span><span class="pl-s1">buf1</span>;
+		<span class="pl-c1">++</span><span class="pl-s1">buf2</span>;
+	}
+}
+
+<span class="pl-smi">int</span> <span class="pl-en">cmp_int</span>(<span class="pl-k">const</span> <span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-s1">e1</span>, <span class="pl-k">const</span> <span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-s1">e2</span>)
+{
+	<span class="pl-k">return</span> <span class="pl-c1">*</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-s1">e1</span> <span class="pl-c1">-</span> <span class="pl-c1">*</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-s1">e2</span>;
+}
+
+<span class="pl-smi">void</span> <span class="pl-en">my_bubble_qsort</span>(<span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-s1">base</span>, <span class="pl-smi">size_t</span> <span class="pl-s1">num</span>, <span class="pl-smi">size_t</span> <span class="pl-s1">size</span>, <span class="pl-smi">int</span>(<span class="pl-c1">*</span><span class="pl-s1">cmp</span>)(<span class="pl-k">const</span> <span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-s1">e1</span>, <span class="pl-k">const</span> <span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-s1">e2</span>))
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-k">for</span> (<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">num</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-k">for</span> (<span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">j</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">num</span> <span class="pl-c1">-</span> <span class="pl-s1">i</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>; <span class="pl-s1">j</span><span class="pl-c1">++</span>)
+		{
+			<span class="pl-c">// 返回了大于0的数就交换</span>
+			<span class="pl-k">if</span> (<span class="pl-en">cmp</span>((<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-s1">base</span> <span class="pl-c1">+</span> <span class="pl-s1">j</span> <span class="pl-c1">*</span> <span class="pl-s1">size</span>, (<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-s1">base</span> <span class="pl-c1">+</span> (<span class="pl-s1">j</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>) <span class="pl-c1">*</span> <span class="pl-s1">size</span>) <span class="pl-c1">&gt;</span> <span class="pl-c1">0</span>)
+			{
+				<span class="pl-en">Swap</span>((<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-s1">base</span> <span class="pl-c1">+</span> <span class="pl-s1">j</span> <span class="pl-c1">*</span> <span class="pl-s1">size</span>, (<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-s1">base</span> <span class="pl-c1">+</span> (<span class="pl-s1">j</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>) <span class="pl-c1">*</span> <span class="pl-s1">size</span>, <span class="pl-s1">size</span>);
+			}
+		}
+	}
+}
+
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">arr</span>[] <span class="pl-c1">=</span> { <span class="pl-c1">3</span>,<span class="pl-c1">2</span>,<span class="pl-c1">5</span>,<span class="pl-c1">6</span>,<span class="pl-c1">8</span>,<span class="pl-c1">7</span>,<span class="pl-c1">9</span>,<span class="pl-c1">1</span>,<span class="pl-c1">4</span>,<span class="pl-c1">0</span> };
+	<span class="pl-smi">int</span> <span class="pl-s1">sz</span> <span class="pl-c1">=</span> <span class="pl-k">sizeof</span>(<span class="pl-smi">arr</span>) / <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>[<span class="pl-c1">0</span>]);
+	<span class="pl-en">my_bubble_qsort</span>(<span class="pl-s1">arr</span>, <span class="pl-s1">sz</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>[<span class="pl-c1">0</span>]), <span class="pl-s1">cmp_int</span>);
+	<span class="pl-en">print_arr</span>(<span class="pl-s1">arr</span>, <span class="pl-s1">sz</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<hr>
+<p>下面图解可以看一下~~</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/03c021b2cdfbd1d01acc989334198bd51c56db628bc54b200bab3b7cb4ee7698/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63353831623064313030663934303237383634623033313532393335383266642e706e67"><img src="https://camo.githubusercontent.com/03c021b2cdfbd1d01acc989334198bd51c56db628bc54b200bab3b7cb4ee7698/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63353831623064313030663934303237383634623033313532393335383266642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/c581b0d100f94027864b0315293582fd.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以看到，我们对整形的排序也成功了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ffe741f76fa212a13411e7a68f5c5214387be50d5f8ad21a6987c0064c8e6cd4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36396161313039323230353834396336386130653731373237616433333930372e706e67"><img src="https://camo.githubusercontent.com/ffe741f76fa212a13411e7a68f5c5214387be50d5f8ad21a6987c0064c8e6cd4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36396161313039323230353834396336386130653731373237616433333930372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/69aa1092205849c68a0e71727ad33907.png" style="max-width: 100%;"></a></p>
+<hr>
+<h1>从浅入深理解指针《第五阶段》</h1>
+<hr>
+<ul>
+<li>在我们学习最后部分的笔试题的时候，我们需要先了解这些概念<code class="notranslate">sizeof</code>和<code class="notranslate">strlen</code></li>
+</ul>
+<h2>一、sizeof和strlen的对比</h2>
+<h3>1.1 sizeof</h3>
+<ul>
+<li>
+<p>在学习操作符的时候，我们学习了<code class="notranslate">sizeof</code> ， <code class="notranslate">sizeof</code> 计算变量所占内存内存空间大小的，单位是字节，如果操作数是类型的话，计算的是使用类型创建的变量所占内存空间的大小。</p>
+</li>
+<li>
+<p>我们就来开始学习了解sizeof~~</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>其中<code class="notranslate">size_t</code>其实专门是设计给<code class="notranslate">sizeof</code>的，表示<code class="notranslate">sizeof</code>的返回值类型</li>
+<li><code class="notranslate">sizeof</code>计算的不可能是负数吧，所以<code class="notranslate">size_t</code>是为<code class="notranslate">sizeof</code>来设计的~~</li>
+</ul>
+<p>列如：</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">a</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>));
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b7ee3897b35274638e282f68a78ec86e5704e555ee430adfd225ddba8b4a8ee1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39383937396534373833393134313635393562366339396136663563383761642e706e67"><img src="https://camo.githubusercontent.com/b7ee3897b35274638e282f68a78ec86e5704e555ee430adfd225ddba8b4a8ee1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39383937396534373833393134313635393562366339396136663563383761642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/98979e478391416595b6c99a6f5c87ad.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>如果这里是变量，括号是可以省略的</li>
+<li>如果是类型就是，就不能省略</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/589685a4806ec8173908b8d58e046b5114c8f271d0b70fc416067a6a4f85dd70/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f61326332326338363865393134663036383632623561653063663037383136382e706e67"><img src="https://camo.githubusercontent.com/589685a4806ec8173908b8d58e046b5114c8f271d0b70fc416067a6a4f85dd70/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f61326332326338363865393134663036383632623561653063663037383136382e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/a2c22c868e914f06862b5ae0cf078168.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这里算出的4就是占用4个字节</li>
+</ul>
+<hr>
+<ul>
+<li><code class="notranslate">sizeof</code> 只关注占用内存空间的大小，不在乎内存中存放什么数据，我们一会来详细看~~</li>
+</ul>
+<h3>1.2 strlen</h3>
+<p><a href="https://legacy.cplusplus.com/reference/cstring/strlen/?kw=strlen" rel="nofollow">strlen</a> 是C语言库函数，功能是求字符串长度。函数原型如下：</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">size_t</span> <span class="pl-en">strlen</span> ( <span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">str</span> );</pre></div>
+<ul>
+<li>它统计的是从<code class="notranslate">strlen</code>函数的参数<code class="notranslate">str</code>中这个地址开始向后，<code class="notranslate">\0</code>之前字符串中字符的个数。</li>
+<li><code class="notranslate">strlen</code> 函数会一直向后找<code class="notranslate">\0</code> 字符，直到找到为止，所以可能存在越界查找。</li>
+</ul>
+<p>我们来看下面的代码：</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">arr2</span>[] <span class="pl-c1">=</span> <span class="pl-s">"abc"</span>;
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-s1">arr2</span>));
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>这里的strlen算出的是<code class="notranslate">3</code></li>
+<li>我们还可以通过调试窗口看一下是怎么存放的~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/92deb31d8dafafefd0ee416fff612a6eb7acb2ccf5c1ac2eedb878d2463d191a/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f30306362333836363063663834376339383239396561383930613766396365622e706e67"><img src="https://camo.githubusercontent.com/92deb31d8dafafefd0ee416fff612a6eb7acb2ccf5c1ac2eedb878d2463d191a/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f30306362333836363063663834376339383239396561383930613766396365622e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/00cb38660cf847c98299ea890a7f9ceb.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以看到这里内存监视窗口的61就是97，0就是<code class="notranslate">\0</code>，<code class="notranslate">strlen</code>是统计<code class="notranslate">\0</code>之前的字符串的个数，结果是<code class="notranslate">3</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/504a560a1ea11d78d13ea9a4d1ee70425668480d9835b4db0a6fcfb1c4267bff/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f39663036633532346434363334356238393933346138393538346630633839612e706e67"><img src="https://camo.githubusercontent.com/504a560a1ea11d78d13ea9a4d1ee70425668480d9835b4db0a6fcfb1c4267bff/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f39663036633532346434363334356238393933346138393538346630633839612e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/9f06c524d46345b89934a89584f0c89a.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>那我在字符串的中间手动加一个<code class="notranslate">\0</code>会算出几呢？</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-s1">arr2</span>[] <span class="pl-c1">=</span> <span class="pl-s">"ab\0c"</span>;
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-s1">arr2</span>));</pre></div>
+<ul>
+<li>可以看到结果是<code class="notranslate">2</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2d58045d791fbb0d568a870c9b3a08178b7654d87f107fdf46e1015f5b819aac/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f62303938393438373037363234393062396335626331616465623930353132362e706e67"><img src="https://camo.githubusercontent.com/2d58045d791fbb0d568a870c9b3a08178b7654d87f107fdf46e1015f5b819aac/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f62303938393438373037363234393062396335626331616465623930353132362e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/b09894870762490b9c5bc1adeb905126.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>那字符串没有<code class="notranslate">\0</code>它的结果是什么呢？</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-s1">arr1</span>[] <span class="pl-c1">=</span> { <span class="pl-c1">'a'</span>, <span class="pl-c1">'b'</span>, <span class="pl-c1">'c'</span> };
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-s1">arr1</span>));</pre></div>
+<ul>
+<li>我们可以看到结果是15，其实是随机值，我也不知道多会会遇到<code class="notranslate">\0</code>。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/163cc538464fca7b34ad9a8627f0aa44f4fae3ed7757abfafec4a957b41030a3/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f63373764633662666539353134613164616139333864643338383738663434642e706e67"><img src="https://camo.githubusercontent.com/163cc538464fca7b34ad9a8627f0aa44f4fae3ed7757abfafec4a957b41030a3/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f63373764633662666539353134613164616139333864643338383738663434642e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/c77dc6bfe9514a1daa938dd38878f44d.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/75967d0033f0f37c2ac528ebe74aa698732cfb5a145f2cc12edfe10e839fe1ec/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f34386261316635663531313234373935623166383866336635383539323839372e706e67"><img src="https://camo.githubusercontent.com/75967d0033f0f37c2ac528ebe74aa698732cfb5a145f2cc12edfe10e839fe1ec/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f34386261316635663531313234373935623166383866336635383539323839372e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/48ba1f5f51124795b1f88f3f58592897.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>下面我们来对比一下<code class="notranslate">strlen</code>和<code class="notranslate">sizeof</code></li>
+</ul>
+<p><strong>strlen：</strong></p>
+<ul>
+<li>sizeof是操作符</li>
+<li>sizeof计算操作数所占内存的大小，单位是字节</li>
+<li>不关注内存中存放什么数据</li>
+</ul>
+<p><strong>sizeof：</strong></p>
+<ul>
+<li>strlen是库函数，使用需要包含头文件<code class="notranslate">string.h</code></li>
+<li>srtlen是求字符串长度的，统计的是<code class="notranslate">\0</code>之前字符的个数</li>
+<li>关注内存中是否有<code class="notranslate">\0</code>，如果没有<code class="notranslate">\0</code>，就会持续往后找，可能会越界</li>
+</ul>
+<hr>
+<ul>
+<li>sizeof在计算大小的时候，其实是根据类型推算的</li>
+<li>那么下面打印的是什么呢？</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">short</span> <span class="pl-s1">s</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">2</span>;
+<span class="pl-smi">int</span> <span class="pl-s1">n</span> <span class="pl-c1">=</span> <span class="pl-k">sizeof</span>(<span class="pl-s1">s</span> <span class="pl-c1">=</span> <span class="pl-s1">i</span> <span class="pl-c1">+</span> <span class="pl-c1">4</span>);
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-s1">n</span>);
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-s1">s</span>);</pre></div>
+<ul>
+<li>我们来看结果~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d181aaa434e29b0c9383e00f4f29209a6aa56ac28ff2080194d2599a8b600259/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f30356339376665303238623534343737393631333331343864333338633665622e706e67"><img src="https://camo.githubusercontent.com/d181aaa434e29b0c9383e00f4f29209a6aa56ac28ff2080194d2599a8b600259/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f30356339376665303238623534343737393631333331343864333338633665622e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/05c97fe028b5447796133148d338c6eb.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>为什么是2和10呢？我们来分析一下~~</p>
+</li>
+<li>
+<p>创建了一个短整型s，占两个字节，i是整形，占四个字节</p>
+</li>
+<li>
+<p>这里的i+4得出的结果我要放到s类型，我一个4个整形的放到两个整形的空间，这要发生截断，截断之后就是s说了算，所以就是2个字节。</p>
+</li>
+<li>
+<p>那么第二个，表达式放到sizeof内部不会真实计算的，不参与计算！！！所以原来的值就会打印什么值~~</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>那么有同学会问，表达式不参与计算，那上面那个为什么会是2呢？其实是sizeof是根据类型推断出来的，s = i + 4不会执行，其中 i + 4算出的就是整形类型的，整形类型的结果要放到shot类型的，所以就是short类型，就是2个字节，你懂了吗~~</li>
+</ul>
+<hr>
+<blockquote>
+<p>如果还没有理解的话，我们来看一些笔试题，来加深一下印象~~</p>
+</blockquote>
+<h2>二、数组和指针笔试题解析</h2>
+<h3>2.1 一维数组</h3>
+<ul>
+<li>我们先来看这里，下面打印的是什么呢？可以先自己分析一下，然后我们来挨个分析~~</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span>[] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>,<span class="pl-c1">4</span> };
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">a</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">a</span> <span class="pl-c1">+</span> <span class="pl-c1">0</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">*</span><span class="pl-s1">a</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">a</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">a</span>[<span class="pl-c1">1</span>]));
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">*</span><span class="pl-c1">&amp;</span><span class="pl-s1">a</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-c1">0</span>]));
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-c1">0</span>] <span class="pl-c1">+</span> <span class="pl-c1">1</span>));
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>你要知道的就是数组名即为首元素地址，不过有两个例外：
+<ul>
+<li>sizeof(数组名) —— 数组名表示整个数组，计算的是整个数组的大小，单位是字节</li>
+<li>&amp;数组名 —— 数组名表示数组名表示整个数组，取出的是整个数组的地址。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li><code class="notranslate">sizeof</code>内部单独放了一个数组名，数组名表示整个数组的大小，数组内有4个元素，每个<strong>元素</strong>4个字节，所以就是<code class="notranslate">16</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">a</span>));</pre></div>
+<hr>
+<ul>
+<li>这个地方的数组名的a并没有放到sizeof内部，也没有<code class="notranslate">&amp;</code>，所以a就是首元素的地址，是<strong>地址</strong>，大小就是<code class="notranslate">4/8</code>个字节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">a</span> <span class="pl-c1">+</span> <span class="pl-c1">0</span>));</pre></div>
+<hr>
+<ul>
+<li>a就是数组首元素的地址,<code class="notranslate">*a == *(a+0) == a[0]</code>，*a 其实就是第一个<strong>元素</strong>，也就是<code class="notranslate">a[0]</code>，大小就是<code class="notranslate">4</code>个字节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">*</span><span class="pl-s1">a</span>));</pre></div>
+<hr>
+<ul>
+<li>a就是数组首元素的地址(&amp;a[0] --&gt;int*)， a+1--&gt; &amp;a[1]，a+1就是第二个元素的<strong>地址</strong>，所以结果就是<code class="notranslate">4/8</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">a</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>));</pre></div>
+<hr>
+<ul>
+<li>计算第2个<strong>元素</strong>的大小，单位是字节 结果就是<code class="notranslate">4</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%zd\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">a</span>[<span class="pl-c1">1</span>]));</pre></div>
+<hr>
+<ul>
+<li><code class="notranslate">&amp;a</code> 取出的是数组的地址，但是数组的地址也是<strong>地址</strong>，是地址大小就是<code class="notranslate">4 / 8</code> 个字节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%zd\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>));</pre></div>
+<hr>
+<ul>
+<li>这里&amp;a是取出数组的地址，然后再解引用，也就是相当于抵消了，&amp;a是一个数组指针，也就是<code class="notranslate">int(*p)[4] = &amp;a</code>，*p访问一个数组的大小，p+1就是跳过一个<strong>数组的大小</strong>，结果是<code class="notranslate">16</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">*</span><span class="pl-c1">&amp;</span><span class="pl-s1">a</span>));</pre></div>
+<hr>
+<ul>
+<li>&amp;a+1是跳过整个数组后的<strong>地址</strong>，是地址大小就是4/8个字节，结果就是<code class="notranslate">4/8</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%zd\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>));</pre></div>
+<hr>
+<ul>
+<li>这里就是首元素的<strong>地址</strong>，结果是<code class="notranslate">4/8</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%zd\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-c1">0</span>]));</pre></div>
+<hr>
+<ul>
+<li>这里就是第二个元素的<strong>地址</strong>，结果是<code class="notranslate">4/8</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%zd\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-c1">0</span>] <span class="pl-c1">+</span> <span class="pl-c1">1</span>));</pre></div>
+<hr>
+<ul>
+<li>我们在vs上验证一下，这个是32位平台下打印的~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1d2a9f57fd1754b91ee60a3daa7e56d4186d2fe1c8a3515cc9811fcce9101410/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f34393735623964666533336534646233386365623037366262333537353337652e706e67"><img src="https://camo.githubusercontent.com/1d2a9f57fd1754b91ee60a3daa7e56d4186d2fe1c8a3515cc9811fcce9101410/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f34393735623964666533336534646233386365623037366262333537353337652e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/4975b9dfe33e4db38ceb076bb357537e.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这个是在64位下运行的~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7dd749c1f44b0d48e4d9e3050f7a576384fe17dbf832e7486023289d4c198d19/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f36613963386462393132653734373832616263633834303630383132333565332e706e67"><img src="https://camo.githubusercontent.com/7dd749c1f44b0d48e4d9e3050f7a576384fe17dbf832e7486023289d4c198d19/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f36613963386462393132653734373832616263633834303630383132333565332e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/6a9c8db912e74782abcc8406081235e3.png" style="max-width: 100%;"></a></p>
+<hr>
+<h3>2.2 字符数组</h3>
+<ul>
+<li>接下来我们来看字符数组</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">arr</span>[] <span class="pl-c1">=</span> { <span class="pl-c1">'a'</span>,<span class="pl-c1">'b'</span>,<span class="pl-c1">'c'</span>,<span class="pl-c1">'d'</span>,<span class="pl-c1">'e'</span>,<span class="pl-c1">'f'</span> };
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span> <span class="pl-c1">+</span> <span class="pl-c1">0</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">*</span><span class="pl-s1">arr</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>[<span class="pl-c1">1</span>]));
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span>[<span class="pl-c1">0</span>] <span class="pl-c1">+</span> <span class="pl-c1">1</span>));
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<hr>
+<ul>
+<li>数组名单独放在了sizeof内部，计算的是整个<strong>数组的大小</strong>，字符有6个，所以结果就是<code class="notranslate">6</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>));</pre></div>
+<hr>
+<ul>
+<li>arr是数组首元素的地址，arr+0 还是首元素的<strong>地址</strong> ，是地址大小就是<code class="notranslate">4/8</code>个字节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span> <span class="pl-c1">+</span> <span class="pl-c1">0</span>));</pre></div>
+<hr>
+<ul>
+<li>arr是数组首元素的地址,*arr就是<strong>首元素</strong>,就占一个字符大小就是<code class="notranslate">1</code>个字节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">*</span><span class="pl-s1">arr</span>));</pre></div>
+<hr>
+<ul>
+<li>arr[1]就是数组的第二个<strong>元素</strong>，大小是<code class="notranslate">1</code>个字节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>[<span class="pl-c1">1</span>]));</pre></div>
+<hr>
+<ul>
+<li>&amp;arr 是数组的地址，数组的地址也是<strong>地址</strong>，大小就是<code class="notranslate">4/8</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span>));</pre></div>
+<hr>
+<ul>
+<li>&amp;arr+1 是跳过<strong>整个数组</strong>，指向f的后面<code class="notranslate">4/8</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>));</pre></div>
+<hr>
+<ul>
+<li>&amp;arr[0]是首元素的地址，&amp;arr[0]+1就是第二个元素的<strong>地址</strong> <code class="notranslate">4/8</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span>[<span class="pl-c1">0</span>] <span class="pl-c1">+</span> <span class="pl-c1">1</span>));</pre></div>
+<hr>
+<ul>
+<li>我们来看32平台下</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2c8c9cc90d5a6d57884256e1650d82150ece1ffab0dce71a6c78cf415371f607/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f39323933356331356537303034623066626362303335633432336166653231392e706e67"><img src="https://camo.githubusercontent.com/2c8c9cc90d5a6d57884256e1650d82150ece1ffab0dce71a6c78cf415371f607/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f39323933356331356537303034623066626362303335633432336166653231392e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/92935c15e7004b0fbcb035c423afe219.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>再来看64位平台下的</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ff3ea09be3ea6fb060f329c300b61771747bb3f35713805ddf0d732b102ff5ee/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f37306466366162616130316634656663613630316438343431623162396366612e706e67"><img src="https://camo.githubusercontent.com/ff3ea09be3ea6fb060f329c300b61771747bb3f35713805ddf0d732b102ff5ee/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f37306466366162616130316634656663613630316438343431623162396366612e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/70df6abaa01f4efca601d8441b1b9cfa.png" style="max-width: 100%;"></a></p>
+<hr>
+<ul>
+<li>我们继续来看第二个</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-s1">arr</span>[] <span class="pl-c1">=</span> { <span class="pl-c1">'a'</span>,<span class="pl-c1">'b'</span>,<span class="pl-c1">'c'</span>,<span class="pl-c1">'d'</span>,<span class="pl-c1">'e'</span>,<span class="pl-c1">'f'</span> };
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-s1">arr</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-s1">arr</span><span class="pl-c1">+</span><span class="pl-c1">0</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">*</span><span class="pl-s1">arr</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-s1">arr</span>[<span class="pl-c1">1</span>]));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span><span class="pl-c1">+</span><span class="pl-c1">1</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span>[<span class="pl-c1">0</span>]<span class="pl-c1">+</span><span class="pl-c1">1</span>));</pre></div>
+<ul>
+<li>这个数组是没有\0的，strlen是计算<code class="notranslate">\0</code>之前的元素个数所以就是<code class="notranslate">随机值</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-s1">arr</span>));</pre></div>
+<hr>
+<ul>
+<li>这个数组名也是首元素的地址，+0也就相当于没有加，结果是<code class="notranslate">随机值</code>~~</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-s1">arr</span><span class="pl-c1">+</span><span class="pl-c1">0</span>));</pre></div>
+<hr>
+<ul>
+<li>这里arr是首元素的地址，然后*arr解引用就是字符<code class="notranslate">a</code>，ASCLL码值是97，97传给strlen，<strong>会把97当成个地址</strong>，会<strong>非法访问</strong>，结果会<code class="notranslate">报错</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">*</span><span class="pl-s1">arr</span>));</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7020a7d30ddb486aab3022eea4b24a75ea0544253229756fbbe1904bff09a3b3/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f38623966373737373533303434653737623534613838303637356263636265362e706e67"><img src="https://camo.githubusercontent.com/7020a7d30ddb486aab3022eea4b24a75ea0544253229756fbbe1904bff09a3b3/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f38623966373737373533303434653737623534613838303637356263636265362e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/8b9f777753044e77b54a880675bccbe6.png" style="max-width: 100%;"></a></p>
+<hr>
+<ul>
+<li>这个代码与上个代码相似，访问的是<strong>第二个元素的ASCLL码值，会当地</strong>址传过去，也会<code class="notranslate">报错</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-s1">arr</span>[<span class="pl-c1">1</span>]));</pre></div>
+<hr>
+<ul>
+<li>&amp;arr就是取出这个数组的地址，也就是<strong>起始位置向后数</strong>，结果也是<code class="notranslate">随机值</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span>));</pre></div>
+<hr>
+<ul>
+<li>这个&amp;arr就是首元素的地址，然后+1，<strong>跳过整个数组的地址，内存放的什么也不知道</strong>，结果也就是<code class="notranslate">随机值</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span><span class="pl-c1">+</span><span class="pl-c1">1</span>));</pre></div>
+<hr>
+<ul>
+<li>&amp;arr[0]是首元素的地址，+1就是<strong>第二个元素的地址，然后向后数</strong>，结果也是<code class="notranslate">随机值</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span>[<span class="pl-c1">0</span>]<span class="pl-c1">+</span><span class="pl-c1">1</span>));</pre></div>
+<hr>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b8640e5962b3bb6bc3a4416f22b57235a98fac56cd4ebdaf6216153a3fae4988/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f64373033633862323066663634386635396630393836333365643761343934302e706e67"><img src="https://camo.githubusercontent.com/b8640e5962b3bb6bc3a4416f22b57235a98fac56cd4ebdaf6216153a3fae4988/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f64373033633862323066663634386635396630393836333365643761343934302e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/d703c8b20ff648f59f098633ed7a4940.png" style="max-width: 100%;"></a></p>
+<hr>
+<ul>
+<li>这里我们初始化<code class="notranslate">abcdef\0</code>，这里面有\0~~</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-s1">arr</span>[] <span class="pl-c1">=</span> <span class="pl-s">"abcdef"</span>;
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span><span class="pl-c1">+</span><span class="pl-c1">0</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">*</span><span class="pl-s1">arr</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>[<span class="pl-c1">1</span>]));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span><span class="pl-c1">+</span><span class="pl-c1">1</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span>[<span class="pl-c1">0</span>]<span class="pl-c1">+</span><span class="pl-c1">1</span>));</pre></div>
+<ul>
+<li>这里算的是<strong>arr元素的大小</strong>，结果是<code class="notranslate">7</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>));</pre></div>
+<ul>
+<li>arr表示数组首元素的地址，<code class="notranslate">arr + 0</code>还是<strong>首元素的地址</strong>，大小就是<code class="notranslate">4/8</code>个字节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span><span class="pl-c1">+</span><span class="pl-c1">0</span>));</pre></div>
+<ul>
+<li>arr表示数组首元素的地址,*arr就是<strong>首元素</strong>，大小就是<code class="notranslate">1</code>字节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">*</span><span class="pl-s1">arr</span>));</pre></div>
+<ul>
+<li>arr[1]是<strong>第二个元素</strong>，大小也是<code class="notranslate">1</code>字节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>[<span class="pl-c1">1</span>]));</pre></div>
+<ul>
+<li>&amp;arr是数组的地址，但是也是地址，是<strong>地址</strong>大小就是<code class="notranslate">4/8</code>个字节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span>));</pre></div>
+<ul>
+<li>&amp;arr是数组的地址,&amp;arr+1就是跳过整个数组的那个<strong>地址</strong>，结果是<code class="notranslate">4/8</code>个字节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span><span class="pl-c1">+</span><span class="pl-c1">1</span>));</pre></div>
+<ul>
+<li>第二个元素的<strong>地址</strong>，大小<code class="notranslate">4/8</code>个字节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span>[<span class="pl-c1">0</span>]<span class="pl-c1">+</span><span class="pl-c1">1</span>));</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4701bd66918cd38f017a670bb88432a1d9c6ee6579a37a3358620b66c6b3dd9a/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f33616632343263326634333334636162383037643038343336336339636637622e706e67"><img src="https://camo.githubusercontent.com/4701bd66918cd38f017a670bb88432a1d9c6ee6579a37a3358620b66c6b3dd9a/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f33616632343263326634333334636162383037643038343336336339636637622e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/3af242c2f4334cab807d084363c9cf7b.png" style="max-width: 100%;"></a></p>
+<hr>
+<ul>
+<li>我们再把<code class="notranslate">sizeof</code>换成<code class="notranslate">strlen</code>~~</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-s1">arr</span>[] <span class="pl-c1">=</span> <span class="pl-s">"abcdef"</span>;
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-s1">arr</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-s1">arr</span><span class="pl-c1">+</span><span class="pl-c1">0</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">*</span><span class="pl-s1">arr</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-s1">arr</span>[<span class="pl-c1">1</span>]));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span><span class="pl-c1">+</span><span class="pl-c1">1</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span>[<span class="pl-c1">0</span>]<span class="pl-c1">+</span><span class="pl-c1">1</span>));</pre></div>
+<ul>
+<li>arr是首元素的地址，计算的是strlen遇到\0之前<strong>元素的个数</strong>，结果是<code class="notranslate">6</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-s1">arr</span>));</pre></div>
+<ul>
+<li>arr+1 也是<strong>首元素的地址</strong>，结果就是<code class="notranslate">6</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-s1">arr</span><span class="pl-c1">+</span><span class="pl-c1">0</span>));</pre></div>
+<ul>
+<li>这里结果是<code class="notranslate">报错</code>,会非法访问</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">*</span><span class="pl-s1">arr</span>));</pre></div>
+<ul>
+<li>这里也会形成<code class="notranslate">非法访问</code>~~</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-s1">arr</span>[<span class="pl-c1">1</span>]));</pre></div>
+<ul>
+<li>&amp;arr是数组的地址，但是这个地址也是指向<strong>数组的起始位置</strong>的，strlen就从起始位置开始向后找\0，结果是<code class="notranslate">6</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span>));</pre></div>
+<ul>
+<li>&amp;arr+1是<strong>跳过整个数组后的地址</strong>，从这里开始向后找\0，就是<code class="notranslate">随机值</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span><span class="pl-c1">+</span><span class="pl-c1">1</span>));</pre></div>
+<ul>
+<li>arr[0] + 1 是第<strong>二个元素的地址</strong>，长度是<code class="notranslate">5</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">arr</span>[<span class="pl-c1">0</span>]<span class="pl-c1">+</span><span class="pl-c1">1</span>));</pre></div>
+<ul>
+<li>我们来看一下结果~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/54f86a133f6637786639e213b567fd6ebcba63f227796804ea9fa9252a9e5672/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f36346234316536626334636534313432383130626636373661393764666234332e706e67"><img src="https://camo.githubusercontent.com/54f86a133f6637786639e213b567fd6ebcba63f227796804ea9fa9252a9e5672/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f36346234316536626334636534313432383130626636373661393764666234332e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/64b41e6bc4ce4142810bf676a97dfb43.png" style="max-width: 100%;"></a></p>
+<hr>
+<ul>
+<li>我们这里指针变量<code class="notranslate">p</code>存放的是这个字符串a的地址</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-c1">*</span><span class="pl-s1">p</span> <span class="pl-c1">=</span> <span class="pl-s">"abcdef"</span>;
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">p</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">p</span><span class="pl-c1">+</span><span class="pl-c1">1</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">*</span><span class="pl-s1">p</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">p</span>[<span class="pl-c1">0</span>]));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">p</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">p</span><span class="pl-c1">+</span><span class="pl-c1">1</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">p</span>[<span class="pl-c1">0</span>]<span class="pl-c1">+</span><span class="pl-c1">1</span>));</pre></div>
+<ul>
+<li>p是一个指针变量，<strong>地址</strong>大小是<code class="notranslate">4/8</code>个字节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">p</span>));</pre></div>
+<ul>
+<li>p+1是‘b’的地址，是<strong>地址</strong>就是<code class="notranslate">4/8</code>个字节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">p</span><span class="pl-c1">+</span><span class="pl-c1">1</span>));</pre></div>
+<ul>
+<li><code class="notranslate">*p</code> 是<strong>首字符</strong>，大小是<code class="notranslate">1</code>字节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">*</span><span class="pl-s1">p</span>));</pre></div>
+<ul>
+<li>p[0] === *(p+0)，其实就是字符串中的<strong>首字符</strong>，大小是<code class="notranslate">1</code>字节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">p</span>[<span class="pl-c1">0</span>]));</pre></div>
+<ul>
+<li>&amp;p是p的地址，也是地址，<strong>地址</strong>大小就是<code class="notranslate">4/8</code>个字节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">p</span>));</pre></div>
+<ul>
+<li>&amp;p + 1也是<strong>地址</strong>，&amp;p1+1是跳过p变量后的地址，是地址就是<code class="notranslate">4/8</code>个字节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">p</span><span class="pl-c1">+</span><span class="pl-c1">1</span>));</pre></div>
+<ul>
+<li>&amp;p[0] + 1是b的<strong>地址</strong>，是地址就是<code class="notranslate">4/8</code>个字节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">p</span>[<span class="pl-c1">0</span>]<span class="pl-c1">+</span><span class="pl-c1">1</span>));</pre></div>
+<p><strong>32位下：</strong></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e76ba4bf258eca0cbffc8b52576b364d59991e46b265c09f4d4f906b9c86f895/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f61306236356161633531356334663331396263656661653062333331623531372e706e67"><img src="https://camo.githubusercontent.com/e76ba4bf258eca0cbffc8b52576b364d59991e46b265c09f4d4f906b9c86f895/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f61306236356161633531356334663331396263656661653062333331623531372e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/a0b65aac515c4f319bcefae0b331b517.png" style="max-width: 100%;"></a></p>
+<p><strong>64位下：</strong></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9dbbb327b8e45d42f925c10f2d4272dad73ba5fd78f8675e4ef67a7536cf614f/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f64653030363262393464373434333938383337383832633135363162653433622e706e67"><img src="https://camo.githubusercontent.com/9dbbb327b8e45d42f925c10f2d4272dad73ba5fd78f8675e4ef67a7536cf614f/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f64653030363262393464373434333938383337383832633135363162653433622e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/de0062b94d744398837882c1561be43b.png" style="max-width: 100%;"></a></p>
+<p><strong>我们再来换成strlen：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-c1">*</span><span class="pl-s1">p</span> <span class="pl-c1">=</span> <span class="pl-s">"abcdef"</span>;
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-s1">p</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-s1">p</span><span class="pl-c1">+</span><span class="pl-c1">1</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">*</span><span class="pl-s1">p</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-s1">p</span>[<span class="pl-c1">0</span>]));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">p</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">p</span><span class="pl-c1">+</span><span class="pl-c1">1</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">p</span>[<span class="pl-c1">0</span>]<span class="pl-c1">+</span><span class="pl-c1">1</span>));</pre></div>
+<ul>
+<li>p指向这个字符串的首元素地址，字符串中有\0，从a的<strong>地址开始向后访问</strong>，结果就是<code class="notranslate">6</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-s1">p</span>));</pre></div>
+<ul>
+<li>p的类型是<code class="notranslate">char*</code>，<code class="notranslate">+1</code>跳过的就是一个char类型的数据，所以就来到了<strong>字符<code class="notranslate">'b'</code>的地址处</strong>，向后找\0的话就最后的结果即为 <code class="notranslate">5</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-s1">p</span><span class="pl-c1">+</span><span class="pl-c1">1</span>));</pre></div>
+<ul>
+<li><code class="notranslate">*p</code>取到的就是字符<code class="notranslate">'a'</code>，strlen就会把字符<strong>a的ascll码值当地址传过去了</strong>，会产生非法访问，结果是<code class="notranslate">err</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">*</span><span class="pl-s1">p</span>));	</pre></div>
+<ul>
+<li>这个和上一个一样，也是会产生<strong>非法访问</strong>，就相当于 <code class="notranslate"> *p == *(p+0) == p[0]</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-s1">p</span>[<span class="pl-c1">0</span>]));</pre></div>
+<ul>
+<li>这个结果就是随机值，&amp;p是p的地址，类型是<code class="notranslate">char*</code>从<strong>p所占空间的起始位置开始查找的</strong>，它不知道什么时候会遇到<code class="notranslate">\0</code>，所以就会是<code class="notranslate">随机值</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">p</span>));</pre></div>
+<ul>
+<li>这个代码在<code class="notranslate">&amp;</code>取地址后它的类型就变成了<code class="notranslate">char**</code>，<code class="notranslate">+1</code>会跳过一个<code class="notranslate">char*</code>类型的数据，它指向了<strong>字符串末尾的这个位置</strong>，从这里向后去进行找<code class="notranslate">\0</code>,也是不知道什么时候会遇到，所以最后的结果还是<code class="notranslate">随机值</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">p</span><span class="pl-c1">+</span><span class="pl-c1">1</span>));</pre></div>
+<ul>
+<li>这里和第二个很相似，&amp;和[]就相当于抵消了，<strong>+1就指向了<code class="notranslate">'b'</code></strong>，结果也就是<code class="notranslate">5</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-en">strlen</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">p</span>[<span class="pl-c1">0</span>]<span class="pl-c1">+</span><span class="pl-c1">1</span>));</pre></div>
+<ul>
+<li>最后我们来看一下结果~~<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/68a562607a6342d0460edad2350e23e44d3d0a5b5025492c62f179ffce5a34bd/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f37363633613765323839326534633930613162353038633636363231306331662e706e67"><img src="https://camo.githubusercontent.com/68a562607a6342d0460edad2350e23e44d3d0a5b5025492c62f179ffce5a34bd/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f37363633613765323839326534633930613162353038633636363231306331662e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/7663a7e2892e4c90a1b508c666210c1f.png" style="max-width: 100%;"></a></li>
+</ul>
+<hr>
+<blockquote>
+<p>最后我们再来看二维数组，也是比较难的一部分，这里一定要认真看~~</p>
+</blockquote>
+<h3>2.3 二维数组</h3>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">a</span>[<span class="pl-c1">3</span>][<span class="pl-c1">4</span>] <span class="pl-c1">=</span> {<span class="pl-c1">0</span>};
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>,<span class="pl-k">sizeof</span>(<span class="pl-s1">a</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>,<span class="pl-k">sizeof</span>(<span class="pl-s1">a</span>[<span class="pl-c1">0</span>][<span class="pl-c1">0</span>]));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>,<span class="pl-k">sizeof</span>(<span class="pl-s1">a</span>[<span class="pl-c1">0</span>]));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>,<span class="pl-k">sizeof</span>(<span class="pl-s1">a</span>[<span class="pl-c1">0</span>]<span class="pl-c1">+</span><span class="pl-c1">1</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>,<span class="pl-k">sizeof</span>(<span class="pl-c1">*</span>(<span class="pl-s1">a</span>[<span class="pl-c1">0</span>]<span class="pl-c1">+</span><span class="pl-c1">1</span>)));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>,<span class="pl-k">sizeof</span>(<span class="pl-s1">a</span><span class="pl-c1">+</span><span class="pl-c1">1</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>,<span class="pl-k">sizeof</span>(<span class="pl-c1">*</span>(<span class="pl-s1">a</span><span class="pl-c1">+</span><span class="pl-c1">1</span>)));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>,<span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-c1">0</span>]<span class="pl-c1">+</span><span class="pl-c1">1</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>,<span class="pl-k">sizeof</span>(<span class="pl-c1">*</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-c1">0</span>]<span class="pl-c1">+</span><span class="pl-c1">1</span>)));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>,<span class="pl-k">sizeof</span>(<span class="pl-c1">*</span><span class="pl-s1">a</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>,<span class="pl-k">sizeof</span>(<span class="pl-s1">a</span>[<span class="pl-c1">3</span>]));</pre></div>
+<ul>
+<li>sizeof(数组名)，计算的就是整个数组的大小，这是一个二维数组，数组<strong>是三行四列</strong>的，总共十二个元素，每个元素的类型是int，为4个字节，那么总的大小就是 <code class="notranslate">48</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">a</span>));</pre></div>
+<ul>
+<li>a[0][0]代表的是数组<strong>第一行第一列</strong>的元素,所以每个元素都是<code class="notranslate">4</code>个字节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">a</span>[<span class="pl-c1">0</span>][<span class="pl-c1">0</span>]));</pre></div>
+<ul>
+<li><code class="notranslate">a[0]</code>为第一行的数组名，而且它是单独放在sizeof()内部的，计算的是<strong>第一行这一整行</strong>的大小，里面有4个元素，每个元素都是4个字节，那么结果即为<code class="notranslate">16</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">a</span>[<span class="pl-c1">0</span>]));</pre></div>
+<ul>
+<li>a[0]是第一行这个数组的数组名，但是数组名并非单独放在sizeof内部，所以数组名表示数组首元素的地址，也就是<code class="notranslate">a[0][0]</code>的地址，<code class="notranslate">a[0]+1</code>是第一行第二个元素<code class="notranslate">a[0][1]</code>的<strong>地址</strong>，是地址的大小是<code class="notranslate">4/8</code>个字节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">a</span>[<span class="pl-c1">0</span>] <span class="pl-c1">+</span> <span class="pl-c1">1</span>));</pre></div>
+<ul>
+<li><code class="notranslate">a[0] + 1</code>是第一行第二个元素<code class="notranslate">a[0][1]</code>的地址，<code class="notranslate">*(a[0] + 1)</code>就是<strong>第一行第二个元素</strong>，大小是<code class="notranslate">4</code>个字节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">*</span>(<span class="pl-s1">a</span>[<span class="pl-c1">0</span>] <span class="pl-c1">+</span> <span class="pl-c1">1</span>)));</pre></div>
+<ul>
+<li><code class="notranslate">a</code>没有单独放在sizeof内部，没有&amp;，数组名a就是数组首元素的地址，也就是第一行的地址，<code class="notranslate">a+1</code>，就是第二行的<strong>地址</strong>，也就是等价于<code class="notranslate">a -- int(*)[4]</code> ----&gt;<code class="notranslate">a+1 -- int(*)[4]</code>，是地址就是<code class="notranslate">4/8</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">a</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>));</pre></div>
+<ul>
+<li>下面这个也就是对这一行解引用，那么也就得到了<strong>第二行这一整行</strong>，此时计算是这一整行的大小，结果为<code class="notranslate">16</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">*</span>(<span class="pl-s1">a</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>)));</pre></div>
+<ul>
+<li>这个和上一个一样，只是换了一种写法，等价于<code class="notranslate">*(a + 1) </code>，计算的是<strong>第二行的元素大小</strong>，结果是<code class="notranslate">16</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">a</span>[<span class="pl-c1">1</span>]));</pre></div>
+<ul>
+<li>a[0]为第一行的数组名，对它进行取地址就取到了这一整行的地址，它的类型也为一个数组指针int (*)[4]，那 <code class="notranslate">+1</code>的话也会跳过整个数组，此时也就来到了第二行，那么取到的便是第二行的<strong>地址</strong>，地址的大小即为 <code class="notranslate">4/8</code>个字节</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-c1">0</span>] <span class="pl-c1">+</span> <span class="pl-c1">1</span>));</pre></div>
+<hr>
+<ul>
+<li>这里和上面那个相似，<strong>第二行解引用，算的是第二行元素的大小</strong>，结果是<code class="notranslate">16</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">*</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-c1">0</span>] <span class="pl-c1">+</span> <span class="pl-c1">1</span>)));</pre></div>
+<hr>
+<ul>
+<li>数组名a就是数组首元素的地址，也就是第一行的地址,<code class="notranslate">*a</code>就是一行的 等价于<code class="notranslate">*(a+0) == a[0]</code>，取到的就是第一行的<strong>元素</strong>，结果是<code class="notranslate">16</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-c1">*</span><span class="pl-s1">a</span>));</pre></div>
+<hr>
+<ul>
+<li>
+<p>这个二维数组不是只有三行吗，第三行的数组名为a[2]，那a[3]不是<strong>越界</strong>了吗？</p>
+</li>
+<li>
+<p>下面这个a[3]来说，虽然看上去存在越界，<code class="notranslate">sizeof()</code>并不关心你有没有越界，不会真实的访问，而是知道你的类型即可，a[3]便是二维数组的第四行，虽然没有第四行，但是类型是确定的，那么大小就是确定的，计算sizeof(数组名)计算的是<strong>整个数组</strong>的大小，结果便是<code class="notranslate">16</code></p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">a</span>[<span class="pl-c1">3</span>]));</pre></div>
+<hr>
+<ul>
+<li>我们来看一下运行结果~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c732affbc9f818dfb6760423eb563f7f8750b410c9c9027363e779103bc08286/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f33376466376339636336343034373838383564346235323339646361343434382e706e67"><img src="https://camo.githubusercontent.com/c732affbc9f818dfb6760423eb563f7f8750b410c9c9027363e779103bc08286/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f33376466376339636336343034373838383564346235323339646361343434382e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/37df7c9cc640478885d4b5239dca4448.png" style="max-width: 100%;"></a></p>
+<p><strong>总结：</strong><br>
+数组名的意义：</p>
+<ol>
+<li>sizeof(数组名)，这里的数组名表示整个数组，计算的是整个数组的大小。</li>
+<li>&amp;数组名，这里的数组名表示整个数组，取出的是整个数组的地址。</li>
+<li>除此之外所有的数组名都表示首元素的地址。</li>
+</ol>
+<h2>指针笔试题</h2>
+<h3>第一道：</h3>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span>[<span class="pl-c1">5</span>] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>, <span class="pl-c1">2</span>, <span class="pl-c1">3</span>, <span class="pl-c1">4</span>, <span class="pl-c1">5</span> };
+	<span class="pl-smi">int</span> <span class="pl-c1">*</span><span class="pl-s1">ptr</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span> <span class="pl-c1">*</span>)(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>);
+	<span class="pl-en">printf</span>( <span class="pl-s">"%d,%d"</span>, <span class="pl-c1">*</span>(<span class="pl-s1">a</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>), <span class="pl-c1">*</span>(<span class="pl-s1">ptr</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>));
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}
+<span class="pl-c">//程序的结果是什么？</span></pre></div>
+<ul>
+<li>首先a是在数组的首元素，然后&amp;+1是跳过整个数组，到了5的后面，然后赋值给了ptr</li>
+<li><code class="notranslate">*(a+1)</code>首先a是在数组的第一个元素，因为没有&amp;，然后加1是跳过一个元素的大小，就来到了元素<code class="notranslate">2</code>的位置</li>
+<li><code class="notranslate">*(ptr - 1) </code>ptr刚刚是到了5的后面，然后-1就指向了5，然后解引用就打印出<code class="notranslate">5</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1a09f30c1db77932aa5fa1c8cdc0a85d79f99ae00d853d3a1cd93e618a59ebd2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32633636356263346365306234613336613163393466323732653337656331352e706e67"><img src="https://camo.githubusercontent.com/1a09f30c1db77932aa5fa1c8cdc0a85d79f99ae00d853d3a1cd93e618a59ebd2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32633636356263346365306234613336613163393466323732653337656331352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/2c665bc4ce0b4a36a1c94f272e37ec15.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们再来看一下结果</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/fe86f159b1309cdb56688152052a033bca43f5c3901e835fef4d968c98114b7f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37383330643033326161633034383165386532336539643462383632313865622e706e67"><img src="https://camo.githubusercontent.com/fe86f159b1309cdb56688152052a033bca43f5c3901e835fef4d968c98114b7f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37383330643033326161633034383165386532336539643462383632313865622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/7830d032aac0481e8e23e9d4b86218eb.png" style="max-width: 100%;"></a></p>
+<h3>第二道：</h3>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//由于还没学习结构体，这里告知结构体的大小是20个字节</span>
+<span class="pl-c">//x86环境下</span>
+<span class="pl-k">struct</span> <span class="pl-smi">Test</span>
+{
+	<span class="pl-smi">int</span> <span class="pl-c1">Num</span>;
+	<span class="pl-smi">char</span> <span class="pl-c1">*</span><span class="pl-c1">pcName</span>;
+	<span class="pl-smi">short</span> <span class="pl-c1">sDate</span>;
+	<span class="pl-smi">char</span> <span class="pl-c1">cha</span>[<span class="pl-c1">2</span>];
+	<span class="pl-smi">short</span> <span class="pl-c1">sBa</span>[<span class="pl-c1">4</span>];
+}<span class="pl-c1">*</span><span class="pl-s1">p</span>;
+<span class="pl-c">//假设p 的值为0x100000。 如下表表达式的值分别为多少？</span>
+<span class="pl-c">//已知，结构体Test类型的变量大小是20个字节</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-s1">p</span> <span class="pl-c1">=</span> (<span class="pl-k">struct</span> <span class="pl-smi">Test</span><span class="pl-c1">*</span>)<span class="pl-c1">0x100000</span>;
+	<span class="pl-en">printf</span>(<span class="pl-s">"%p\n"</span>, <span class="pl-s1">p</span> <span class="pl-c1">+</span> <span class="pl-c1">0x1</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"%p\n"</span>, (<span class="pl-smi">unsigned long</span>)<span class="pl-s1">p</span> <span class="pl-c1">+</span> <span class="pl-c1">0x1</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"%p\n"</span>, (<span class="pl-smi">unsigned <span class="pl-smi">int</span></span><span class="pl-c1">*</span>)<span class="pl-s1">p</span> <span class="pl-c1">+</span> <span class="pl-c1">0x1</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>
+<p>首先我们要知道0x开头的数字是16进制的数字</p>
+</li>
+<li>
+<p><code class="notranslate">p + 0x1</code> 结构体指针+1是跳过一个结构体的大小<code class="notranslate">20</code>，是<code class="notranslate">0x100020</code>吗？不是，而是<code class="notranslate">0x100014</code>，因为这个是16进制的</p>
+</li>
+<li>
+<p><code class="notranslate">(unsigned long)p + 0x1 </code>指针p强制类型转换成(unsigned long)，整形+1是加1结果是<code class="notranslate">0x100001</code></p>
+</li>
+<li>
+<p><code class="notranslate">(unsigned int*)p + 0x1 </code>指针p强制类型转换成(unsigned int*)，整形指针+1跳过4个字节，结果是<code class="notranslate">0x100004</code></p>
+</li>
+<li>
+<p>最后我们需要以<code class="notranslate">%p</code>的形式打印出来，那么打印的是8个16进制打印出来</p>
+<ul>
+<li>第一个结果应该是<code class="notranslate">00100014</code></li>
+<li>第二个结果应该是<code class="notranslate">00100001</code></li>
+<li>第二个结果应该是<code class="notranslate">00100004</code></li>
+</ul>
+</li>
+<li>
+<p>我们开看一下结果：</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/83116e078dd8baee796216a4adca7ce6a305d4eb10a85be62474e41874683e59/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34313035656364303263633034323639383661343563316465623061313761312e706e67"><img src="https://camo.githubusercontent.com/83116e078dd8baee796216a4adca7ce6a305d4eb10a85be62474e41874683e59/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34313035656364303263633034323639383661343563316465623061313761312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/4105ecd02cc0426986a45c1deb0a17a1.png" style="max-width: 100%;"></a></p>
+<h3>第三道：</h3>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span>[<span class="pl-c1">4</span>] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>, <span class="pl-c1">2</span>, <span class="pl-c1">3</span>, <span class="pl-c1">4</span> };
+	<span class="pl-smi">int</span> <span class="pl-c1">*</span><span class="pl-s1">ptr1</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span> <span class="pl-c1">*</span>)(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>);
+	<span class="pl-smi">int</span> <span class="pl-c1">*</span><span class="pl-s1">ptr2</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span> <span class="pl-c1">*</span>)((<span class="pl-smi">int</span>)<span class="pl-s1">a</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>);
+	<span class="pl-en">printf</span>( <span class="pl-s">"%x,%x"</span>, <span class="pl-s1">ptr1</span>[<span class="pl-c1">-1</span>], <span class="pl-c1">*</span><span class="pl-s1">ptr2</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>第一个<code class="notranslate">(int *)(&amp;a + 1)</code> ，<code class="notranslate">&amp;a+1</code>是取出整个地址+1,因为这个是数组类型，然后强制类型转换成了(int*)，赋值给了<code class="notranslate">ptr1</code></li>
+<li>然后我们看打印选项<code class="notranslate">ptr1[-1]</code>，这个就相当于<code class="notranslate">*(ptr1 - 1)</code>，然后就指向了<code class="notranslate">4</code></li>
+<li>那么我们第二个就要进行画图进行分析了，这里需要画出内存布局图，机器是小端存储</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e21696032606fba5e1475661716cde40300b77c0ee34c92a5c174d6085cf54e6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66326338346131393733383234323836393038383437333734393633653633322e706e67"><img src="https://camo.githubusercontent.com/e21696032606fba5e1475661716cde40300b77c0ee34c92a5c174d6085cf54e6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66326338346131393733383234323836393038383437333734393633653633322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/f2c84a1973824286908847374963e632.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>首先将a数组的地址强制类型转换成了<code class="notranslate">int</code>类型，然后加1，加的是内存中一个字节的位置，然后赋给了ptr2，ptr2是整形指针，向后访问4个字节，又因为是小端存储，打印是以<code class="notranslate">%x</code>打印的，所以结果是<code class="notranslate">2000000</code></li>
+</ul>
+<p>我们来看一下结果：</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6666c62a0aeb76ca352ee7018fa680dd583d634097b5fa19bad0f51f3ca4225b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39373134656337663631363134653561616330623638303733653138626364312e706e67"><img src="https://camo.githubusercontent.com/6666c62a0aeb76ca352ee7018fa680dd583d634097b5fa19bad0f51f3ca4225b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39373134656337663631363134653561616330623638303733653138626364312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/9714ec7f61614e5aac0b68073e18bcd1.png" style="max-width: 100%;"></a></p>
+<h3>第四道：</h3>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span>[<span class="pl-c1">3</span>][<span class="pl-c1">2</span>] <span class="pl-c1">=</span> { (<span class="pl-c1">0</span>, <span class="pl-c1">1</span>), (<span class="pl-c1">2</span>, <span class="pl-c1">3</span>), (<span class="pl-c1">4</span>, <span class="pl-c1">5</span>) };
+	<span class="pl-smi">int</span> <span class="pl-c1">*</span><span class="pl-s1">p</span>;
+	<span class="pl-s1">p</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span>[<span class="pl-c1">0</span>];
+	<span class="pl-en">printf</span>( <span class="pl-s">"%d"</span>, <span class="pl-s1">p</span>[<span class="pl-c1">0</span>]);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>首先我我们要注意这个二维数组的初始化里面的扩话，是小括号，而不是大括号，里面是逗号表达式</li>
+<li>然后a[0] == &amp;a[0][0]，也就是第一行的地址</li>
+<li>打印的时候是<code class="notranslate">p[0]</code>也就是<code class="notranslate">*(p+0)</code>，+0就相当于没加，结果打印的就是1</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5973f29942241214f7827bba959109e76fa07cc2b1be58c47d3ffdd5987fe49c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65346366393338363430336534643637393131396635376637396438336631302e706e67"><img src="https://camo.githubusercontent.com/5973f29942241214f7827bba959109e76fa07cc2b1be58c47d3ffdd5987fe49c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65346366393338363430336534643637393131396635376637396438336631302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/e4cf9386403e4d679119f57f79d83f10.png" style="max-width: 100%;"></a></p>
+<p><strong>我们来看一下结果：</strong></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/eed3356326c1377add7226aaf457953c5969cf532e6f6b6ede60eade2d27cd7f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32633330666564313139663534633437393565346432303563613864353039302e706e67"><img src="https://camo.githubusercontent.com/eed3356326c1377add7226aaf457953c5969cf532e6f6b6ede60eade2d27cd7f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32633330666564313139663534633437393565346432303563613864353039302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/2c30fed119f54c4795e4d205ca8d5090.png" style="max-width: 100%;"></a></p>
+<h3>第五道：</h3>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span>[<span class="pl-c1">5</span>][<span class="pl-c1">5</span>];
+	<span class="pl-smi">int</span>(<span class="pl-c1">*</span><span class="pl-s1">p</span>)[<span class="pl-c1">4</span>];
+	<span class="pl-s1">p</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span>;
+	<span class="pl-en">printf</span>( <span class="pl-s">"%p,%d\n"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">p</span>[<span class="pl-c1">4</span>][<span class="pl-c1">2</span>] <span class="pl-c1">-</span> <span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-c1">4</span>][<span class="pl-c1">2</span>], <span class="pl-c1">&amp;</span><span class="pl-s1">p</span>[<span class="pl-c1">4</span>][<span class="pl-c1">2</span>] <span class="pl-c1">-</span> <span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-c1">4</span>][<span class="pl-c1">2</span>]);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>首先定义了一个五行五列的二维数组，还定义了一个数组指针，这个数组指针指向了有4个元素，每个元素是int类型，然后将a赋值给了p</li>
+<li>p+1是跳过4个元素，p+4就来到了第三行</li>
+<li>我们这里是小地址减去了大地址，得到的是元素与元素之间的个数，得到的是负数<code class="notranslate">-4</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/35b01f8922aff7024f9e367b18705aee925ae1bcbc16ccdb6629ee276579fd9c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36303239666631663834366234346365383732333766363361303235353732382e706e67"><img src="https://camo.githubusercontent.com/35b01f8922aff7024f9e367b18705aee925ae1bcbc16ccdb6629ee276579fd9c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36303239666631663834366234346365383732333766363361303235353732382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/6029ff1f846b44ce87237f63a0255728.png" style="max-width: 100%;"></a></p>
+<ul>
+<li><code class="notranslate">-4</code>以%p的方式打印，认为内存中存储的补码就是地址 ，结果是<code class="notranslate">FFFFFFFC</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ff32bac349f31d78bb1fe3a722ffd174a57ba1abf202b395deac8fbcf68f70cc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61616439653638623135373034333932613437393061323935666264306464382e706e67"><img src="https://camo.githubusercontent.com/ff32bac349f31d78bb1fe3a722ffd174a57ba1abf202b395deac8fbcf68f70cc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61616439653638623135373034333932613437393061323935666264306464382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/aad9e68b15704392a4790a295fbd0dd8.png" style="max-width: 100%;"></a></p>
+<p>我们来验证一下结果：<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/67545aa4028b75b37f623b598dd72093cf96b88ecedc226683caae878c2ee619/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38333531386536316361343234396165623462373965613163646463326561322e706e67"><img src="https://camo.githubusercontent.com/67545aa4028b75b37f623b598dd72093cf96b88ecedc226683caae878c2ee619/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38333531386536316361343234396165623462373965613163646463326561322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/83518e61ca4249aeb4b79ea1cddc2ea2.png" style="max-width: 100%;"></a></p>
+<h3>第六道：</h3>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">aa</span>[<span class="pl-c1">2</span>][<span class="pl-c1">5</span>] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>, <span class="pl-c1">2</span>, <span class="pl-c1">3</span>, <span class="pl-c1">4</span>, <span class="pl-c1">5</span>, <span class="pl-c1">6</span>, <span class="pl-c1">7</span>, <span class="pl-c1">8</span>, <span class="pl-c1">9</span>, <span class="pl-c1">10</span> };
+	<span class="pl-smi">int</span> <span class="pl-c1">*</span><span class="pl-s1">ptr1</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span> <span class="pl-c1">*</span>)(<span class="pl-c1">&amp;</span><span class="pl-s1">aa</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>);
+	<span class="pl-smi">int</span> <span class="pl-c1">*</span><span class="pl-s1">ptr2</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span> <span class="pl-c1">*</span>)(<span class="pl-c1">*</span>(<span class="pl-s1">aa</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>));
+	<span class="pl-en">printf</span>( <span class="pl-s">"%d,%d"</span>, <span class="pl-c1">*</span>(<span class="pl-s1">ptr1</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>), <span class="pl-c1">*</span>(<span class="pl-s1">ptr2</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>));
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>首先我们定义了一个二维数组</li>
+<li>取地址aa数组是取出了整个二维数组的地址，然后+1，是跳过整个数组，强制类型转换成了整形赋值给了<code class="notranslate">ptr1</code>，然后我们看ptr1-1，就是减去了一个整形，然后解引用就找到了<code class="notranslate">10</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/687059852c6b83034e734654fa6a9ec977002d1b940d81ebb4ae33fb01d00e3e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34633863656531613735303534663837623933393464613864623636636333372e706e67"><img src="https://camo.githubusercontent.com/687059852c6b83034e734654fa6a9ec977002d1b940d81ebb4ae33fb01d00e3e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34633863656531613735303534663837623933393464613864623636636333372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/4c8cee1a75054f87b9394da8db66cc37.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们再来看第二个，aa+1是加到了第二行，再解引用就找到了，也就等价于<code class="notranslate">a[1]</code>，指向了6，这里的强制类型转换是迷惑，不会发生什么作用的，赋值给了ptr2</li>
+<li>然后ptr2-1就减去一个整形，就得到了5</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e0a0739f40dbbca1ef7ee06c5f73b23a7fd1ac7f3f068ac96a7e7dd2f4cf62f9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63346662383335643362303134633435396266623466633637613432346634302e706e67"><img src="https://camo.githubusercontent.com/e0a0739f40dbbca1ef7ee06c5f73b23a7fd1ac7f3f068ac96a7e7dd2f4cf62f9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63346662383335643362303134633435396266623466633637613432346634302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/c4fb835d3b014c459bfb4fc67a424f40.png" style="max-width: 100%;"></a></p>
+<p>我们来验证一下结果：</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1ea3963e01a71dc69cdc1fe12bdec563b21d19e50eaae53ba9a15448049dae9c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64633761353961313939643034303335396663343632313161623134313338302e706e67"><img src="https://camo.githubusercontent.com/1ea3963e01a71dc69cdc1fe12bdec563b21d19e50eaae53ba9a15448049dae9c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64633761353961313939643034303335396663343632313161623134313338302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/dc7a59a199d040359fc46211ab141380.png" style="max-width: 100%;"></a></p>
+<h3>第七道：</h3>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-c1">*</span><span class="pl-s1">a</span>[] <span class="pl-c1">=</span> {<span class="pl-s">"work"</span>,<span class="pl-s">"at"</span>,<span class="pl-s">"alibaba"</span>};
+	<span class="pl-smi">char</span><span class="pl-c1">*</span><span class="pl-c1">*</span><span class="pl-s1">pa</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span>;
+	<span class="pl-s1">pa</span><span class="pl-c1">++</span>;
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-c1">*</span><span class="pl-s1">pa</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>首先定义了一个指针数组，里面放了三个字符串，每个元素是char*，每个元素都保存着字符串的首字母</li>
+<li>然后还有一个二级指针，然后pa++，原来的pa是指向了数组的首地址，++就加了一个char类型，就访问到了<code class="notranslate">at</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4a16cba01735a7dc468f80b1b1d805ed0e4c69c607782f9a88d760a660ed4361/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63393365386663346562613134323062383534383435616133393235643030612e706e67"><img src="https://camo.githubusercontent.com/4a16cba01735a7dc468f80b1b1d805ed0e4c69c607782f9a88d760a660ed4361/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63393365386663346562613134323062383534383435616133393235643030612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/c93e8fc4eba1420b854845aa3925d00a.png" style="max-width: 100%;"></a></p>
+<p>我们来验证一下结果：</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2b4807cb8c2548d541f814abe4c17b55c68b42f50e160dfc03a54de80264e9c5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38393436363934623062653834313366616366393530303435616563306539362e706e67"><img src="https://camo.githubusercontent.com/2b4807cb8c2548d541f814abe4c17b55c68b42f50e160dfc03a54de80264e9c5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38393436363934623062653834313366616366393530303435616563306539362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/8946694b0be8413facf950045aec0e96.png" style="max-width: 100%;"></a></p>
+<h3>第八道【压轴题】：</h3>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-c1">*</span><span class="pl-s1">c</span>[] <span class="pl-c1">=</span> {<span class="pl-s">"ENTER"</span>,<span class="pl-s">"NEW"</span>,<span class="pl-s">"POINT"</span>,<span class="pl-s">"FIRST"</span>};
+	<span class="pl-smi">char</span><span class="pl-c1">*</span><span class="pl-c1">*</span><span class="pl-s1">cp</span>[] <span class="pl-c1">=</span> {<span class="pl-s1">c</span><span class="pl-c1">+</span><span class="pl-c1">3</span>,<span class="pl-s1">c</span><span class="pl-c1">+</span><span class="pl-c1">2</span>,<span class="pl-s1">c</span><span class="pl-c1">+</span><span class="pl-c1">1</span>,<span class="pl-s1">c</span>};
+	<span class="pl-smi">char</span><span class="pl-c1">*</span><span class="pl-c1">*</span><span class="pl-c1">*</span><span class="pl-s1">cpp</span> <span class="pl-c1">=</span> <span class="pl-s1">cp</span>;
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-c1">*</span><span class="pl-c1">*</span><span class="pl-c1">++</span><span class="pl-s1">cpp</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-c1">*</span><span class="pl-c1">--</span><span class="pl-c1">*</span><span class="pl-c1">++</span><span class="pl-s1">cpp</span><span class="pl-c1">+</span><span class="pl-c1">3</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-c1">*</span><span class="pl-s1">cpp</span>[<span class="pl-c1">-2</span>]<span class="pl-c1">+</span><span class="pl-c1">3</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">cpp</span>[<span class="pl-c1">-1</span>][<span class="pl-c1">-1</span>]<span class="pl-c1">+</span><span class="pl-c1">1</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>首先有一个<strong>指针数组</strong>分别存放了四个字符串的首字符地址</li>
+<li>有一个<strong>二级指针数组</strong>存放了这个指针数组每一行的地址，仔细观察是倒着存放的</li>
+<li>又有一个<strong>三级字符指针</strong>指向了<strong>二级指针数组cp的首元素地址</strong>，即<strong>第一行</strong>的地址</li>
+</ul>
+<p><strong>我们来看一下下面的图片：</strong></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9f7a0824a0297423c33a26a2c8cb17a9c82176962251b9dbb5accc0ff5de3153/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34616462373530613937343634613530616235636537633336646561323033632e706e67"><img src="https://camo.githubusercontent.com/9f7a0824a0297423c33a26a2c8cb17a9c82176962251b9dbb5accc0ff5de3153/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34616462373530613937343634613530616235636537633336646561323033632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/4adb750a97464a50ab5ce7c36dea203c.png" style="max-width: 100%;"></a></p>
+<hr>
+<ul>
+<li>我们来看到第一个打印语句~~</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-c1">*</span><span class="pl-c1">*</span><span class="pl-c1">++</span><span class="pl-s1">cpp</span>);</pre></div>
+<ul>
+<li>首先 <strong>++cpp</strong>，cpp就会访问一个<strong>char*类型</strong>的元素，也就是这个cp数组的第二行，解引用就拿到了c+2这个地址，那么我们就可以顺着这个地址找到了c数组所在的这行地址，解引用就是拿到了c数组存放的内容，以%s打印结果就是<code class="notranslate">POINT</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0ebf0ba93718843593dc56728c9ec7cb505dc45559b20ae5e389c02a9b7576cc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37356538396362316134343334316530616561636266643863356434336165392e706e67"><img src="https://camo.githubusercontent.com/0ebf0ba93718843593dc56728c9ec7cb505dc45559b20ae5e389c02a9b7576cc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37356538396362316134343334316530616561636266643863356434336165392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/75e89cb1a44341e0aeacbfd8c5d43ae9.png" style="max-width: 100%;"></a></p>
+<hr>
+<p><strong>再来看第二句：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-c1">*</span><span class="pl-c1">--</span><span class="pl-c1">*</span><span class="pl-c1">++</span><span class="pl-s1">cpp</span><span class="pl-c1">+</span><span class="pl-c1">3</span>);</pre></div>
+<ul>
+<li>首先执行++cpp，因为它的优先级最高，它就来到了cp数组的<strong>第三个位置</strong>，然后解引用，到了c+1的位置，接下来进行<code class="notranslate">--</code>，也就是c + 1 - 1 = c，这个时候里面就不再是<code class="notranslate">c + 1</code>这块地址，而是c这块地址，再对其进行<strong>解引用，到了E所在的地址</strong>，最后再 + 3即向后偏移3个字节也就是3个字符，就是E所在的位置，使用%s进行打印，便打印出了后面的<code class="notranslate">ER</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4186c2e5cbbe8dab062943dea2e20e594682fc364e5e650f24bdf65701b819a8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37313434616139313864666534353564616538393430613333623835323561382e706e67"><img src="https://camo.githubusercontent.com/4186c2e5cbbe8dab062943dea2e20e594682fc364e5e650f24bdf65701b819a8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37313434616139313864666534353564616538393430613333623835323561382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/7144aa918dfe455dae8940a33b8525a8.png" style="max-width: 100%;"></a></p>
+<hr>
+<p><strong>再来看第三句：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-c1">*</span><span class="pl-s1">cpp</span>[<span class="pl-c1">-2</span>]<span class="pl-c1">+</span><span class="pl-c1">3</span>);</pre></div>
+<ul>
+<li>上面的表达式可以写成<code class="notranslate">* *(cpp - 2) + 3</code>，也就是cpp向前偏移2个<code class="notranslate">char**</code>的位置，就找到了cp这行地址中所存放的值为c + 3，这个地址保存着c这一行所在的地址，再<strong>解引用</strong>，就取到了F的地址，然后+3，打印出<code class="notranslate">ST</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/53935e357789762b6680ad7a13e3c4dc15cd712d1befaa8b2d4952fa1f9c2280/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63626561333333666236343834613066613635623037633930323261616430662e706e67"><img src="https://camo.githubusercontent.com/53935e357789762b6680ad7a13e3c4dc15cd712d1befaa8b2d4952fa1f9c2280/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63626561333333666236343834613066613635623037633930323261616430662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/cbea333fb6484a0fa65b07c9022aad0f.png" style="max-width: 100%;"></a></p>
+<hr>
+<p><strong>最后来看最后一句：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">cpp</span>[<span class="pl-c1">-1</span>][<span class="pl-c1">-1</span>]<span class="pl-c1">+</span><span class="pl-c1">1</span>);</pre></div>
+<ul>
+<li>上面的表达式可以写成<code class="notranslate">*(*(cpp - 1) - 1) + 1</code>，首先就是将cpp向前偏移一个<code class="notranslate">char**</code>的位置，然后解引用取到了<strong>第二行</strong>的内容c+2，然后再-1，为c+1，再<strong>解引用</strong>，就拿到了c+1中存放的内容，找到了N，然后最后面还有个+1，就找到了E，最后打印，结果位<code class="notranslate">EW</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7339afdffea87e09348c9c1f25919c9b1f59dd76e467e7ecc25cae4b74cd0d84/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36316236396261373762376134626231383430343465363130613937323766632e706e67"><img src="https://camo.githubusercontent.com/7339afdffea87e09348c9c1f25919c9b1f59dd76e467e7ecc25cae4b74cd0d84/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36316236396261373762376134626231383430343465363130613937323766632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/61b69ba77b7a4bb184044e610a9727fc.png" style="max-width: 100%;"></a></p>
+<hr>
+<ul>
+<li>最后，我们来验证一下结果！</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3bc88a1805cccc1c510a3b228fc690de014ceadcc6cb32cc7cdcacc020e9cd44/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66636538343831373162613134363237393064373335653436323631336261372e706e67"><img src="https://camo.githubusercontent.com/3bc88a1805cccc1c510a3b228fc690de014ceadcc6cb32cc7cdcacc020e9cd44/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66636538343831373162613134363237393064373335653436323631336261372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/fce848171ba1462790d735e462613ba7.png" style="max-width: 100%;"></a></p></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

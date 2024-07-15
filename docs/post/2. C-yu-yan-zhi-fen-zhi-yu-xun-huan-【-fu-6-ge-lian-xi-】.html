@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## 前言
+>C语言是结构化的程序设计语言，这里的结构指的是顺序结构、选择结构、循环结构，C语⾔是能够实现这三种结构的，其实我们如果仔细分析，我们⽇常所⻅的事情都可以拆分为这三种结构或者这三种结构的组合。">
+<meta property="og:title" content="2. C语言之分支与循环【附6个练习】">
+<meta property="og:description" content="## 前言
+>C语言是结构化的程序设计语言，这里的结构指的是顺序结构、选择结构、循环结构，C语⾔是能够实现这三种结构的，其实我们如果仔细分析，我们⽇常所⻅的事情都可以拆分为这三种结构或者这三种结构的组合。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/2.%20C-yu-yan-zhi-fen-zhi-yu-xun-huan-%E3%80%90-fu-6-ge-lian-xi-%E3%80%91.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>2. C语言之分支与循环【附6个练习】</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">2. C语言之分支与循环【附6个练习】</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/26" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>前言</h2>
+<blockquote>
+<p>C语言是结构化的程序设计语言，这里的结构指的是顺序结构、选择结构、循环结构，C语⾔是能够实现这三种结构的，其实我们如果仔细分析，我们⽇常所⻅的事情都可以拆分为这三种结构或者这三种结构的组合。我们可以使⽤<code class="notranslate">if</code> 、 <code class="notranslate">switch</code> 实现分⽀结构，使⽤ <code class="notranslate">for</code> 、 <code class="notranslate">while</code> 、 <code class="notranslate">do while</code> 实现循环结构。</p>
+</blockquote>
+<h2>一、什么是语句？</h2>
+<p>在我们平时写字中，一句话的结尾是句号，然而正在C语言中一句话的结尾是<code class="notranslate">;</code></p>
+<ul>
+<li>语句可以分为以下五类：<br>
+1）表达式语句<br>
+2）函数调用语句<br>
+3）控制语句<br>
+4）复合语句<br>
+5）空语句</li>
+</ul>
+<h3>1.1 表达式语句</h3>
+<p>下面这个就是表达式语句：</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">3</span> <span class="pl-c1">+</span> <span class="pl-c1">5</span>;  </pre></div>
+<h3>1.2 函数调用语句</h3>
+<p>函数调用语句，就是将函数进行使用时调用的语句。</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-s1">a</span>);  
+<span class="pl-en">ADD</span>(<span class="pl-c1">3</span>, <span class="pl-c1">5</span>); </pre></div>
+<h3>1.3 控制语句</h3>
+<ul>
+<li><code class="notranslate">控制语句</code>用于控制程序的执行流程，以实现程序的各种结构方式，它们由特定的语句定义符组成，C语言有九种控制语句。</li>
+<li>C语言是由三种结构组成的，有<code class="notranslate">顺序结构</code>，<code class="notranslate">选择结构</code>和<code class="notranslate">循环结构</code></li>
+</ul>
+<p>可分成以下三类：</p>
+<blockquote>
+<ol>
+<li>条件判断语句也叫分支语句：if语句、switch语句；</li>
+<li>循环执行语句：do while语句、while语句、for语句；</li>
+<li>转向语句：break语句、goto语句、continue语句、return语句。</li>
+</ol>
+</blockquote>
+<h3>1.4 复合语句</h3>
+<ul>
+<li>复合语句就是被多个扩号括起来的语句</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate">{
+    <span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+    <span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+    <span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-s1">a</span> <span class="pl-c1">+</span> <span class="pl-s1">b</span>);
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h3>1.5 空语句</h3>
+<ul>
+<li>空语句虽然很简单，但是其用途很大：<strong>有时候需要一条语句，但这条语句什么都不需要做</strong></li>
+<li>例如下面这段代码，我们会后面在字符章节也会详细讲解</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">while</span>(<span class="pl-c1">*</span><span class="pl-s1">dest</span><span class="pl-c1">++</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">src</span><span class="pl-c1">++</span>)
+{
+    ;
+}</pre></div>
+<h2>二、分支语句（选择结构）</h2>
+<ul>
+<li>分支语句可以为双分支或者多分支。</li>
+<li>在C语言中需要知道真假两个概念：<code class="notranslate">非0</code>为真，<code class="notranslate">0</code>为假（注意：正数和<code class="notranslate">负数</code>都是真）</li>
+<li>分支语句分为<strong>两类</strong>：<strong>if语句，switch语句</strong>。</li>
+</ul>
+<h3>2.1 if语句</h3>
+<ul>
+<li>那么<strong>if语句</strong>的语法结构是怎么样的？</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">if</span>(<span class="pl-s1">表达式</span>）<span class="pl-c">//表达式为真执行下面的语句</span>
+    <span class="pl-s1">语句</span>；
+<span class="pl-c">//单分支语句</span>
+<span class="pl-k">if</span>(<span class="pl-s1">表达式</span>）
+    <span class="pl-s1">语句1</span>；
+<span class="pl-k">else</span>
+    <span class="pl-s1">语句2</span>；
+<span class="pl-c">//多分支语句</span>
+<span class="pl-k">if</span>(<span class="pl-s1">表达式1</span>)
+    <span class="pl-s1">语句1</span>；
+<span class="pl-k">else</span> <span class="pl-k">if</span>(<span class="pl-s1">表达式2</span>)
+    <span class="pl-s1">语句2</span>；
+<span class="pl-k">else</span>
+    <span class="pl-s1">语句3</span>；</pre></div>
+<ul>
+<li>单分支练习（输入大于等于18输出为成年人，否则不输出）：</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+    <span class="pl-smi">int</span> <span class="pl-s1">age</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+    <span class="pl-en">scanf</span>(<span class="pl-s">"%d"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">age</span>);
+    <span class="pl-k">if</span> (<span class="pl-s1">age</span> &gt;= <span class="pl-c1">18</span>)
+    {
+        <span class="pl-en">printf</span>(<span class="pl-s">"成年人\n"</span>);
+    }
+}</pre></div>
+<ul>
+<li>单分支练习（输入大于等于18输出为成年人，否则输出未成年人）：</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+    <span class="pl-smi">int</span> <span class="pl-s1">age</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+    <span class="pl-en">scanf</span>(<span class="pl-s">"%d"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">age</span>);
+    <span class="pl-k">if</span> (<span class="pl-s1">age</span> &gt;= <span class="pl-c1">18</span>)
+    {
+        <span class="pl-en">printf</span>(<span class="pl-s">"成年人\n"</span>);
+    }
+    <span class="pl-k">else</span>
+    {
+        <span class="pl-en">printf</span>(<span class="pl-s">"未成年\n"</span>);
+    }
+}</pre></div>
+<ul>
+<li>多分支练习</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+    <span class="pl-smi">int</span> <span class="pl-s1">age</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+    <span class="pl-en">scanf</span>(<span class="pl-s">"%d"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">age</span>);
+    <span class="pl-k">if</span> (<span class="pl-s1">age</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">18</span>)
+    {
+        <span class="pl-en">printf</span>(<span class="pl-s">"少年\n"</span>);
+    }
+    <span class="pl-k">else</span> <span class="pl-k">if</span> (<span class="pl-s1">age</span> &gt;= <span class="pl-c1">18</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">age</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">30</span>)
+    {
+        <span class="pl-en">printf</span>(<span class="pl-s">"青年\n"</span>);
+    }
+    <span class="pl-k">else</span> <span class="pl-k">if</span> (<span class="pl-s1">age</span> &gt;= <span class="pl-c1">30</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">age</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">50</span>)
+    {
+        <span class="pl-en">printf</span>(<span class="pl-s">"中年\n"</span>);
+    }
+    <span class="pl-k">else</span> <span class="pl-k">if</span> (<span class="pl-s1">age</span> &gt;= <span class="pl-c1">50</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">age</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">80</span>)
+    {
+        <span class="pl-en">printf</span>(<span class="pl-s">"老年\n"</span>);
+    }
+    <span class="pl-k">else</span>
+    {
+        <span class="pl-en">printf</span>(<span class="pl-s">"老寿星\n"</span>);
+    }
+
+}</pre></div>
+<h4>2.1.1 悬空else</h4>
+<ul>
+<li>当你写了这个代码：</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+    <span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+    <span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">2</span>;
+    <span class="pl-k">if</span>(<span class="pl-s1">a</span> <span class="pl-c1">==</span> <span class="pl-c1">1</span>)
+        <span class="pl-k">if</span>(<span class="pl-s1">b</span> <span class="pl-c1">==</span> <span class="pl-c1">2</span>)
+            <span class="pl-en">printf</span>(<span class="pl-s">"hehe\n"</span>);
+    <span class="pl-k">else</span>
+        <span class="pl-en">printf</span>(<span class="pl-s">"haha\n"</span>);
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>上面那个代码虽然可以运行，但是风格不是很好</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+    <span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+    <span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">2</span>;
+    <span class="pl-k">if</span>(<span class="pl-s1">a</span> <span class="pl-c1">==</span> <span class="pl-c1">1</span>)
+   {
+        <span class="pl-k">if</span>(<span class="pl-s1">b</span> <span class="pl-c1">==</span> <span class="pl-c1">2</span>)
+       {
+            <span class="pl-en">printf</span>(<span class="pl-s">"hehe\n"</span>);
+       }
+   }
+    <span class="pl-k">else</span>
+   {
+         <span class="pl-en">printf</span>(<span class="pl-s">"haha\n"</span>);
+   }       
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>这段代码加上了<code class="notranslate">{}</code>使代码变得逻辑更加清楚，要养成更好的代码分格</li>
+<li>如何写出一个好的代码呢？</li>
+</ul>
+<blockquote>
+<p>这里我推荐<code class="notranslate">《高质量C/C++编程》</code>，而这本书就写了如何写出好的风格，大家可以看一下</p>
+</blockquote>
+<ul>
+<li>在我们判断是否等于一个变量或者数的时候我们有可能少一个等于号，那么我们怎么避免呢？</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//代码1</span>
+<span class="pl-smi">int</span> <span class="pl-s1">num</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+<span class="pl-k">if</span>(<span class="pl-s1">num</span> <span class="pl-c1">==</span> <span class="pl-c1">5</span>)
+{
+    <span class="pl-en">printf</span>(<span class="pl-s">"hehe\n"</span>);
+}
+<span class="pl-c">//代码2</span>
+<span class="pl-smi">int</span> <span class="pl-s1">num</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+<span class="pl-k">if</span>(<span class="pl-c1">5</span> <span class="pl-c1">==</span> <span class="pl-s1">num</span>)
+{
+    <span class="pl-en">printf</span>(<span class="pl-s">"hehe\n"</span>);
+}</pre></div>
+<p>上面的代码哪个比较好？</p>
+<ul>
+<li>肯定是代码2，因为在判断是否相等时用两个等于号写，这样反过来写就会避免只写一个等于号，只写一个等于号的话会编译错误，可以及时发现。</li>
+</ul>
+<h4>2.1.2 练习（1. 判断一个数是否为奇数 2. 输出1-100之间的奇数）</h4>
+<ol>
+<li>判断一个数是否为奇数</li>
+</ol>
+<ul>
+<li>思路：要判断是不是奇数，那么我们就可以看一个数的余数是不是等于1，如果等于1那么这个数就是奇数，否则就是偶数了</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">n</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-en">scanf</span>(<span class="pl-s">"%d"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">n</span>);
+	<span class="pl-k">if</span> (<span class="pl-s1">n</span> % <span class="pl-c1">2</span> <span class="pl-c1">==</span> <span class="pl-c1">1</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"YES\n"</span>);
+	}
+	<span class="pl-k">else</span>
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"NO\n"</span>);
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ol start="2">
+<li>输出1-100之间的奇数</li>
+</ol>
+<ul>
+<li>思路：要输出1-100之间的奇数，就要产生1~100的数，然后将每个数进行判断是不是奇数然后再输出</li>
+<li>我们目前学了<code class="notranslate">while</code>循环，那么我们就用while循环来解决这道题~，后面学到了for循环也可以很简便的写出来</li>
+</ul>
+<p>方法一：</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span><span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+	<span class="pl-k">while</span> (<span class="pl-s1">i</span>&lt;= <span class="pl-c1">100</span>)<span class="pl-c">//产生1~100的数字</span>
+	{
+		<span class="pl-k">if</span>(<span class="pl-s1">i</span> % <span class="pl-c1">2</span> <span class="pl-c1">==</span><span class="pl-c1">1</span>)<span class="pl-c">//进行判断是否奇数</span>
+			<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">i</span>);
+		<span class="pl-s1">i</span><span class="pl-c1">++</span>;
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p>方法二：</p>
+<ul>
+<li>这个方法的话就有点投机取巧了~~</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span><span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+	<span class="pl-k">while</span> (<span class="pl-s1">i</span> &lt;= <span class="pl-c1">100</span>)<span class="pl-c">//产生1~100的数字</span>
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">i</span>);
+		<span class="pl-c">//i+=2;</span>
+		<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-s1">i</span> <span class="pl-c1">+</span> <span class="pl-c1">2</span>;<span class="pl-c">//也可以这样写</span>
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h3>2.2 switch语句</h3>
+<ul>
+<li>switch语句也是一种分支语句，常常用于多分支情况~~</li>
+</ul>
+<p>比如：</p>
+<blockquote>
+<p>输入1，输出星期一；<br>
+输入2，输出星期二；<br>
+输入3，输出星期三；<br>
+输入4，输出星期四；<br>
+输入5，输出星期五；<br>
+输入6，输出星期六；<br>
+输入7，输出星期七。</p>
+</blockquote>
+<ul>
+<li>
+<p>如果写成if...else if...else if...else的情况就很复杂，那我们需要有<strong>不一样的语法形式</strong>。</p>
+</li>
+<li>
+<p>switch语句（支持嵌套使用）</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">switch</span>(<span class="pl-s1">整形表达式</span>)
+{
+    <span class="pl-s1">语句项</span>;
+}</pre></div>
+<ul>
+<li>而语句项是什么呢？</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//是一些case语句：</span>
+<span class="pl-c">//如下：</span>
+<span class="pl-k">case</span> <span class="pl-s1">整形常量表达式</span>:
+    <span class="pl-s1">语句</span>;</pre></div>
+<h3>2.3 switch语句中的break:</h3>
+<ul>
+<li>在switch语句中，我们没办法直接实现分支，搭配break使用才能实现真正的分支。</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+    <span class="pl-smi">int</span> <span class="pl-s1">day</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+    <span class="pl-k">switch</span>(<span class="pl-s1">day</span>)
+   {
+        <span class="pl-k">case</span> <span class="pl-c1">1</span>：
+            <span class="pl-en">printf</span>(<span class="pl-s">"星期一\n"</span>);
+            <span class="pl-k">break</span>;
+        <span class="pl-k">case</span> <span class="pl-c1">2</span>:
+            <span class="pl-en">printf</span>(<span class="pl-s">"星期二\n"</span>);
+            <span class="pl-k">break</span>;
+        <span class="pl-k">case</span> <span class="pl-c1">3</span>:
+            <span class="pl-en">printf</span>(<span class="pl-s">"星期三\n"</span>);
+            <span class="pl-k">break</span>;    
+        <span class="pl-k">case</span> <span class="pl-c1">4</span>:
+            <span class="pl-en">printf</span>(<span class="pl-s">"星期四\n"</span>);
+            <span class="pl-k">break</span>;    
+        <span class="pl-k">case</span> <span class="pl-c1">5</span>:
+            <span class="pl-en">printf</span>(<span class="pl-s">"星期五\n"</span>);
+            <span class="pl-k">break</span>;
+        <span class="pl-k">case</span> <span class="pl-c1">6</span>:
+            <span class="pl-en">printf</span>(<span class="pl-s">"星期六\n"</span>);
+            <span class="pl-k">break</span>;
+        <span class="pl-k">case</span> <span class="pl-c1">7</span>:
+            <span class="pl-en">printf</span>(<span class="pl-s">"星期天\n"</span>);    
+            <span class="pl-k">break</span>;
+   }
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>有时候我们的需求变了：</li>
+</ul>
+<ol>
+<li>输入1-5，输出的是“weekday”;</li>
+<li>输入6-7，输出“weekend”</li>
+</ol>
+<ul>
+<li>所以我们的代码就应该这样实现了：</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-c">//switch代码演示</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+    <span class="pl-smi">int</span> <span class="pl-s1">day</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+    <span class="pl-k">switch</span> (<span class="pl-s1">day</span>)
+    {
+        <span class="pl-k">case</span> <span class="pl-c1">1</span>:
+        <span class="pl-k">case</span> <span class="pl-c1">2</span>:
+        <span class="pl-k">case</span> <span class="pl-c1">3</span>:
+        <span class="pl-k">case</span> <span class="pl-c1">4</span>:
+        <span class="pl-k">case</span> <span class="pl-c1">5</span>:
+            <span class="pl-en">printf</span>(<span class="pl-s">"weekday\n"</span>);
+            <span class="pl-k">break</span>;
+        <span class="pl-k">case</span> <span class="pl-c1">6</span>:
+        <span class="pl-k">case</span> <span class="pl-c1">7</span>:
+            <span class="pl-en">printf</span>(<span class="pl-s">"weekend\n"</span>);
+            <span class="pl-k">break</span>;
+    }
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>其中break语句的实际效果是把语句列表划分为不同的分支部分。</li>
+</ul>
+<p>在这里我推荐一个<strong>编程好习惯</strong></p>
+<ul>
+<li>在最后一个 case 语句的后面加上一条 break语句。</li>
+<li>（之所以这么写是可以避免出现在以前的最后一个 case 语句后面忘了添加 break语句~~）</li>
+</ul>
+<h3>2.4 switch语句中的default子句：</h3>
+<p>如果表达的值与所有的case标签的值都不匹配怎么办？</p>
+<p><strong>default：</strong></p>
+<ul>
+<li>写在任何一个 case 标签可以出现的位置。</li>
+<li>当 switch 表达式的值并不匹配所有 case 标签的值时，这个 default 子句后面的语句就会执行。</li>
+<li>所以，每个switch语句中只能出现一条default子句。</li>
+<li>但是它可以出现在语句列表的任何位置，而且语句流会像执行一个case标签一样执行default子句。</li>
+</ul>
+<p><strong>推荐编程好习惯</strong>：</p>
+<ul>
+<li><strong>在每一个switch语句中都放入一条default语句是一个好习惯，甚至可以在后面加一个break。</strong></li>
+</ul>
+<h3>2.5 练习</h3>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+    <span class="pl-smi">int</span> <span class="pl-s1">n</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+    <span class="pl-smi">int</span> <span class="pl-s1">m</span> <span class="pl-c1">=</span> <span class="pl-c1">2</span>;
+    <span class="pl-k">switch</span> (<span class="pl-s1">n</span>)
+    {
+    <span class="pl-k">case</span> <span class="pl-c1">1</span>:
+        <span class="pl-s1">m</span><span class="pl-c1">++</span>;
+    <span class="pl-k">case</span> <span class="pl-c1">2</span>:
+        <span class="pl-s1">n</span><span class="pl-c1">++</span>;
+    <span class="pl-k">case</span> <span class="pl-c1">3</span>:
+        <span class="pl-k">switch</span> (<span class="pl-s1">n</span>)
+        {<span class="pl-c">//switch允许嵌套使用</span>
+        <span class="pl-k">case</span> <span class="pl-c1">1</span>:
+            <span class="pl-s1">n</span><span class="pl-c1">++</span>;
+        <span class="pl-k">case</span> <span class="pl-c1">2</span>:
+            <span class="pl-s1">m</span><span class="pl-c1">++</span>;
+            <span class="pl-s1">n</span><span class="pl-c1">++</span>;
+            <span class="pl-k">break</span>;
+        }
+    <span class="pl-k">case</span> <span class="pl-c1">4</span>:
+        <span class="pl-s1">m</span><span class="pl-c1">++</span>;
+        <span class="pl-k">break</span>;
+    <span class="pl-k">default</span>:
+        <span class="pl-k">break</span>;
+    }
+    <span class="pl-en">printf</span>(<span class="pl-s">"m = %d, n = %d\n"</span>, <span class="pl-s1">m</span>, <span class="pl-s1">n</span>);
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>
+<p>上面这段代码的结果是什么呢？</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/8882eb9e32fce8f8dc91d1d369711c7d45ebeb9471e29fc09529c289fa362de5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35313035633732343431323434393234393037653730323733653433336365622e706e67"><img src="https://camo.githubusercontent.com/8882eb9e32fce8f8dc91d1d369711c7d45ebeb9471e29fc09529c289fa362de5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35313035633732343431323434393234393037653730323733653433336365622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/5105c72441244924907e70273e433ceb.png" style="max-width: 100%;"></a></p>
+</li>
+</ul>
+<h2>三、循环语句</h2>
+<ul>
+<li>循环语句分为<strong>三类</strong>：<strong>while循环，for循环，do......while循环</strong>。</li>
+</ul>
+<h3>3.1 while循环</h3>
+<p>我们已经掌握了，if语句：</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">if</span>(<span class="pl-s1">条件</span>) 
+	<span class="pl-s1">语句</span>;</pre></div>
+<ul>
+<li>当条件满足的情况下，if语句后的语句执行，否则不执行。</li>
+<li>但是这个语句只会执行一次。</li>
+<li>由于我们发现生活中很多的实际的例子是：同一件事情我们需要完成很多次。</li>
+<li>那我们怎么做呢？</li>
+<li>C语言中给我们引入了： while 语句，可以实现循环。</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">while</span>(<span class="pl-s1">表达式</span>)
+    <span class="pl-s1">循环语句</span>;</pre></div>
+<p>while循环的执行流程：</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/cb054616d635e3ac74b79fbeaa2714836528f0815e6e0d2d8612e893492e44f6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61343132383735343165393334323332623536363333316362653266303366662e706e67"><img src="https://camo.githubusercontent.com/cb054616d635e3ac74b79fbeaa2714836528f0815e6e0d2d8612e893492e44f6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61343132383735343165393334323332623536363333316362653266303366662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/a41287541e934232b566331cbe2f03ff.png" style="max-width: 100%;"></a></p>
+<h4>3.1.1 while语句中的break和continue</h4>
+<p><strong>break介绍</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+    <span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+    <span class="pl-k">while</span> (<span class="pl-s1">i</span> &lt;= <span class="pl-c1">10</span>)
+    {
+        <span class="pl-k">if</span> (<span class="pl-s1">i</span> <span class="pl-c1">==</span> <span class="pl-c1">5</span>)
+            <span class="pl-k">break</span>;
+        <span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">i</span>);
+        <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-s1">i</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>;
+    }
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p>这里代码输出的结果是什么？<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/835f114b45e6d16c98db7a329459d3222d4ee6b2c9eb3b665f8ded3592941d20/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62646336353135353962363834633564613237376631623538386538653732622e706e67"><img src="https://camo.githubusercontent.com/835f114b45e6d16c98db7a329459d3222d4ee6b2c9eb3b665f8ded3592941d20/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62646336353135353962363834633564613237376631623538386538653732622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/bdc651559b684c5da277f1b588e8e72b.png" style="max-width: 100%;"></a></p>
+<p><strong>总结</strong>：</p>
+<ul>
+<li>break在while循环中的作用：
+<ul>
+<li>其实在循环中只要遇到break，就停止后期的所有的循环，直接终止循环。</li>
+<li>所以：while中的break是用于<strong>永久</strong>终止循环的。</li>
+</ul>
+</li>
+</ul>
+<p><strong>continue介绍</strong></p>
+<ul>
+<li>continue 代码实例1：</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+    <span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+    <span class="pl-k">while</span> (<span class="pl-s1">i</span> &lt;= <span class="pl-c1">10</span>)
+    {
+        <span class="pl-k">if</span> (<span class="pl-s1">i</span> <span class="pl-c1">==</span> <span class="pl-c1">5</span>)
+            <span class="pl-k">continue</span>;
+        <span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">i</span>);
+        <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-s1">i</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>;
+    }
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p>输出<code class="notranslate">1 2 3 4...</code></p>
+<ul>
+<li>continue 代码实例2：</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+    <span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+    <span class="pl-k">while</span> (<span class="pl-s1">i</span> &lt;= <span class="pl-c1">10</span>)
+    {
+        <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-s1">i</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>; 
+        <span class="pl-k">if</span> (<span class="pl-s1">i</span> <span class="pl-c1">==</span> <span class="pl-c1">5</span>)
+            <span class="pl-k">continue</span>;
+        <span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">i</span>);
+    }
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p>输出：&gt;<code class="notranslate">2 3 4 6 7 8 9 10 11</code></p>
+<p><strong>总结</strong>:</p>
+<ul>
+<li>continue在while循环中的作用就是：
+<ul>
+<li>continue是用于终止本次循环的，也就是本次循环中continue后边的代码不会再执行，<br>
+而是直接跳转到while语句的判断部分。进行下一次循环的入口判断。</li>
+</ul>
+</li>
+</ul>
+<p>那么我们在看几个代码~~</p>
+<p><strong>getchar介绍</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+    <span class="pl-smi">int</span> <span class="pl-s1">ch</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+    <span class="pl-k">while</span> ((<span class="pl-s1">ch</span> <span class="pl-c1">=</span> <span class="pl-en">getchar</span>()) <span class="pl-c1">!=</span> <span class="pl-c1">EOF</span>)
+        <span class="pl-en">putchar</span>(<span class="pl-s1">ch</span>);
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>这里的<code class="notranslate">getchar</code>函数不接收任何的参数，返回类型是<code class="notranslate">int </code>从<code class="notranslate">stdin</code>（键盘）上读取一个字符返回读取到字符的ASCLL码值,如果读取失败或者读取到文件末尾就会返回<code class="notranslate">EOF</code></li>
+<li>这里可以打开msdn或者<a href="https://legacy.cplusplus.com/" rel="nofollow">cplusplus</a>网站进行搜索</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/322a3aa8eb18eae848ac01a301ecae9b76c7e66e257d4c0750f8c04e60edcb7a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30333166333165353535373734303636613634623465333733616431326634642e706e67"><img src="https://camo.githubusercontent.com/322a3aa8eb18eae848ac01a301ecae9b76c7e66e257d4c0750f8c04e60edcb7a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30333166333165353535373734303636613634623465333733616431326634642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/031f31e555774066a64b4e373ad12f4d.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>选中<code class="notranslate">EOF</code>转到定义就可以看到</li>
+<li>那么EOF是什么呢？EOF是<code class="notranslate">-1</code>，在一次证明了返回值是int的。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5873f736140733a6135e0fd6233bbf3db1d6aebe3d47b79e46156ad6f7aa2b02/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34373033366336393433666334363036616261363839663234653834383162342e706e67"><img src="https://camo.githubusercontent.com/5873f736140733a6135e0fd6233bbf3db1d6aebe3d47b79e46156ad6f7aa2b02/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34373033366336393433666334363036616261363839663234653834383162342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/47036c6943fc4606aba689f24e8481b4.png" style="max-width: 100%;"></a></p>
+<p><strong>putchar介绍</strong></p>
+<ul>
+<li>接收一个字符输出到屏幕，也就是从键盘上获取一个字符打印到屏幕上</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/bd90b7d2009eb5459df6c1d7ccae248a910cd847a3205f586782f7a397469c26/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36653532653335616365396634366136623062303161323430356139616137382e706e67"><img src="https://camo.githubusercontent.com/bd90b7d2009eb5459df6c1d7ccae248a910cd847a3205f586782f7a397469c26/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36653532653335616365396634366136623062303161323430356139616137382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/6e52e35ace9f46a6b0b01a2405a9aa78.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>现在代码运行结果是什么呢？</li>
+</ul>
+<p>输入：&gt;<code class="notranslate">q</code><br>
+输出：&gt;<code class="notranslate">q</code></p>
+<ul>
+<li>输入什么就会输出什么</li>
+</ul>
+<p>那么我们这个程序怎么停止下来呢？</p>
+<ul>
+<li>只需要<code class="notranslate">ctrl+z</code>然后回车就可以了，目的是让读取到<code class="notranslate">EOF</code>这样程序就会终止。</li>
+</ul>
+<p>那么这里的代码还有什么用呢？</p>
+<ul>
+<li>可以用来清理缓冲区的</li>
+</ul>
+<p><strong>列如：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">password</span>[<span class="pl-c1">20</span>];
+	<span class="pl-en">scanf</span>(<span class="pl-s">"%s"</span>, <span class="pl-s1">password</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"请确认（Y/N）："</span>);
+	<span class="pl-smi">int</span> <span class="pl-s1">ch</span> <span class="pl-c1">=</span> <span class="pl-en">getchar</span>();
+	<span class="pl-k">if</span> (<span class="pl-c1">'Y'</span> <span class="pl-c1">==</span> <span class="pl-s1">ch</span>)
+		<span class="pl-en">printf</span>(<span class="pl-s">"确认成功\n"</span>);
+	<span class="pl-k">else</span>
+		<span class="pl-en">printf</span>(<span class="pl-s">"确认失败\n"</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p>输入：&gt;<code class="notranslate">abcde</code><br>
+输出：&gt;<code class="notranslate">请确认（Y/N）：确认失败</code></p>
+<p>怎么回事呢？还没确认就是确认失败了，为什么呢？</p>
+<ul>
+<li>scanf会从键盘上读取一些你输入的数据，但你不输入的时候，它就一直等，一直等，直等到你输入为止。</li>
+<li>在计算机中，使用scanf时并不会直接获取键盘上输入的数据。相反，存在一个输入缓冲区，用户输入的数据首先会被放入这个缓冲区。当用户输入完数据（例如"abcde"），为了将这些数据送入缓冲区，用户需要按下回车键。
+<ul>
+<li>举例来说，如果用户输入"abcde"并按下回车键，整个输入会被存储为"abcde\n"，其中\n表示回车符。这时，scanf会从缓冲区读取数据，直到遇到换行符为止。所以，用户的输入实际上是被缓冲并在程序请求时才被获取的。</li>
+</ul>
+</li>
+<li>通过<code class="notranslate">scanf</code>函数将数据输入到缓冲区，并检查是否有可读取的数据。如果有数据可读取，它会一直读取直到遇到换行符（\n）。随后，将这些数据作为密码赋给变量password。此时，<code class="notranslate">getchar()</code>函数也开始读取数据，其工作原理与scanf()相似，检查缓冲区是否有数据。一旦发现换行符（\n），就将对应的数据存储到变量ch中。然后，程序判断ch是否为‘Y’，由于不满足这个条件，进入else分支，并输出“确认失败”。这就是编译器在等待我们输入确认密码时，却直接结束程序的原因。</li>
+</ul>
+<p>再看一个代码</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+    <span class="pl-smi">char</span> <span class="pl-s1">ch</span> <span class="pl-c1">=</span> <span class="pl-c1">'\0'</span>;
+    <span class="pl-k">while</span> ((<span class="pl-s1">ch</span> <span class="pl-c1">=</span> <span class="pl-en">getchar</span>()) <span class="pl-c1">!=</span> <span class="pl-c1">EOF</span>)
+    {
+        <span class="pl-k">if</span> (<span class="pl-s1">ch</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">'0'</span> <span class="pl-c1">||</span> <span class="pl-s1">ch</span> <span class="pl-c1">&gt;</span> <span class="pl-c1">'9'</span>)
+            <span class="pl-k">continue</span>;
+        <span class="pl-en">putchar</span>(<span class="pl-s1">ch</span>);
+    }
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>那么这段代码就要对ASCLL码表要熟悉</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b0e69fd4ef1382d54c2fd15327fa47473e085ff2091da01ecab2b971fc766b2f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61623961396135316435313734656333396565393261323335363236323334642e706e67"><img src="https://camo.githubusercontent.com/b0e69fd4ef1382d54c2fd15327fa47473e085ff2091da01ecab2b971fc766b2f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61623961396135316435313734656333396565393261323335363236323334642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/ab9a9a51d5174ec39ee92a235626234d.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这段代码只打印0~9的字符</li>
+</ul>
+<h3>3.2 for循环</h3>
+<h4>3.2.1 语法</h4>
+<p>首先来看看for循环的语法：</p>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">for</span>(表达式<span class="pl-c1">1</span>; 表达式<span class="pl-c1">2</span>; 表达式<span class="pl-c1">3</span>)
+    循环语句;</pre></div>
+<ul>
+<li>表达式1：表达式1为初始化部分，用于初始化循环变量的；</li>
+<li>表达式2：表达式2为条件判断部分，用于判断循环时候终止；</li>
+<li>表达式3：表达式3为调整部分，用于循环条件的调整。</li>
+</ul>
+<p>for循环的执行流程：<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c4b919c6abec3deebbea59fccc9fd8b1681d8626e6d4d6348ec0f964f818db09/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30353533336365663636373434303032616465653163313336356662343034352e706e67"><img src="https://camo.githubusercontent.com/c4b919c6abec3deebbea59fccc9fd8b1681d8626e6d4d6348ec0f964f818db09/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30353533336365663636373434303032616465653163313336356662343034352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/05533cef66744002adee1c1365fb4045.png" style="max-width: 100%;"></a></p>
+<h4>3.2.2 练习：使用for循环 在屏幕上打印1-10的数字。</h4>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-c">//for(i=1/*初始化*/; i&lt;=10/*判断部分*/; i++/*调整部分*/)</span>
+	<span class="pl-k">for</span> (<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span> &lt;= <span class="pl-c1">10</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">i</span>);
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>
+<p>输出：&gt;<code class="notranslate">1 2 3 4 5 6 7 8 9 	10</code></p>
+</li>
+<li>
+<p>就像我们这里去打印1-10的数字，使用for循环的话就会很清晰直观，代码也比较简练</p>
+</li>
+<li>
+<p>现在，我们学习完了while循环和for循环后，让我们进行对比一下这两个循环：</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+<span class="pl-c">//实现相同的功能，使用while</span>
+<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>; <span class="pl-c">//初始化部分</span>
+<span class="pl-k">while</span>(<span class="pl-s1">i</span> &lt;= <span class="pl-c1">10</span>) <span class="pl-c">//判断部分</span>
+{
+    <span class="pl-en">printf</span>(<span class="pl-s">"hehe\n"</span>);
+    <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-s1">i</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>; <span class="pl-c">//调整部分</span>
+}
+ 
+<span class="pl-c">//实现相同的功能，使用for</span>
+<span class="pl-k">for</span>(<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span> &lt;= <span class="pl-c1">10</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+{
+    <span class="pl-en">printf</span>(<span class="pl-s">"hehe\n"</span>);
+}</pre></div>
+<blockquote>
+<p>通过上面的代码，可以发现在while循环中依然存在循环的三个必须条件，但是由于风格问题使得三个部分很可能偏离较远，这样查找修改不够集中和方便。</p>
+</blockquote>
+<h3>3.3 do......while()循环</h3>
+<p><strong>do......while()执行流程：</strong></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c058c40a1a994e62aab2488b30170cf478e283c41c20a5f3c343bfb2560cea2f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37326533616339623761373834383630623366343963333938323839623637372e706e67"><img src="https://camo.githubusercontent.com/c058c40a1a994e62aab2488b30170cf478e283c41c20a5f3c343bfb2560cea2f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37326533616339623761373834383630623366343963333938323839623637372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/72e3ac9b7a784860b3f49c398289b677.png" style="max-width: 100%;"></a></p>
+<h4>3.3.1 do语句的语法</h4>
+<p>首先来看一下它的语法格式，和while循环很类似</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">do</span>
+{
+    <span class="pl-s1">循环语句</span>;
+}<span class="pl-k">while</span>(<span class="pl-s1">表达式</span>);</pre></div>
+<h4>3.3.2 do...while语句的特点</h4>
+<ul>
+<li>循环体内至少执行一次，使用的场景有限，所以不是经常使用。</li>
+<li>但是我们下面的猜数字游戏会有一个案例我们可以来看一下</li>
+</ul>
+<h2>四、goto语句</h2>
+<p>在大多数现代编程语言中，goto语句通常被认为是一种不良的编程实践，因为它可能导致程序难以理解和维护。然而，在某些情况下，它仍然是一种有用的控制流工具。在C语言中，goto语句可以用来无条件地将程序控制转移到指定的标签处</p>
+<blockquote>
+<p>如果<code class="notranslate">goto</code>语句用的不好，会导致程序跳来跳去的。</p>
+</blockquote>
+<h3>4.1 goto语句的作用</h3>
+<ul>
+<li>C语言提供了⼀种非常特别的语法，就是 <code class="notranslate">goto</code> 语句和跳转标号，<code class="notranslate">goto</code>语句可以实现在同⼀个函数 内跳转到设置好的标号处。</li>
+</ul>
+<h3>4.2 goto语句的使用场景</h3>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">for</span> (...)
+<span class="pl-k">for</span> (...)
+{
+    <span class="pl-k">for</span> (...)
+    {
+        <span class="pl-k">if</span> (<span class="pl-smi">disaster</span>)
+            <span class="pl-s1">goto</span> <span class="pl-s1">error</span>;
+    }
+}
+…
+<span class="pl-s1">error</span> :
+<span class="pl-k">if</span> (<span class="pl-s1">disaster</span>)
+<span class="pl-c">// 处理错误情况</span></pre></div>
+<h3>4.3 goto语句的例子</h3>
+<ul>
+<li>下面这是一个关机程序的例子，学会后可以拿去恶搞同学一下~~</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-k">#include</span> <span class="pl-s">&lt;windows.h&gt;</span>
+<span class="pl-k">#include</span> <span class="pl-s">&lt;string.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+    <span class="pl-smi">char</span> <span class="pl-s1">input</span>[<span class="pl-c1">10</span>] <span class="pl-c1">=</span> {<span class="pl-c1">0</span>};
+    <span class="pl-en">system</span>(<span class="pl-s">"shutdown -s -t 60"</span>);
+again:
+    <span class="pl-en">printf</span>(<span class="pl-s">"电脑将在1分钟内关机，如果输入：我是猪，就取消关机！\n请输入:&gt;"</span>);
+    <span class="pl-en">scanf</span>(<span class="pl-s">"%s"</span>, <span class="pl-s1">input</span>);
+    <span class="pl-k">if</span>(<span class="pl-c1">0</span> <span class="pl-c1">==</span> <span class="pl-en">strcmp</span>(<span class="pl-s1">input</span>, <span class="pl-s">"我是猪"</span>))
+    {
+        <span class="pl-en">printf</span>(<span class="pl-s">"shutdown -a"</span>);
+    }
+    <span class="pl-k">else</span>
+    {
+        goto again;
+    }
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>使用goto通常容易导致程序结构混乱，使得代码难以理解和维护。因此，除非有充分的理由，推荐使用其他控制流结构（如for、while、do-while、if等）来替代goto语句。</li>
+</ul>
+<h2>五、作业练习</h2>
+<h3>1、 计算 n的阶乘</h3>
+<ul>
+<li>
+<p>计算一个n的阶乘，那只要定义一个变量去存放这个阶乘的结果，然后通过循环去遍历即可</p>
+</li>
+<li>
+<p>这里需要注意的一点就是，ret初始值为1</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c">//n的阶乘</span>
+	<span class="pl-smi">int</span> <span class="pl-s1">n</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-en">scanf</span>(<span class="pl-s">"%d"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">n</span>);
+	<span class="pl-smi">int</span> <span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span> &lt;= <span class="pl-s1">n</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+	{
+		<span class="pl-s1">ret</span> *= <span class="pl-s1">i</span>;
+	}
+	<span class="pl-en">printf</span>(<span class="pl-s">"ret = %d\n"</span>, <span class="pl-s1">ret</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h3>2、 计算 1!+2!+3!+……+10!</h3>
+<ul>
+<li>
+<p>第二小题又是一道计算阶乘的题，然后把计算出的阶乘再相加~~</p>
+</li>
+<li>
+<p>假设我们要计算1! + 2! + 3! 这一小规模的阶乘之和。首先，让我们审视解题思路。由于只需计算到数字3的阶乘，我们需要一个外层循环，从1迭代到3，表示我们要求解的是这三个数字的阶乘之和。</p>
+</li>
+<li>
+<p>接下来，内层循环用于计算每个数字的阶乘，从1迭代到该数字即可。我们使用一个累乘变量来存储计算结果。在完成每个数字的阶乘计算后，我们需要累加这些阶乘的和，因此还需要定义一个sum变量来存储这个累加和。最终，sum变量就是我们所需的结果。</p>
+<ul>
+<li>正确答案应该是1 + 2 + 6 = 9</li>
+</ul>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+<span class="pl-smi">int</span> <span class="pl-s1">sum</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span> &lt;= <span class="pl-c1">3</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+{
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>; <span class="pl-s1">j</span> &lt;= <span class="pl-s1">i</span>; <span class="pl-c1">++</span><span class="pl-s1">j</span>)
+	{
+		<span class="pl-s1">ret</span> *= <span class="pl-s1">j</span>;
+	}
+	<span class="pl-s1">sum</span> <span class="pl-c1">+=</span> <span class="pl-s1">ret</span>;
+}
+<span class="pl-en">printf</span>(<span class="pl-s">"sum = %d\n"</span>, <span class="pl-s1">sum</span>);</pre></div>
+<ul>
+<li>可以看到，sum的结果并非为9。这里涉及到一个常见的错误，很多同学容易犯这个错。因为我们正在计算不同数字的阶乘，但是使用的累乘变量是同一个ret。因此，当计算下一个数字的阶乘时，ret仍然保留了上一次数字累乘后的结果。这导致了阶乘计算的不准确，因此结果也会有所不同。</li>
+<li>在计算3!时，可能多乘了一个2！留下了额外的2，导致3！= 12，比实际结果多了6。因此，最终的计算结果也就多了6。</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+<span class="pl-smi">int</span> <span class="pl-s1">sum</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span> &lt;= <span class="pl-c1">3</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+{
+	<span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;<span class="pl-c">//这里要把ret掷为1</span>
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>; <span class="pl-s1">j</span> &lt;= <span class="pl-s1">i</span>; <span class="pl-c1">++</span><span class="pl-s1">j</span>)
+	{
+		<span class="pl-s1">ret</span> *= <span class="pl-s1">j</span>;
+	}
+	<span class="pl-s1">sum</span> <span class="pl-c1">+=</span> <span class="pl-s1">ret</span>;
+}
+<span class="pl-en">printf</span>(<span class="pl-s">"sum = %d\n"</span>, <span class="pl-s1">sum</span>);</pre></div>
+<ul>
+<li>我们应该加上<code class="notranslate">ret = 1;</code>在每一次更新需要求阶乘的数时，都将这个累乘变量ret重置</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+<span class="pl-smi">int</span> <span class="pl-s1">sum</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span> &lt;= <span class="pl-c1">3</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+{
+	<span class="pl-s1">ret</span> *= <span class="pl-s1">i</span>;
+	<span class="pl-s1">sum</span> <span class="pl-c1">+=</span> <span class="pl-s1">ret</span>;
+}</pre></div>
+<h3>3、 在一个有序数组中查找具体的某个数字n</h3>
+<ul>
+<li>
+<p>在数组的两端分别设定左右两个指针，然后计算它们的中间值。将欲查找的数字与中间值比较，若小于中间值，则舍弃后半段区间，只需在前半段继续查找；若大于中间值，则舍弃前半段区间，继续在后半段查找。将此逻辑嵌入一个循环中，不断更新中间值进行比较。最终左右两指针会相遇，表示区间即将结束。若左指针大于右指针，表示已找到目标元素或未找到，此时退出循环并进行相应打印说明。</p>
+</li>
+<li>
+<p>接下来我们就看看代码~~</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{	
+	<span class="pl-c">//二分查找法</span>
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span>[<span class="pl-c1">10</span>] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>,<span class="pl-c1">4</span>,<span class="pl-c1">5</span>,<span class="pl-c1">6</span>,<span class="pl-c1">7</span>,<span class="pl-c1">8</span>,<span class="pl-c1">9</span>,<span class="pl-c1">10</span> };
+	<span class="pl-smi">int</span> <span class="pl-s1">sz</span> <span class="pl-c1">=</span> <span class="pl-k">sizeof</span>(<span class="pl-smi">a</span>) / <span class="pl-k">sizeof</span>(<span class="pl-s1">a</span>[<span class="pl-c1">0</span>]);
+	<span class="pl-smi">int</span> <span class="pl-s1">key</span> <span class="pl-c1">=</span> <span class="pl-c1">7</span>;<span class="pl-c">//要查找的数字k</span>
+	<span class="pl-smi">int</span> <span class="pl-s1">left</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">right</span> <span class="pl-c1">=</span> <span class="pl-s1">sz</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>;
+
+	<span class="pl-k">while</span> (<span class="pl-s1">left</span> &lt;= <span class="pl-s1">right</span>)
+	{
+		<span class="pl-smi">int</span> <span class="pl-s1">mid</span> <span class="pl-c1">=</span> (<span class="pl-s1">left</span> <span class="pl-c1">+</span> <span class="pl-s1">right</span>) / <span class="pl-c1">2</span>;
+		<span class="pl-k">if</span> (<span class="pl-s1">key</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">a</span>[<span class="pl-s1">mid</span>])
+			<span class="pl-s1">right</span> <span class="pl-c1">=</span> <span class="pl-s1">mid</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>;
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (<span class="pl-s1">key</span> <span class="pl-c1">&gt;</span> <span class="pl-s1">a</span>[<span class="pl-s1">mid</span>])
+			<span class="pl-s1">left</span> <span class="pl-c1">=</span> <span class="pl-s1">mid</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>;
+		<span class="pl-k">else</span>
+		{
+			<span class="pl-en">printf</span>(<span class="pl-s">"找到了，下标是%d\n"</span>, <span class="pl-s1">mid</span>);
+			<span class="pl-k">break</span>;		<span class="pl-c">//找到了便跳出循环</span>
+		}
+	}
+	<span class="pl-k">if</span> (<span class="pl-s1">left</span> <span class="pl-c1">&gt;</span> <span class="pl-s1">right</span>)
+		<span class="pl-en">printf</span>(<span class="pl-s">"没找到此元素\n"</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h3>4、演示多个字符从两端移动，向中间汇聚</h3>
+<ul>
+<li>
+<p>我们要展示多个字符从两端向中间汇聚的效果，需要实现一种覆盖的动画效果。我定义了两个数组，最终要打印的是第一个数组的内容，但在打印过程中，我们通过左右指针实现覆盖效果。</p>
+</li>
+<li>
+<p>首先，初始化左指针为0，右指针不能直接取末尾值，需要使用<code class="notranslate">strlen()</code>库函数求解数组1的长度，然后减1得到右指针位置。</p>
+</li>
+<li>
+<p>将逻辑放入循环中，通过左右指针将第一个数组的内容赋给第二个数组，然后不断移动这两个指针直至左指针大于右指针。</p>
+</li>
+<li>
+<p>为了慢慢显示出效果，使用了Sleep()睡眠函数，需要引入头文件<code class="notranslate">#include &lt;Windows.h&gt;</code>。这个函数的参数是毫秒值，比如1秒执行一次就传入1000，0.5秒执行一次就传入500。这样可以创建一个动画效果。</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">arr1</span>[] <span class="pl-c1">=</span> { <span class="pl-s">"C生万物!!!"</span> };
+	<span class="pl-smi">char</span> <span class="pl-s1">arr2</span>[] <span class="pl-c1">=</span> { <span class="pl-s">"*****************"</span> };
+
+	<span class="pl-smi">int</span> <span class="pl-s1">left</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">right</span> <span class="pl-c1">=</span> <span class="pl-en">strlen</span>(<span class="pl-s1">arr1</span>) <span class="pl-c1">-</span> <span class="pl-c1">1</span>;
+	<span class="pl-k">while</span> (<span class="pl-s1">left</span> &lt;= <span class="pl-s1">right</span>)
+	{
+		<span class="pl-s1">arr2</span>[<span class="pl-s1">left</span>] <span class="pl-c1">=</span> <span class="pl-s1">arr1</span>[<span class="pl-s1">left</span>];
+		<span class="pl-s1">arr2</span>[<span class="pl-s1">right</span>] <span class="pl-c1">=</span> <span class="pl-s1">arr1</span>[<span class="pl-s1">right</span>];
+		<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">arr2</span>);
+		<span class="pl-en">Sleep</span>(<span class="pl-c1">500</span>);
+		<span class="pl-s1">left</span><span class="pl-c1">++</span>;
+		<span class="pl-s1">right</span><span class="pl-c1">--</span>;
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>为了让其在一行打印，不需要一行行地打印，我们可以使用这样一个命令</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">system</span>(<span class="pl-s">"cls"</span>);	<span class="pl-c">//清屏，一行打印</span></pre></div>
+<ul>
+<li>但是这个system()函数要加上头文件<code class="notranslate">#include &lt;stdlib.h&gt;</code>，大家不要忘了~~</li>
+</ul>
+<h3>5、密码校验</h3>
+<ul>
+<li>这题的要求是输入一串字符，然后与正确密码进行比较，如果相同就立即跳出循环；如果不同，继续输入，但只有3次机会，用完后强制跳出循环，不允许再次输入。</li>
+</ul>
+<p>我们来看一下代码~~</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">char</span> <span class="pl-s1">password</span>[<span class="pl-c1">20</span>] <span class="pl-c1">=</span> { <span class="pl-c1">0</span> };
+
+	<span class="pl-k">for</span> (<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">3</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"请输入密码&gt;："</span>);
+		<span class="pl-en">scanf</span>(<span class="pl-s">"%s"</span>, <span class="pl-s1">password</span>);
+		<span class="pl-k">if</span> (<span class="pl-en">strcmp</span>(<span class="pl-s1">password</span>, <span class="pl-s">"bitbit"</span>) <span class="pl-c1">==</span> <span class="pl-c1">0</span>)
+		{
+			<span class="pl-en">printf</span>(<span class="pl-s">"密码输入正确\n"</span>);
+			<span class="pl-k">break</span>;
+		}
+		<span class="pl-k">else</span>
+		{
+			<span class="pl-en">printf</span>(<span class="pl-s">"密码输入错误\n"</span>);
+		}
+	}
+	<span class="pl-k">if</span> (<span class="pl-s1">i</span> <span class="pl-c1">==</span> <span class="pl-c1">3</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"输入机会用完，请30分钟后再试\n"</span>);
+	}
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>
+<p>在这方面需要注意的一个问题是字符串比较时可能出现的挂字符串问题。我们不能直接使用==运算符进行比较，而应该利用字符串库函数strcmp来实现比较。关于<code class="notranslate">strcmp</code>的返回值，我们可以通过查阅<a href="https://legacy.cplusplus.com/" rel="nofollow">cplusplus</a>来获取详细信息。</p>
+</li>
+<li>
+<p>简而言之，<code class="notranslate">strcmp</code>函数的返回值取决于第一个字符串的首字母与第二个字符串的首字母的ASCII码值大小关系。如果第一个字符串的首字母大于第二个字符串的首字母，那么返回一个大于0的数字；反之，如果小于，则返回一个小于0的数字。如果两个字符串相同，返回值则为0。这里实际上进行的是ASCII码值的大小比较。</p>
+</li>
+</ul>
+<h3>6、猜数字游戏【经典】</h3>
+<ul>
+<li>首先我们来实现一个整体的逻辑，也就是当你输入的时候，通过我们上面学习的switch语句进行一个分支的判断，是要继续猜数字还是退出游戏</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">menu</span>()
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"********************************\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"**********  1.play  ************\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"**********  0.exit  ************\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"********************************\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"\n"</span>);
+}
+<span class="pl-smi">void</span> <span class="pl-en">game</span>()
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"猜数字\n"</span>);
+}
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">input</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-en">srand</span>((<span class="pl-smi">unsigned <span class="pl-smi">int</span></span>)<span class="pl-en">time</span>(<span class="pl-c1">NULL</span>));
+	<span class="pl-k">do</span>
+	{
+		<span class="pl-en">menu</span>();
+		<span class="pl-en">printf</span>(<span class="pl-s">"请选择&gt;:"</span>);
+		<span class="pl-en">scanf</span>(<span class="pl-s">"%d"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">input</span>);
+		<span class="pl-k">switch</span> (<span class="pl-s1">input</span>)
+		{
+		<span class="pl-k">case</span> <span class="pl-c1">1</span>:
+			<span class="pl-en">game</span>();
+			<span class="pl-k">break</span>;
+		<span class="pl-k">case</span> <span class="pl-c1">0</span>:
+			<span class="pl-k">break</span>;
+		<span class="pl-k">default</span>:
+			<span class="pl-en">printf</span>(<span class="pl-s">"选择错误,请重新输入!\n"</span>);
+			<span class="pl-k">break</span>;
+		}
+	} <span class="pl-k">while</span> (<span class="pl-s1">input</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/430c631fcf4fa766a53472fa33586768bad525a4eea866eec1a9aa9d5c57b54b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66376365616432633933333334363866386235313335633738666464343335322e706e67"><img src="https://camo.githubusercontent.com/430c631fcf4fa766a53472fa33586768bad525a4eea866eec1a9aa9d5c57b54b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66376365616432633933333334363866386235313335633738666464343335322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/f7cead2c9333468f8b5135c78fdd4352.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>可以看到，整体的逻辑已经实现了按下【1】时启动猜数字功能。如果一直按下1，就能一直进行猜数字，直到按下0为止。</p>
+</li>
+<li>
+<p>接下来我们就要实现猜数字内部的逻辑了，我们首先要产生一个随机数，然后我们输入一个数字，比较要猜的数字，如果输入的大了就提示猜的数字打了，相反，输入的小了就提示小了，要么就一直继续，知道猜成功为止</p>
+</li>
+<li>
+<p>那么就要用到一个函数<code class="notranslate">rand()</code>，可以在<a href="https://legacy.cplusplus.com/reference/cstdlib/rand/?kw=rand" rel="nofollow">cplusplus</a>网站上找到~~</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b20612d9013684996796ee142003614e6fda12204902d073e6444a20010893b2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61626666323132353763303334626230613732643134316532666566376561302e706e67"><img src="https://camo.githubusercontent.com/b20612d9013684996796ee142003614e6fda12204902d073e6444a20010893b2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61626666323132353763303334626230613732643134316532666566376561302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/abff21257c034bb0a72d141e2fef7ea0.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们要生成1~100内的数字，我们使用下面这段代码官方文档上面也有写</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//生成随机数</span>
+<span class="pl-smi">int</span> <span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-en">rand</span>() % <span class="pl-c1">100</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>;		<span class="pl-c">//1 ~ 100</span></pre></div>
+<ul>
+<li>但是我们这里又有一个问题，这个rand是一个<a href="https://baike.baidu.com/item/%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0/104358?fr=ge_ala" rel="nofollow">伪随机数</a></li>
+<li>在C语言中，rand() 函数用于生成伪随机数。伪随机数是由一个算法生成的数字序列，其看似随机，但实际上是可预测的，因为它们是根据一个称为"种子"的初始值计算的。</li>
+<li>这个时候我们就要使用到一个C语言中的另一个函数叫做随机种子<code class="notranslate">srand()</code>，我们通过<a href="https://legacy.cplusplus.com/reference/cstdlib/srand/?kw=srand" rel="nofollow">cplusplus</a>我们再来看看</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/75d808677fb0e7f6e69f80c49628835efc53456cd8a713d4b5aa795720388529/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65383837613637383666653934313231616365363236366630653763326563372e706e67"><img src="https://camo.githubusercontent.com/75d808677fb0e7f6e69f80c49628835efc53456cd8a713d4b5aa795720388529/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65383837613637383666653934313231616365363236366630653763326563372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/e887a6786fe94121ace6266f0e7c2ec7.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这个时候我们有了这个函数是不够的，一般还要再配合使用一个时间戳函数<code class="notranslate">time()</code>，不会使用的话也可以在<a href="https://legacy.cplusplus.com/reference/ctime/time/?kw=time" rel="nofollow">cplusplus</a>中查看</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/163044b7018c455c403bdc1a76fb7f3798659bf2396b776ad4fa332ce4f4a6f3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63646533653037623165313234383239623930636463343632616365333761622e706e67"><img src="https://camo.githubusercontent.com/163044b7018c455c403bdc1a76fb7f3798659bf2396b776ad4fa332ce4f4a6f3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63646533653037623165313234383239623930636463343632616365333761622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/cde3e07b1e124829b90cdc462ace37ab.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们可以这样直接使用，下面我们来详细介绍一下这段代码</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">srand</span>((<span class="pl-smi">unsigned <span class="pl-smi">int</span></span>)<span class="pl-en">time</span>(<span class="pl-c1">NULL</span>));</pre></div>
+<ul>
+<li>
+<p><code class="notranslate">time(NULL)</code> 返回当前的系统时间，表示从某个固定时间点（通常是1970年1月1日午夜）到现在的秒数。</p>
+</li>
+<li>
+<p><code class="notranslate">(unsigned int)</code> 是将时间转换为无符号整数。<code class="notranslate">srand</code>函数的参数应该是一个无符号整数，因此这里进行了强制类型转换。</p>
+</li>
+<li>
+<p>最终，<code class="notranslate">srand((unsigned int)time(NULL));</code> 将当前时间作为种子传递给 srand 函数，以初始化伪随机数生成器。</p>
+</li>
+<li>
+<p>这个time()函数是要包含头文件的<code class="notranslate">#include &lt;time.h&gt;</code></p>
+</li>
+<li>
+<p>还可以加上一个猜数字的次数，如果只能猜10次，次数用完了就结束了，并告知要猜的数字~~</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">while</span> (<span class="pl-c1">1</span>)
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"次数还有%d\n"</span>, <span class="pl-s1">flag</span>);
+
+	<span class="pl-en">printf</span>(<span class="pl-s">"请输入猜的数字&gt;:"</span>);
+	<span class="pl-en">scanf</span>(<span class="pl-s">"%d"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">input</span>);
+	<span class="pl-k">if</span> (<span class="pl-s1">input</span> <span class="pl-c1">&gt;</span> <span class="pl-s1">random_num</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"猜大了\n"</span>);
+		<span class="pl-s1">flag</span><span class="pl-c1">--</span>;
+	}
+	<span class="pl-k">else</span> <span class="pl-k">if</span> (<span class="pl-s1">input</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">random_num</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"猜小了\n"</span>);
+		<span class="pl-s1">flag</span><span class="pl-c1">--</span>;
+	}
+	<span class="pl-k">else</span>
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"恭喜你，猜对了\n"</span>);
+		<span class="pl-k">break</span>;
+	}
+	<span class="pl-k">if</span> (<span class="pl-s1">flag</span> <span class="pl-c1">==</span> <span class="pl-c1">0</span>) {
+		<span class="pl-en">printf</span>(<span class="pl-s">"次数用完了，数字是%d"</span>, <span class="pl-s1">random_num</span>);
+		<span class="pl-k">break</span>;
+	}
+}</pre></div>
+<p>完整的代码：&gt;</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-s1">_CRT_SECURE_NO_WARNINGS</span> 1
+<span class="pl-k">#include</span> <span class="pl-s">&lt;stdlib.h&gt;</span>
+<span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-k">#include</span> <span class="pl-s">&lt;time.h&gt;</span>
+
+<span class="pl-c">//设置猜的数字次数多少</span>
+<span class="pl-k">#define</span> <span class="pl-c1">NUM</span> 10 
+
+<span class="pl-smi">void</span> <span class="pl-en">menu</span>()
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"**********************\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"******  1.play *******\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"******  0.exit *******\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"**********************\n"</span>);
+}
+
+<span class="pl-smi">void</span> <span class="pl-en">game</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">guess</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-en">rand</span>() % <span class="pl-c1">100</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">count</span> <span class="pl-c1">=</span> <span class="pl-c1">NUM</span>;
+	<span class="pl-k">while</span> (<span class="pl-c1">1</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"你还有%d次机会\n"</span>, <span class="pl-s1">count</span>);
+		<span class="pl-en">printf</span>(<span class="pl-s">"请猜数字:&gt;"</span>);
+		<span class="pl-en">scanf</span>(<span class="pl-s">"%d"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">guess</span>);
+		<span class="pl-k">if</span> (<span class="pl-s1">guess</span> <span class="pl-c1">&gt;</span> <span class="pl-s1">ret</span>)
+		{
+			<span class="pl-en">printf</span>(<span class="pl-s">"猜大了！\n"</span>);
+		}
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (<span class="pl-s1">guess</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">ret</span>)
+		{
+			<span class="pl-en">printf</span>(<span class="pl-s">"猜小了！\n"</span>);
+		}
+		<span class="pl-k">else</span>
+		{
+			<span class="pl-en">printf</span>(<span class="pl-s">"恭喜你，猜对了！\n"</span>);
+			<span class="pl-k">break</span>;
+		}
+		<span class="pl-s1">count</span><span class="pl-c1">--</span>;
+		<span class="pl-k">if</span> (<span class="pl-s1">count</span> <span class="pl-c1">==</span> <span class="pl-c1">0</span>)
+		{
+			<span class="pl-en">printf</span>(<span class="pl-s">"次数用完，正确的数字是%d\n"</span>, <span class="pl-s1">ret</span>);
+			<span class="pl-k">break</span>;
+		}
+	}
+}
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">input</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-en">srand</span>((<span class="pl-smi">unsigned <span class="pl-smi">int</span></span>)<span class="pl-en">time</span>(<span class="pl-c1">NULL</span>));<span class="pl-c">//生成随机数</span>
+	<span class="pl-k">do</span>
+	{
+		<span class="pl-en">menu</span>();
+		<span class="pl-en">printf</span>(<span class="pl-s">"请选择：&gt;"</span>);
+		<span class="pl-en">scanf</span>(<span class="pl-s">"%d"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">input</span>);
+		<span class="pl-k">switch</span> (<span class="pl-s1">input</span>)
+		{
+		<span class="pl-k">case</span> <span class="pl-c1">1</span>:
+			<span class="pl-en">game</span>();
+			<span class="pl-k">break</span>;
+		<span class="pl-k">case</span> <span class="pl-c1">0</span>:
+			<span class="pl-en">printf</span>(<span class="pl-s">"退出游戏！\n"</span>);
+			<span class="pl-k">break</span>;
+		<span class="pl-k">default</span>:
+			<span class="pl-en">printf</span>(<span class="pl-s">"选择错误，请重新选择！\n"</span>);
+			<span class="pl-k">break</span>;
+		}
+
+	} <span class="pl-k">while</span> (<span class="pl-s1">input</span>);
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/38cbe6f9775c8ba49765a9d16c039e84c88f57663d6d2224fab7078635b1be8e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65306633393238353966336234666232386437643137616339623032613334302e706e67"><img src="https://camo.githubusercontent.com/38cbe6f9775c8ba49765a9d16c039e84c88f57663d6d2224fab7078635b1be8e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65306633393238353966336234666232386437643137616339623032613334302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/e0f392859f3b4fb28d7d17ac9b02a340.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们最后增加了一个次数限制，这样我们对一个猜数字游戏有更有游戏体验感</li>
+</ul></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

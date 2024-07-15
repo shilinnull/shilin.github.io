@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## 前言
+>扫雷游戏是1992年发行的一款大众类益智游戏，对于许多80后、90后来说都是童年的回忆。">
+<meta property="og:title" content="5. C语言之数组应用——扫雷小游戏的实现【含递归展开】">
+<meta property="og:description" content="## 前言
+>扫雷游戏是1992年发行的一款大众类益智游戏，对于许多80后、90后来说都是童年的回忆。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/5.%20C-yu-yan-zhi-shu-zu-ying-yong-%E2%80%94%E2%80%94-sao-lei-xiao-you-xi-de-shi-xian-%E3%80%90-han-di-gui-zhan-kai-%E3%80%91.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>5. C语言之数组应用——扫雷小游戏的实现【含递归展开】</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">5. C语言之数组应用——扫雷小游戏的实现【含递归展开】</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/29" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>前言</h2>
+<blockquote>
+<p>扫雷游戏是1992年发行的一款大众类益智游戏，对于许多80后、90后来说都是童年的回忆。如今三十年过去了，这款游戏依旧受到很多网友的喜爱，今天我们一起来模拟实现一下扫雷游戏。<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c24789fd12e7c0bdc5d76c85782b1ee16545b7dd70063d97fca3e4609ad2b5cf/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39623939366262303230616634343363393532613030353432366138323864302e706e67"><img src="https://camo.githubusercontent.com/c24789fd12e7c0bdc5d76c85782b1ee16545b7dd70063d97fca3e4609ad2b5cf/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39623939366262303230616634343363393532613030353432366138323864302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/9b996bb020af443c952a005426a828d0.png" style="max-width: 100%;"></a></p>
+</blockquote>
+<p>本文所用的编译器是VS2022</p>
+<h2>一、扫雷游戏代码设计思路</h2>
+<p>这里我们使用模块化设计，模块化设计就是把各个模块的代码分别放在各个新建的<code class="notranslate">.c</code>文件里，在<code class="notranslate">.h</code>文件里提供外部可调用函数的声明，其它<code class="notranslate">.c</code>文件想使用其中的代码时，只需要<code class="notranslate">#include "XXX.h"</code>文件即可。使用模块化编程可极大的提高代码的可阅读性、可维护性、可移植性等。</p>
+<ol>
+<li>创建菜单函数【选择进入游戏（1）或者退出游戏（0）】</li>
+<li>实现9x9扫雷</li>
+<li>初始化棋盘</li>
+<li>打印棋盘</li>
+<li>随机布置雷的位置</li>
+<li>排查雷的信息</li>
+</ol>
+<blockquote>
+<p>检查输入坐标是不是雷<br>
+如果这个位置不是雷，就计算这个位置的周围8个坐标有几个雷，并显示雷的个数<br>
+如果这个位置是雷，就炸死了，游戏结束<br>
+如果把不是雷的位置都找出来了，那游戏也结束了</p>
+</blockquote>
+<h2>二、设计扫雷代码</h2>
+<h3>1.创建菜单函数</h3>
+<blockquote>
+<p><strong>菜单界面函数实际上就像是我们的一个界面，就好比是游戏的界面目录，餐馆当中的菜单。一样的道理。这个是库函数就有的我们只需要直接引用下即可。</strong></p>
+</blockquote>
+<p><strong>game函数的实现</strong></p>
+<p><strong>主要功能如下：</strong></p>
+<blockquote>
+<p><strong>1.创建并初始化棋盘</strong></p>
+<p><strong>2.设置雷的位置（使用rand函数）</strong></p>
+<p><strong>3.打印棋盘信息</strong></p>
+<p><strong>4.排查雷：a.展开一片非雷区域</strong></p>
+<p>​                   <strong>b.显示周围雷的个数</strong></p>
+<p>​          	     <strong>c.判断游戏输赢</strong></p>
+</blockquote>
+<p><strong>代码示例:</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-s1">_CRT_SECURE_NO_WARNINGS</span> 1
+<span class="pl-k">#include</span><span class="pl-s">"game.h"</span>
+
+<span class="pl-smi">void</span> <span class="pl-en">enmu</span>() {
+	<span class="pl-en">printf</span>(<span class="pl-s">"\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"***********************\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"*******  1.play  ******\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"*******  0.exit  ******\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"***********************\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"\n"</span>);
+}
+
+<span class="pl-smi">void</span> <span class="pl-en">game</span>() {
+	<span class="pl-c">//游戏代码逻辑</span>
+	<span class="pl-c">//创建数组</span>
+	<span class="pl-smi">char</span> <span class="pl-s1">mine</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>];
+	<span class="pl-smi">char</span> <span class="pl-s1">show</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>];
+	<span class="pl-c">//初始化棋盘</span>
+	<span class="pl-en">InitBoard</span>(<span class="pl-s1">mine</span>, <span class="pl-c1">ROWS</span>, <span class="pl-c1">COLS</span>, <span class="pl-c1">'0'</span>);
+	<span class="pl-en">InitBoard</span>(<span class="pl-s1">show</span>, <span class="pl-c1">ROWS</span>, <span class="pl-c1">COLS</span>, <span class="pl-c1">'*'</span>);
+	<span class="pl-en">DisplayBoard</span>(<span class="pl-s1">show</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+	<span class="pl-c">//布置雷</span>
+	<span class="pl-en">SetMine</span>(<span class="pl-s1">mine</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+	<span class="pl-c">//DisplayBoard(mine, ROW, COL);</span>
+	<span class="pl-c">//排查雷</span>
+	<span class="pl-en">FindMine</span>(<span class="pl-s1">mine</span>,<span class="pl-s1">show</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+
+} 
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>() {
+	<span class="pl-en">srand</span>((<span class="pl-smi">unsigned <span class="pl-smi">int</span></span>)<span class="pl-en">time</span>(<span class="pl-c1">NULL</span>));
+	<span class="pl-smi">int</span> <span class="pl-s1">input</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-k">do</span> {
+		<span class="pl-en">enmu</span>();
+		<span class="pl-en">printf</span>(<span class="pl-s">"请选择：&gt;"</span>);
+		<span class="pl-en">scanf</span>(<span class="pl-s">"%d"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">input</span>);
+		<span class="pl-k">switch</span> (<span class="pl-s1">input</span>) {
+		<span class="pl-k">case</span> <span class="pl-c1">1</span>:
+			<span class="pl-en">game</span>();
+			<span class="pl-k">break</span>;
+		<span class="pl-k">case</span> <span class="pl-c1">0</span>:
+			<span class="pl-en">printf</span>(<span class="pl-s">"退出游戏"</span>);
+			<span class="pl-k">break</span>;
+		<span class="pl-k">default</span>:
+			<span class="pl-en">printf</span>(<span class="pl-s">"选择错误，请重新选择!\n"</span>);
+			<span class="pl-k">break</span>;
+		}
+	} <span class="pl-k">while</span> (<span class="pl-s1">input</span>);
+}</pre></div>
+<p>效果图：</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1ae89cc9188b9661babf4080b84d9a53c6b3ba4144d0df615e786b0bfa3f7490/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30346162353966656336333334643264393865373166623434346630616231622e706e67"><img src="https://camo.githubusercontent.com/1ae89cc9188b9661babf4080b84d9a53c6b3ba4144d0df615e786b0bfa3f7490/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30346162353966656336333334643264393865373166623434346630616231622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/04ab59fec6334d2d98e71fb444f0ab1b.png" style="max-width: 100%;"></a></p>
+<h3>2.实现9x9扫雷</h3>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-c1">ROW</span> 9
+<span class="pl-k">#define</span> <span class="pl-c1">COL</span> 9</pre></div>
+<p><strong>使用 #define 宏定义在这里的好处：</strong></p>
+<blockquote>
+<ul>
+<li>方便程序的修改，不用对整个程序进行修改，只需对宏定义上进行修改。</li>
+<li>提高程序的运行效率，更加方便模块化。</li>
+<li>在9x9扫雷基础上，只需改变宏定义的值，就可以实现NxN扫雷的效果。</li>
+</ul>
+</blockquote>
+<h3>3.初始化棋盘</h3>
+<blockquote>
+<p><strong>数组最开始存放的是空格，达到为打印棋盘做准备的一个初始化棋盘的实现。</strong></p>
+</blockquote>
+<p><strong>初始化棋盘首先要创建两个数组，一个是mine数组存放雷的信息，一个数组是show显示排查雷的位置；我们封装一个InitBoard的函数来实现对以上两个数组的初始化。</strong><br>
+<strong>注</strong>：这里传参时的set是决定数组初始化的内容，所以多传了一个参数。只要调用两次这个InitBoard函数就可以实现两个数组的初始化。<br>
+这里是函数的传参，封装在game函数里面**</p>
+<blockquote>
+<p>在game.h文件中#define定义了以下符号ROWS,COLS,ROW,COL</p>
+</blockquote>
+<p>这定义11*11的数组是为了防止数组越界访问</p>
+<p>game.h</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-c1">ROWS</span> ROW+2
+<span class="pl-k">#define</span> <span class="pl-c1">COLS</span> COL+2</pre></div>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">InitBoard</span>(<span class="pl-smi">char</span> <span class="pl-s1">board</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">int</span> <span class="pl-s1">rows</span>, <span class="pl-smi">int</span> <span class="pl-s1">cols</span>, <span class="pl-smi">char</span> <span class="pl-s1">set</span>) {
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-k">for</span> (<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">rows</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>) {
+		<span class="pl-k">for</span> (<span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">j</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">cols</span>; <span class="pl-s1">j</span><span class="pl-c1">++</span>) {
+			<span class="pl-s1">board</span>[<span class="pl-s1">i</span>][<span class="pl-s1">j</span>] <span class="pl-c1">=</span> <span class="pl-s1">set</span>;
+		}
+	}
+}</pre></div>
+<h3>4.打印棋盘</h3>
+<blockquote>
+<p>打印棋盘，本质上是打印数组的内容。</p>
+</blockquote>
+<p><strong>代码示例：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">DisplayBoard</span>(<span class="pl-smi">char</span> <span class="pl-s1">board</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">int</span> <span class="pl-s1">row</span>, <span class="pl-smi">int</span> <span class="pl-s1">col</span>) {
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-en">printf</span>(<span class="pl-s">"---------扫雷--------\n"</span>);
+	<span class="pl-k">for</span> (<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> &lt;= <span class="pl-s1">col</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>) {
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">i</span>);<span class="pl-c">//打印行</span>
+	}
+	<span class="pl-en">printf</span>(<span class="pl-s">"\n"</span>);
+	<span class="pl-k">for</span> (<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span> &lt;= <span class="pl-s1">row</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>) {
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">i</span>);<span class="pl-c">//打印列</span>
+		<span class="pl-k">for</span> (<span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>; <span class="pl-s1">j</span> &lt;= <span class="pl-s1">col</span>; <span class="pl-s1">j</span><span class="pl-c1">++</span>) {
+			<span class="pl-en">printf</span>(<span class="pl-s">"%c "</span>, <span class="pl-s1">board</span>[<span class="pl-s1">i</span>][<span class="pl-s1">j</span>]);
+		}
+		<span class="pl-en">printf</span>(<span class="pl-s">"\n"</span>);
+	}
+	<span class="pl-en">printf</span>(<span class="pl-s">"---------扫雷--------\n"</span>);
+}</pre></div>
+<p>效果图：</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1292850210e2bab3b1282d7173b3524319a75ff9c44f98ce23687db9502d37aa/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61353064356338313330636134373934396139646636373435323633353232652e706e67"><img src="https://camo.githubusercontent.com/1292850210e2bab3b1282d7173b3524319a75ff9c44f98ce23687db9502d37aa/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61353064356338313330636134373934396139646636373435323633353232652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/a50d5c8130ca47949a9df6745263522e.png" style="max-width: 100%;"></a></p>
+<h3>5.随机布置雷的位置</h3>
+<blockquote>
+<ul>
+<li><strong>字符‘1’表示雷</strong></li>
+<li><strong>字符‘0’表示不是雷</strong></li>
+<li><strong>字符星号表示还没有被排查过的位置</strong></li>
+<li><strong>在布置雷这里，我们又需要用到rand这个随机函数了，需要用到&lt;stdlib.h&gt;头文件，这个函数在使用前，需要使用srand这个函数，srand这个函数的使用只需要调用一次，srand函数在使用时需要一个随机种子，这个随机种子可以用时间戳，所以需要用到&lt;time.h&gt;的头文件</strong></li>
+<li><strong>这里的EASY_COUNT在game.h文件中#define声明了这个符号为10，这是布置雷的个数</strong></li>
+</ul>
+</blockquote>
+<p>game.h</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-k">#include</span> <span class="pl-s">&lt;stdlib.h&gt;</span>
+<span class="pl-k">#include</span> <span class="pl-s">&lt;time.h&gt;</span>
+<span class="pl-c">//要布置的雷个数</span>
+<span class="pl-k">#define</span> <span class="pl-c1">EASY_COUNT</span> 10
+<span class="pl-c">//布置雷</span>
+<span class="pl-smi">void</span> <span class="pl-en">SetMine</span>(<span class="pl-smi">char</span> <span class="pl-s1">mine</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">int</span> <span class="pl-s1">row</span>, <span class="pl-smi">int</span> <span class="pl-s1">col</span>);</pre></div>
+<p>game.c</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">SetMine</span>(<span class="pl-smi">char</span> <span class="pl-s1">mine</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">int</span> <span class="pl-s1">row</span>, <span class="pl-smi">int</span> <span class="pl-s1">col</span>) {
+	<span class="pl-smi">int</span> <span class="pl-s1">count</span> <span class="pl-c1">=</span> <span class="pl-c1">EASY_COUNT</span>;
+	<span class="pl-k">while</span> (<span class="pl-s1">count</span>) {
+		<span class="pl-smi">int</span> <span class="pl-s1">x</span> <span class="pl-c1">=</span> <span class="pl-en">rand</span>() % <span class="pl-s1">row</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>;
+		<span class="pl-smi">int</span> <span class="pl-s1">y</span> <span class="pl-c1">=</span> <span class="pl-en">rand</span>() % <span class="pl-s1">col</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>;
+		<span class="pl-k">if</span> (<span class="pl-c1">'0'</span> <span class="pl-c1">==</span> <span class="pl-s1">mine</span>[<span class="pl-s1">x</span>][<span class="pl-s1">y</span>])
+		{
+			<span class="pl-s1">mine</span>[<span class="pl-s1">x</span>][<span class="pl-s1">y</span>] <span class="pl-c1">=</span> <span class="pl-c1">'1'</span>;
+			<span class="pl-s1">count</span><span class="pl-c1">--</span>;
+		}
+	}
+}</pre></div>
+<h3>6.排查雷的信息</h3>
+<p><strong>排查雷的信息，我们需要考虑到排查雷的信息是一个循环，所以需要用到while语句；什么时候结束呢？</strong></p>
+<p>row*col个字符中有10个雷，只有当我们把所有不是雷的位置排查完，游戏才算赢，我们在while条件判断里面写win &lt; (row * col - EASY_COUNT)作为输赢的条件；</p>
+<blockquote>
+<p>输入的坐标值必须在9x9的范围内</p>
+</blockquote>
+<ol>
+<li>如果坐标不在9x9的范围内，则这个坐标是非法的</li>
+<li>如果输入的坐标位置的内容不是星号则表示该坐标位置已经被排查过，</li>
+<li>如果输入的坐标位置上的字符等于‘1’，则表示这个坐标是雷，游戏结束</li>
+<li>如果以上都不是，则显示目标位置周围的8的坐标的雷的数量，排查一个win++；</li>
+<li>只有当win等于总字符数减去雷的个数时，才表示排雷成功；</li>
+</ol>
+<p>game.h</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">FindMine</span>(<span class="pl-smi">char</span> <span class="pl-s1">mine</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">char</span> <span class="pl-s1">show</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">int</span> <span class="pl-s1">row</span>, <span class="pl-smi">int</span> <span class="pl-s1">col</span>);</pre></div>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">GetMineCount</span>(<span class="pl-smi">char</span> <span class="pl-s1">mine</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>],<span class="pl-smi">int</span> <span class="pl-s1">x</span>, <span class="pl-smi">int</span> <span class="pl-s1">y</span>) {
+	<span class="pl-k">return</span> <span class="pl-s1">mine</span>[<span class="pl-s1">x</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>][<span class="pl-s1">y</span>] <span class="pl-c1">+</span>
+		<span class="pl-s1">mine</span>[<span class="pl-s1">x</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>][<span class="pl-s1">y</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>] <span class="pl-c1">+</span>
+		<span class="pl-s1">mine</span>[<span class="pl-s1">x</span>][<span class="pl-s1">y</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>] <span class="pl-c1">+</span>
+		<span class="pl-s1">mine</span>[<span class="pl-s1">x</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>][<span class="pl-s1">y</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>] <span class="pl-c1">+</span>
+		<span class="pl-s1">mine</span>[<span class="pl-s1">x</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>][<span class="pl-s1">y</span>] <span class="pl-c1">+</span>
+		<span class="pl-s1">mine</span>[<span class="pl-s1">x</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>][<span class="pl-s1">y</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>] <span class="pl-c1">+</span>
+		<span class="pl-s1">mine</span>[<span class="pl-s1">x</span>][<span class="pl-s1">y</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>] <span class="pl-c1">+</span>
+		<span class="pl-s1">mine</span>[<span class="pl-s1">x</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>][<span class="pl-s1">y</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>] <span class="pl-c1">-</span> <span class="pl-c1">8</span> <span class="pl-c1">*</span> <span class="pl-c1">'0'</span>;
+}
+
+<span class="pl-smi">void</span> <span class="pl-en">FindMine</span>(<span class="pl-smi">char</span> <span class="pl-s1">mine</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">char</span> <span class="pl-s1">show</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">int</span> <span class="pl-s1">row</span>, <span class="pl-smi">int</span> <span class="pl-s1">col</span>) {
+	<span class="pl-smi">int</span> <span class="pl-s1">x</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">y</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">win</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-k">while</span> (<span class="pl-s1">win</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">row</span> <span class="pl-c1">*</span> <span class="pl-s1">col</span> <span class="pl-c1">+</span> <span class="pl-c1">EASY_COUNT</span>) {
+		<span class="pl-en">printf</span>(<span class="pl-s">"请输入坐标，进行排查雷：&gt;"</span>);
+		<span class="pl-en">scanf</span>(<span class="pl-s">"%d%d"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">x</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">y</span>);
+		<span class="pl-k">if</span> (<span class="pl-s1">x</span> &gt;= <span class="pl-c1">1</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">x</span> &lt;= <span class="pl-s1">row</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">y</span> &gt;= <span class="pl-c1">1</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">y</span> &lt;= <span class="pl-s1">col</span>) {
+			<span class="pl-k">if</span> (<span class="pl-s1">show</span>[<span class="pl-s1">x</span>][<span class="pl-s1">y</span>] <span class="pl-c1">!=</span> <span class="pl-c1">'*'</span>){
+				<span class="pl-en">printf</span>(<span class="pl-s">"该坐标被排查了，请重新输入坐标\n"</span>);
+			}
+			<span class="pl-k">else</span> <span class="pl-k">if</span> (<span class="pl-c1">'1'</span> <span class="pl-c1">==</span> <span class="pl-s1">mine</span>[<span class="pl-s1">x</span>][<span class="pl-s1">y</span>]) {
+				<span class="pl-en">printf</span>(<span class="pl-s">"很遗憾，被炸死了!\n"</span>);
+				<span class="pl-en">DisplayBoard</span>(<span class="pl-s1">mine</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+				<span class="pl-k">break</span>;
+			}
+			<span class="pl-k">else</span> {
+				<span class="pl-smi">int</span> <span class="pl-s1">c</span> <span class="pl-c1">=</span> <span class="pl-en">GetMineCount</span>(<span class="pl-s1">mine</span>, <span class="pl-s1">x</span>, <span class="pl-s1">y</span>);
+				<span class="pl-s1">show</span>[<span class="pl-s1">x</span>][<span class="pl-s1">y</span>] <span class="pl-c1">=</span> <span class="pl-s1">c</span> <span class="pl-c1">+</span> <span class="pl-c1">'0'</span>;
+				<span class="pl-en">DisplayBoard</span>(<span class="pl-s1">show</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+				<span class="pl-s1">win</span><span class="pl-c1">++</span>;
+			}
+		}
+		<span class="pl-k">else</span> {
+			<span class="pl-en">printf</span>(<span class="pl-s">"坐标输入非法，请重新输入!\n"</span>);
+		}
+		<span class="pl-k">if</span> (<span class="pl-s1">win</span> <span class="pl-c1">==</span> <span class="pl-s1">row</span> <span class="pl-c1">*</span> <span class="pl-s1">col</span> <span class="pl-c1">-</span> <span class="pl-c1">EASY_COUNT</span>) {
+			<span class="pl-en">printf</span>(<span class="pl-s">"恭喜你，排雷成功\n"</span>);
+			<span class="pl-en">DisplayBoard</span>(<span class="pl-s1">mine</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+		}
+	}
+}</pre></div>
+<h3>7.递归展开</h3>
+<ul>
+<li>函数接受三个参数：<code class="notranslate">mine</code>，<code class="notranslate">show</code>，以及要展开的单元格的坐标 <code class="notranslate">x</code> 和 <code class="notranslate">y</code>。</li>
+<li>检查坐标（x，y）是否在地雷场边界内（ROWS和COLS）。</li>
+<li>如果坐标（x，y）处的单元格为空（周围的地雷数为0），则递归探索并展开相邻单元格，直到到达具有非零地雷数的单元格。</li>
+<li>如果单元格周围有地雷，它显示地雷的数量。</li>
+<li>每次成功展开单元格时，变量 <code class="notranslate">win</code> 都会递增。</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">expand</span>(<span class="pl-smi">char</span> <span class="pl-s1">mine</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">char</span> <span class="pl-s1">show</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">int</span> <span class="pl-s1">x</span>, <span class="pl-smi">int</span> <span class="pl-s1">y</span>, <span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">win</span>)
+{
+
+	<span class="pl-k">if</span> (<span class="pl-s1">x</span> &gt;= <span class="pl-c1">1</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">x</span> &lt;= <span class="pl-c1">ROW</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">y</span> &gt;= <span class="pl-c1">1</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">y</span> &lt;= <span class="pl-c1">COL</span>) <span class="pl-c">//限制在棋盘内展开，防止越界</span>
+	{
+		<span class="pl-smi">int</span> <span class="pl-s1">count</span> <span class="pl-c1">=</span> <span class="pl-en">GetMineCount</span>(<span class="pl-s1">mine</span>, <span class="pl-s1">x</span>, <span class="pl-s1">y</span>);<span class="pl-c">//获取雷数</span>
+
+		<span class="pl-k">if</span> (<span class="pl-s1">count</span> <span class="pl-c1">==</span> <span class="pl-c1">0</span>) <span class="pl-c">//四周没雷，进入递归展开</span>
+		{
+			<span class="pl-s1">show</span>[<span class="pl-s1">x</span>][<span class="pl-s1">y</span>] <span class="pl-c1">=</span> <span class="pl-c1">' '</span>;<span class="pl-c">//四周没雷的改为 空格  ' '</span>
+
+			<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+			<span class="pl-c">//向四周共8个位置递归</span>
+			<span class="pl-k">for</span> (<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-s1">x</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span> &lt;= <span class="pl-s1">x</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+			{
+				<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+				<span class="pl-k">for</span> (<span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-s1">y</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>; <span class="pl-s1">j</span> &lt;= <span class="pl-s1">y</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>; <span class="pl-s1">j</span><span class="pl-c1">++</span>)
+				{
+
+					<span class="pl-c">//只对 '*' 进行展开，防止死循环</span>
+					<span class="pl-k">if</span> (<span class="pl-s1">show</span>[<span class="pl-s1">i</span>][<span class="pl-s1">j</span>] <span class="pl-c1">==</span> <span class="pl-c1">'*'</span>)
+					{
+						<span class="pl-en">expand</span>(<span class="pl-s1">mine</span>, <span class="pl-s1">show</span>, <span class="pl-s1">i</span>, <span class="pl-s1">j</span>, <span class="pl-s1">win</span>);
+					}
+				}
+			}
+		}
+		<span class="pl-k">else</span>   <span class="pl-c">//四周有雷显示雷数</span>
+		{
+			<span class="pl-s1">show</span>[<span class="pl-s1">x</span>][<span class="pl-s1">y</span>] <span class="pl-c1">=</span> <span class="pl-s1">count</span> <span class="pl-c1">+</span> <span class="pl-c1">'0'</span>;
+		}
+		<span class="pl-c">//记录展开的数量</span>
+		(<span class="pl-c1">*</span><span class="pl-s1">win</span>)<span class="pl-c1">++</span>;
+	}
+}</pre></div>
+<h2>三、源码</h2>
+<h3>1.新建一个test.c源文件</h3>
+<blockquote>
+<p><strong>test.c文件用来存放游戏的逻辑代码。</strong></p>
+</blockquote>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-s1">_CRT_SECURE_NO_WARNINGS</span> 1
+<span class="pl-k">#include</span> <span class="pl-s">"game.h"</span>
+
+
+<span class="pl-smi">void</span> <span class="pl-en">menu</span>()
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"***********************\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"******  1. play   *****\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"******  0. exit   *****\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"***********************\n"</span>);
+}
+
+<span class="pl-smi">void</span> <span class="pl-en">game</span>()
+{
+	<span class="pl-c">//数组</span>
+	<span class="pl-smi">char</span> <span class="pl-s1">mine</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>];<span class="pl-c">//'0'</span>
+	<span class="pl-smi">char</span> <span class="pl-s1">show</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>];<span class="pl-c">//'*'</span>
+	<span class="pl-en">InitBoard</span>(<span class="pl-s1">mine</span>, <span class="pl-c1">ROWS</span>, <span class="pl-c1">COLS</span>, <span class="pl-c1">'0'</span>);
+	<span class="pl-en">InitBoard</span>(<span class="pl-s1">show</span>, <span class="pl-c1">ROWS</span>, <span class="pl-c1">COLS</span>, <span class="pl-c1">'*'</span>);
+	<span class="pl-c">//棋盘打印</span>
+	<span class="pl-c">//DisplayBoard(mine, ROW, COL);</span>
+	<span class="pl-en">DisplayBoard</span>(<span class="pl-s1">show</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+
+	<span class="pl-c">//布置雷</span>
+	<span class="pl-en">SetMine</span>(<span class="pl-s1">mine</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+	<span class="pl-c">//DisplayBoard(mine, ROW, COL);</span>
+
+	<span class="pl-c">//排查雷</span>
+	<span class="pl-en">FindMine</span>(<span class="pl-s1">mine</span>, <span class="pl-s1">show</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+}
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">input</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-en">srand</span>((<span class="pl-smi">unsigned <span class="pl-smi">int</span></span>)<span class="pl-en">time</span>(<span class="pl-c1">NULL</span>));
+	<span class="pl-k">do</span>
+	{
+		<span class="pl-en">menu</span>();
+		<span class="pl-en">printf</span>(<span class="pl-s">"请选择:&gt;"</span>);
+		<span class="pl-en">scanf</span>(<span class="pl-s">"%d"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">input</span>);
+		<span class="pl-k">switch</span> (<span class="pl-s1">input</span>)
+		{
+		<span class="pl-k">case</span> <span class="pl-c1">1</span>:
+			<span class="pl-en">game</span>();
+			<span class="pl-k">break</span>;
+		<span class="pl-k">case</span> <span class="pl-c1">0</span>:
+			<span class="pl-en">printf</span>(<span class="pl-s">"退出游戏\n"</span>);
+			<span class="pl-k">break</span>;
+		<span class="pl-k">default</span>:
+			<span class="pl-en">printf</span>(<span class="pl-s">"选择错误，重新选择\n"</span>);
+			<span class="pl-k">break</span>;
+		}
+		<span class="pl-c">//...</span>
+	} <span class="pl-k">while</span> (<span class="pl-s1">input</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h3>2.新建一个game.c源文件</h3>
+<blockquote>
+<p><strong>game.c文件用来存放函数的定义。</strong></p>
+</blockquote>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-s1">_CRT_SECURE_NO_WARNINGS</span> 1
+
+<span class="pl-k">#include</span> <span class="pl-s">"game.h"</span>
+
+
+<span class="pl-smi">void</span> <span class="pl-en">InitBoard</span>(<span class="pl-smi">char</span> <span class="pl-s1">board</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">int</span> <span class="pl-s1">rows</span>, <span class="pl-smi">int</span> <span class="pl-s1">cols</span>, <span class="pl-smi">char</span> <span class="pl-s1">set</span>)
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-k">for</span> (<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">rows</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+		<span class="pl-k">for</span> (<span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">j</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">cols</span>; <span class="pl-s1">j</span><span class="pl-c1">++</span>)
+		{
+			<span class="pl-s1">board</span>[<span class="pl-s1">i</span>][<span class="pl-s1">j</span>] <span class="pl-c1">=</span> <span class="pl-s1">set</span>;
+		}
+	}
+}
+
+
+<span class="pl-smi">void</span> <span class="pl-en">DisplayBoard</span>(<span class="pl-smi">char</span> <span class="pl-s1">board</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">int</span> <span class="pl-s1">row</span>, <span class="pl-smi">int</span> <span class="pl-s1">col</span>)
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-en">printf</span>(<span class="pl-s">"--------扫雷游戏-------\n"</span>);
+	<span class="pl-k">for</span> (<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> &lt;= <span class="pl-s1">row</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">i</span>);
+	}
+	<span class="pl-en">printf</span>(<span class="pl-s">"\n"</span>);
+	<span class="pl-k">for</span> (<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span> &lt;= <span class="pl-s1">row</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">i</span>);
+		<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+		<span class="pl-k">for</span> (<span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>; <span class="pl-s1">j</span> &lt;= <span class="pl-s1">col</span>; <span class="pl-s1">j</span><span class="pl-c1">++</span>)
+		{
+			<span class="pl-en">printf</span>(<span class="pl-s">"%c "</span>, <span class="pl-s1">board</span>[<span class="pl-s1">i</span>][<span class="pl-s1">j</span>]);
+		}
+		<span class="pl-en">printf</span>(<span class="pl-s">"\n"</span>);
+	}
+	<span class="pl-en">printf</span>(<span class="pl-s">"--------扫雷游戏-------\n"</span>);
+}
+
+<span class="pl-smi">void</span> <span class="pl-en">SetMine</span>(<span class="pl-smi">char</span> <span class="pl-s1">mine</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">int</span> <span class="pl-s1">row</span>, <span class="pl-smi">int</span> <span class="pl-s1">col</span>)
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">count</span> <span class="pl-c1">=</span> <span class="pl-c1">EASY_COUNT</span>;
+
+	<span class="pl-k">while</span> (<span class="pl-s1">count</span>)
+	{
+		<span class="pl-smi">int</span> <span class="pl-s1">x</span> <span class="pl-c1">=</span> <span class="pl-en">rand</span>() % <span class="pl-s1">row</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>;
+		<span class="pl-smi">int</span> <span class="pl-s1">y</span> <span class="pl-c1">=</span> <span class="pl-en">rand</span>() % <span class="pl-s1">col</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>;
+		<span class="pl-k">if</span> (<span class="pl-s1">mine</span>[<span class="pl-s1">x</span>][<span class="pl-s1">y</span>] <span class="pl-c1">==</span> <span class="pl-c1">'0'</span>)
+		{
+			<span class="pl-s1">mine</span>[<span class="pl-s1">x</span>][<span class="pl-s1">y</span>] <span class="pl-c1">=</span> <span class="pl-c1">'1'</span>;
+			<span class="pl-s1">count</span><span class="pl-c1">--</span>;
+		}
+	}
+}
+
+<span class="pl-k">static</span> <span class="pl-smi">int</span> <span class="pl-en">GetMineCount</span>(<span class="pl-smi">char</span> <span class="pl-s1">mine</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">int</span> <span class="pl-s1">x</span>, <span class="pl-smi">int</span> <span class="pl-s1">y</span>)
+{
+	<span class="pl-k">return</span> (<span class="pl-s1">mine</span>[<span class="pl-s1">x</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>][<span class="pl-s1">y</span>] <span class="pl-c1">+</span>
+		<span class="pl-s1">mine</span>[<span class="pl-s1">x</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>][<span class="pl-s1">y</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>] <span class="pl-c1">+</span>
+		<span class="pl-s1">mine</span>[<span class="pl-s1">x</span>][<span class="pl-s1">y</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>] <span class="pl-c1">+</span>
+		<span class="pl-s1">mine</span>[<span class="pl-s1">x</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>][<span class="pl-s1">y</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>] <span class="pl-c1">+</span>
+		<span class="pl-s1">mine</span>[<span class="pl-s1">x</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>][<span class="pl-s1">y</span>] <span class="pl-c1">+</span>
+		<span class="pl-s1">mine</span>[<span class="pl-s1">x</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>][<span class="pl-s1">y</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>] <span class="pl-c1">+</span>
+		<span class="pl-s1">mine</span>[<span class="pl-s1">x</span>][<span class="pl-s1">y</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>] <span class="pl-c1">+</span>
+		<span class="pl-s1">mine</span>[<span class="pl-s1">x</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>][<span class="pl-s1">y</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>] <span class="pl-c1">-</span> <span class="pl-c1">8</span> <span class="pl-c1">*</span> <span class="pl-c1">'0'</span>);
+}
+
+
+<span class="pl-smi">void</span> <span class="pl-en">FindMine</span>(<span class="pl-smi">char</span> <span class="pl-s1">mine</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">char</span> <span class="pl-s1">show</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">int</span> <span class="pl-s1">row</span>, <span class="pl-smi">int</span> <span class="pl-s1">col</span>)
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">x</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>, <span class="pl-s1">y</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>, <span class="pl-s1">z</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">win</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;;<span class="pl-c">// 用于判断是否所有的雷已经排尽</span>
+	<span class="pl-smi">int</span> <span class="pl-s1">s</span> <span class="pl-c1">=</span> <span class="pl-c1">EASY_COUNT</span>;<span class="pl-c">//雷数</span>
+	<span class="pl-k">while</span> (<span class="pl-s1">win</span> <span class="pl-c1">&lt;</span> (<span class="pl-s1">row</span> <span class="pl-c1">*</span> <span class="pl-s1">col</span>) <span class="pl-c1">-</span> <span class="pl-s1">s</span>)
+	{
+		<span class="pl-en">system</span>(<span class="pl-s">"cls"</span>);
+		<span class="pl-k">if</span> (<span class="pl-s1">z</span> <span class="pl-c1">==</span> <span class="pl-c1">0</span>)
+		{
+			<span class="pl-en">printf</span>(<span class="pl-s">"游戏开始\n"</span>);
+		}
+		<span class="pl-k">if</span> (<span class="pl-s1">z</span> <span class="pl-c1">&gt;</span> <span class="pl-c1">0</span>)
+		{
+			<span class="pl-en">printf</span>(<span class="pl-s">"\n"</span>);
+		}
+		<span class="pl-en">DisplayBoard</span>(<span class="pl-s1">show</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+		<span class="pl-en">printf</span>(<span class="pl-s">"请输入要排查的坐标:&gt;"</span>);
+		<span class="pl-en">scanf</span>(<span class="pl-s">"%d %d"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">x</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">y</span>);
+		<span class="pl-k">if</span> (<span class="pl-s1">x</span> &gt;= <span class="pl-c1">1</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">x</span> &lt;= <span class="pl-s1">row</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">y</span> &gt;= <span class="pl-c1">1</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">y</span> &lt;= <span class="pl-s1">col</span>)
+		{
+			<span class="pl-k">if</span> (<span class="pl-s1">mine</span>[<span class="pl-s1">x</span>][<span class="pl-s1">y</span>] <span class="pl-c1">==</span> <span class="pl-c1">'1'</span>)
+			{
+
+				<span class="pl-en">system</span>(<span class="pl-s">"cls"</span>);
+				<span class="pl-en">printf</span>(<span class="pl-s">"很遗憾，被炸死了!!1\n"</span>);
+				<span class="pl-en">DisplayBoard</span>(<span class="pl-s1">mine</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+				<span class="pl-k">break</span>;
+			}
+			<span class="pl-k">else</span>
+			{
+				<span class="pl-en">expand</span>(<span class="pl-s1">mine</span>, <span class="pl-s1">show</span>, <span class="pl-s1">x</span>, <span class="pl-s1">y</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">win</span>);
+
+				<span class="pl-c">//统计周围雷数</span>
+				<span class="pl-smi">int</span> <span class="pl-s1">c</span> <span class="pl-c1">=</span> <span class="pl-en">GetMineCount</span>(<span class="pl-s1">mine</span>, <span class="pl-s1">x</span>, <span class="pl-s1">y</span>);
+				<span class="pl-s1">show</span>[<span class="pl-s1">x</span>][<span class="pl-s1">y</span>] <span class="pl-c1">=</span> <span class="pl-s1">c</span> <span class="pl-c1">+</span> <span class="pl-c1">'0'</span>;<span class="pl-c">// 字符0ascll为48 1为49 加字符即可打印出周围集合的相关的字符</span>
+				<span class="pl-c">//每排查一次打印一次棋盘</span>
+				<span class="pl-en">DisplayBoard</span>(<span class="pl-s1">mine</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+				<span class="pl-s1">win</span><span class="pl-c1">++</span>;
+			}
+		}
+		<span class="pl-k">else</span>
+		{
+			<span class="pl-en">printf</span>(<span class="pl-s">"坐标非法请重新输入\n"</span>);
+		}
+		<span class="pl-s1">z</span><span class="pl-c1">++</span>;
+	}
+	<span class="pl-k">if</span> (<span class="pl-s1">win</span> <span class="pl-c1">==</span> (<span class="pl-s1">row</span> <span class="pl-c1">*</span> <span class="pl-s1">col</span>) <span class="pl-c1">-</span> <span class="pl-s1">s</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"恭喜你，排雷成功\n"</span>);
+		<span class="pl-en">DisplayBoard</span>(<span class="pl-s1">mine</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+
+	}
+}
+
+
+<span class="pl-smi">void</span> <span class="pl-en">expand</span>(<span class="pl-smi">char</span> <span class="pl-s1">mine</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">char</span> <span class="pl-s1">show</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">int</span> <span class="pl-s1">x</span>, <span class="pl-smi">int</span> <span class="pl-s1">y</span>, <span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">win</span>)
+{
+
+	<span class="pl-k">if</span> (<span class="pl-s1">x</span> &gt;= <span class="pl-c1">1</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">x</span> &lt;= <span class="pl-c1">ROW</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">y</span> &gt;= <span class="pl-c1">1</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">y</span> &lt;= <span class="pl-c1">COL</span>) <span class="pl-c">//限制在棋盘内展开，防止越界</span>
+	{
+		<span class="pl-smi">int</span> <span class="pl-s1">count</span> <span class="pl-c1">=</span> <span class="pl-en">GetMineCount</span>(<span class="pl-s1">mine</span>, <span class="pl-s1">x</span>, <span class="pl-s1">y</span>);<span class="pl-c">//获取雷数</span>
+
+		<span class="pl-k">if</span> (<span class="pl-s1">count</span> <span class="pl-c1">==</span> <span class="pl-c1">0</span>) <span class="pl-c">//四周没雷，进入递归展开</span>
+		{
+			<span class="pl-s1">show</span>[<span class="pl-s1">x</span>][<span class="pl-s1">y</span>] <span class="pl-c1">=</span> <span class="pl-c1">' '</span>;<span class="pl-c">//四周没雷的改为 空格  ' '</span>
+
+			<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+			<span class="pl-c">//向四周共8个位置递归</span>
+			<span class="pl-k">for</span> (<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-s1">x</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span> &lt;= <span class="pl-s1">x</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+			{
+				<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+				<span class="pl-k">for</span> (<span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-s1">y</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>; <span class="pl-s1">j</span> &lt;= <span class="pl-s1">y</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>; <span class="pl-s1">j</span><span class="pl-c1">++</span>)
+				{
+
+					<span class="pl-c">//只对 '*' 进行展开，防止死循环</span>
+					<span class="pl-k">if</span> (<span class="pl-s1">show</span>[<span class="pl-s1">i</span>][<span class="pl-s1">j</span>] <span class="pl-c1">==</span> <span class="pl-c1">'*'</span>)
+					{
+						<span class="pl-en">expand</span>(<span class="pl-s1">mine</span>, <span class="pl-s1">show</span>, <span class="pl-s1">i</span>, <span class="pl-s1">j</span>, <span class="pl-s1">win</span>);
+					}
+				}
+			}
+		}
+		<span class="pl-k">else</span>   <span class="pl-c">//四周有雷显示雷数</span>
+		{
+			<span class="pl-s1">show</span>[<span class="pl-s1">x</span>][<span class="pl-s1">y</span>] <span class="pl-c1">=</span> <span class="pl-s1">count</span> <span class="pl-c1">+</span> <span class="pl-c1">'0'</span>;
+		}
+		<span class="pl-c">//记录展开的数量</span>
+		(<span class="pl-c1">*</span><span class="pl-s1">win</span>)<span class="pl-c1">++</span>;
+	}
+}</pre></div>
+<h3>3.创建一个game.h头文件</h3>
+<blockquote>
+<p><strong>game.h文件用来存放函数声明，符号声明头文件的包含以及宏定义。</strong></p>
+</blockquote>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#pragma</span> once
+<span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-k">#include</span> <span class="pl-s">&lt;stdlib.h&gt;</span>
+<span class="pl-k">#include</span> <span class="pl-s">&lt;time.h&gt;</span>
+
+<span class="pl-k">#define</span> <span class="pl-c1">ROW</span> 9
+<span class="pl-k">#define</span> <span class="pl-c1">COL</span> 9
+
+<span class="pl-c">//要布置的雷个数</span>
+<span class="pl-k">#define</span> <span class="pl-c1">EASY_COUNT</span> 10
+
+
+<span class="pl-k">#define</span> <span class="pl-c1">ROWS</span> ROW+2
+<span class="pl-k">#define</span> <span class="pl-c1">COLS</span> COL+2
+
+<span class="pl-c">//初始化数组</span>
+<span class="pl-smi">void</span> <span class="pl-en">InitBoard</span>(<span class="pl-smi">char</span> <span class="pl-s1">board</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">int</span> <span class="pl-s1">rows</span>, <span class="pl-smi">int</span> <span class="pl-s1">cols</span>, <span class="pl-smi">char</span> <span class="pl-s1">set</span>);
+
+<span class="pl-c">//打印</span>
+<span class="pl-smi">void</span> <span class="pl-en">DisplayBoard</span>(<span class="pl-smi">char</span> <span class="pl-s1">board</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">int</span> <span class="pl-s1">row</span>, <span class="pl-smi">int</span> <span class="pl-s1">col</span>);
+
+<span class="pl-c">//布置雷</span>
+<span class="pl-smi">void</span> <span class="pl-en">SetMine</span>(<span class="pl-smi">char</span> <span class="pl-s1">mine</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">int</span> <span class="pl-s1">row</span>, <span class="pl-smi">int</span> <span class="pl-s1">col</span>);
+
+<span class="pl-c">//排查雷</span>
+
+<span class="pl-smi">void</span> <span class="pl-en">FindMine</span>(<span class="pl-smi">char</span> <span class="pl-s1">mine</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">char</span> <span class="pl-s1">show</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">int</span> <span class="pl-s1">row</span>, <span class="pl-smi">int</span> <span class="pl-s1">col</span>);
+
+<span class="pl-c">//递归展开</span>
+<span class="pl-smi">void</span> <span class="pl-en">expand</span>(<span class="pl-smi">char</span> <span class="pl-s1">mine</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">char</span> <span class="pl-s1">show</span>[<span class="pl-c1">ROWS</span>][<span class="pl-c1">COLS</span>], <span class="pl-smi">int</span> <span class="pl-s1">x</span>, <span class="pl-smi">int</span> <span class="pl-s1">y</span>, <span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">win</span>);</pre></div></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

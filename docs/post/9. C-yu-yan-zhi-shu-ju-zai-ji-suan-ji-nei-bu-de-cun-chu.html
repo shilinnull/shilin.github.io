@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## 一、前言
+
+前面我们已经学习了基本的内置类型，以及他们所占存储空间的大小~~
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/d6f2c59a258a4628852444bb835ed062.png)
+
+
+**类型的意义：**
+
+1. 使用这个类型开辟内存空间的大小（大小决定了使用范围）
+2. 如何看待内存空间的视角
+
+## 二、类型的基本归类
+
+### 1、整型家族
+
+- 下面是整形家族
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/2a778c9fa5c3420ba736227437b76642.png)
+
+
+-  char在字符存储的时候存的是一个ASCLL码值，而ASCLL码值是一个整数
+
+-  数值有正数和负数之分
+ 	 - 有些数值只有正数，没有负数（身高）—— unsigned
+ 	 - 有些数值，有正数也有负数（温度）—— signed
+
+
+### 2、浮点数家族
+
+- 浮点数只分为两类，一个是【float】，一个是【double】
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/ec63c617e00d4c7f8a3232de357c21d3.png)
+
+
+### 3、构造类型
+
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/3085f6af579b4e128a89e1e892b96492.png)
+
+
+
+### 4、指针类型
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/009011ba72ba49bba05fc1cf2cd1a08a.png)
+
+
+ -下面我们来介绍一下这个空指针
+- `void*`叫做【空指针】
+  - 对于int类型的指针可以用来接收int类型的数据的地址
+  - 对于char类型的指针可以用来接收char类型的数据的地址
+  - 对于float类型的指针可以用来接收float类型的数据的地址
+-  对于`void`类型的指针可以用来接收任何类型数据的地址【它就像一个垃圾桶一样，起到临时存放的作用】
+
+
+> void 表示空类型（无类型）
+> 通常应用于函数的返回类型、函数的参数、指针类型
+
+## 三、整型在内存中的存储
+
+### 1、原码、反码、补码
+
+#### 1.1 概念
+
+计算机中的整数有三种2进制表示方法，即原码、反码和补码。">
+<meta property="og:title" content="9. C语言之数据在计算机内部的存储">
+<meta property="og:description" content="## 一、前言
+
+前面我们已经学习了基本的内置类型，以及他们所占存储空间的大小~~
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/d6f2c59a258a4628852444bb835ed062.png)
+
+
+**类型的意义：**
+
+1. 使用这个类型开辟内存空间的大小（大小决定了使用范围）
+2. 如何看待内存空间的视角
+
+## 二、类型的基本归类
+
+### 1、整型家族
+
+- 下面是整形家族
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/2a778c9fa5c3420ba736227437b76642.png)
+
+
+-  char在字符存储的时候存的是一个ASCLL码值，而ASCLL码值是一个整数
+
+-  数值有正数和负数之分
+ 	 - 有些数值只有正数，没有负数（身高）—— unsigned
+ 	 - 有些数值，有正数也有负数（温度）—— signed
+
+
+### 2、浮点数家族
+
+- 浮点数只分为两类，一个是【float】，一个是【double】
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/ec63c617e00d4c7f8a3232de357c21d3.png)
+
+
+### 3、构造类型
+
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/3085f6af579b4e128a89e1e892b96492.png)
+
+
+
+### 4、指针类型
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/009011ba72ba49bba05fc1cf2cd1a08a.png)
+
+
+ -下面我们来介绍一下这个空指针
+- `void*`叫做【空指针】
+  - 对于int类型的指针可以用来接收int类型的数据的地址
+  - 对于char类型的指针可以用来接收char类型的数据的地址
+  - 对于float类型的指针可以用来接收float类型的数据的地址
+-  对于`void`类型的指针可以用来接收任何类型数据的地址【它就像一个垃圾桶一样，起到临时存放的作用】
+
+
+> void 表示空类型（无类型）
+> 通常应用于函数的返回类型、函数的参数、指针类型
+
+## 三、整型在内存中的存储
+
+### 1、原码、反码、补码
+
+#### 1.1 概念
+
+计算机中的整数有三种2进制表示方法，即原码、反码和补码。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/9.%20C-yu-yan-zhi-shu-ju-zai-ji-suan-ji-nei-bu-de-cun-chu.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>9. C语言之数据在计算机内部的存储</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">9. C语言之数据在计算机内部的存储</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/33" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>一、前言</h2>
+<p>前面我们已经学习了基本的内置类型，以及他们所占存储空间的大小~~</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/a468ae5bc8b14d06b4986b8152c84ca2ea37181d7fa321b2e38d5586dcc99e0e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64366632633539613235386134363238383532343434626238333565643036322e706e67"><img src="https://camo.githubusercontent.com/a468ae5bc8b14d06b4986b8152c84ca2ea37181d7fa321b2e38d5586dcc99e0e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64366632633539613235386134363238383532343434626238333565643036322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/d6f2c59a258a4628852444bb835ed062.png" style="max-width: 100%;"></a></p>
+<p><strong>类型的意义：</strong></p>
+<ol>
+<li>使用这个类型开辟内存空间的大小（大小决定了使用范围）</li>
+<li>如何看待内存空间的视角</li>
+</ol>
+<h2>二、类型的基本归类</h2>
+<h3>1、整型家族</h3>
+<ul>
+<li>下面是整形家族</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/20dd0031de6395ae387decaa84d33bfefefaa154f126201b34f85b3589c15d83/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32613737386339666135633334323062613733363232373433376237363634322e706e67"><img src="https://camo.githubusercontent.com/20dd0031de6395ae387decaa84d33bfefefaa154f126201b34f85b3589c15d83/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32613737386339666135633334323062613733363232373433376237363634322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/2a778c9fa5c3420ba736227437b76642.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>char在字符存储的时候存的是一个ASCLL码值，而ASCLL码值是一个整数</p>
+</li>
+<li>
+<p>数值有正数和负数之分</p>
+<ul>
+<li>有些数值只有正数，没有负数（身高）—— unsigned</li>
+<li>有些数值，有正数也有负数（温度）—— signed</li>
+</ul>
+</li>
+</ul>
+<h3>2、浮点数家族</h3>
+<ul>
+<li>浮点数只分为两类，一个是【float】，一个是【double】</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/a34d72650710af5e4a42ca5d1c43a65eaa2d246b23bf2c86f2886402798a1f08/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65633633633631376530306434633766386133323332646533353763323164332e706e67"><img src="https://camo.githubusercontent.com/a34d72650710af5e4a42ca5d1c43a65eaa2d246b23bf2c86f2886402798a1f08/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65633633633631376530306434633766386133323332646533353763323164332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/ec63c617e00d4c7f8a3232de357c21d3.png" style="max-width: 100%;"></a></p>
+<h3>3、构造类型</h3>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/27d489867906df6e00db6d45a68e3602c073a4c11409ead96aa3e9a96f033cf4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33303835663661663537396234653132386138396531653839326239363439322e706e67"><img src="https://camo.githubusercontent.com/27d489867906df6e00db6d45a68e3602c073a4c11409ead96aa3e9a96f033cf4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33303835663661663537396234653132386138396531653839326239363439322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/3085f6af579b4e128a89e1e892b96492.png" style="max-width: 100%;"></a></p>
+<h3>4、指针类型</h3>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/68bf63f88b39a694c4140de7a0e2af21b58ab1520763daf1ed0f7ef2a0e9adeb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30303930313162613732626134396262613035666331636632636431613038612e706e67"><img src="https://camo.githubusercontent.com/68bf63f88b39a694c4140de7a0e2af21b58ab1520763daf1ed0f7ef2a0e9adeb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30303930313162613732626134396262613035666331636632636431613038612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/009011ba72ba49bba05fc1cf2cd1a08a.png" style="max-width: 100%;"></a></p>
+<p>-下面我们来介绍一下这个空指针</p>
+<ul>
+<li><code class="notranslate">void*</code>叫做【空指针】
+<ul>
+<li>对于int类型的指针可以用来接收int类型的数据的地址</li>
+<li>对于char类型的指针可以用来接收char类型的数据的地址</li>
+<li>对于float类型的指针可以用来接收float类型的数据的地址</li>
+</ul>
+</li>
+<li>对于<code class="notranslate">void</code>类型的指针可以用来接收任何类型数据的地址【它就像一个垃圾桶一样，起到临时存放的作用】</li>
+</ul>
+<blockquote>
+<p>void 表示空类型（无类型）<br>
+通常应用于函数的返回类型、函数的参数、指针类型</p>
+</blockquote>
+<h2>三、整型在内存中的存储</h2>
+<h3>1、原码、反码、补码</h3>
+<h4>1.1 概念</h4>
+<p>计算机中的整数有三种2进制表示方法，即原码、反码和补码。</p>
+<ul>
+<li>三种表示方法均有符号位和数值位两部分，符号位都是用<code class="notranslate">0</code>表示“正”，用<code class="notranslate">1</code>表示“负”，而数值位正数的原、反、补码都相同，负整数的三种表示方法各不相同</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;</pre></div>
+<ul>
+<li>对于正数说，因为原、反、补都是相同的~~<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2332410263d492dfde2c34086b5c3b6a52a32998c1552acdb8d0543583e35b32/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61626239316238343235383634383763623163653331386332623735616437342e706e67"><img src="https://camo.githubusercontent.com/2332410263d492dfde2c34086b5c3b6a52a32998c1552acdb8d0543583e35b32/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61626239316238343235383634383763623163653331386332623735616437342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/abb91b842586487cb1ce318c2b75ad74.png" style="max-width: 100%;"></a></li>
+</ul>
+<hr>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">-10</span>;</pre></div>
+<ul>
+<li>对于负数来说就不太一样了，要得到反码就将原码除符号位外其余各位取反，要得到补码的话就在反码的基础上 + 1</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e803019713f686fea5488f05bc0251799e0fd48b9cea29d55f985db2e9c21221/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63376464346535316230386534303831626336386564626230343636366564622e706e67"><img src="https://camo.githubusercontent.com/e803019713f686fea5488f05bc0251799e0fd48b9cea29d55f985db2e9c21221/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63376464346535316230386534303831626336386564626230343636366564622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/c7dd4e51b08e4081bc68edbb04666edb.png" style="max-width: 100%;"></a></p>
+<h4>1.2 原码与补码的转换形式</h4>
+<ul>
+<li>原码到补码 —— 1种方式</li>
+</ul>
+<ol>
+<li>原码取反，+1得到补码</li>
+</ol>
+<ul>
+<li>补码到原码 —— 2种方式</li>
+</ul>
+<ol>
+<li>补码 - 1，取反得到原码</li>
+<li>补码取反，+1得到原码</li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/db185668c86c631ee76bc76724a2322710b07de0eeb30a964b9c98affa93109d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30623434666137353839656334303139626661663230383533353637343864632e706e67"><img src="https://camo.githubusercontent.com/db185668c86c631ee76bc76724a2322710b07de0eeb30a964b9c98affa93109d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30623434666137353839656334303139626661663230383533353637343864632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/0b44fa7589ec4019bfaf2085356748dc.png" style="max-width: 100%;"></a></p>
+<h4>1.3 计算机内部的存储编码</h4>
+<ul>
+<li>对于整形来说：数据存放内存中存放的是补码。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/cedc896f9659eea2b1cd7552f88bb0813523442d8693c5364d78ac9331eae095/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32623761653737663930333834646539396332393365353032333632303662362e706e67"><img src="https://camo.githubusercontent.com/cedc896f9659eea2b1cd7552f88bb0813523442d8693c5364d78ac9331eae095/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32623761653737663930333834646539396332393365353032333632303662362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/2b7ae77f90384de99c293e50236206b6.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这里存储的是16进制类型的补码~~</li>
+<li>在【进制转换】中，4位二进制表示1位16进制。通过将补码4位4位进行一个划分就可以得出8个16进制的数字为<code class="notranslate">ff ff ff f6</code>，这里发现是倒着存的，那么就要涉及到大小端存储的~~</li>
+</ul>
+<h3>2、大小端介绍~~</h3>
+<h4>2.1 为什么要有大端和小端之分？</h4>
+<blockquote>
+<p>在计算机系统中，我们是以<strong>字节</strong>为单位的，每个地址单元都对应着一个字节，一个字节为8 bit</p>
+</blockquote>
+<ul>
+<li>但是在C语言中除了8 bit的char之外，还有16 bit的short 型，32 bit的long型（要看具体的编译器），另外，对于位数大于8位的处理器，例如16位或者32 位的处理器，由于寄存器宽度大于一个字节，那么必然存在着一个如何将多个字节安排的问题。因 此就导致了大端存储模式和小端存储模式。</li>
+<li>例如：一个 16bit 的 short 型 x ，在内存中的地址为 0x0010 ， x 的值为 0x1122 ，那么 0x11 为 高字节， 0x22 为低字节。对于大端模式，就将 0x11 放在低地址中，即 0x0010 中， 0x22 放在高 地址中，即 0x0011 中。小端模式，刚好相反。我们常用的 X86 结构是小端模式，而 KEIL C51 则 为大端模式。很多的ARM，DSP都为小端模式。有些ARM处理器还可以由硬件来选择是大端模式 还是小端模式。大端】和【小端】的由来，接下去呢就正式地来给读者介绍一下这种倒着存放的方式</li>
+</ul>
+<h4>2.2 大（小）端字节序存储</h4>
+<ul>
+<li>【大端（存储）模式】：是指数据的<code class="notranslate">低位</code>保存在内存的<code class="notranslate">高地址</code>中，而数据的<code class="notranslate">高位</code>，保存在内存的<code class="notranslate">低地址</code>中；</li>
+<li>【小端（存储）模式】：是指数据的<code class="notranslate">低位</code>保存在内存的<code class="notranslate">低地址</code>中，而数据的<code class="notranslate">高位</code>,，保存在内存的<code class="notranslate">高地址</code>中;</li>
+</ul>
+<hr>
+<ul>
+<li>对于下面这一个十六进制数<code class="notranslate">0x11223344</code>，以进制的权重来看的话右边的权重低【0】，左边的权重高【3】，所以11为高位，44为低位。若是对其进行小端字节存储的话就要将44存放到低位，11存放到高位</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3306bf08b4d6eff8bad9c120c48f744aeccb7952fac24d9738d85150bc6c50a9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30653633653864343136613434313061626235323464346632623131356435632e706e67"><img src="https://camo.githubusercontent.com/3306bf08b4d6eff8bad9c120c48f744aeccb7952fac24d9738d85150bc6c50a9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30653633653864343136613434313061626235323464346632623131356435632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/0e63e8d416a4410abb524d4f2b115d5c.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>【大端字节序存储】是要将高位存放到低地址，低位存放到高地址，因此11要放在左边，44要放在右边</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6139e0e7ef9ae4ce17cdf7dd6042ebd27ce152d733df1473b696d896f03632e3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31316361366462393337316234316235386664643739633639656331336435322e706e67"><img src="https://camo.githubusercontent.com/6139e0e7ef9ae4ce17cdf7dd6042ebd27ce152d733df1473b696d896f03632e3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31316361366462393337316234316235386664643739633639656331336435322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/11ca6db9371b41b58fdd79c69ec13d52.png" style="max-width: 100%;"></a></p>
+<h4>2.3 一道百度系统工程师笔试题</h4>
+<blockquote>
+<p>请简述大端字节序和小端字节序的概念，设计一个小程序来判断当前机器的字节序。（10分）</p>
+</blockquote>
+<ul>
+<li>下面我通过一个简单的数作为案例来进行一个分析</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e9f975e0f99a05a10382f68e5f628edf07bc82f571d25870ae9f2238bfff9fff/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65363965656663643336303634373530623361623961336432643330383365312e706e67"><img src="https://camo.githubusercontent.com/e9f975e0f99a05a10382f68e5f628edf07bc82f571d25870ae9f2238bfff9fff/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65363965656663643336303634373530623361623961336432643330383365312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/e69eefcd36064750b3ab9a3d2d3083e1.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>对于a以【小端字节序存储】会将<code class="notranslate">01</code>放在低位；而以【大端字节序存储】会将<code class="notranslate">01</code>放在高位，那么此时我们只需要获取到内存中规定最低位即可</li>
+<li>因为<code class="notranslate">01</code>在内存中表示一个字节，而一个【char】类型的数据就为1个字节，所以此时我们可以使用到一个字符型指针接受要存放到内存中的这个数，然后对其进行一个解引用，就可以获取到低位的第一个字节了</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">p</span> <span class="pl-c1">=</span> <span class="pl-c1">&amp;</span><span class="pl-s1">a</span>;</pre></div>
+<ul>
+<li>若直接使用一个字符型指针去接收一个整型数值的地址，就会出现问题，因为一个字符型的指针只能放得下一个字节的数据，所以我们要对这个整型的数值去进行一个<strong>强制类型转换为字符型的地址</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/962d36edeef2cfa57503d20ea10a41df48f48844a5b7e0fb5152d0e85fa1a584/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38613664643637343062663334623133386333663838366233323539393962372e706e67"><img src="https://camo.githubusercontent.com/962d36edeef2cfa57503d20ea10a41df48f48844a5b7e0fb5152d0e85fa1a584/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38613664643637343062663334623133386333663838366233323539393962372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/8a6dd6740bf34b138c3f886b325999b7.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>通过强制类型转换后，再对这个字符型指针进行解引用，就可以取到一个字节的数据，继而对其进行一个判断，如果为<code class="notranslate">1</code>的话那就是【小端】，反之则是【大端】</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">p</span> <span class="pl-c1">=</span> (<span class="pl-smi">char</span> <span class="pl-c1">*</span>)<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>;
+<span class="pl-k">if</span> (<span class="pl-c1">*</span><span class="pl-s1">p</span> <span class="pl-c1">==</span> <span class="pl-c1">1</span>){
+	<span class="pl-en">printf</span>(<span class="pl-s">"小端\n"</span>);
+}
+<span class="pl-k">else</span> {
+	<span class="pl-en">printf</span>(<span class="pl-s">"大端\n"</span>);
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6818f83eb81a32f032e74cd67d489d0bb5742caccb81c149563e48176d45e40a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35353336363039346137366434343763396361343265323135376565646665332e706e67"><img src="https://camo.githubusercontent.com/6818f83eb81a32f032e74cd67d489d0bb5742caccb81c149563e48176d45e40a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35353336363039346137366434343763396361343265323135376565646665332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/55366094a76d447c9ca42e2157eedfe3.png" style="max-width: 100%;"></a></p>
+<hr>
+<ul>
+<li>通过学习了函数章节，我们可以对其进行一个分装~~</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">check_sys</span>(<span class="pl-smi">int</span> <span class="pl-s1">num</span>)
+{
+	<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">p</span> <span class="pl-c1">=</span> (<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-c1">&amp;</span><span class="pl-s1">num</span>;
+	<span class="pl-k">if</span> (<span class="pl-c1">*</span><span class="pl-s1">p</span> <span class="pl-c1">==</span> <span class="pl-c1">1</span>) {
+		<span class="pl-k">return</span> <span class="pl-c1">1</span>;
+	}
+	<span class="pl-k">else</span> {
+		<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+	}
+}
+<span class="pl-smi">int</span> <span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-en">check_sys</span>(<span class="pl-c1">1</span>);</pre></div>
+<hr>
+<ul>
+<li>或者，对于这个if判断我们可以就直接写成解引用的形式，然后对其去进行一个判断</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">if</span> (<span class="pl-c1">*</span>(<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-c1">&amp;</span><span class="pl-s1">num</span> <span class="pl-c1">==</span> <span class="pl-c1">1</span>)</pre></div>
+<hr>
+<ul>
+<li>那既然是我们要return 1或者0的时候，其实在解引用获取到低地址的第一个字节时直接return即可~~</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-k">int</span> <span class="pl-en">check_sys</span>(<span class="pl-k">int</span> num) {
+	<span class="pl-k">return</span> *(<span class="pl-k">char</span>*)&amp;num;
+}</pre></div>
+<h3>3、数据范围的介绍</h3>
+<h4>3.1 char与signed char数据范围</h4>
+<ul>
+<li>
+<p>首先我们通过下面这幅图来看一看对于有符号的<code class="notranslate">char</code>和无符号的<code class="notranslate">char</code></p>
+<p>在内存中所能表示的范围各自是多少：</p>
+<ul>
+<li>【signed char】：<code class="notranslate">-128 ~ 127</code></li>
+<li>【unsigned char】：<code class="notranslate">0 ~ 255</code></li>
+</ul>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/78dd9cb6229e8157da79a6ce4fe352debaa2bc30d1446b31edd3a6e0005f472f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65333661336332653830306634363138623635633862623638383034393630612e706e67"><img src="https://camo.githubusercontent.com/78dd9cb6229e8157da79a6ce4fe352debaa2bc30d1446b31edd3a6e0005f472f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65333661336332653830306634363138623635633862623638383034393630612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/e36a3c2e800f4618b65c8bb68804960a.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>char数据类型在内存中占1个字节，也就是8个比特位。若是从<code class="notranslate">00000000</code>开始存放，每次+1上去然后逢二进一，之后你就可以得出最大能表示的正整数为【127】，可是在继续+1后又会进行进位然后变为<code class="notranslate">10000000</code>，符号位为1，这是<code class="notranslate">-128</code>这是为什么呢？</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e461c8f392701c2cfb023d879b6f5bfd16c506a1357d1d11d346f834bde1dce0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39346637323536653138656434623763386332343161646562333966643935332e706e67"><img src="https://camo.githubusercontent.com/e461c8f392701c2cfb023d879b6f5bfd16c506a1357d1d11d346f834bde1dce0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39346637323536653138656434623763386332343161646562333966643935332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/94f7256e18ed4b7c8c241adeb39fd953.png" style="max-width: 100%;"></a></p>
+</li>
+<li>
+<p>在内存中都是以【补码】的形式进行存放，所以我们看到的<code class="notranslate">1 1111111</code>只不过是补码的形式</p>
+</li>
+<li>
+<p>但是对于<code class="notranslate">10000000</code>我们直接将其记作【-128】，它就对应的【-128】在内存中的补码，通过去写出【-128】的原、反、补码可以发现是需要9个比特位来进行存放，对于<code class="notranslate">char</code>类型的数值而言只能存放8个比特位，因此在转换为补码之后会进行一个<strong>截断</strong></p>
+</li>
+<li>
+<p>最后剩下的就是<code class="notranslate">10000000</code>，即为有符号char的最小负数为【-128】</p>
+</li>
+</ul>
+<h4>3.2 unsigned char数据范围</h4>
+<ul>
+<li>因为是无符号char，所以第一位不作为符号位，就是从<code class="notranslate">0 ~ 255</code></li>
+</ul>
+<h3>4、笔试题</h3>
+<ul>
+<li><strong>有符号的数</strong>在整型提升的时候补符号位，<strong>无符号的数</strong>在整型提升的时候补0</li>
+</ul>
+<ol>
+<li><code class="notranslate">%u</code> 是打印无符号整型，认为内存中存放的补码对应的是一个<strong>无符号数</strong></li>
+<li><code class="notranslate">%d</code> 是打印有符号整型，认为内存中存放的补码对应的是一个<strong>有符号数</strong></li>
+</ol>
+<hr>
+<p><strong>第一道</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+    <span class="pl-smi">char</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">-1</span>;
+    <span class="pl-smi">signed <span class="pl-smi">char</span></span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">-1</span>;
+    <span class="pl-smi">unsigned <span class="pl-smi">char</span></span> <span class="pl-s1">c</span> <span class="pl-c1">=</span> <span class="pl-c1">-1</span>;
+    <span class="pl-en">printf</span>(<span class="pl-s">"a = %d, b = %d, c = %d"</span>, <span class="pl-s1">a</span>, <span class="pl-s1">b</span>, <span class="pl-s1">c</span>);
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>我们来分析一下，可以看到【a】和【b】都是有符号位的char类型，那它们就是一样的，现在将<code class="notranslate">-1</code>存放到这两个数据中去，首先你应该要考虑到的是一个数据放到内存中去是以补码的形式</li>
+<li>所以我们首先将<code class="notranslate">-1</code>转换为补码的形式</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">1</span> <span class="pl-c1">0000000</span> <span class="pl-c1">00000000</span> <span class="pl-c1">00000000</span> <span class="pl-c1">00000001</span>
+<span class="pl-c1">1</span> <span class="pl-c1">1111111</span> <span class="pl-c1">11111111</span> <span class="pl-c1">11111111</span> <span class="pl-c1">11111110</span>
+<span class="pl-c1">1</span> <span class="pl-c1">1111111</span> <span class="pl-c1">11111111</span> <span class="pl-c1">11111111</span> <span class="pl-c1">11111111</span></pre></div>
+<ul>
+<li>可是呢，需要存放的地方又是char类型的变量，只能存放8个字节，无法放得下这32个字节，因此便需要进行一个<strong>截断</strong>的操作，放到变量a和变量b中都只剩下<code class="notranslate">11111111</code>这8个字节。</li>
+<li>对于变量c来说，它是一个无符号的char类型变量，不过<code class="notranslate">-1</code>存放到它里面还是<code class="notranslate">11111111</code>这8个字节不会改变，只不过在内存中的变化与有符号char不太一样~~</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"a = %d, b = %d, c = %d"</span>, <span class="pl-s1">a</span>, <span class="pl-s1">b</span>, <span class="pl-s1">c</span>);</pre></div>
+<ul>
+<li>以<code class="notranslate">%d</code>的形式进行一个打印，但是呢三个变量所存放的都是char类型的变量，因此会进行一个整型提升，只是有符号数的整型提升和无符号数不太一样</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//a b - 有符号数</span>
+<span class="pl-c1">11111111111111111111111111111111</span> <span class="pl-c1">-</span> <span class="pl-s1">补符号位</span>
+
+<span class="pl-c">//c - 无符号数</span>
+<span class="pl-c1">00000000000000000000000011111111</span> <span class="pl-c1">-</span> <span class="pl-s1">补0</span></pre></div>
+<ul>
+<li>在进行整型提升之后，这些二进制数据还是存放在内存中的，可是要输出打印在屏幕上的话还要转换为【原码】的形式</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">11111111111111111111111111111111</span>
+<span class="pl-c1">10000000000000000000000000000000</span>
+<span class="pl-c1">10000000000000000000000000000001</span> ——<span class="pl-c1">&gt;</span> 【<span class="pl-c1">-1</span>】
+
+<span class="pl-c1">00000000000000000000000011111111</span> ——<span class="pl-c1">&gt;</span> 【<span class="pl-c1">255</span>】</pre></div>
+<hr>
+<p><strong>第二道</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+    <span class="pl-smi">char</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">-128</span>;
+    <span class="pl-en">printf</span>(<span class="pl-s">"%u\n"</span>,<span class="pl-s1">a</span>);
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>同理，一个整数存放到内存中，首先要将其转换为【补码】的方式</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">10000000</span> <span class="pl-c1">00000000</span> <span class="pl-c1">00000000</span> <span class="pl-c1">10000000</span>
+<span class="pl-c1">11111111</span> <span class="pl-c1">11111111</span> <span class="pl-c1">11111111</span> <span class="pl-c1">01111111</span>
+<span class="pl-c1">11111111</span> <span class="pl-c1">11111111</span> <span class="pl-c1">11111111</span> <span class="pl-c1">10000000</span></pre></div>
+<ul>
+<li>接着因为这32个二进制位要存放到一个<code class="notranslate">char</code>类型的变量中，因为进行<strong>截断</strong>为<code class="notranslate">10000000</code></li>
+<li>然后在内存中需要进行一个整型提升，<code class="notranslate">char</code>类型的变量将会填充符号位<code class="notranslate">11111111111111111111111110000000</code></li>
+<li>执行打印语句，可以看到这里是以<code class="notranslate">%u</code>的形式进行打印，认为在内存中存放的是一个<strong>无符号整数</strong>。我们知道，对于无符号整数来说，不存在负数，所以其原、反、补码都是一样的，因此在打印的时候就直接将其转换为十进制进行输出</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%u\n"</span>,<span class="pl-s1">a</span>);</pre></div>
+<p>输出：</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1ab58994ed2d2f55c2954a347ed2e31fad67eeab4d5fe6993e14c18518c0418e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64343964363566653563333934376665623761383962653335323365613534652e706e67"><img src="https://camo.githubusercontent.com/1ab58994ed2d2f55c2954a347ed2e31fad67eeab4d5fe6993e14c18518c0418e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64343964363566653563333934376665623761383962653335323365613534652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/d49d65fe5c3947feb7a89be3523ea54e.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>不信的话还可以使用计算器来算一下</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/53b80b4723726f378fe09328f21a47e6cb8b416f5c3aefc1c5a6bc72c7f53b4c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33636262623564613135353934653038613463343661353761646531363864352e706e67"><img src="https://camo.githubusercontent.com/53b80b4723726f378fe09328f21a47e6cb8b416f5c3aefc1c5a6bc72c7f53b4c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33636262623564613135353934653038613463343661353761646531363864352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/3cbbb5da15594e08a4c46a57ade168d5.png" style="max-width: 100%;"></a></p>
+<hr>
+<p><strong>第三道</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+    <span class="pl-smi">char</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">128</span>;
+    <span class="pl-en">printf</span>(<span class="pl-s">"%u\n"</span>,<span class="pl-s1">a</span>);
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>接下去我们来看第三道题，可以看出和上面那题基本基本一样，只是把<code class="notranslate">-128</code>变成了<code class="notranslate">128</code>而已</li>
+<li>如果是【128】的话放到内存中就不需要像负数那样还要进行很多的转化了，因为正数的原、反、补码都一致，当我们内存中真正存的是<code class="notranslate">10000000</code>又因为是<code class="notranslate">%u</code>的形式打印，然后需要整形提升</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">00000000</span> <span class="pl-c1">00000000</span> <span class="pl-c1">00000000</span> <span class="pl-c1">10000000</span></pre></div>
+<ul>
+<li>然后我们可以看到时<code class="notranslate">10000000</code>符号位是1，所以整形提升的时候补1</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">11111111</span> <span class="pl-c1">11111111</span> <span class="pl-c1">11111111</span> <span class="pl-c1">10000000</span></pre></div>
+<ul>
+<li>所以还是和上题一样，这里就不多赘述~~</li>
+</ul>
+<hr>
+<p><strong>第四道</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">-20</span>;
+	<span class="pl-smi">unsigned <span class="pl-smi">int</span></span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-s1">i</span> <span class="pl-c1">+</span> <span class="pl-s1">j</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p>下面是解法：</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">-20</span>;
+	<span class="pl-c">//1 0000000 00000000 00000000 00010100</span>
+	<span class="pl-c">//1 1111111 11111111 11111111 11101011</span>
+	<span class="pl-c">//1 1111111 11111111 11111111 11101100</span>
+
+	<span class="pl-smi">unsigned <span class="pl-smi">int</span></span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+	<span class="pl-c">//0 0000000 00000000 00000000 00001010</span>
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-s1">i</span> <span class="pl-c1">+</span> <span class="pl-s1">j</span>);
+
+	<span class="pl-c">//1 1111111 11111111 11111111 11101100</span>
+	<span class="pl-c">//0 0000000 00000000 00000000 00001010</span>
+  <span class="pl-c">//------------------------------------------</span>
+	<span class="pl-c">//1 1111111 11111111 11111111 11110110</span>
+	
+	<span class="pl-c">//1 1111111 11111111 11111111 11110110</span>
+	<span class="pl-c">//1 0000000 00000000 00000000 00001001</span>
+	<span class="pl-c">//1 0000000 00000000 00000000 00001010 —— 【-10】</span>
+
+	<span class="pl-c">//按照补码的形式进行运算，最后格式化成为有符号整数</span>
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>本次我们用到的是两个<code class="notranslate">int</code>类型的数据，一个是有符号的，一个是无符号的。但无论是有符号还是无符号，放到内存中都是要转换为补码的形式</li>
+<li>就是对算出来的两个补码一个二进制数的相加运算，注意这里是将整数存放到<code class="notranslate">int</code>类型的变量中去，所以不需要进行【截断】和【整型提升】</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate">   <span class="pl-c1">1</span> <span class="pl-c1">1111111</span> <span class="pl-c1">11111111</span> <span class="pl-c1">11111111</span> <span class="pl-c1">11101100</span>
+   <span class="pl-c1">0</span> <span class="pl-c1">0000000</span> <span class="pl-c1">00000000</span> <span class="pl-c1">00000000</span> <span class="pl-c1">00001010</span>
+<span class="pl-c1">--</span><span class="pl-c1">--</span><span class="pl-c1">--</span><span class="pl-c1">--</span><span class="pl-c1">--</span><span class="pl-c1">--</span><span class="pl-c1">--</span><span class="pl-c1">--</span><span class="pl-c1">--</span><span class="pl-c1">--</span><span class="pl-c1">--</span><span class="pl-c1">--</span><span class="pl-c1">--</span><span class="pl-c1">--</span><span class="pl-c1">--</span><span class="pl-c1">--</span><span class="pl-c1">--</span><span class="pl-c1">--</span><span class="pl-c1">--</span><span class="pl-c1">--</span><span class="pl-c1">--</span>
+   <span class="pl-c1">1</span> <span class="pl-c1">1111111</span> <span class="pl-c1">11111111</span> <span class="pl-c1">11111111</span> <span class="pl-c1">11110110</span></pre></div>
+<ul>
+<li>在运算之后要以<code class="notranslate">%d</code>的形式进行打印输出，那就会将内部中存放的补码看做是一个<strong>有符号数</strong>，既然是有符号数的话就存正负，可以很明显地看到最前面的一个数字是<code class="notranslate">1</code>，所以是负数，要转换为原码的形式进行输出</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">1</span> <span class="pl-c1">1111111</span> <span class="pl-c1">11111111</span> <span class="pl-c1">11111111</span> <span class="pl-c1">11110110</span>
+<span class="pl-c1">1</span> <span class="pl-c1">0000000</span> <span class="pl-c1">00000000</span> <span class="pl-c1">00000000</span> <span class="pl-c1">00001001</span>
+<span class="pl-c1">1</span> <span class="pl-c1">0000000</span> <span class="pl-c1">00000000</span> <span class="pl-c1">00000000</span> <span class="pl-c1">00001010</span> —— 【<span class="pl-c1">-10</span>】</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5c5e43b7671e3a49618d439bf67f9443cb815f84cb134ecfc44be72129572029/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34333433396266316330303834646136613935343731393532633230363065392e706e67"><img src="https://camo.githubusercontent.com/5c5e43b7671e3a49618d439bf67f9443cb815f84cb134ecfc44be72129572029/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34333433396266316330303834646136613935343731393532633230363065392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/43439bf1c0084da6a95471952c2060e9.png" style="max-width: 100%;"></a></p>
+<hr>
+<p><strong>第五道</strong></p>
+<ul>
+<li>接下去第五道，是一个for循环的打印</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">unsigned <span class="pl-smi">int</span></span> <span class="pl-s1">i</span>;
+	<span class="pl-k">for</span> (<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">9</span>; <span class="pl-s1">i</span> &gt;= <span class="pl-c1">0</span>; <span class="pl-s1">i</span><span class="pl-c1">--</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%u\n"</span>, <span class="pl-s1">i</span>);
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p>运行结果:&gt;<code class="notranslate">死循环</code></p>
+<ul>
+<li>
+<p>有同学就很诧异为什么会陷入死循环呢？这不是就是一个正常的打印过程吗？</p>
+</li>
+<li>
+<p>其实，问题就出在这个<code class="notranslate">unsigned</code>，把它去掉之后就可以正常打印了</p>
+</li>
+<li>
+<p>回忆一下我们在将无符号整数的时它的数据范围是多少呢</p>
+<ul>
+<li>对于<code class="notranslate">char</code>类型来说是<code class="notranslate">0 ~ 255</code>;</li>
+<li>对于<code class="notranslate">short</code>来说是<code class="notranslate">0 ~ 65536</code>;</li>
+<li>对于<code class="notranslate">int</code>类型来说是<code class="notranslate">0 ~ 16,777,215</code>；</li>
+</ul>
+</li>
+<li>
+<p>对比进行观察其实可以发现它们的数值范围都是 &gt; 0的，所以对于无符号整数来说就不会存在负数的情况。因此这个for循环的条件【i &gt;= 0】其实是恒成立的，若是当<code class="notranslate">i == 0</code>再去<code class="notranslate">--</code>，此时就会变成【-1】</p>
+</li>
+<li>
+<p>对于【-1】我们有看过它在内存中的补码形式为<code class="notranslate">11...11</code>是全部都是1，而此时这这个变量i又是个无符号的整型，所以不存在符号位这一说，那么在计算机看来它就是一个很大的无符号整数。此时当i以这个数值再次进入循环的时候，继续进行打印，然后执行<code class="notranslate">--i</code>，最后知道其为0的时候又变成了-1，然后继续进入循环。。。</p>
+</li>
+</ul>
+<blockquote>
+<p>光是这么说说太抽象了，我们可以通过Sleep()函数在打印完每个数之后停一会，来观察一下</p>
+</blockquote>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;windows.h&gt;</span>
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">unsigned <span class="pl-smi">int</span></span> <span class="pl-s1">i</span>;
+	<span class="pl-k">for</span> (<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">9</span>; <span class="pl-s1">i</span> &gt;= <span class="pl-c1">0</span>; <span class="pl-s1">i</span><span class="pl-c1">--</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%u\n"</span>, <span class="pl-s1">i</span>);
+		<span class="pl-en">Sleep</span>(<span class="pl-c1">200</span>);
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>接着你便可以发现，当<code class="notranslate">i</code>循环到0的时候，突然就变成了一个很大的数字，这也就是印证了我上面的说法</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d6294d2be4ec2e7f69fc53e919d37f85d15f7e816c62c8f0a65112c7502f36dc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37396162316466656539383234356133613339646163313364346639366262352e706e67"><img src="https://camo.githubusercontent.com/d6294d2be4ec2e7f69fc53e919d37f85d15f7e816c62c8f0a65112c7502f36dc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37396162316466656539383234356133613339646163313364346639366262352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/79ab1dfee98245a3a39dac13d4f96bb5.png" style="max-width: 100%;"></a></p>
+<hr>
+<p><strong>第六道</strong></p>
+<ul>
+<li>本题和四五道的原理是一样的，对于<code class="notranslate">unsigned char</code>来说，最大的整数范围不能超过<code class="notranslate">255</code>，所以当这里的【i】加到255之后又会再+1就会变成<code class="notranslate">00000000</code>，此时又会进入循环从0开始，也就造成了死循环的结果</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">unsigned <span class="pl-smi">char</span></span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">for</span> (<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> &lt;= <span class="pl-c1">255</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"hello world\n"</span>);
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7b6b2df94bae6510c91b1abf9f27cc1a20d6eb1f9cb00fb92a758224a2e70f48/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36326437613666626230643534323335613835333734383066313839363438652e706e67"><img src="https://camo.githubusercontent.com/7b6b2df94bae6510c91b1abf9f27cc1a20d6eb1f9cb00fb92a758224a2e70f48/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36326437613666626230643534323335613835333734383066313839363438652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/62d7a6fbb0d54235a8537480f189648e.png" style="max-width: 100%;"></a></p>
+<hr>
+<p><strong>第七道</strong></p>
+<ul>
+<li>最后一道，我们来做做综合一些的，涉及到字符串函数<a href="https://legacy.cplusplus.com/reference/cstring/strlen/?kw=strlen" rel="nofollow">strlen</a></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">a</span>[<span class="pl-c1">1000</span>];
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span>;
+	<span class="pl-k">for</span> (<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">1000</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-s1">a</span>[<span class="pl-s1">i</span>] <span class="pl-c1">=</span> <span class="pl-c1">-1</span> <span class="pl-c1">-</span> <span class="pl-s1">i</span>;
+	}
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d"</span>, <span class="pl-en">strlen</span>(<span class="pl-s1">a</span>));
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>首先来看函数主体，也是一个for循环，在开头定义了一个char类型的数组，大小为1000,。在循环内部呢对它们进行一个初始化，那最后里面的数字一定是</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">-1</span>  <span class="pl-c1">-</span><span class="pl-c1">2</span>  <span class="pl-c1">-</span><span class="pl-c1">3</span>  <span class="pl-c1">-</span><span class="pl-c1">4</span>  <span class="pl-c1">-</span><span class="pl-c1">5</span>  <span class="pl-c1">-</span><span class="pl-c1">6</span>  <span class="pl-c1">-</span><span class="pl-c1">7</span> ...</pre></div>
+<ul>
+<li>
+<p>但是呢，我们在上面学习过的有符号<code class="notranslate">signed char</code>，它和<code class="notranslate">char</code>是一样的，数据的范围在【<strong>-128 ~ 127</strong>】，所以当<code class="notranslate">i</code>加到128的时候，这个位置上的值变为【-129】，此时在计算机内部会将它识别成【127】，同理【-130】会被识别成为【126】。。。依次类推，最后当这个值为【0】的时候若再去减就会变成【-1】，然后又变成【-2】【-3】【-4】。。。一直当这个<code class="notranslate">i</code>累加到1001的时候截止</p>
+</li>
+<li>
+<p>我们要通过<code class="notranslate">strlen()</code>去求这个数字的长度，对于strlen()来说，求的长度是到<code class="notranslate">\0</code>截止，那也就是上面的【0】，不需要去关心后面的第二、三轮回</p>
+</li>
+<li>
+<p>那其实这也就转变成了让我们去求有符号char在内存中可以存储多少个。这很简单，范围是<code class="notranslate">-128 ~ +127</code>，二者的绝对值一加便知为<code class="notranslate">255</code></p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//-1  -2  -3  -4  -5  -6  -7 ...-128  127  126  ...  0 -1 -2 -3....</span>
+<span class="pl-en">printf</span>(<span class="pl-s">"%d"</span>, <span class="pl-en">strlen</span>(<span class="pl-s1">a</span>));</pre></div>
+<ul>
+<li>来看一下运行结果~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d6969f97b2251f1be94a17d79ab1745d23e59471f1e2401a0bd3bc2e890b71fe/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62323131343638303235623334656566383238313165326336376465373562382e706e67"><img src="https://camo.githubusercontent.com/d6969f97b2251f1be94a17d79ab1745d23e59471f1e2401a0bd3bc2e890b71fe/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62323131343638303235623334656566383238313165326336376465373562382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/b211468025b34eef82811e2c67de75b8.png" style="max-width: 100%;"></a></p>
+<h2>四、浮点型在内存中的存储</h2>
+<ul>
+<li>
+<p>在第二模块，我有提到过一个叫做【浮点数家族】，里面包含了<code class="notranslate">[float]</code>和<code class="notranslate">[double]</code>类型，对于浮点数其实我们不陌生，在上小学的时候就有接触到的<code class="notranslate">3.14</code>圆周率，还有以科学计数法表示的<code class="notranslate">1E10</code></p>
+</li>
+<li>
+<p>在计算机中整型类型的取值范围限定在：<code class="notranslate">limits.h</code>；浮点型类型的取值范围限定在：<code class="notranslate">float.h</code></p>
+</li>
+<li>
+<p>我们可以在【everything】中找找有关<code class="notranslate">float.h</code>这个头文件</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1c89f48b5e4a1c7076933df203d04603d0177ecf2c7e2c6afbbc4f7278a48a88/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37343965376163636634396534373938383339363736616364353433613432632e706e67"><img src="https://camo.githubusercontent.com/1c89f48b5e4a1c7076933df203d04603d0177ecf2c7e2c6afbbc4f7278a48a88/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37343965376163636634396534373938383339363736616364353433613432632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/749e7accf49e4798839676acd543a42c.png" style="max-width: 100%;"></a></p>
+<h3>1、引入</h3>
+<ul>
+<li>首先要了解浮点数在内存中的存储规则，我们要通过一个案例来进行引入。请问下面四个输出语句分别会打印什么内容？</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">n</span> <span class="pl-c1">=</span> <span class="pl-c1">9</span>;
+	<span class="pl-smi">float</span><span class="pl-c1">*</span> <span class="pl-s1">pFloat</span> <span class="pl-c1">=</span> (<span class="pl-smi">float</span><span class="pl-c1">*</span>)<span class="pl-c1">&amp;</span><span class="pl-s1">n</span>;
+	<span class="pl-en">printf</span>(<span class="pl-s">"n的值为：%d\n"</span>, <span class="pl-s1">n</span>);		<span class="pl-c">//1</span>
+	<span class="pl-en">printf</span>(<span class="pl-s">"*pFloat的值为：%f\n"</span>, <span class="pl-c1">*</span><span class="pl-s1">pFloat</span>);		<span class="pl-c">//2</span>
+	<span class="pl-c1">*</span><span class="pl-s1">pFloat</span> <span class="pl-c1">=</span> <span class="pl-c1">9.0</span>;
+	<span class="pl-en">printf</span>(<span class="pl-s">"num的值为：%d\n"</span>, <span class="pl-s1">n</span>);	<span class="pl-c">//3</span>
+	<span class="pl-en">printf</span>(<span class="pl-s">"*pFloat的值为：%f\n"</span>, <span class="pl-c1">*</span><span class="pl-s1">pFloat</span>);		<span class="pl-c">//4</span>
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>来简单分析一下，整型变量n里面存放了9，然后通过强制类型转换为浮点型的指针，存放到pFloat中。
+<ul>
+<li>首先第一个去打印n的值毫无疑问就是<code class="notranslate">9</code></li>
+<li>第二个对pFloat进行解引用访问，对于<code class="notranslate">float</code>类型的指针与int一样都可以访问四个字节的地址，所以解引用便访问到了n中的内容，又因为浮点数小数点后仅6位有效，因此打印出来应该是<code class="notranslate">9.000000</code></li>
+<li>接下去通过pFloat的解引用修改了n的值，不过第三个以<code class="notranslate">%d</code>的形式进行打印，应该也还是<code class="notranslate">9</code></li>
+<li>第四个的话也是以浮点数的形式进行打印，那应该也是<code class="notranslate">9.000000</code></li>
+</ul>
+</li>
+<li>可结果真的和我们想象的一样吗？让我们来看一下~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ffaf06aaf899198c72a665271500cca28cf79102664ed9a2858d093076c9b994/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66613630353731363961376134303431396634623037326236363638616531642e706e67"><img src="https://camo.githubusercontent.com/ffaf06aaf899198c72a665271500cca28cf79102664ed9a2858d093076c9b994/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66613630353731363961376134303431396634623037326236363638616531642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/fa6057169a7a40419f4b072b6668ae1d.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以看到，我们猜测推理的4个里面对了两个，中间的两个出了问题，而且还是两个很古怪的数字，对于<code class="notranslate">n</code> 和 <code class="notranslate">*pFloat</code> 在内存中明明是同一个数，为什么浮点数和整数的解读结果会差别这么大？</li>
+</ul>
+<blockquote>
+<p>这要涉及到浮点数在内存中【存】与【取】规则，接下去我们首先来了解一下这个规则~~</p>
+</blockquote>
+<h3>2、浮点数存储规则</h3>
+<h4>2.1 概念</h4>
+<ul>
+<li>根据国际标准IEEE（电气和电子工程协会） 754，任意一个二进制浮点数V可以表示成下面的形式：</li>
+</ul>
+<blockquote>
+<p><strong>V = (-1)^S * M * 2^E</strong></p>
+</blockquote>
+<ul>
+<li><code class="notranslate">(-1)^S</code>表示符号位，占一位。当<code class="notranslate">S = 0</code>，V为正数；当<code class="notranslate">S = 1</code>，V为负数</li>
+<li>M【尾数】表示有效数字，放在最低部分，占用23位（<strong>1 &lt;= M &lt; 2</strong>）</li>
+<li>2^E表示指数位。<code class="notranslate">E</code>为指数，占用8位【阶符采用隐含方式，即采用移码方法来表示正负指数】</li>
+</ul>
+<hr>
+<ol>
+<li><strong>v = 5.5</strong>
+<ul>
+<li>整数部分的5可以写成<code class="notranslate">101</code>，这毋庸置疑，但是这个小数部分的5要如何去进行转换呢？对于<code class="notranslate">0.5</code>来说我们刚才看了小数部分的权重之后知道是<strong>2-1</strong>，所以直接使这一位为1即可</li>
+<li>接着我们就要去求出S、M和E，对于M来说是&gt;= 1并且&lt; 2的，不过这里的<code class="notranslate">101.1</code>却远远大于1，所以我们可以通过在操作符中学习的【移位】操作将这个数进行左移两位，但是左移之后又要保持与原来的数相同，所以可以再乘上<strong>22*<em>使得与原来的二进制相同。接着根据公式就可以写出*</em>(-1)0 * 1.011 * 22这个式子</strong>，然后可以得出S、M、E为多少了</li>
+</ul>
+</li>
+<li><strong>v = -5.5</strong>
+<ul>
+<li>这个和上面的一样，就是前面加了一个负号，那只是符号位进行了修改的话我们只需要变动S就可以了，即<code class="notranslate">S == 1</code></li>
+</ul>
+</li>
+<li><strong>v = 9.5</strong>
+<ul>
+<li>如果知道了第一题如何计算的话这题也是同样的道理，只是整数部分发生了一个变化而已</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>可并不是所有数的小数位都是<code class="notranslate">0.5</code>，如果是<code class="notranslate">0.25</code>的话你可以将【<strong>2-2</strong>】置为1，依次类推。。。可以对于下面这个<code class="notranslate">3.3</code>里面的<code class="notranslate">0.3</code>你会如何去凑数呢，首先<code class="notranslate">0.5</code>肯定不能，那只能有<code class="notranslate">0.25</code>，但若是再加上<code class="notranslate">0.125</code>的话那就多出来了，那应该配几呢？</li>
+<li>其实你将后面的数一个个地去列出来就可以发现是没有数字可以配成<code class="notranslate">0.3</code>的。所以我们可以得出这个数字其实是无法在内存中进行保存。这也是为什么浮点数在内存中容易发生<strong>精度丢失</strong>的原因</li>
+</ul>
+<p><strong>进一步探索指数E与尾数M的特性：</strong></p>
+<p><strong>IEEE 754标准规定：</strong></p>
+<ul>
+<li>对于<code class="notranslate">32位</code>的浮点数【float】，最高的1位是符号位<code class="notranslate">S</code>，接着的8位是指数<code class="notranslate">E</code>，剩下的23位为有效数字<code class="notranslate">M</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/41c2984d8b575111b0831df6fc8d224124ef29855623eb02a7dbdaa96cef304a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34356166323866333331323534643335616132343161666639356665663365612e706e67"><img src="https://camo.githubusercontent.com/41c2984d8b575111b0831df6fc8d224124ef29855623eb02a7dbdaa96cef304a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34356166323866333331323534643335616132343161666639356665663365612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/45af28f331254d35aa241aff95fef3ea.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>对于<code class="notranslate">64位</code>的浮点数【double】，最高的1位是符号位<code class="notranslate">S</code>，接着的11位是指数<code class="notranslate">E</code>，剩下的52位为有效数字<code class="notranslate">M</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c80f393ec05a02c7f6086d5321ad26ac0cf023352a82235d8ad5635393bf3aae/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63393061653932333732373434656631396431653962363135313132393036392e706e67"><img src="https://camo.githubusercontent.com/c80f393ec05a02c7f6086d5321ad26ac0cf023352a82235d8ad5635393bf3aae/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63393061653932333732373434656631396431653962363135313132393036392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/c90ae92372744ef19d1e9b6151129069.png" style="max-width: 100%;"></a></p>
+<p><strong>IEEE 754对有效数字M和指数E，还有一些特别规定：</strong></p>
+<p>首先是对于有效数字（尾数）M</p>
+<ul>
+<li>前面说过 <code class="notranslate">1 ≤ M &lt; 2 </code>，也就是说，M可以写成 <code class="notranslate">1.xxxxxx</code> 的形式，其中xxxxxx表示小数部分</li>
+<li>IEEE 754规定，在计算机内部保存M时，默认这个数的第一位总是<code class="notranslate">1</code>，<strong>因此可以被舍去</strong>，只保存后面的xxxxxx部分。比如保存1.01的时候，只保存<code class="notranslate">01</code>，等<strong>到读取的时候，再把第一位的1加上去</strong>。这样做的目的，是节省1位有效数字。</li>
+<li>以32位浮点数为例，留给M只有<code class="notranslate">22位</code>，但若是将第一位的1舍去以后，等于可以保存<code class="notranslate">23位</code>有效数字，精度相当于又高了一位</li>
+</ul>
+<p><strong>至于指数E，情况就比较复杂</strong></p>
+<ul>
+<li>
+<p>首先，E为一个无符号整数（<code class="notranslate">unsigned int</code>）</p>
+</li>
+<li>
+<p>那对于无符号整数来说，我们在上面有介绍过，如果E为8位，它的取值范围为<code class="notranslate">[0 - 255]</code>；如果E为11位，它的取值范围为<code class="notranslate">[0 - 2047]</code></p>
+</li>
+<li>
+<p>但是，我们知道，科学计数法中的<strong>E是可以出现负数</strong>的，所以IEEE 754规定，存入内存时E的真实值必须再加上一个<strong>中间数</strong>，<strong>对于8位的E，这个中间数是127；对于11位的E，这个中间数是1023</strong></p>
+</li>
+<li>
+<p>简单一点，还是上面讲到过的<code class="notranslate">5.5</code>，注意如果定义成【float】类型的变量的话要在后面加上一个<code class="notranslate">f</code>作为和【double】类型的区分</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">float</span> <span class="pl-s1">f</span> <span class="pl-c1">=</span> <span class="pl-c1">5.5f</span>;</pre></div>
+<ul>
+<li>然后我们对<code class="notranslate">5.5</code>这个数字去进行分析它存入到内存中的样子。通过上面算出来的</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"> <span class="pl-c1">S</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>, <span class="pl-c1">M</span> <span class="pl-c1">=</span> <span class="pl-c1">1.011</span>, <span class="pl-c1">E</span> <span class="pl-c1">=</span> <span class="pl-c1">2</span></pre></div>
+<p>去写出这32位浮点数存放到内存中是一个怎样的形式</p>
+<ul>
+<li>
+<p>对于<strong>符号数S</strong>来说就是把0存进去，占一位</p>
+</li>
+<li>
+<p>对于<strong>指数E</strong>来说为2，32位浮点数要加上一个中间值127，所以要存入的十进制数为129，再将其转换为8位二进制即为<code class="notranslate">10000001</code></p>
+</li>
+<li>
+<p>对于<strong>尾数M</strong>来说，需要舍去整数位1，然后将【小数部分】的<code class="notranslate">011</code>这三位放到内存中，但是规定了M为23位，此时我们只需要在后面补上20个0即可</p>
+</li>
+<li>
+<p>然后便可以对这个32个比特位进行划分，8位一个字节，得出<code class="notranslate">40 b0 00 00</code></p>
+</li>
+<li>
+<p>还有一点莫要忘了！还记得我们上面讲到的【大小端】存放吗？要存放到内存中的最后一步就是将其进行小端存放【这是我的机器】，即为<code class="notranslate">00 00 b0 40</code></p>
+</li>
+</ul>
+<hr>
+<blockquote>
+<p>如何将浮点数从内存中【读取】出来呢?</p>
+</blockquote>
+<p><strong>指数E从内存中取出还可以再分成三种情况：</strong></p>
+<p><strong>1. E不全为0或不全为1</strong></p>
+<ul>
+<li>对于这种情况就是最普通的，若是E存放在内存中的8位二进制数不全为0或者不全为1的话，那么直接按照上面说到过多一些M与E【写入内存】的规则进行一个逆推即可</li>
+<li>以32位浮点数为例，因为我们在计算指数E的时候加上了一个<code class="notranslate">127</code>，那么此时<strong>减去127即可</strong>；在计算尾数M的时候舍去了整数部分的1，那次此时再<strong>补上这个1即可</strong></li>
+</ul>
+<p><strong>2. E全为0</strong></p>
+<ul>
+<li>对于E全0的这种情况很特殊，也就是意味着8位二进制全为0即<code class="notranslate">00000000</code>，这个情况是在指数E加上127之后的结果，那么原先最初的指数是多少呢？那也只能是<code class="notranslate">-127</code>了。那如果这个指数是-127的话也就相当于是【<strong>1.xxxx * 2-127</strong>】，是一个非常小的数字，几乎是和0没有什么差别</li>
+<li>这时，浮点数的指数E等于<strong>1-127</strong>（或者1-1023）即为真实值；对于尾数M不再加上第一位的1，而是还原为0.xxxxxx的小数。这样做是为了表示<code class="notranslate">±0</code>，以及接近于0的很小的数字</li>
+</ul>
+<p><strong>3. E全为1</strong></p>
+<ul>
+<li>最后一种就是当E全为1的时候即<code class="notranslate">11111111</code>，这个情况也是在指数E加上127之后的结果，那么原先最初的指数是多少呢？那便能是<code class="notranslate">128</code>了，那也只能是<code class="notranslate">-127</code>了。那如果这个指数是-127的话也就相当于是【<strong>1.xxxx * 2128</strong>】，是一个非常大的数字</li>
+<li>这时，如果尾数M全为0，表示<strong>±无穷大</strong>（正负取决于符号位s）；</li>
+</ul>
+<blockquote>
+<p>以上就是有关浮点数如何【写入】内存和从内存中【读取】的所有相关知识</p>
+</blockquote>
+<hr>
+<h3>3、开局疑难解答</h3>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">n</span> <span class="pl-c1">=</span> <span class="pl-c1">9</span>;
+	<span class="pl-smi">float</span><span class="pl-c1">*</span> <span class="pl-s1">pFloat</span> <span class="pl-c1">=</span> (<span class="pl-smi">float</span><span class="pl-c1">*</span>)<span class="pl-c1">&amp;</span><span class="pl-s1">n</span>;
+	<span class="pl-en">printf</span>(<span class="pl-s">"n的值为：%d\n"</span>, <span class="pl-s1">n</span>);		<span class="pl-c">//1</span>
+	<span class="pl-en">printf</span>(<span class="pl-s">"*pFloat的值为：%f\n"</span>, <span class="pl-c1">*</span><span class="pl-s1">pFloat</span>);		<span class="pl-c">//2</span>
+	<span class="pl-c1">*</span><span class="pl-s1">pFloat</span> <span class="pl-c1">=</span> <span class="pl-c1">9.0</span>;
+	<span class="pl-en">printf</span>(<span class="pl-s">"num的值为：%d\n"</span>, <span class="pl-s1">n</span>);	<span class="pl-c">//3</span>
+	<span class="pl-en">printf</span>(<span class="pl-s">"*pFloat的值为：%f\n"</span>, <span class="pl-c1">*</span><span class="pl-s1">pFloat</span>);		<span class="pl-c">//4</span>
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>首先写出【n = 9】在内存中的补码<code class="notranslate">0 0000000 00000000 00000000 00001001</code>。然后是将这个n的地址存放到了一个浮点型的指针中去</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">n</span> <span class="pl-c1">=</span> <span class="pl-c1">9</span>;
+<span class="pl-smi">float</span><span class="pl-c1">*</span> <span class="pl-s1">pFloat</span> <span class="pl-c1">=</span> (<span class="pl-smi">float</span><span class="pl-c1">*</span>)<span class="pl-c1">&amp;</span><span class="pl-s1">n</span>;</pre></div>
+<ul>
+<li>那么此时进行一个打印，以<code class="notranslate">%d</code>的形式打印n不用考虑就是9；但是后一个就不一样了，对浮点型的指针进行解引用，那也就是要<strong>将存放在内存中的浮点数进行读取出来</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"n的值为：%d\n"</span>, <span class="pl-s1">n</span>);
+<span class="pl-en">printf</span>(<span class="pl-s">"*pFloat的值为：%f\n"</span>, <span class="pl-c1">*</span><span class="pl-s1">pFloat</span>);</pre></div>
+<ul>
+<li>那编译器此时就会站在浮点数的角度去看待这个<code class="notranslate">00000000000000000000000000001001</code>，将第一位看做是符号位0，即<code class="notranslate">S == 0</code>，然后接下去就是8个比特位E，不过可以发现这个E是全0呀<code class="notranslate">00000000</code>，就是我们上面所讲到的这种特殊情况</li>
+<li>那此时后面的尾数M就不可以添上前面的整数部分1了，而是应该写成<code class="notranslate">0.xxxxxx</code>的形式即<code class="notranslate">0.000000000000000000001001</code>。那对于指数E应该等于1-127为【-126】。所以最后写出来v的形式为</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate">(<span class="pl-c1">-1</span>)^<span class="pl-c1">0</span> <span class="pl-c1">*</span> <span class="pl-c1">0.000000000000000000001001</span> <span class="pl-c1">*</span> <span class="pl-c1">2</span>^ (<span class="pl-c1">-126</span>)</pre></div>
+<ul>
+<li>此时我们再去计算这个值打印的结果是多少，其实完全不需要计算，仔细观察就可以发现S为1，M为一个很小的数，若E再去乘上这个很小的数那只会更小，然后无限接近0,。那最后根据这个浮点数小数点后6位有效，便可以看出最终的结果为<code class="notranslate">0.000000</code></li>
+</ul>
+<hr>
+<ul>
+<li>然后我们再来看下面的。此时pFloat进行解引用，然后将<code class="notranslate">9.0</code>存放到n这块地址中去，那也就相当于是我们最先学习了如何将一个浮点数存放到内存中去</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">*</span><span class="pl-s1">pFloat</span> <span class="pl-c1">=</span> <span class="pl-c1">9.0</span>;</pre></div>
+<ul>
+<li>那我们可以很快将其转换为二进制的形式<code class="notranslate">1001.0</code>，然后通过v的公式得出<code class="notranslate">(-1)^0 * 1.001 * 2^3</code></li>
+<li>此时再去将其转换为IEEE 754标准规定的32位浮点数。首先看到指数E为3，加上127之后为130，那么二进制形式即为<code class="notranslate">10000010</code>，尾数M也是同理，舍去1后看到<code class="notranslate">001</code>，后面添上20个0补齐23个尾数位。最后的结果即为</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate">——<span class="pl-c1">&gt;</span> <span class="pl-c1">0</span> <span class="pl-c1">10000010</span> <span class="pl-c1">00100000000000000000000</span></pre></div>
+<ul>
+<li>然后去执行打印语句，那我们以浮点数的形式放进去，但是以<code class="notranslate">%d</code>的形式打印n，那么这一串二进制就会被编译器看做是补码，<strong>既然是打印就得是原码的形式</strong>，不过看到这个符号位为0，那我们也不需要去做一个转换，它就是原码</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"num的值为：%d\n"</span>, <span class="pl-s1">n</span>);</pre></div>
+<ul>
+<li>那么最后机器就会将二进制形式的原码转换为十进制的形式然后打印。一样，我们可以将它放到【程序员】计计算器进行运行，然后找到十进制的形式，便是最后打印输出在屏幕上的结果</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">01000001000100000000000000000000</span> —— <span class="pl-c1">1</span>,<span class="pl-c1">091</span>,<span class="pl-c1">567</span>,<span class="pl-c1">616</span></pre></div></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

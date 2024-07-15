@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="
+## 一、字符分类函数
+
+- C语言中有一系列的函数是专门做字符分类的，也就是一个字符是属于什么类型的字符的。">
+<meta property="og:title" content="11. C语言之字符函数、字符串函数与内存函数">
+<meta property="og:description" content="
+## 一、字符分类函数
+
+- C语言中有一系列的函数是专门做字符分类的，也就是一个字符是属于什么类型的字符的。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/11.%20C-yu-yan-zhi-zi-fu-han-shu-%E3%80%81-zi-fu-chuan-han-shu-yu-nei-cun-han-shu.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>11. C语言之字符函数、字符串函数与内存函数</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">11. C语言之字符函数、字符串函数与内存函数</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/36" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>一、字符分类函数</h2>
+<ul>
+<li>C语言中有一系列的函数是专门做字符分类的，也就是一个字符是属于什么类型的字符的。</li>
+<li>这些函数的使用都需要包含一个头文件是<code class="notranslate">ctype.h</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/a04a3b383f29addc6ff8b60dbf6921315c4f7930b9f49a18610945730d6d4881/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35663632633934323661663234653964393762353031306636613638333063302e706e67"><img src="https://camo.githubusercontent.com/a04a3b383f29addc6ff8b60dbf6921315c4f7930b9f49a18610945730d6d4881/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35663632633934323661663234653964393762353031306636613638333063302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/5f62c9426af24e9d97b5010f6a6830c0.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这些函数的使用方法非常类似，我们就讲解一个函数，其他的非常类似：</li>
+<li>可以看一下文档如何使用<a href="https://legacy.cplusplus.com/reference/cctype/islower/?kw=islower" rel="nofollow">islower()</a></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">islower</span> (<span class="pl-smi">int</span> <span class="pl-s1">c</span> );</pre></div>
+<ul>
+<li><code class="notranslate">islower</code> 是能够<strong>判断参数部分的c是否是小写字母的</strong>。</li>
+<li>通过<strong>返回值</strong>来说明是否是小写字母，如果是<strong>小写字母就返回非0的整数</strong>，如果<strong>不是小写字母，则返回0。</strong></li>
+<li>用代码演示：<strong>写一个代码，讲字符串中的小写字母转大写，其他字符不变。</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-k">#include</span> <span class="pl-s">&lt;ctype.h&gt;</span><span class="pl-c">// 要注意需要包含头文件ctype.h</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>() {
+    <span class="pl-smi">char</span> <span class="pl-s1">str</span>[] <span class="pl-c1">=</span> <span class="pl-s">"Test String.\n"</span>;
+    <span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+
+    <span class="pl-k">while</span>(<span class="pl-s1">str</span>[<span class="pl-s1">i</span>]){
+        <span class="pl-k">if</span>(<span class="pl-en">islower</span>(<span class="pl-s1">str</span>[<span class="pl-s1">i</span>])){
+            <span class="pl-s1">str</span>[<span class="pl-s1">i</span>] <span class="pl-c1">-=</span> <span class="pl-c1">32</span>;
+        }
+        <span class="pl-s1">i</span><span class="pl-c1">++</span>;
+    }
+    <span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>,<span class="pl-s1">str</span>);
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/315a02706684ab3b3fd11787480cd8e668994815cd67a684966afdb6d7eff8cd/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38303066323534303032356434363065393330326262663864316537323730392e706e67"><img src="https://camo.githubusercontent.com/315a02706684ab3b3fd11787480cd8e668994815cd67a684966afdb6d7eff8cd/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38303066323534303032356434363065393330326262663864316537323730392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/800f2540025d460e9302bbf8d1e72709.png" style="max-width: 100%;"></a></p>
+<h2>二、字符转换函数</h2>
+<ul>
+<li>C语言提供了2个字符转换函数：</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">tolower</span>(<span class="pl-smi">int</span> <span class="pl-s1">c</span>); <span class="pl-c">//将参数传进去的大写字母转小写</span>
+<span class="pl-smi">int</span> <span class="pl-en">toupper</span>(<span class="pl-smi">int</span> <span class="pl-s1">c</span>); <span class="pl-c">//将参数传进去的小写字母转大写</span></pre></div>
+<ul>
+<li>上面的代码，我们将小写转大写，是-32完成的效果，有了转换函数，就可以直接使用 <code class="notranslate">toupper</code> 函数。</li>
+<li>返回的是对应转换后的字母</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/a509effccc48d601dd7fc2e81bd1940785e2912adc60c0e2958f33799afb5a6d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39346231656531656563656334333763396337396162356232663063323434352e706e67"><img src="https://camo.githubusercontent.com/a509effccc48d601dd7fc2e81bd1940785e2912adc60c0e2958f33799afb5a6d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39346231656531656563656334333763396337396162356232663063323434352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/94b1ee1eecec437c9c79ab5b2f0c2445.png" style="max-width: 100%;"></a></p>
+<blockquote>
+<p>要注意都要报包含头文件<code class="notranslate">ctype.h</code></p>
+</blockquote>
+<ul>
+<li>
+<p>补充一个<code class="notranslate">strlwr</code>，这个头文件在<code class="notranslate">string.h</code>里</p>
+</li>
+<li>
+<p>函数原型：</p>
+</li>
+</ul>
+<blockquote>
+<p>char *strlwr(char *str);</p>
+</blockquote>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c8cbddea2426b09de9f6dceb934eb9e1eaeccdf8b8207a81c5fa0e8e849f9c97/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32363738346361393732363934656339393762626537623135373466643662622e706e67"><img src="https://camo.githubusercontent.com/c8cbddea2426b09de9f6dceb934eb9e1eaeccdf8b8207a81c5fa0e8e849f9c97/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32363738346361393732363934656339393762626537623135373466643662622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/26784ca972694ec997bbe7b1574fd6bb.png" style="max-width: 100%;"></a></p>
+<h2>三、求字符串长度</h2>
+<h3>strlen()</h3>
+<ul>
+<li>函数原型</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">size_t</span> <span class="pl-en">strlen</span> ( <span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">str</span> );</pre></div>
+<p><a href="https://legacy.cplusplus.com/reference/cstring/strlen/?kw=strlen" rel="nofollow">文档链接</a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/67e1af073e2ae61c0ad036046d0db9d572d7a3bed438da2d94c63dca42e96ef8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35303464636637343033313134393562623839633537336139353133633864622e706e67"><img src="https://camo.githubusercontent.com/67e1af073e2ae61c0ad036046d0db9d572d7a3bed438da2d94c63dca42e96ef8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35303464636637343033313134393562623839633537336139353133633864622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/504dcf740311495bb89c573a9513c8db.png" style="max-width: 100%;"></a></p>
+<blockquote>
+<p>求一下下面这个字符串的长度</p>
+</blockquote>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span><span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-k">#include</span><span class="pl-s">&lt;string.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">arr</span>[] <span class="pl-c1">=</span> <span class="pl-s">"abcdef"</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">len</span> <span class="pl-c1">=</span> <span class="pl-en">strlen</span>(<span class="pl-s1">arr</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"len = %d\n"</span>, <span class="pl-s1">len</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c96fed9f73c06cb541a1e9e60153389af736affb3235b9d4293a81161a68f688/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66666461313764386461316534323739393939613639663861303230306333362e706e67"><img src="https://camo.githubusercontent.com/c96fed9f73c06cb541a1e9e60153389af736affb3235b9d4293a81161a68f688/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66666461313764386461316534323739393939613639663861303230306333362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/ffda17d8da1e4279999a69f8a0200c36.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这里为什么算出来的是<code class="notranslate">6</code>呢？</li>
+</ul>
+<blockquote>
+<p>通过<code class="notranslate">debug</code>（调试）我们可以看到，对于<code class="notranslate">strlen()</code>来说，计算的是从字符串开头到字符串末尾的<code class="notranslate">\0</code>为止一共有多少字符，那数一下就可以知道有6个</p>
+</blockquote>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/47d536d4e5b723b7e68b46e0ae492bf0d5097529030a815eb73ff6d391821717/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31373463323130313530653934626235393332343361623636373332636430652e706e67"><img src="https://camo.githubusercontent.com/47d536d4e5b723b7e68b46e0ae492bf0d5097529030a815eb73ff6d391821717/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31373463323130313530653934626235393332343361623636373332636430652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/174c210150e94bb593243ab66732cd0e.png" style="max-width: 100%;"></a></p>
+<h3>注意事项</h3>
+<ul>
+<li>参数指向的字符串必须要以 ‘\0’ 结束</li>
+<li>如果将<code class="notranslate">arr</code>字符数组初始化成单个字符，这样再使用strlen求字符串长度就会不正确，这样初始化就没有<code class="notranslate">\0</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b53167b22c7d14eee78fa1bb1037ce695e58a33b68fb37a8dc47884b9aae4c28/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30356664333731346437303934303864613030356331323835633963663935662e706e67"><img src="https://camo.githubusercontent.com/b53167b22c7d14eee78fa1bb1037ce695e58a33b68fb37a8dc47884b9aae4c28/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30356664333731346437303934303864613030356331323835633963663935662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/05fd3714d709408da005c1285c9cf95f.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>再次通过调试观察就可以发现</li>
+<li>字符数组arr末尾是没有<code class="notranslate">\0</code>，编译器为这个数组在内存中随机分配了一块空间，strlen再寻找<code class="notranslate">\0</code>，不知道后面什么时候遇到，所以就是<strong>随机值</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/81a62c165d7bf14edee76f64d1c418f2370bb17fe9a14188d646b2de0e20abab/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39626135313930616634636134366639626531346562656166306330336133302e706e67"><img src="https://camo.githubusercontent.com/81a62c165d7bf14edee76f64d1c418f2370bb17fe9a14188d646b2de0e20abab/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39626135313930616634636134366639626531346562656166306330336133302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/9ba5190af4ca46f9be14ebeaf0c03a30.png" style="max-width: 100%;"></a></p>
+<hr>
+<blockquote>
+<p>注意函数的返回值为<code class="notranslate">size_t</code>，是无符号的</p>
+</blockquote>
+<ul>
+<li>请问下面这段代码的运行结果是多少？会进入哪个if分支呢？</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">if</span> (<span class="pl-en">strlen</span>(<span class="pl-s">"abc"</span>) <span class="pl-c1">-</span> <span class="pl-en">strlen</span>(<span class="pl-s">"abcdef"</span>) <span class="pl-c1">&gt;</span> <span class="pl-c1">0</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"&gt;\n"</span>);
+	}
+	<span class="pl-k">else</span>
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"&lt;=\n"</span>);
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>可以看到，最后的结果出人意料地为输出<code class="notranslate">&gt;</code>，因为上面说到了strlen()函数计算的是字符串末尾的<code class="notranslate">\0</code>之前的字符个数，那么if()条件中即为<code class="notranslate">3 - 6 = -3 </code>应该<code class="notranslate">&gt;0</code>，那一定会进入第二个分支，打印出来的结果就是<code class="notranslate">&lt;=</code>，但为什么最后的结果是<code class="notranslate">&gt;</code>呢？</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e662706ee2411302ade451e3f17849018e1a67fc0d8b86e4bf5898078a574930/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35303863376566663965633234343032393132366261383230343638303831312e706e67"><img src="https://camo.githubusercontent.com/e662706ee2411302ade451e3f17849018e1a67fc0d8b86e4bf5898078a574930/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35303863376566663965633234343032393132366261383230343638303831312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/508c7eff9ec244029126ba8204680811.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>在这个时候就要找问题了，这个时候再看一下函数解读中的<a href="https://legacy.cplusplus.com/reference/cstring/strlen/?kw=strlen" rel="nofollow">原文链接</a><code class="notranslate">strlen()</code>函数的返回值，为<code class="notranslate">size_t</code></p>
+</li>
+<li>
+<p>转到定义后可以看到，就发现它的原型是<code class="notranslate">unsigned int</code> —— 无符号整型。在计算机内部对于一个负数来说它会被当成一个无符号整型来进行处理，那它就会是一个非常大的正数，所以最后的结果<code class="notranslate">&gt;0</code>就是这么出来的</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c265b0597e4d9982212443bd100aba3a82e3bf98225a653a18918d3ead883057/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33366262323931633662346134646161613264376535616530366133643530652e706e67"><img src="https://camo.githubusercontent.com/c265b0597e4d9982212443bd100aba3a82e3bf98225a653a18918d3ead883057/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33366262323931633662346134646161613264376535616530366133643530652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/36bb291c6b4a4daaa2d7e5ae06a3d50e.png" style="max-width: 100%;"></a><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0f00ab83a3e54af06dd2148ddf80416776ff46d25711d9c5e84969bd396d1a27/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36663033323264366134333734643264623339323662353732336630663062662e706e67"><img src="https://camo.githubusercontent.com/0f00ab83a3e54af06dd2148ddf80416776ff46d25711d9c5e84969bd396d1a27/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36663033323264366134333734643264623339323662353732336630663062662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/6f0322d6a4374d2db3926b5723f0f0bf.png" style="max-width: 100%;"></a></p>
+<h3>模拟实现</h3>
+<blockquote>
+<p>接下来的话我们就来模拟实现这个strlen()函数，这里我介绍三种方法</p>
+</blockquote>
+<blockquote>
+<p>方法1：计数器</p>
+</blockquote>
+<ul>
+<li>首先第一种就是采用计数器的形式，最简单直观</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">size_t</span> <span class="pl-en">my_strlen1</span>(<span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">str</span>)<span class="pl-c">//返回类型是无符号整形所以就是size_t,</span>
+{	
+	<span class="pl-c">//而我们统计的字符串我们不想让他修改，所以就加上个const</span>
+	<span class="pl-smi">int</span> <span class="pl-s1">count</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-k">while</span> (<span class="pl-c1">*</span><span class="pl-s1">str</span>)
+	{
+		<span class="pl-s1">str</span><span class="pl-c1">++</span>;
+		<span class="pl-s1">count</span><span class="pl-c1">++</span>;
+	}
+	<span class="pl-k">return</span> <span class="pl-s1">count</span>;
+}</pre></div>
+<hr>
+<blockquote>
+<p>方法2：递归</p>
+</blockquote>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">/*</span>
+<span class="pl-c">* a b c d e f \0</span>
+<span class="pl-c">* 1 + b c d e f \0</span>
+<span class="pl-c">* 1 + 1 + c d e f \0</span>
+<span class="pl-c">* 1 + 1 + 1 + d e f \0</span>
+<span class="pl-c">* 1 + 1 + 1 + 1 + e f \0</span>
+<span class="pl-c">* 1 + 1 + 1 + 1 + 1 + f \0</span>
+<span class="pl-c">* 1 + 1 + 1 + 1 + 1 + 1 + \0</span>
+<span class="pl-c">*/</span>
+<span class="pl-smi">size_t</span> <span class="pl-en">my_strlen2</span>(<span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">str</span>)
+{
+	<span class="pl-k">if</span> (<span class="pl-c1">*</span><span class="pl-s1">str</span> <span class="pl-c1">==</span> <span class="pl-c1">'\0'</span>)
+		<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+	<span class="pl-k">return</span> <span class="pl-c1">1</span> <span class="pl-c1">+</span> <span class="pl-en">my_strlen2</span>(<span class="pl-s1">str</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>);
+}</pre></div>
+<hr>
+<blockquote>
+<p>方法3：指针相减【计算的就是二者之间相差的元素个数】</p>
+</blockquote>
+<ul>
+<li>在C语言指针章节，两个指针相减计算的就是它们之间相差的个数，因此我们可以先记录一下首字符的地址，直到指针偏移到末尾的<code class="notranslate">\0</code>时，将两个地址一减最后的结果便是字符串的长度</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">size_t</span> <span class="pl-en">my_strlen3</span>(<span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">str</span>)
+{
+	<span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">tmp</span> <span class="pl-c1">=</span> <span class="pl-s1">str</span>;
+	<span class="pl-k">while</span> (<span class="pl-c1">*</span><span class="pl-s1">tmp</span>)
+	{
+		<span class="pl-s1">tmp</span><span class="pl-c1">++</span>;
+	}
+	<span class="pl-k">return</span> <span class="pl-s1">tmp</span> <span class="pl-c1">-</span> <span class="pl-s1">str</span>;
+}</pre></div>
+<h2>四、长度不受限制的字符串函数</h2>
+<h3>strcpy()</h3>
+<ul>
+<li>函数原型</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-en">strcpy</span> ( <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">destination</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">source</span> );</pre></div>
+<p><a href="https://legacy.cplusplus.com/reference/cstring/strcpy/?kw=strcpy" rel="nofollow">原文链接</a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/646b2e00da8f75bc46d71946e9b3dcca7cf26c69f9843485c62c488c0ebb09a2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31323033356263393430636234643335626438336631343030336332313965342e706e67"><img src="https://camo.githubusercontent.com/646b2e00da8f75bc46d71946e9b3dcca7cf26c69f9843485c62c488c0ebb09a2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31323033356263393430636234643335626438336631343030336332313965342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/12035bc940cb4d35bd83f14003c219e4.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>功能演示</li>
+</ul>
+<blockquote>
+<p>将一个字符串拷贝到另一个字符串中</p>
+</blockquote>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">arr1</span>[<span class="pl-c1">20</span>] <span class="pl-c1">=</span> { <span class="pl-c1">0</span> };
+	<span class="pl-smi">char</span> <span class="pl-s1">arr2</span>[] <span class="pl-c1">=</span> <span class="pl-s">"abcdef"</span>;
+	<span class="pl-en">strcpy</span>(<span class="pl-s1">arr1</span>, <span class="pl-s1">arr2</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">arr1</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>首定义了两个数组，将<code class="notranslate">arr2</code>中数组的内容拷贝到<code class="notranslate">arr1</code>中</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ac3f985a6f93185b40a3d0cb0076feccf316ffde763c58a3cae6c61a07c99208/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31313564663465383466386134353639616531376232613030346536663662322e706e67"><img src="https://camo.githubusercontent.com/ac3f985a6f93185b40a3d0cb0076feccf316ffde763c58a3cae6c61a07c99208/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31313564663465383466386134353639616531376232613030346536663662322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/115df4e84f8a4569ae17b2a004e6f6b2.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>也可以通过调试来看看最后有没有拷贝过去</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4de373f66bc80a13d648e40e9751dd73f54bc6b95d24ccee51c704da7b6e4a88/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62343963336537643930373634666134383865613439386261323039356362612e706e67"><img src="https://camo.githubusercontent.com/4de373f66bc80a13d648e40e9751dd73f54bc6b95d24ccee51c704da7b6e4a88/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62343963336537643930373634666134383865613439386261323039356362612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/b49c3e7d90764fa488ea498ba2095cba.png" style="max-width: 100%;"></a></p>
+<h3>注意事项</h3>
+<blockquote>
+<p>源字符串必须以 ‘\0’ 结束，因为源字符串中的 ‘\0’ 会被拷贝到目标空间</p>
+</blockquote>
+<ul>
+<li>继续定义两个字符数组进行拷贝的工作测试，为了能够看得更清楚，str1中我使用的都是<code class="notranslate">*</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">str1</span>[] <span class="pl-c1">=</span> <span class="pl-s">"**************"</span>;
+	<span class="pl-smi">char</span> <span class="pl-s1">str2</span>[] <span class="pl-c1">=</span> <span class="pl-s">"hello world"</span>;
+	<span class="pl-en">strcpy</span>(<span class="pl-s1">str1</span>, <span class="pl-s1">str2</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">str1</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>你可能想的结果是<code class="notranslate">hello world***</code>，但是不是，<code class="notranslate">d</code>后面并没有任何东西</li>
+</ul>
+<blockquote>
+<p>原因其实就在于字符串最后面的<code class="notranslate">\0</code>，str2里面存放的是个字符串，最后面是带有<code class="notranslate">\0</code>的， 通过strcpy()进行拷贝的时候，<strong>会将末尾的<code class="notranslate">\0</code>也一起拷贝过去</strong></p>
+</blockquote>
+<ul>
+<li>又因为<code class="notranslate">%s</code>打印字符串的时候也是以末尾的<code class="notranslate">\0</code>作为结束的标志，因此打印到此处就结束了，不会再打印后面的<code class="notranslate">***</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/278c9ea70f51d04b538dbcb85f2e40ccdaee26a107db54d2d4e05f0e71184d6d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65636435373435376630306534663166626534356537333030643539623761652e706e67"><img src="https://camo.githubusercontent.com/278c9ea70f51d04b538dbcb85f2e40ccdaee26a107db54d2d4e05f0e71184d6d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65636435373435376630306534663166626534356537333030643539623761652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/ecd57457f00e4f1fbe45e7300d59b7ae.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>但此时若是我将原字符串改为末尾不带<code class="notranslate">\0</code>，会发生什么呢？我们运行起来看看</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3c2981631b9279c3685875b9e7aeedfa1e8f96e6c62a354befe37f665ab06300/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38303436623331626330666434356536383636616265616461333265336263312e706e67"><img src="https://camo.githubusercontent.com/3c2981631b9279c3685875b9e7aeedfa1e8f96e6c62a354befe37f665ab06300/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38303436623331626330666434356536383636616265616461333265336263312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/8046b31bc0fd45e6866abeada32e3bc1.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这里就会编译器就会提示错误了，再将代码进行调试后发现程序发生了奔溃，因为原字符串的末尾没有<code class="notranslate">\0</code>，所以在拷贝的时候编译器完全不知道什么时候停下来，所以在一直拷贝的过程中就会发生 <strong>【越界访问】</strong> 的问题</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0b8c733d94f364bdcd4f4938039caf4b1b5b8287c4b51236d3074c0713ab4e19/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33633831623963363632663434633839386335623038306265663331303232372e706e67"><img src="https://camo.githubusercontent.com/0b8c733d94f364bdcd4f4938039caf4b1b5b8287c4b51236d3074c0713ab4e19/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33633831623963363632663434633839386335623038306265663331303232372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/3c81b9c662f44c898c5b080bef310227.png" style="max-width: 100%;"></a></p>
+<blockquote>
+<p>所以需要拷贝的原字符串一定要以<code class="notranslate">\0</code>结尾，否则会出现问题</p>
+</blockquote>
+<blockquote>
+<p>目标空间必须足够大，以确保能存放源字符串</p>
+</blockquote>
+<ul>
+<li>不仅是源头有限制，目标字符串也需要有一定的限制，不可以过随意。例如说下面要将字符数组中的<code class="notranslate">abcdef</code>拷贝到空间只有3的字符数组str1中去，会发生什么呢？</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">str1</span>[<span class="pl-c1">3</span>] <span class="pl-c1">=</span> { <span class="pl-c1">0</span> };
+	<span class="pl-smi">char</span> <span class="pl-s1">str2</span>[] <span class="pl-c1">=</span> <span class="pl-s">"abcdef"</span>;
+	<span class="pl-en">strcpy</span>(<span class="pl-s1">str1</span>, <span class="pl-s1">str2</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">str1</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>可以看到，str2虽然拷贝过去了，但是str1这个原字符数组却被破坏了，原因就在于str1数组的容量太小了，不足以容纳<code class="notranslate">abcdef</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b95ea4ac52fa9e10b224d5634677300a2415ba6a1155b9b711045cacfc589e78/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30396236356438353566626534656538393064643336646464616335656266362e706e67"><img src="https://camo.githubusercontent.com/b95ea4ac52fa9e10b224d5634677300a2415ba6a1155b9b711045cacfc589e78/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30396236356438353566626534656538393064643336646464616335656266362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/09b65d855fbe4ee890dd36dddac5ebf6.png" style="max-width: 100%;"></a></p>
+<blockquote>
+<p>所以我们在拷贝字符串的时候也要考虑到目标字符串的空间是否足够容纳原字符串</p>
+</blockquote>
+<ul>
+<li>
+<p>目标空间必须可变</p>
+</li>
+<li>
+<p>不过目标空间除了要有足够大的空间之外，还要保证可以变，因为将源字符串拷贝过去的时候，肯定会修改目标空间的内容，若是目标空间不可以修改的话，那就是无稽之谈了</p>
+</li>
+<li>
+<p>p存放的就是字符串<code class="notranslate">abcdef</code>中<code class="notranslate">a</code>的首元素地址，我们知道对于一个字符串来说为一个常量，是不可修改的</p>
+</li>
+<li>
+<p>在定义指针p最标准的写法还是<code class="notranslate">const char* p = "abcdef"</code>，这是一个常量指针，表示指针p所指向的那块空间中的内存是不可修改的，因此将<code class="notranslate">"bit"</code>拷贝过去的话便是非法的</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">p</span> <span class="pl-c1">=</span> <span class="pl-s">"abcdef"</span>;
+	<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">str</span> <span class="pl-c1">=</span> <span class="pl-s">"bit"</span>;
+	<span class="pl-en">strcpy</span>(<span class="pl-s1">p</span>, <span class="pl-s1">str</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">p</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>通过调试可以看出，对内存中一块只读的空间进行修改的时候就会发生【访问冲突】的问题</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d332f7b856c0469fb9066a88fe30710a5bf5b1536b26268b7e8faa0a634c4811/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39383834613538613139326234383538616433396265616632336166306634622e706e67"><img src="https://camo.githubusercontent.com/d332f7b856c0469fb9066a88fe30710a5bf5b1536b26268b7e8faa0a634c4811/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39383834613538613139326234383538616433396265616632336166306634622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/9884a58a192b4858ad39beaf23af0f4b.png" style="max-width: 100%;"></a></p>
+<h3>模拟实现</h3>
+<ul>
+<li>
+<p>定义出一个<code class="notranslate">my_strcpy()</code>的函数，设置形参为两个字符指针，用于接收主函数传入进来的两个字符串的起始地址</p>
+</li>
+<li>
+<p>对于数组的函数名来说就是首元素地址，所以直接传入数组名即可</p>
+</li>
+<li>
+<p>写代码前我们来看一下字符串拷贝的原理，也就是获取到<code class="notranslate">src</code>和<code class="notranslate">dst</code>两个指针所指向的字符，然后进行一一拷贝，直到<code class="notranslate">*src == '\0’</code> 为止</p>
+</li>
+<li>
+<p>最后当这个<code class="notranslate">*src == '\0'</code>的时候，便结束拷贝，跳出循环。此时我们还有最后一个<code class="notranslate">'\0'</code>还没有拷贝过去，继续执行一次<code class="notranslate">*dst = *src</code>即可<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/eab129f8ef411c2e6e569adbe14adf81154e58509150e8b8439f4b13f8db6f67/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62666561356237616666323734666164393036656161306161656161373034302e706e67"><img src="https://camo.githubusercontent.com/eab129f8ef411c2e6e569adbe14adf81154e58509150e8b8439f4b13f8db6f67/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62666561356237616666323734666164393036656161306161656161373034302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/bfea5b7aff274fad906eaa0aaeaa7040.png" style="max-width: 100%;"></a></p>
+</li>
+<li>
+<p>最后得出的代码如下：</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">my_strcpy</span>(<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">dest</span>, <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">src</span>)
+{
+	<span class="pl-k">while</span> (<span class="pl-c1">*</span><span class="pl-s1">src</span> <span class="pl-c1">!=</span> <span class="pl-c1">'\0'</span>)
+	{
+		<span class="pl-c1">*</span><span class="pl-s1">dst</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">src</span>;
+		<span class="pl-s1">src</span><span class="pl-c1">++</span>;
+		<span class="pl-s1">dest</span><span class="pl-c1">++</span>;
+	}
+	<span class="pl-c1">*</span><span class="pl-s1">dest</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">src</span>;
+}</pre></div>
+<p>这样写这个代码不够好，还可以优化简练代码</p>
+<p>思路：</p>
+<ul>
+<li>对于while循环内部的判断，我们知道是一个逻辑表达式，而对于'\0'来说就相当于与【假】，所以当<em>src != '\0'的时候就会一直循环，就为【真】。所以我们可以直接改成</em>src，当其碰到'\0'的时候就会跳出循环停止拷贝</li>
+<li>第二处可以优化的就是循环内部的一个拷贝的过程，因为在每一次拷贝完成之后两个字符指针就会进行一个后移，此时我们可以对它们进行一些合并。<br>
+因为对于后置++来说是先执行++之前的，所以赋值完成之后再++就刚好可以达到一个后移的效果</li>
+</ul>
+<p>优化后的代码：</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">while</span> (<span class="pl-c1">*</span><span class="pl-s1">src</span>)
+{
+	<span class="pl-c1">*</span><span class="pl-s1">dst</span><span class="pl-c1">++</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">src</span><span class="pl-c1">++</span>;
+}
+<span class="pl-c1">*</span><span class="pl-s1">dst</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">src</span>;</pre></div>
+<ul>
+<li>通过仔细观察库函数strcpy()的描述后就可以发现，其实它在拷贝结束之后也是存在返回值的，返回的就是拷贝完成之后的目标字符串</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9233026d1f02e4a92e8d68f8dae610132919ca92d15ca0c07261147c55b2f6fa/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63356432393864633038383134323262613762386363393537626264613533332e706e67"><img src="https://camo.githubusercontent.com/9233026d1f02e4a92e8d68f8dae610132919ca92d15ca0c07261147c55b2f6fa/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63356432393864633038383134323262613762386363393537626264613533332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/c5d298dc0881422ba7b8cc957bbda533.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>因此我们可以将拷贝的逻辑也放到循环的条件判断中去，不需要在最后继续拷贝'\0'，随着*dst++ = *src++的不断执行，最后将src中的\0拷贝到了dest中，此时while()循环中的条件就变成了\0，会自动跳出循环，此时【src】和【dst】也已经遍历结束</li>
+</ul>
+<p>最后代码的简化就可以成这样</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">while</span> (<span class="pl-c1">*</span><span class="pl-s1">dst</span><span class="pl-c1">++</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">src</span><span class="pl-c1">++</span>)
+{
+	;
+}</pre></div>
+<h3>assert()断言</h3>
+<ul>
+<li>经过上面的众多优化，你一定觉得可以了，确实已经是够简洁了，但是呢却缺乏安全性</li>
+<li>我们是模拟实现字符串的拷贝，将str2中的字符串拷贝到str1中，那就是要源头字符串中有内容才可以拷贝，但若是我将这个str置为NULL然后传进去呢，会发生什么？</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ed883f2308e37a67cd9c7619c963ad4147a2abd7e77c3d34d94d1567e968e760/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66643330383531343863633734313363613630333934303031376635383237332e706e67"><img src="https://camo.githubusercontent.com/ed883f2308e37a67cd9c7619c963ad4147a2abd7e77c3d34d94d1567e968e760/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66643330383531343863633734313363613630333934303031376635383237332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/fd3085148cc7413ca603940017f58273.png" style="max-width: 100%;"></a><br>
+通过运行可以看到，运行的时候报出了<code class="notranslate">空指针异常</code>，因为在函数内部现在要执行<code class="notranslate">*src</code>，也就是解引用的操作，我们知道对于空指针来说是不能解引用的，因此这里就出现问题了，表示我们的程序考虑地不够严谨</p>
+<ul>
+<li>此时就可以使用到一样东西叫做【断言】，可以去看看官方文档<a href="https://legacy.cplusplus.com/reference/cassert/assert/?kw=assert" rel="nofollow">assert</a></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/72e0a092bf852903e1cf61dbedf189f1ad8158392b1a2ab2fed2979f4fd0db7b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38363161346266316362343534353137393266346331663763316135646135612e706e67"><img src="https://camo.githubusercontent.com/72e0a092bf852903e1cf61dbedf189f1ad8158392b1a2ab2fed2979f4fd0db7b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38363161346266316362343534353137393266346331663763316135646135612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/861a4bf1cb45451792f4c1f7c1a5da5a.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>若是加上了这句assert断言，那么编译器在运行的时候就会报出对应的错误信息，括号里面要写上的就是出错的对立面，若是当<code class="notranslate">src != NULL</code>时，便不会执行这个断言，只有当src传入进来是NULL的时候才会触发这个断言</li>
+<li>当然为了方便也可以写成这样<code class="notranslate">assert(src)</code>;只有里面的表达式expression为真的时候才会执行，为假的时候便不会执行</li>
+<li>也可以给<code class="notranslate">dst</code>加上断言，防止它传入进来也为NULL，<code class="notranslate">assert(dst)</code>;<br>
+那么这两个断言的逻辑就可以转换为只有当src和dst均为非空的时候程序才正常执行，只要有一方为空便报出错误，那便将它们做一个合并，就可以想到使用我们在操作符章节【逻辑与】</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">assert</span>(<span class="pl-s1">dest</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">src</span>);</pre></div>
+<ul>
+<li>
+<p>const修饰常量指针</p>
+</li>
+<li>
+<p>假设一个公司的程序员，它现在就在模拟实现一个字符串strcpy()，也想到了断言这一步，然后吃饭去了。和朋友一起到楼下酒吧喝了两杯，然后呢回到公司之后继续写业务，要知道此时他喝醉了</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">while</span> (<span class="pl-c1">*</span><span class="pl-s1">src</span><span class="pl-c1">++</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">dst</span><span class="pl-c1">++</span>)
+{
+	;
+}</pre></div>
+<p>于是呢他就将代码写成了上面这样，将目标字符串dst中的内容拷贝到了原字符串src中，此时虽然在拷贝的过程中不会出现什么问题，可是呢在运行的时候就会出现【变量str周围的堆栈已损坏】，也就是【str1】中的这些“xxxxxxxxx”若是拷贝到str2中是存不下的，这就出现问题了</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3816eddad9cd6cbf84a79f6b07946e465bcebd77f98379691bfe1baa978e8085/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37393463343539363662666234316239383032396338623166346537646439632e706e67"><img src="https://camo.githubusercontent.com/3816eddad9cd6cbf84a79f6b07946e465bcebd77f98379691bfe1baa978e8085/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37393463343539363662666234316239383032396338623166346537646439632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/794c45966bfb41b98029c8b1f4e7dd9c.png" style="max-width: 100%;"></a></p>
+<p>那么上述的这个程序员的操作其实是在修改源头字符串src，那我们要将原字符串拷贝到目标字符串中，原字符串肯定不能修改，所以这个时候就要使用到<code class="notranslate">const</code>了。此时我们可以在char* src的前面加上一个const作为修饰，此时若是这个喝醉酒的程序员把拷贝的字符串反了，编译时期就会直接报出错误<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9d16818352443220b45d413e6ba719667fd3f82fd05d6540085be500c9979414/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33623832303636633837613834633966386336363033366666336662363062652e706e67"><img src="https://camo.githubusercontent.com/9d16818352443220b45d413e6ba719667fd3f82fd05d6540085be500c9979414/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33623832303636633837613834633966386336363033366666336662363062652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/3b82066c87a84c9f8c66036ff3fb60be.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>此时对于src来说就叫做【常量指针】，它所指向的内容是不可以修改的，但是它的指向是可以修改的</li>
+</ul>
+<blockquote>
+<p>就这么一个小小的const也这么讲究，那我要和你说：我们写业务逻辑就是要严谨，你永远不可能知道用户下一秒会做什么。加上了const之后使得我们的代码更具有健壮性防止源头被修改，也就可以扼杀一个运行时错误</p>
+</blockquote>
+<ul>
+<li>最后还有一个返回值，也就是<code class="notranslate">char*</code>，返回的是【dst】拷贝后的内容</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3e0174691890e5be17f17d6f95469f59d4e65bb165fe40dd62f73480d8dc0d71/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31363939666665363530343634623635626562393761613737313762323063362e706e67"><img src="https://camo.githubusercontent.com/3e0174691890e5be17f17d6f95469f59d4e65bb165fe40dd62f73480d8dc0d71/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31363939666665363530343634623635626562393761613737313762323063362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/1699ffe650464b65beb97aa7717b20c6.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>因为我们是进行一个模拟，所以为了尽量和原本的内容保持一致，我们也要将这个返回值加上，这个很简单，只需要在一开始的时候保存一下src原字符串即可</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-s1">src</span>;</pre></div>
+<ul>
+<li>最后将其返回即可</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">return</span> <span class="pl-s1">ret</span>;</pre></div>
+<p>那么官方要加上这个<code class="notranslate">char *</code>的目的是什么呢？从下面的printf语句其实就可以看出是为了实现一个【<strong>链式访问</strong>】</p>
+<ul>
+<li>什么是链式访问呢？也就是将一个函数的<strong>返回值</strong>作为另一个函数的参数，设想若是这个函数的返回类型是<code class="notranslate">void</code>的话，那么它还能不能放在这里呢</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"str1 = %s\n"</span>, <span class="pl-en">my_strcpy</span>(<span class="pl-s1">str1</span>, <span class="pl-s1">str2</span>));</pre></div>
+<ul>
+<li>以下便是整体代码展示</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-en">my_strcpy</span>(<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">dst</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">src</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">dst</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">src</span>);
+	<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-s1">src</span>;
+	<span class="pl-k">while</span> (<span class="pl-c1">*</span><span class="pl-s1">dst</span><span class="pl-c1">++</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">src</span><span class="pl-c1">++</span>)
+	{
+		;
+	}
+	<span class="pl-k">return</span> <span class="pl-s1">ret</span>;
+}
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">str1</span>[<span class="pl-c1">10</span>] <span class="pl-c1">=</span> <span class="pl-s">"xxxxxxxxx"</span>;
+	<span class="pl-smi">char</span> <span class="pl-s1">str2</span>[] <span class="pl-c1">=</span> <span class="pl-s">"hello"</span>;
+
+	<span class="pl-en">printf</span>(<span class="pl-s">"str1 = %s\n"</span>, <span class="pl-en">my_strcpy</span>(<span class="pl-s1">str1</span>, <span class="pl-s1">str2</span>));
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h3>strcat()</h3>
+<ul>
+<li>函数原型</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-en">strcat</span> ( <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">destination</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">source</span> );</pre></div>
+<p><a href="https://legacy.cplusplus.com/reference/cstring/strcat/?kw=strcat" rel="nofollow">原文链接</a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/99e7a9a8915f48744d2b5f24ff448600e56d3ac7d67e1d7f6a2dc6e2ab4dc6a8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30376166363332306461313234353236396134656234333961383665396235652e706e67"><img src="https://camo.githubusercontent.com/99e7a9a8915f48744d2b5f24ff448600e56d3ac7d67e1d7f6a2dc6e2ab4dc6a8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30376166363332306461313234353236396134656234333961383665396235652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/07af6320da1245269a4eb439a86e9b5e.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>看完官方文档后，那么就看看怎么使用的</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span><span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">arr1</span>[<span class="pl-c1">20</span>] <span class="pl-c1">=</span> <span class="pl-s">"hello "</span>;
+	<span class="pl-smi">char</span> <span class="pl-s1">arr2</span>[<span class="pl-c1">20</span>] <span class="pl-c1">=</span> <span class="pl-s">"word"</span>;
+	<span class="pl-en">strcat</span>(<span class="pl-s1">arr1</span>, <span class="pl-s1">arr2</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">arr1</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b19b1aff73b27f326c982c492e832db0c5929842befdcd13ab95d237f739d095/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61636361643163653764336634316362386336313866386265613161383962392e706e67"><img src="https://camo.githubusercontent.com/b19b1aff73b27f326c982c492e832db0c5929842befdcd13ab95d237f739d095/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61636361643163653764336634316362386336313866386265613161383962392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/accad1ce7d3f41cb8c618f8bea1a89b9.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>那既然是拼接，是从什么地方开始拼接的呢？这里猜测一波是<code class="notranslate">\0</code></p>
+</li>
+<li>
+<p>通过调试观察可以发现，<code class="notranslate">world</code>就是从arr1的<code class="notranslate">\0</code>处开始拼接的，而且也会将自己的<code class="notranslate">\0</code>拷贝过去</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c4e2b056742e9b1a0f1aa2e89cf4141ade604f549a7f9ef0a549eb7f00342319/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65626437396237656630626434326634383763353362363066623765643965342e706e67"><img src="https://camo.githubusercontent.com/c4e2b056742e9b1a0f1aa2e89cf4141ade604f549a7f9ef0a549eb7f00342319/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65626437396237656630626434326634383763353362363066623765643965342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/ebd79b7ef0bd42f487c53b60fb7ed9e4.png" style="max-width: 100%;"></a><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/840c8d702cebd458441019c67f3932c0226cfd7c4b112f8f43fc5aa6a39c7bf5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30323262363765646563393034386639613462366165353638363332636632632e706e67"><img src="https://camo.githubusercontent.com/840c8d702cebd458441019c67f3932c0226cfd7c4b112f8f43fc5aa6a39c7bf5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30323262363765646563393034386639613462366165353638363332636632632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/022b67edec9048f9a4b6ae568632cf2c.png" style="max-width: 100%;"></a></p>
+<h3>注意事项</h3>
+<blockquote>
+<p>接下去我们来说说有关这个函数的一些注意事项，与<code class="notranslate">strcpy</code>类似</p>
+</blockquote>
+<h4>源字符串必须以 ‘\0’ 结束</h4>
+<ul>
+<li>可以看到，若是将源字符串初始化为无<code class="notranslate">\0</code>的，在拷贝的过程中就会出现问题</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span><span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-k">#include</span><span class="pl-s">&lt;string.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">arr1</span>[] <span class="pl-c1">=</span> <span class="pl-s">"hello \0********"</span>;
+	<span class="pl-smi">char</span> <span class="pl-s1">arr2</span>[] <span class="pl-c1">=</span> { <span class="pl-c1">'a'</span>, <span class="pl-c1">'b'</span>, <span class="pl-c1">'c'</span> };
+	<span class="pl-en">strcat</span>(<span class="pl-s1">arr1</span>, <span class="pl-s1">arr2</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">arr1</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>可以看到，虽然是拼接了，但是因为在字符串的末尾没有<code class="notranslate">\0</code>，所以在打印的时候编译器就会一直去寻找<code class="notranslate">\0</code>继而导致访问冲突的问题</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d629ce54bb989a5370f656d484d6935f534cc24b2ca19454e9d44741f549c752/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63616366613464633733653034343664616231646661393965616130336262332e706e67"><img src="https://camo.githubusercontent.com/d629ce54bb989a5370f656d484d6935f534cc24b2ca19454e9d44741f549c752/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63616366613464633733653034343664616231646661393965616130336262332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/cacfa4dc73e0446dab1dfa99eaa03bb3.png" style="max-width: 100%;"></a></p>
+<h4>标空间必须有足够的大，能容纳下源字符串的内容</h4>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-s1">arr1</span>[<span class="pl-c1">3</span>] <span class="pl-c1">=</span> { <span class="pl-c1">0</span> };
+<span class="pl-smi">char</span> <span class="pl-s1">arr2</span>[] <span class="pl-c1">=</span> <span class="pl-s">"abcdef"</span>;
+
+<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-en">strcat</span>(<span class="pl-s1">arr1</span>, <span class="pl-s1">arr2</span>));		</pre></div>
+<ul>
+<li>也是一样，不仅是源头有要求，目标空间也有一定的要求，如果没有足够大空间的话也放不下想要拼接过来的内容</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/cb39a62a785f6fe7fca45febe32b43623c5d202215a6de41d14c269736f6d6a0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66306166373934323837326534353565613733396136646436653436396236662e706e67"><img src="https://camo.githubusercontent.com/cb39a62a785f6fe7fca45febe32b43623c5d202215a6de41d14c269736f6d6a0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66306166373934323837326534353565613733396136646436653436396236662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/f0af7942872e455ea739a6dd6e469b6f.png" style="max-width: 100%;"></a></p>
+<h4>目标空间必须可修改</h4>
+<ul>
+<li>一样，若是目标空间不可修改的话，拼接也是【无稽之谈】，会造成访问冲突的问题</li>
+<li>*p是常量字符串，不可被修改</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/888b7b4c48f53b4fc0c5239b6a81a5a562933f224ea8d18cd5a6d40575b75129/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61303063623435316262643634386432613134643166343838343134316664662e706e67"><img src="https://camo.githubusercontent.com/888b7b4c48f53b4fc0c5239b6a81a5a562933f224ea8d18cd5a6d40575b75129/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61303063623435316262643634386432613134643166343838343134316664662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/a00cb451bbd648d2a14d1f4884141fdf.png" style="max-width: 100%;"></a></p>
+<h4>不可以给自己做追加</h4>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span><span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-k">#include</span><span class="pl-s">&lt;string.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">arr1</span>[<span class="pl-c1">20</span>] <span class="pl-c1">=</span> <span class="pl-s">"abcdef"</span>;
+	<span class="pl-en">strcat</span>(<span class="pl-s1">arr1</span>, <span class="pl-s1">arr1</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">arr1</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>还有一点要说明的是不可以自己给自己做追加，因为源字符串是在目标字符串的<code class="notranslate">\0</code>位置开始拼接的，也就是说这个<code class="notranslate">\0</code>会被覆盖掉，那么在想要追加自己原本的<code class="notranslate">\0</code>时，却找不到了，即自己在给自己追加的时候会把自己的内容破坏，使得自己在停下来的时候没有<code class="notranslate">\0</code>了</li>
+</ul>
+<h3>模拟实现</h3>
+<ul>
+<li>因为其进行拼接的时候是从<code class="notranslate">\0</code>的位置开始的，因此我们在模拟实现的时候就要先去找到目标字符串中的<code class="notranslate">\0</code>才行，保存一下<code class="notranslate">dest</code>就可以出发了，一直寻找直到找到<code class="notranslate">\0</code>为止停下来</li>
+<li>接下去的逻辑就和<code class="notranslate">strcpy()</code>一样了，把源字符串拷贝到目标字符串的<code class="notranslate">\0</code>处</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span><span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-k">#include</span><span class="pl-s">&lt;string.h&gt;</span>
+<span class="pl-k">#include</span><span class="pl-s">&lt;assert.h&gt;</span>
+<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-en">my_strcat</span>(<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">dest</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">src</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">dest</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">src</span>);
+	<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-s1">dest</span>;<span class="pl-c">//保存一下目标字符串的起始地址</span>
+	<span class="pl-c">//1.寻找目标字符串中的\0</span>
+	<span class="pl-k">while</span> (<span class="pl-c1">*</span><span class="pl-s1">dest</span> <span class="pl-c1">!=</span> <span class="pl-c1">'\0'</span>)
+	{
+		<span class="pl-s1">dest</span><span class="pl-c1">++</span>;
+	}
+	<span class="pl-c">//2.从目标字符串的\0开始拷贝源字符串</span>
+	<span class="pl-k">while</span> (<span class="pl-c1">*</span><span class="pl-s1">dest</span><span class="pl-c1">++</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">src</span><span class="pl-c1">++</span>)
+	{
+		;
+	}
+	<span class="pl-k">return</span> <span class="pl-s1">ret</span>;
+}
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">arr1</span>[<span class="pl-c1">20</span>] <span class="pl-c1">=</span> <span class="pl-s">"abcdef"</span>;
+	<span class="pl-smi">char</span> <span class="pl-s1">arr2</span>[] <span class="pl-c1">=</span> <span class="pl-s">"ghi"</span>;
+	<span class="pl-en">my_strcat</span>(<span class="pl-s1">arr1</span>, <span class="pl-s1">arr2</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">arr1</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h3>strcmp()</h3>
+<ul>
+<li>函数原型</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">strcmp</span> ( <span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">str1</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">str2</span> );</pre></div>
+<p><a href="https://legacy.cplusplus.com/reference/cstring/strcmp/?kw=strcmp" rel="nofollow">原文链接</a><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b31ed636d380833ec9cc2dbc5e6922146116f0965d3b2dbbe06694dd5c0e7d71/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35373732613133313534386134366634623134323863323334626130383366612e706e67"><img src="https://camo.githubusercontent.com/b31ed636d380833ec9cc2dbc5e6922146116f0965d3b2dbbe06694dd5c0e7d71/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35373732613133313534386134366634623134323863323334626130383366612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/5772a131548a46f4b1428c234ba083fa.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>再来看一下是怎么使用的？</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">arr1</span>[] <span class="pl-c1">=</span> <span class="pl-s">"zhangsan"</span>;
+	<span class="pl-smi">char</span> <span class="pl-s1">arr2</span>[] <span class="pl-c1">=</span> <span class="pl-s">"zhangsan"</span>;
+
+	<span class="pl-smi">int</span> <span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-en">strcmp</span>(<span class="pl-s1">arr1</span>, <span class="pl-s1">arr2</span>);
+	<span class="pl-k">if</span> (<span class="pl-s1">ret</span> <span class="pl-c1">==</span> <span class="pl-c1">1</span>)
+		<span class="pl-en">printf</span>(<span class="pl-s">"&gt;\n"</span>);
+	<span class="pl-k">else</span> <span class="pl-k">if</span> (<span class="pl-s1">ret</span> <span class="pl-c1">==</span> <span class="pl-c1">-1</span>)
+		<span class="pl-en">printf</span>(<span class="pl-s">"&lt;\n"</span>);
+	<span class="pl-k">else</span>
+		<span class="pl-en">printf</span>(<span class="pl-s">"==\n"</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/520ed8cc1664632d4dbd588b826d69881701419d56164e6137232a22760a9e52/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31376334323231343461653134653566613533323262363039336266653930382e706e67"><img src="https://camo.githubusercontent.com/520ed8cc1664632d4dbd588b826d69881701419d56164e6137232a22760a9e52/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31376334323231343461653134653566613533323262363039336266653930382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/17c422144ae14e5fa5322b6093bfe908.png" style="max-width: 100%;"></a></p>
+<p>下面是<code class="notranslate">strcmp()</code>函数的比较规则：</p>
+<ul>
+<li>ptr1所指向小于ptr2，返回 &lt; 0的数【VS下是-1】</li>
+<li>ptr1所指向等于ptr2，返回 0</li>
+<li>ptr1所指向大于ptr2，返回 &gt; 0的数【VS下是1】</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d691c1f7c20a8868a4424f79760616fdb92b0e4b97f67822b987e83b9deec568/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39643432386338333464613934366561626532353263653237376634623665342e706e67"><img src="https://camo.githubusercontent.com/d691c1f7c20a8868a4424f79760616fdb92b0e4b97f67822b987e83b9deec568/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39643432386338333464613934366561626532353263653237376634623665342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/9d428c834da946eabe252ce277f4b6e4.png" style="max-width: 100%;"></a></p>
+<h3>模拟实现</h3>
+<ul>
+<li>可以看到，主体就是在比较<code class="notranslate">*str1</code>和<code class="notranslate">*str2</code>，若是它们相同的话就一直++，若是不相同的话便跳出循环继续比较谁大谁小，那么判断二者完全相同的逻辑就只能写在循环内部了，判断<code class="notranslate">*str == '\0'</code>就可以看出它是不是走到了字符串的末尾，而且还没有跳出循环，此时就可以<code class="notranslate">return 0;</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">my_strcmp</span>(<span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">str1</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">str2</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">str1</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">str2</span>);
+	<span class="pl-k">while</span> (<span class="pl-c1">*</span><span class="pl-s1">str1</span> <span class="pl-c1">==</span> <span class="pl-c1">*</span><span class="pl-s1">str2</span>)
+	{
+		<span class="pl-k">if</span> (<span class="pl-c1">*</span><span class="pl-s1">str1</span> <span class="pl-c1">==</span> <span class="pl-c1">'\0'</span>)<span class="pl-c">//二者相同且为'\0'，return 0</span>
+		{
+			<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+		}
+		<span class="pl-s1">str1</span><span class="pl-c1">++</span>;
+		<span class="pl-s1">str2</span><span class="pl-c1">++</span>;		<span class="pl-c">//否则向后继续查找</span>
+	}
+	<span class="pl-k">if</span> (<span class="pl-c1">*</span><span class="pl-s1">str1</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">*</span><span class="pl-s1">str2</span>)
+		<span class="pl-k">return</span> <span class="pl-c1">-1</span>;
+	<span class="pl-k">else</span>
+		<span class="pl-k">return</span> <span class="pl-c1">1</span>;
+}</pre></div>
+<ul>
+<li>那既然<code class="notranslate">*str1</code>和<code class="notranslate">*str2</code>我们都知道是两个字符了，直接相减判断其<code class="notranslate">ASCLL码</code>即可</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">my_strcmp</span>(<span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">str1</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">str2</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">str1</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">str2</span>);
+	<span class="pl-k">while</span> (<span class="pl-c1">*</span><span class="pl-s1">str1</span> <span class="pl-c1">==</span> <span class="pl-c1">*</span><span class="pl-s1">str2</span>)
+	{
+		<span class="pl-k">if</span> (<span class="pl-c1">*</span><span class="pl-s1">str1</span> <span class="pl-c1">==</span> <span class="pl-c1">'\0'</span>)<span class="pl-c">//二者相同且为'\0'，return 0</span>
+		{
+			<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+		}
+		<span class="pl-s1">str1</span><span class="pl-c1">++</span>;
+		<span class="pl-s1">str2</span><span class="pl-c1">++</span>;		<span class="pl-c">//否则向后继续查找</span>
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">*</span><span class="pl-s1">str1</span> <span class="pl-c1">-</span> <span class="pl-c1">*</span><span class="pl-s1">str2</span>;<span class="pl-c">//指针相减等于个数</span>
+}</pre></div>
+<hr>
+<h2>五、长度受限制的字符串函数</h2>
+<blockquote>
+<p>讲完了长度不受限制的字符串函数，接下去我们再来说说<strong>长度受限制的字符串函数</strong>，和上面的一组函数很像，可以指定长度大小的字符串进行操作</p>
+</blockquote>
+<h3>引入</h3>
+<ul>
+<li>还记得我们在将<code class="notranslate">strcpy()</code>的时候说到在拷贝的时候目标字符串要有足够大的空间来容纳源字符串吗？但是你仔细去观察的话是可以发现，虽然目标空间有时候放不下，但是编译器还是把它拷贝过去了，然后才报出来<strong>Error</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f7c3a70c6f4eae5aa3e6d8e7434d228b53a240b90fc58855a44f627e022347c2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38653365363731376661643234666630383532393131373135643038633065392e706e67"><img src="https://camo.githubusercontent.com/f7c3a70c6f4eae5aa3e6d8e7434d228b53a240b90fc58855a44f627e022347c2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38653365363731376661643234666630383532393131373135643038633065392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/8e3e6717fad24ff0852911715d08c0e9.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>不过编译器其实是有一些<strong>Warning⚠</strong>的，因为在计算机内部有个东西叫做【缓冲区】，计算机从外设中读入的东西首先是要放到缓冲区中的，这个缓冲区在内存中，然后CPU再去内存中的缓冲区里拿东西，这里稍微拓展一下</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/bfe94df10fd1a321277e2fc21ec2d292c1df6ebe442b1be1df5e0bfde97f1681/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30393933663232373839656134333337623965373363396661346134623033632e706e67"><img src="https://camo.githubusercontent.com/bfe94df10fd1a321277e2fc21ec2d292c1df6ebe442b1be1df5e0bfde97f1681/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30393933663232373839656134333337623965373363396661346134623033632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/0993f22789ea4337b9e73c9fa4a4b03c.png" style="max-width: 100%;"></a></p>
+<blockquote>
+<p>其实对于上面的这种越界写入是很危险的事情，正常来说编译器应该要爆出错误，而不是只警告一下，原因就在于我在首部加上了这句</p>
+</blockquote>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-s1">_CRT_SECURE_NO_WARNINGS</span> 1</pre></div>
+<ul>
+<li>将其去掉之后就可以看到爆出了下面这样的错误。所以其实就是因为上面这句话才使得编译器没有报出错误，其实编译器是很严谨的</li>
+</ul>
+<hr>
+<p>那接下去呢就让我们来看看下面的这几组函数</p>
+<h3>strncpy()</h3>
+<ul>
+<li>函数原型</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-en">strncpy</span> ( <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">destination</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">source</span>, <span class="pl-smi">size_t</span> <span class="pl-s1">num</span> );</pre></div>
+<p><a href="https://legacy.cplusplus.com/reference/cstring/strncpy/?kw=strncpy" rel="nofollow">原文链接</a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1dda75f19580123503443d84762a5de5aae9da2ba41c0466c4db01e64d1edde9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37666663613735326230353134663763613531333165636663643465643965612e706e67"><img src="https://camo.githubusercontent.com/1dda75f19580123503443d84762a5de5aae9da2ba41c0466c4db01e64d1edde9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37666663613735326230353134663763613531333165636663643465643965612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/7ffca752b0514f7ca5131ecfcd4ed9ea.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">arr1</span>[<span class="pl-c1">10</span>] <span class="pl-c1">=</span> { <span class="pl-c1">0</span> };
+	<span class="pl-smi">char</span> <span class="pl-s1">arr2</span>[] <span class="pl-c1">=</span> <span class="pl-s">"hello world"</span>;
+	<span class="pl-en">strncpy</span>(<span class="pl-s1">arr1</span>, <span class="pl-s1">arr2</span>, <span class="pl-c1">5</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">arr1</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/cb3be9ca3c65ab01dd1d3ea0cdad145ad396431474755f2020a57f8a32062b01/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63393838383732666436306634663534383431613439373333633364316665352e706e67"><img src="https://camo.githubusercontent.com/cb3be9ca3c65ab01dd1d3ea0cdad145ad396431474755f2020a57f8a32062b01/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63393838383732666436306634663534383431613439373333633364316665352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/c988872fd60f4f54841a49733c3d1fe5.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们通过调试来观察一下n个字符是否有被拷贝过去了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/caf7f4fd4059376afe14a45748e9dd7fc622a0191d9746cbcbf9245f61f2a774/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61633463366232353636616434363731386536656137343533666663336266332e706e67"><img src="https://camo.githubusercontent.com/caf7f4fd4059376afe14a45748e9dd7fc622a0191d9746cbcbf9245f61f2a774/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61633463366232353636616434363731386536656137343533666663336266332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/ac4c6b2566ad46718e6ea7453ffc3bf3.png" style="max-width: 100%;"></a></p>
+<hr>
+<ul>
+<li>但是呢，有些时候会出现像下面这样的场景，即源字符串中只有3个字符，但是拷贝过去却要拷5个的情况，由运行结果我们可以看到，确实是拷贝过去了，也没有出现任何的问题</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/768556919ea91dfaaa832c4f7b666fc08d06fdf0f8a69492150a340a151797fd/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38383431643438616230306434373933393134316161323266313034636163332e706e67"><img src="https://camo.githubusercontent.com/768556919ea91dfaaa832c4f7b666fc08d06fdf0f8a69492150a340a151797fd/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38383431643438616230306434373933393134316161323266313034636163332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/8841d48ab00d47939141aa22f104cac3.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>通过调试也可以看出，确实原封不动地拷贝过去了，但是这样看不出最后的<code class="notranslate">\0</code>到底有没有过去，我们将目标字符串做一个修改</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f5ebf7379c9011173082a2d4bb7046f4dbb9cc8eea2206bc628b6c83543f0050/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37363939313735396333323734656162393338363262343561636334653939632e706e67"><img src="https://camo.githubusercontent.com/f5ebf7379c9011173082a2d4bb7046f4dbb9cc8eea2206bc628b6c83543f0050/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37363939313735396333323734656162393338363262343561636334653939632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/76991759c3274eab93862b45acc4e99c.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>通过对目标字符串做一个修改，然后再去进行一个拷贝就可以发现，在在首先拷贝了原先的【h】【e】【l】【\0】后，又在后面补上了一个<code class="notranslate">\0</code>，这样就凑足了5个</li>
+</ul>
+<h3>模拟实现</h3>
+<ul>
+<li>思路很简单，首先第一块逻辑就是将原字符串中num个字符拷贝过去，拷一个<code class="notranslate">num--</code>，直到num个字符拷贝完为止。</li>
+<li>接着第二块逻辑，就是去判断一下num是否 &gt; 0，若是的话那就表示<code class="notranslate">num &gt; 原字符串的长度</code>，此时就需要再做【补充\0的工作】，不过while循环中的条件要写<code class="notranslate">--num</code>，否则的话就会多进入一次，那后面就会多出一个<code class="notranslate">\0</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-en">my_strncpy</span>(<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">dest</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">src</span>, <span class="pl-smi">size_t</span> <span class="pl-s1">num</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">dest</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">src</span>);
+	<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">start</span> <span class="pl-c1">=</span> <span class="pl-s1">dest</span>;
+	<span class="pl-k">while</span> (<span class="pl-s1">num</span> <span class="pl-c1">&amp;&amp;</span> (<span class="pl-c1">*</span><span class="pl-s1">dest</span><span class="pl-c1">++</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">src</span><span class="pl-c1">++</span>))
+	{
+		<span class="pl-s1">num</span><span class="pl-c1">--</span>;
+	}
+
+	<span class="pl-c">//若是跳出循环后num &gt; 0，表示num &gt; 原字符串的长度</span>
+	<span class="pl-k">if</span> (<span class="pl-s1">num</span>)
+	{
+		<span class="pl-k">while</span> (<span class="pl-c1">--</span><span class="pl-s1">num</span>)
+		{
+			<span class="pl-c1">*</span><span class="pl-s1">dest</span><span class="pl-c1">++</span> <span class="pl-c1">=</span> <span class="pl-c1">'\0'</span>;		<span class="pl-c">//再补充num个'\0'</span>
+		}
+	}
+	<span class="pl-k">return</span> <span class="pl-s1">start</span>;
+}</pre></div>
+<h3>strncat()</h3>
+<ul>
+<li>函数原型</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-en">strncat</span> ( <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">destination</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">source</span>, <span class="pl-smi">size_t</span> <span class="pl-s1">num</span> );</pre></div>
+<p><a href="https://legacy.cplusplus.com/reference/cstring/strncat/?kw=strncat" rel="nofollow">原文链接</a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3c13f4339ff9663838b107efa7aaefe0ec9b0243950cac4dae36dfd1b4c3431f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37323335643939393233653234366331616433336332643136373863663663332e706e67"><img src="https://camo.githubusercontent.com/3c13f4339ff9663838b107efa7aaefe0ec9b0243950cac4dae36dfd1b4c3431f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37323335643939393233653234366331616433336332643136373863663663332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/7235d99923e246c1ad33c2d1678cf6c3.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">arr1</span>[<span class="pl-c1">20</span>] <span class="pl-c1">=</span> <span class="pl-s">"hello "</span>;
+	<span class="pl-smi">char</span> <span class="pl-s1">arr2</span>[] <span class="pl-c1">=</span> <span class="pl-s">"word !"</span>;
+	<span class="pl-en">strncat</span>(<span class="pl-s1">arr1</span>, <span class="pl-s1">arr2</span>, <span class="pl-c1">5</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">arr1</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/fffe7683f64577e9b2eeec49a0c32a7b9697dc8029715082f2d0ee2b52c1d7b2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36663264636236663934353834386335613830633961313864346239353530372e706e67"><img src="https://camo.githubusercontent.com/fffe7683f64577e9b2eeec49a0c32a7b9697dc8029715082f2d0ee2b52c1d7b2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36663264636236663934353834386335613830633961313864346239353530372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/6f2dcb6f945848c5a80c9a18d4b95507.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>一样，我们通过调试来看看</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b55666fb4f4f5d93bdeb705c5823bd8ea74231863e8c0b26393cdea3e97d4b3d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64313663663834616136653334633538393765323665333038653336323361632e706e67"><img src="https://camo.githubusercontent.com/b55666fb4f4f5d93bdeb705c5823bd8ea74231863e8c0b26393cdea3e97d4b3d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64313663663834616136653334633538393765323665333038653336323361632e706e67" alt="" data-canonical-src="https://img-blog.csdnimg.cn/d16cf84aa6e34c5897e26e308e3623ac.png" style="max-width: 100%;"></a><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b3eb12d8169649ce81497153195fc1a6161f853f3009ecb2082e5030a5783f9d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34346233626535653838633534393534623930373962373766643434646331652e706e67"><img src="https://camo.githubusercontent.com/b3eb12d8169649ce81497153195fc1a6161f853f3009ecb2082e5030a5783f9d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34346233626535653838633534393534623930373962373766643434646331652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/44b3be5e88c54954b9079b77fd44dc1e.png" style="max-width: 100%;"></a></p>
+<hr>
+<blockquote>
+<p>还是一样，对于<code class="notranslate">strncat()</code>来说也会出现需要拷贝的字符个数 &gt; 源字符串原先的个数，那此时也会和<code class="notranslate">strncpy()</code>一样在后面补充<code class="notranslate">\0</code>吗？我们继续通过调试来看看</p>
+</blockquote>
+<ul>
+<li>可以看到，原本的<code class="notranslate">hello</code> 加上8个最后的arr1长度应该为13，即数组下标12的地方为<code class="notranslate">\0</code>，但是在调试看来却不是这样，<code class="notranslate">d</code>的后面还是只有一个<code class="notranslate">\0</code>，编译器并没有做过多的补充，那么这也就印证了我们原先解读函数时说的那些东西</li>
+</ul>
+<h3>模拟实现</h3>
+<ul>
+<li>
+<p>前面的思路还是和<code class="notranslate">strcat()</code>一样，让<code class="notranslate">dest</code>先移动到<code class="notranslate">\0</code>的位置，然后第二块逻辑，就是从从<code class="notranslate">\0</code>的位置开始拷贝src中的num个字符</p>
+</li>
+<li>
+<p>内部是一个拷贝逻辑，不过在我测试了多次后，这个<strong>拷贝的逻辑和判断是否到达<code class="notranslate">\0</code>的逻辑必须放在一起</strong>，即从源头拷贝过来<code class="notranslate">\0</code>的那一瞬间就立马返回，因为<code class="notranslate">dest++</code>这是一个后置++，当这句代码执行完后dest又会往后进行偏移，此时就不对了，要在拷贝到<code class="notranslate">\0</code>立马返回当前目标字符串的起始地址</p>
+</li>
+<li>
+<p>当然上述的灵感也是来自于官方的库中，否则也很难想到这一点</p>
+</li>
+<li>
+<p>最后的话若是在循环内部没有找到<code class="notranslate">\0</code>的话就需要自己手动去加上了，保证一个字符串的完整性，最后也是一样返回目标字符串的起始地址</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-en">my_strncat</span>(<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">dest</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">src</span>, <span class="pl-smi">size_t</span> <span class="pl-s1">num</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">dest</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">src</span>);
+	<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">start</span> <span class="pl-c1">=</span> <span class="pl-s1">dest</span>;
+
+	<span class="pl-c">//1.首先让dest先移动到\0的位置</span>
+	<span class="pl-k">while</span> (<span class="pl-c1">*</span><span class="pl-s1">dest</span> <span class="pl-c1">!=</span> <span class="pl-c1">'\0'</span>)
+	{
+		<span class="pl-s1">dest</span><span class="pl-c1">++</span>;
+	}
+	<span class="pl-c">//2.从\0开始拷贝src中的num个字符</span>
+	<span class="pl-k">while</span> (<span class="pl-s1">num</span><span class="pl-c1">--</span>)
+	{
+		<span class="pl-k">if</span>((<span class="pl-c1">*</span><span class="pl-s1">dest</span><span class="pl-c1">++</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">src</span><span class="pl-c1">++</span>) <span class="pl-c1">==</span> <span class="pl-c1">'\0'</span>)
+			<span class="pl-k">return</span> <span class="pl-s1">start</span>;		<span class="pl-c">//碰到\0直接返回，不再补充\0</span>
+	}
+	<span class="pl-c1">*</span><span class="pl-s1">dest</span> <span class="pl-c1">=</span> <span class="pl-c1">'\0'</span>;		<span class="pl-c">//最后在目标字符串的末尾处添上\0</span>
+	<span class="pl-k">return</span> <span class="pl-s1">start</span>;
+}</pre></div>
+<h3>strncmp()</h3>
+<ul>
+<li>函数原型</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">strncmp</span> ( <span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">str1</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">str2</span>, <span class="pl-smi">size_t</span> <span class="pl-s1">num</span> );</pre></div>
+<p><a href="https://legacy.cplusplus.com/reference/cstring/strncmp/?kw=strncmp" rel="nofollow">原文链接</a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ec09392618f8555d32a537e30608df872ae94efc8637edf7a053e261018bea40/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39636234313539363962663234373666386265633235353737333738623264382e706e67"><img src="https://camo.githubusercontent.com/ec09392618f8555d32a537e30608df872ae94efc8637edf7a053e261018bea40/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39636234313539363962663234373666386265633235353737333738623264382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/9cb415969bf2476f8bec25577378b2d8.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">arr1</span>[] <span class="pl-c1">=</span> <span class="pl-s">"abcdef"</span>;
+	<span class="pl-smi">char</span> <span class="pl-s1">arr2</span>[] <span class="pl-c1">=</span> <span class="pl-s">"abcz"</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-en">strncmp</span>(<span class="pl-s1">arr1</span>, <span class="pl-s1">arr2</span>, <span class="pl-c1">3</span>);
+	<span class="pl-k">if</span> (<span class="pl-s1">ret</span> <span class="pl-c1">==</span> <span class="pl-c1">0</span>) {
+		<span class="pl-en">printf</span>(<span class="pl-s">"==\n"</span>);
+	}
+	<span class="pl-k">else</span> <span class="pl-k">if</span>(<span class="pl-s1">ret</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">0</span>) {
+		<span class="pl-en">printf</span>(<span class="pl-s">"&lt;\n"</span>);
+	}
+	<span class="pl-k">else</span>{
+		<span class="pl-en">printf</span>(<span class="pl-s">"&gt;\n"</span>);
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>首先是比较两个字符串中的前3个，可以看到<code class="notranslate">abc</code>与<code class="notranslate">abc</code>是相同的</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5d2be31215263bd073489386989e66450137be2f4fce9c1e693986480bbb5f7d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63333535623134666563626234336439393837336462616136636435656139392e706e67"><img src="https://camo.githubusercontent.com/5d2be31215263bd073489386989e66450137be2f4fce9c1e693986480bbb5f7d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63333535623134666563626234336439393837336462616136636435656139392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/c355b14fecbb43d99873dbaa6cd5ea99.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>首先是比较两个字符串中的前4个，可以看到<code class="notranslate">abcd</code>是小于<code class="notranslate">abcz</code>的</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/645521134c60500c4176c8bfc372f0a546584c623b772fa8884db8ab346ed184/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33373234653563393135653934383137383635323039353430653537386333662e706e67"><img src="https://camo.githubusercontent.com/645521134c60500c4176c8bfc372f0a546584c623b772fa8884db8ab346ed184/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33373234653563393135653934383137383635323039353430653537386333662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/3724e5c915e94817865209540e578c3f.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>将<code class="notranslate">abcz</code>换成<code class="notranslate">abcd</code>后，结果又会有所不同</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5dbedf5ca3e4012d4267a596fe17a38a1c86901ac18786fe0b43e25208fdb387/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64363538623565643937306634643636393431376635373236363562653736332e706e67"><img src="https://camo.githubusercontent.com/5dbedf5ca3e4012d4267a596fe17a38a1c86901ac18786fe0b43e25208fdb387/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64363538623565643937306634643636393431376635373236363562653736332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/d658b5ed970f4d669417f572665be763.png" style="max-width: 100%;"></a></p>
+<p>不过呢，要注意这里的返回值ret，不可以用<code class="notranslate">== 1</code>或<code class="notranslate">== -1</code>这样去判断</p>
+<ul>
+<li>通过运算我们可以发现，在VS下若是前者小于后者返回的结果便是【-1】，但是在其他编译器上可不一定，如果你有仔细看过<code class="notranslate">strcmp()</code>的话就可以知道它返回的只是<code class="notranslate">&gt;/&lt;/== 0</code>的数字，而不是具体的数值，因此我们不能将值写死，否则在其他编译器例如gcc上就跑不过去了</li>
+</ul>
+<h2>六、字符串查找函数</h2>
+<h3>strstr()</h3>
+<ul>
+<li>函数原型</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-en">strstr</span> ( <span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">str1</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">str2</span> );
+      <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-en">strstr</span> (       <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">str1</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">str2</span> );</pre></div>
+<p><a href="https://legacy.cplusplus.com/reference/cstring/strstr/?kw=strstr" rel="nofollow">原文链接</a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1e52554df2eac3d5fcdeaa16e9db6241d91b72873f957e0fd9ede83f1ccf5a6b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36303738333962646266313534323366386535316239333633643134666237352e706e67"><img src="https://camo.githubusercontent.com/1e52554df2eac3d5fcdeaa16e9db6241d91b72873f957e0fd9ede83f1ccf5a6b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36303738333962646266313534323366386535316239333633643134666237352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/607839bdbf15423f8e51b9363d14fb75.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">str1</span>[] <span class="pl-c1">=</span> <span class="pl-s">"abcdefabcdef"</span>;
+	<span class="pl-smi">char</span> <span class="pl-s1">str2</span>[] <span class="pl-c1">=</span> <span class="pl-s">"def"</span>;
+
+	<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">substr</span> <span class="pl-c1">=</span> <span class="pl-en">strstr</span>(<span class="pl-s1">str1</span>, <span class="pl-s1">str2</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">substr</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>可以看到，最后返回的结果是子串<code class="notranslate">def</code>在主串<code class="notranslate">abcdefabcdef</code>中出现的第一个位置，我们使用<code class="notranslate">%s</code>去打印的话就会从这个位置开始往后打印后面的字符串</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/dc62e232c9d8d0fcbe33b7c877ade0b06ba717e27e9e857f8d5c0ee07320d6b9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36343139643136653732643334613836613435363531353466656364313936652e706e67"><img src="https://camo.githubusercontent.com/dc62e232c9d8d0fcbe33b7c877ade0b06ba717e27e9e857f8d5c0ee07320d6b9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36343139643136653732643334613836613435363531353466656364313936652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/6419d16e72d34a86a4565154fecd196e.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>但我若是去更换一下str2的话，它就不存在于str1中了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c724278d753b90a3ba856e482e1b30359f6d1d19812af29eadf6690e18ff1f6f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65643936336362623465323634663133396430393162346337346332303935382e706e67"><img src="https://camo.githubusercontent.com/c724278d753b90a3ba856e482e1b30359f6d1d19812af29eadf6690e18ff1f6f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65643936336362623465323634663133396430393162346337346332303935382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/ed963cbb4e264f139d091b4c74c20958.png" style="max-width: 100%;"></a></p>
+<h3>模拟实现</h3>
+<h4>情况①：匹配一次就成功</h4>
+<ul>
+<li>首先是第一种情况，那就是子串在和主串匹配的时候一次就能匹配成功了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/86512949b34c46867cedc5fb54fbe3deaea4b2146fda2b0165cb377f11539642/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66346632343039343465636534386533623662323836303062316438616432392e706e67"><img src="https://camo.githubusercontent.com/86512949b34c46867cedc5fb54fbe3deaea4b2146fda2b0165cb377f11539642/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66346632343039343465636534386533623662323836303062316438616432392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/f4f240944ece48e3b6b28600b1d8ad29.png" style="max-width: 100%;"></a></p>
+<h4>情况②：匹配多次才成功</h4>
+<ul>
+<li>接下去第二种情况，就是需要匹配多次才能成功，可以看到一开始前面出现了<code class="notranslate">b b b</code>，但是我们要匹配的子串是<code class="notranslate">b b c</code>，所以在匹配到第三个b的时候就需要进行重新匹配</li>
+<li>那若是要重新匹配的话就需要让【s1】和【s2】进行重新置位的操作，【s2】的话很简单，直接回到初始的位置即可，但是对于【s1】的话其实没有必要，我们可以设置一个【p】记录子串在主串中的位置，如果在匹配的过程中失配了，<strong>只需要让【s1】回到<code class="notranslate">p + 1</code>的位置即可，因为从【p】的位置开始已经不可以匹配成功了</strong>，具体地我在下面讲述代码的时候细说</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3714df9c57abeb7b0edfb193583845ed8586f65cbdba3fcbcce632bf094581fc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31323666633237363362363734356632613637643832313161633234363130342e706e67"><img src="https://camo.githubusercontent.com/3714df9c57abeb7b0edfb193583845ed8586f65cbdba3fcbcce632bf094581fc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31323666633237363362363734356632613637643832313161633234363130342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/126fc2763b6745f2a67d8211ac246104.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-en">my_strstr</span>(<span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">str1</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">str2</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">str1</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">str2</span>);
+	<span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">s1</span> <span class="pl-c1">=</span> <span class="pl-s1">str1</span>;
+	<span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">s2</span> <span class="pl-c1">=</span> <span class="pl-s1">str2</span>;
+	<span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">p</span> <span class="pl-c1">=</span> <span class="pl-s1">str1</span>;
+
+	<span class="pl-k">while</span> (<span class="pl-c1">*</span><span class="pl-s1">p</span>)
+	{
+		<span class="pl-s1">s1</span> <span class="pl-c1">=</span> <span class="pl-s1">p</span>;
+		<span class="pl-s1">s2</span> <span class="pl-c1">=</span> <span class="pl-s1">str2</span>;
+		<span class="pl-k">while</span> (<span class="pl-s1">s1</span> <span class="pl-c1">!=</span> <span class="pl-c1">'\0'</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">s2</span> <span class="pl-c1">!=</span> <span class="pl-c1">'\0'</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-c1">*</span><span class="pl-s1">s1</span> <span class="pl-c1">==</span> <span class="pl-c1">*</span><span class="pl-s1">s2</span>)
+		{
+			<span class="pl-s1">s1</span><span class="pl-c1">++</span>;
+			<span class="pl-s1">s2</span><span class="pl-c1">++</span>;
+		}
+		<span class="pl-k">if</span> (<span class="pl-c1">*</span><span class="pl-s1">s2</span> <span class="pl-c1">==</span> <span class="pl-c1">'\0'</span>)
+		{
+			<span class="pl-k">return</span> <span class="pl-s1">p</span>;		<span class="pl-c">//此时p的位置即为子串s2在s1中出现的第一个位置</span>
+		}
+		<span class="pl-s1">p</span><span class="pl-c1">++</span>;
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">NULL</span>;		<span class="pl-c">//若是主串遍历完了还是没有找到子串，</span>
+						<span class="pl-c">//表明其不在主串中，返回NULL</span>
+}</pre></div>
+<p><strong>细说一下：</strong></p>
+<ul>
+<li>首先我们看到开头的三个指针定义，因为在失配的时候需要指针回到字符串的起始位置，所以【str1】和【str2】的位置我们不可以去动它，那两个指针另外做移动，然后再拿一个【p】记录位置</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">s1</span> <span class="pl-c1">=</span> <span class="pl-s1">str1</span>;
+<span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">s2</span> <span class="pl-c1">=</span> <span class="pl-s1">str2</span>;
+<span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">p</span> <span class="pl-c1">=</span> <span class="pl-s1">str1</span>;</pre></div>
+<ul>
+<li>在while循环内存，最主要的还是这段匹配的逻辑，若是<code class="notranslate">*s1</code>和<code class="notranslate">*s2</code>z中的存放的字符相同的话，就继续往后查找，但是呢它们不能一直无休止地往后查找，总有停下来的时候，那也就是当指针所指向的内容为<code class="notranslate">\0</code>时，就需要跳出循环</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">while</span> (<span class="pl-s1">s1</span> <span class="pl-c1">!=</span> <span class="pl-c1">'\0'</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">s2</span> <span class="pl-c1">!=</span> <span class="pl-c1">'\0'</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-c1">*</span><span class="pl-s1">s1</span> <span class="pl-c1">==</span> <span class="pl-c1">*</span><span class="pl-s1">s2</span>)
+{
+	<span class="pl-s1">s1</span><span class="pl-c1">++</span>;
+	<span class="pl-s1">s2</span><span class="pl-c1">++</span>;
+}</pre></div>
+<ul>
+<li>若只是二者不相同跳出来了，此时<code class="notranslate">p++</code>即可，然后回到循环判断<code class="notranslate">*p</code>是否为<code class="notranslate">\0</code>，若还没有碰到主串末尾的话，就需要更新<code class="notranslate">s1</code>和<code class="notranslate">s2</code>的位置，继续进行匹配的逻辑</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-s1">p</span><span class="pl-c1">++</span>;
+<span class="pl-s1">s1</span> <span class="pl-c1">=</span> <span class="pl-s1">p</span>;
+<span class="pl-s1">s2</span> <span class="pl-c1">=</span> <span class="pl-s1">str2</span>;</pre></div>
+<ul>
+<li>若是<code class="notranslate">*s2 == '\0'</code>的话，此时就表示子串已经匹配完成了，都到达末尾了，那么这个时候我们应该返回【子串在主串中出现的第一个位置】，这也是<code class="notranslate">strstr()</code>的本质，那么这个位置在哪里呢？因为我们是哪<code class="notranslate">p</code>去记录位置的，那就可以说<strong>在主串中从指针p所指向的这个位置开始直到<code class="notranslate">\*s2</code>到末尾时，即为匹配成功子串的一个位置</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">if</span> (<span class="pl-c1">*</span><span class="pl-s1">s2</span> <span class="pl-c1">==</span> <span class="pl-c1">'\0'</span>)
+{
+	<span class="pl-k">return</span> <span class="pl-s1">p</span>;		<span class="pl-c">//此时p的位置即为子串s2在s1中出现的第一个位置</span>
+}</pre></div>
+<p><strong>匹配过程解说：</strong></p>
+<blockquote>
+<p>看完匹配的过程相信你对strstr()这个函数应该非常清楚了，但其实它的效率并不是很高，在我们看来它只是一个【暴搜】的过程，若是想要追求更加高效的匹配过程，可以看看<code class="notranslate">KMP算法</code></p>
+</blockquote>
+<h3>strtok()</h3>
+<ul>
+<li>函数原型</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-en">strtok</span> ( <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">str</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">delimiters</span> );</pre></div>
+<p><a href="https://legacy.cplusplus.com/reference/cstring/strtok/?kw=strtok" rel="nofollow">原文链接</a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/bb177e5bc00ac645377590f4ec4550a723832e8ab28c089ed3ec6a647d9a2b80/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38396465356234366161316134386133393466646138333331336533323666612e706e67"><img src="https://camo.githubusercontent.com/bb177e5bc00ac645377590f4ec4550a723832e8ab28c089ed3ec6a647d9a2b80/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38396465356234366161316134386133393466646138333331336533323666612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/89de5b46aa1a48a394fda83313e326fa.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">sep</span>[] <span class="pl-c1">=</span> <span class="pl-s">"@."</span>;
+	<span class="pl-smi">char</span> <span class="pl-s1">email</span>[<span class="pl-c1">30</span>] <span class="pl-c1">=</span> <span class="pl-s">"256652753@qq.com"</span>;
+	
+	<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-en">strtok</span>(<span class="pl-s1">email</span>, <span class="pl-s1">sep</span>);
+	<span class="pl-k">if</span> (<span class="pl-s1">ret</span> <span class="pl-c1">!=</span> <span class="pl-c1">NULL</span>)
+		<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">ret</span>);
+
+	<span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-en">strtok</span>(<span class="pl-c1">NULL</span>, <span class="pl-s1">sep</span>);
+	<span class="pl-k">if</span> (<span class="pl-s1">ret</span> <span class="pl-c1">!=</span> <span class="pl-c1">NULL</span>)
+		<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">ret</span>);
+
+	<span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-en">strtok</span>(<span class="pl-c1">NULL</span>, <span class="pl-s1">sep</span>);
+	<span class="pl-k">if</span> (<span class="pl-s1">ret</span> <span class="pl-c1">!=</span> <span class="pl-c1">NULL</span>)
+		<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">ret</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>
+<p>本函数也可以叫做【字符串分割函数】，根据所传入的<code class="notranslate">seq</code>分割字符数组，来确定要以何种字符来进行分割，这里我采用的是<code class="notranslate">@</code>和<code class="notranslate">.</code>，那么在这个函数执行的时候，就会根据这两个字符来进行分割</p>
+</li>
+<li>
+<p>细心的同学应该可以发现我两次在传递参数的时候是不一样的，只有第一次传递了<code class="notranslate">email</code>字符串，但第二、三次传递的都是NULL，如果你有认真阅读过这个函数，就知道为什么了我这样做了</p>
+</li>
+<li>
+<p>strtok函数的<strong>第一个参数不为 NULL</strong> ，函数将找到str中第一个标记，strtok函数将保存它在字符串中的位置</p>
+</li>
+<li>
+<p>strtok函数的<strong>第一个参数为 NULL</strong> ，函数将在同一个字符串中<code class="notranslate">被保存的位置开始</code>，查找下一个标记</p>
+</li>
+<li>
+<p>如果字符串中不存在更多的标记，<strong>则返回 NULL 指针</strong></p>
+</li>
+<li>
+<p>有了上面的这些规则，相信你一定能理解这个函数了</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0f287c20ec1bd436c9c509e7f5bb72b4a47040c5ff21cfb0fccc1016932bb8a7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62643031376231633237326634633438386263373163333338653534343331332e706e67"><img src="https://camo.githubusercontent.com/0f287c20ec1bd436c9c509e7f5bb72b4a47040c5ff21cfb0fccc1016932bb8a7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62643031376231633237326634633438386263373163333338653534343331332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/bd017b1c272f4c488bc71c338e544313.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以看到，我在获取到分割的子串后去打印时都会判断一下它是否为空，因为原文中有写到<code class="notranslate">If a token is found, a pointer to the beginning of the token.Otherwise, a null pointer.</code>所以它是有可能返回一个空指针的，对于一个空指针来说，我们就无需去打印了</li>
+</ul>
+<p><strong>代码优化：</strong></p>
+<blockquote>
+<p>因为strtok函数会改变被操作的字符串，所以我们一般不会对原字符串进行操作，而会去选择临时拷贝一份</p>
+</blockquote>
+<ul>
+<li>这个时候就可以使用到我们前面所学的<code class="notranslate">strcpy</code>，此时再去操作的话原字符串就不会被修改了</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-s1">cp</span>[<span class="pl-c1">30</span>];
+<span class="pl-en">strcpy</span>(<span class="pl-s1">cp</span>, <span class="pl-s1">email</span>);		<span class="pl-c">//临时拷贝一份</span>
+
+<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-en">strtok</span>(<span class="pl-s1">cp</span>, <span class="pl-s1">sep</span>);
+<span class="pl-k">if</span> (<span class="pl-s1">ret</span> <span class="pl-c1">!=</span> <span class="pl-c1">NULL</span>)
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">ret</span>);
+
+<span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-en">strtok</span>(<span class="pl-c1">NULL</span>, <span class="pl-s1">sep</span>);
+<span class="pl-k">if</span> (<span class="pl-s1">ret</span> <span class="pl-c1">!=</span> <span class="pl-c1">NULL</span>)
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">ret</span>);
+
+<span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-en">strtok</span>(<span class="pl-c1">NULL</span>, <span class="pl-s1">sep</span>);
+<span class="pl-k">if</span> (<span class="pl-s1">ret</span> <span class="pl-c1">!=</span> <span class="pl-c1">NULL</span>)
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">ret</span>);</pre></div>
+<blockquote>
+<p>但你是否觉得上面这样判断一次打印一次很麻烦，这种代码要是给你上司看到的话指不定会被骂成什么样，我们不要写重复的逻辑，尽量将其进行封装，那对于上面的重复工作，其实我们可以使用【循环】来做一个优化</p>
+</blockquote>
+<ul>
+<li>就像下面这样，我们可以将这些逻辑写到for循环中去，<strong>对于for循环来说第一个表达式是只会被执行一次的，也就是一开始进来出初始化的时候</strong>，而我们传递参数给<code class="notranslate">strtok()</code>的时候也是只在第一次传递字符串给第一个参数，后面的话就都传递NULL了</li>
+<li>因此<strong>后面的传值改变我们可以写在循环变量调整的位置</strong>，即第三个表达式处。那第二个表达式我们最熟悉了，就是写for循环的终止条件，因为我们始终拿的就是<code class="notranslate">ret</code>去接收每一次分割后的返回值然后去打印，那么最后的话当分割到字符串结尾的时候没有了就会返回NULL，那此时我们将其作为结束条件来判断即可</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">for</span> (<span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-en">strtok</span>(<span class="pl-s1">cp</span>, <span class="pl-s1">sep</span>); <span class="pl-s1">ret</span> <span class="pl-c1">!=</span> <span class="pl-c1">NULL</span>; <span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-en">strtok</span>(<span class="pl-c1">NULL</span>, <span class="pl-s1">sep</span>))
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">ret</span>);
+}</pre></div>
+<p><strong>完整代码如下：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">sep</span>[] <span class="pl-c1">=</span> <span class="pl-s">"@."</span>;
+	<span class="pl-smi">char</span> <span class="pl-s1">email</span>[<span class="pl-c1">30</span>] <span class="pl-c1">=</span> <span class="pl-s">"256652753@qq.com"</span>;
+	
+	<span class="pl-smi">char</span> <span class="pl-s1">cp</span>[<span class="pl-c1">30</span>];
+	<span class="pl-en">strcpy</span>(<span class="pl-s1">cp</span>, <span class="pl-s1">email</span>);		<span class="pl-c">//临时拷贝一份</span>
+
+	<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+	<span class="pl-k">for</span> (<span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-en">strtok</span>(<span class="pl-s1">cp</span>, <span class="pl-s1">sep</span>); <span class="pl-s1">ret</span> <span class="pl-c1">!=</span> <span class="pl-c1">NULL</span>; <span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-en">strtok</span>(<span class="pl-c1">NULL</span>, <span class="pl-s1">sep</span>))
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">ret</span>);
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h2>七、错误信息报告函数</h2>
+<h3>strerror()</h3>
+<ul>
+<li>函数原型</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-en">strerror</span> ( <span class="pl-smi">int</span> <span class="pl-s1">errnum</span> );</pre></div>
+<p><a href="https://legacy.cplusplus.com/reference/cstring/strerror/?kw=strerror" rel="nofollow">原文链接</a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6b43b78e23a318e1c27c15ce9e3398d50b8605cd6c6e49e966ee48e25af6e2eb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64623036636263323261663334393534613333643238343961653563333865372e706e67"><img src="https://camo.githubusercontent.com/6b43b78e23a318e1c27c15ce9e3398d50b8605cd6c6e49e966ee48e25af6e2eb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64623036636263323261663334393534613333643238343961653563333865372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/db06cbc22af34954a33d2849ae5c38e7.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-en">strerror</span>(<span class="pl-c1">0</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-en">strerror</span>(<span class="pl-c1">1</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-en">strerror</span>(<span class="pl-c1">2</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-en">strerror</span>(<span class="pl-c1">3</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-en">strerror</span>(<span class="pl-c1">4</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-en">strerror</span>(<span class="pl-c1">5</span>));
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>可以看到，这里我打印了一些错误信息，也就是每种数字所示对应的【错误信息】</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3138d539c70c640160c8e265aa3c7145181ed0c416d6c296ec1e14794c5f3764/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35613133663937626166326434653230383530343633633032653162646561362e706e67"><img src="https://camo.githubusercontent.com/3138d539c70c640160c8e265aa3c7145181ed0c416d6c296ec1e14794c5f3764/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35613133663937626166326434653230383530343633633032653162646561362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/5a13f97baf2d4e20850463c02e1bdea6.png" style="max-width: 100%;"></a></p>
+<blockquote>
+<p>当然这个函数不是这么用的，我们可以在实际的场景中来试试，比方说这里要打开一个文件，那么打开文件的话就一定存在打开失败的情况，此时我们就可以使用<code class="notranslate">strerror()</code>去给出一些错误信息</p>
+</blockquote>
+<ul>
+<li>在这里看到我给这个函数内部传入了一个东西叫做【errno】，它是一个错误变量，里面记录了很多常见的错误，我们若是不知道要传入哪个数字来显示错误信息的话，只需要传入这个变量即可，它是<strong>C语言设置的一个全局的错误码存放的变量</strong></li>
+<li>只不过你要只用的话需要包含一下<code class="notranslate">#include &lt;errno.h&gt;</code>这个头文件才可以</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">FILE</span><span class="pl-c1">*</span> <span class="pl-s1">pf</span> <span class="pl-c1">=</span> <span class="pl-en">fopen</span>(<span class="pl-s">"test.txt"</span>, <span class="pl-s">"r"</span>);
+	<span class="pl-k">if</span> (<span class="pl-c1">NULL</span> <span class="pl-c1">==</span> <span class="pl-s1">pf</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-en">strerror</span>(<span class="pl-s1">errno</span>));
+		<span class="pl-k">return</span> <span class="pl-c1">1</span>;
+	}
+	<span class="pl-k">else</span> {
+		<span class="pl-en">printf</span>(<span class="pl-s">"文件打开正常\n"</span>);
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>可以看到，此时我在当前目录下创建了一个<code class="notranslate">test.text</code>的文本文件，然后通过<code class="notranslate">fopen()</code>函数去打开它</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/993f0eba4a5cfede1a4d58286060ba093e1b5f6bae494f3488ec68b6ffe7bdf9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65386238623133326565303134653733613132343538646336323337663138382e706e67"><img src="https://camo.githubusercontent.com/993f0eba4a5cfede1a4d58286060ba093e1b5f6bae494f3488ec68b6ffe7bdf9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65386238623133326565303134653733613132343538646336323337663138382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/e8b8b132ee014e73a12458dc6237f188.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>但若是我将文件的文件名删除一下，此时文件一定是打开失败的，那么就会通过<code class="notranslate">strerror(erron)</code>这个函数去打印一些相关的错误信息</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/84a120f31724b8cb4d62675bc41d201292e27d474ef59842f660bf9069219d55/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32306538616339303135626434323961623331303433396464373130633437362e706e67"><img src="https://camo.githubusercontent.com/84a120f31724b8cb4d62675bc41d201292e27d474ef59842f660bf9069219d55/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32306538616339303135626434323961623331303433396464373130633437362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/20e8ac9015bd429ab310439dd710c476.png" style="max-width: 100%;"></a></p>
+<h2>八、字符操作函数</h2>
+<ul>
+<li>下面给出一起有关字符操作的函数，它们都可以在<a href="https://legacy.cplusplus.com/reference/cctype/" rel="nofollow">cplusplus</a>这个网站中搜到</li>
+</ul>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>函数</th>
+<th>如果他的参数符合下列条件就返回真</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>iscntrl</td>
+<td>任何控制字符</td>
+</tr>
+<tr>
+<td>isspace</td>
+<td>空白字符：空格‘ ’，换页‘\f’，换行’\n’，回车‘\r’，制表符’\t’或者垂直制表符’\v’</td>
+</tr>
+<tr>
+<td>isdigit</td>
+<td>十进制数字 0~9</td>
+</tr>
+<tr>
+<td>isxdigit</td>
+<td>十六进制数字，包括所有十进制数字，小写字母a ~ f，大写字母A ~ F</td>
+</tr>
+<tr>
+<td>islower</td>
+<td>小写字母a~z</td>
+</tr>
+<tr>
+<td>isupper</td>
+<td>大写字母A~Z</td>
+</tr>
+<tr>
+<td>isalpha</td>
+<td>字母a ~ z或A ~ Z</td>
+</tr>
+<tr>
+<td>isalnum</td>
+<td>字母或者数字，a ~ z,A ~ Z,0 ~ 9</td>
+</tr>
+<tr>
+<td>ispunct</td>
+<td>标点符号，任何不属于数字或者字母的图形字符（可打印）</td>
+</tr>
+<tr>
+<td>isgraph</td>
+<td>任何图形字符</td>
+</tr>
+<tr>
+<td>isprint</td>
+<td>任何可打印字符，包括图形字符和空白字符</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<ul>
+<li>下面演示两个比较常用的<code class="notranslate">isupper()</code>判断是否为大写字母，以及<code class="notranslate">tolower()</code>将大写字母转为小写</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-k">#include</span> <span class="pl-s">&lt;ctype.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">char</span> <span class="pl-s1">str</span>[] <span class="pl-c1">=</span> <span class="pl-s">"Test String.\n"</span>;
+	<span class="pl-smi">char</span> <span class="pl-s1">c</span>;
+	<span class="pl-k">while</span> (<span class="pl-s1">str</span>[<span class="pl-s1">i</span>])
+	{
+		<span class="pl-s1">c</span> <span class="pl-c1">=</span> <span class="pl-s1">str</span>[<span class="pl-s1">i</span>];
+		<span class="pl-k">if</span> (<span class="pl-en">isupper</span>(<span class="pl-s1">c</span>))
+			<span class="pl-s1">c</span> <span class="pl-c1">=</span> <span class="pl-en">tolower</span>(<span class="pl-s1">c</span>);
+		<span class="pl-en">putchar</span>(<span class="pl-s1">c</span>);
+		<span class="pl-s1">i</span><span class="pl-c1">++</span>;
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6bbd4bf153697b0bf58c5250d59602eb0c8865b81e4243ca2557b05c8a29205b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39313636663164643833343734373161396661323830636265323266656135392e706e67"><img src="https://camo.githubusercontent.com/6bbd4bf153697b0bf58c5250d59602eb0c8865b81e4243ca2557b05c8a29205b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39313636663164643833343734373161396661323830636265323266656135392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/9166f1dd8347471a9fa280cbe22fea59.png" style="max-width: 100%;"></a></p>
+<h2>九、内存操作函数</h2>
+<h3>memcpy()</h3>
+<ul>
+<li>函数原型</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-c1">*</span> <span class="pl-en">memcpy</span> ( <span class="pl-smi">void</span> <span class="pl-c1">*</span> <span class="pl-s1">destination</span>, <span class="pl-k">const</span> <span class="pl-smi">void</span> <span class="pl-c1">*</span> <span class="pl-s1">source</span>, <span class="pl-smi">size_t</span> <span class="pl-s1">num</span> );</pre></div>
+<p><a href="https://legacy.cplusplus.com/reference/cstring/memcpy/?kw=memcpy" rel="nofollow">原文链接</a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2dd2e82302a7c121b58a7baa88aa8d5e296ad152f549a3b476c3414b28b3f818/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38303931373934393161663634623634396639356563363039353062343636622e706e67"><img src="https://camo.githubusercontent.com/2dd2e82302a7c121b58a7baa88aa8d5e296ad152f549a3b476c3414b28b3f818/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f38303931373934393161663634623634396639356563363039353062343636622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/809179491af64b649f95ec60950b466b.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们要为<code class="notranslate">memcpy()</code>传入的前两个参数就是目的地址和源地址，最后一个参数的话就是要拷贝的字节数，记住，这里是【字节数】而不是【元素个数】，所以可以看到我是用<code class="notranslate">sizeof(int)</code>首先求出了数组中每个元素的字节数，然后在乘上数组元素个数，<strong>就是整个数组所占的字节数</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">arr1</span>[<span class="pl-c1">10</span>] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>,<span class="pl-c1">4</span>,<span class="pl-c1">5</span>,<span class="pl-c1">6</span>,<span class="pl-c1">7</span>,<span class="pl-c1">8</span>,<span class="pl-c1">9</span>,<span class="pl-c1">10</span> };
+	<span class="pl-smi">int</span> <span class="pl-s1">sz</span> <span class="pl-c1">=</span> <span class="pl-k">sizeof</span>(<span class="pl-smi">arr1</span>) / <span class="pl-k">sizeof</span>(<span class="pl-s1">arr1</span>[<span class="pl-c1">0</span>]);
+	<span class="pl-smi">int</span> <span class="pl-s1">arr2</span>[<span class="pl-c1">10</span>] <span class="pl-c1">=</span> { <span class="pl-c1">0</span> };
+
+	<span class="pl-en">memcpy</span>(<span class="pl-s1">arr2</span>, <span class="pl-s1">arr1</span>, <span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>) <span class="pl-c1">*</span> <span class="pl-s1">sz</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7451f74d7477c430bdf9b3ded41e99c5a821e8c76455aa1963a5c82684892a9a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38663237303165383365303034373634626635333535366266613533393861392e706e67"><img src="https://camo.githubusercontent.com/7451f74d7477c430bdf9b3ded41e99c5a821e8c76455aa1963a5c82684892a9a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38663237303165383365303034373634626635333535366266613533393861392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/8f2701e83e004764bf53556bfa5398a9.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>除了整型数据，<code class="notranslate">memcpy()</code>也可以拷贝浮点型的数据，上去仔细看看原函数就可以知道目标地址和原地址的类型都是<code class="notranslate">void*</code>，表明它们可以接收任意类型的地址，即可以拷贝任意类型的数据</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">float</span> <span class="pl-s1">arr1</span>[] <span class="pl-c1">=</span> { <span class="pl-c1">1.1</span>, <span class="pl-c1">2.2</span>, <span class="pl-c1">3.3</span>, <span class="pl-c1">4.4</span>, <span class="pl-c1">5.5</span> };
+	<span class="pl-smi">int</span> <span class="pl-s1">sz</span> <span class="pl-c1">=</span> <span class="pl-k">sizeof</span>(<span class="pl-smi">arr1</span>) / <span class="pl-k">sizeof</span>(<span class="pl-s1">arr1</span>[<span class="pl-c1">0</span>]);
+	<span class="pl-smi">float</span> <span class="pl-s1">arr2</span>[<span class="pl-c1">5</span>] <span class="pl-c1">=</span> { <span class="pl-c1">0</span> };
+
+	<span class="pl-en">memcpy</span>(<span class="pl-s1">arr2</span>, <span class="pl-s1">arr1</span>, <span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>) <span class="pl-c1">*</span> <span class="pl-s1">sz</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7bbfac5a3fcb44c7d3e1601b0adad4a0d465788b28c8279b8a2fc90146823b5a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66633333656330653632663834346661393634656132613266316132306466312e706e67"><img src="https://camo.githubusercontent.com/7bbfac5a3fcb44c7d3e1601b0adad4a0d465788b28c8279b8a2fc90146823b5a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66633333656330653632663834346661393634656132613266316132306466312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/fc33ec0e62f844fa964ea2a2f1a20df1.png" style="max-width: 100%;"></a></p>
+<h3>模拟实现</h3>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-en">my_memcpy</span>(<span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-s1">dest</span>, <span class="pl-k">const</span> <span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-s1">src</span>, <span class="pl-smi">int</span> <span class="pl-s1">num</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">dest</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">src</span>);
+	<span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-s1">dest</span>;
+	<span class="pl-k">while</span> (<span class="pl-s1">num</span><span class="pl-c1">--</span>)
+	{
+		<span class="pl-c1">*</span>(<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-s1">dest</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span>(<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-s1">src</span>;
+		<span class="pl-s1">dest</span> <span class="pl-c1">=</span>	(<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-s1">dest</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>;
+		<span class="pl-s1">src</span> <span class="pl-c1">=</span> (<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-s1">src</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>;
+	}
+	<span class="pl-k">return</span> <span class="pl-s1">ret</span>;
+}</pre></div>
+<ul>
+<li>
+<p>这里主要讲一下的就是这个内部的拷贝逻辑，之前我们在使用<code class="notranslate">strcpy()</code>的时候是直接用【*dest = *src】的，但是这里的话我们不能这么去操作，上面讲到过两个目标指针和源指针都是<code class="notranslate">void*</code>类型的，这种指针类型是不可以直接进行解引用的，而是要在内部对其进行<strong>强制类型转换</strong></p>
+</li>
+<li>
+<p>那转成什么类型的指针呢？<code class="notranslate">int*</code>、<code class="notranslate">float*</code>、<code class="notranslate">double*</code>吗？不，这些都不可以，设想我们传入的字节数是28，那使用<code class="notranslate">int*</code>类型的指针去拷贝确实可以做到，但若是我传入的总字节数为27呢？不是一个4字节或者8字节的整数倍，那要怎么去拷贝呢？</p>
+</li>
+<li>
+<p>但是有一个类型的指针却可以做到，那就是<code class="notranslate">char*</code>，无论你要我拷多少字节的数据，反正我解引用每次只能拷贝1个字节的数据，那么就一个个拷过去就行了，虽然效率上来说是低了一些，但是容错率下降了，就不会出现什么大问题</p>
+</li>
+<li>
+<p>当单个字节的数据拷贝完成后，指针就向后偏移指向下一个要拷贝的数据，那也强转为<code class="notranslate">char*</code>类型即可，便可以一次访问4个字节，但是这里尽量不要直接写成<code class="notranslate">(char*)dest++</code>，因为这里面涉及到【隐式类型转换】，在中间会产生一个临时对象，我们对临时对象去++的话并没有什么意义，所以这里还是规规矩矩地写就行</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-s1">dest</span> <span class="pl-c1">=</span>	(<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-s1">dest</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>;
+<span class="pl-s1">src</span> <span class="pl-c1">=</span> (<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-s1">src</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>;</pre></div>
+<hr>
+<p>看到上面这样一个个拷贝过去太累了，如果我不想拷贝所有的数据，而是只拷贝一半的数据呢？这可以不可以做到</p>
+<ul>
+<li>这当然是可以的，我们只需要指定拷贝的字节数就可以了，现在数组的大小是40个字节，一般数据的话就是20个字节，那就像下面这样去进行拷贝即可</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">arr1</span>[<span class="pl-c1">10</span>] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>,<span class="pl-c1">4</span>,<span class="pl-c1">5</span>,<span class="pl-c1">6</span>,<span class="pl-c1">7</span>,<span class="pl-c1">8</span>,<span class="pl-c1">9</span>,<span class="pl-c1">10</span> };
+	<span class="pl-smi">int</span> <span class="pl-s1">arr2</span>[<span class="pl-c1">10</span>] <span class="pl-c1">=</span> { <span class="pl-c1">0</span> };
+
+	<span class="pl-en">my_memcpy</span>(<span class="pl-s1">arr2</span>, <span class="pl-s1">arr1</span>, <span class="pl-c1">20</span>);
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">10</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">arr2</span>[<span class="pl-s1">i</span>]);
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>可以看到，最后就只拷贝了一半的数据过去</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/fa934ed071f534ac6a284ca755f26c91324aa79a433af58f696ed630b8e6e144/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38353963346634653861353234376231393134373362313061613331313463612e706e67"><img src="https://camo.githubusercontent.com/fa934ed071f534ac6a284ca755f26c91324aa79a433af58f696ed630b8e6e144/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38353963346634653861353234376231393134373362313061613331313463612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/859c4f4e8a5247b191473b10aa3114ca.png" style="max-width: 100%;"></a></p>
+<p>不过我觉得，从一个数组拷贝到另外一个数组太麻烦了，可以直接在自己本身上进行操作吗？</p>
+<ul>
+<li>这当然也是可以的，比方说现在我想把arr1数组中前面20个字节的数据，即前5个元素【1 2 3 4 5】拷贝到【3 4 5 6 7】这个位置中，那最后的结果是否会是【1 2 1 2 3 4 5 8 9 10】呢</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">arr1</span>[<span class="pl-c1">10</span>] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>,<span class="pl-c1">4</span>,<span class="pl-c1">5</span>,<span class="pl-c1">6</span>,<span class="pl-c1">7</span>,<span class="pl-c1">8</span>,<span class="pl-c1">9</span>,<span class="pl-c1">10</span> };
+
+	<span class="pl-en">my_memcpy</span>(<span class="pl-s1">arr1</span> <span class="pl-c1">+</span> <span class="pl-c1">2</span>, <span class="pl-s1">arr1</span>, <span class="pl-c1">20</span>);
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">10</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">arr1</span>[<span class="pl-s1">i</span>]);
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>通过运行可以看出，似乎并没有拷贝过去，而且数组前面的元素变成了【1 2 1 2 1 2 1】，这是为何呢？</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/300f43d874befb6b3b9e587f33ec04bff1ba0467c6ba75a941d1bc965151d01c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30646362333230636334393334323534383161653032663435383736633932342e706e67"><img src="https://camo.githubusercontent.com/300f43d874befb6b3b9e587f33ec04bff1ba0467c6ba75a941d1bc965151d01c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30646362333230636334393334323534383161653032663435383736633932342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/0dcb320cc493425481ae02f45876c924.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>我们一起来看一下下面这张图，仔细观察就可以发现，当前两个数拷贝完之后想要去拷贝3的时候，此时我们拿到的还是【1】，当想要去拷贝4的时候，拿到的便是【2】，依次类推，这就是为什么打印出来拷贝位置的结果是【1 2 1 2 1】</p>
+</li>
+<li>
+<p>对与<code class="notranslate">memcpy()</code>来说，它只负责拷贝两块独立空间中的数据，但是对于一个数组的元素，它们都是连续存放的，若是擅自去进行拷贝的话会造成覆盖的情况，此时我们可以使用<code class="notranslate">memmove()</code>这个函数，它可以用来专门拷贝重叠内存的数据</p>
+</li>
+</ul>
+<h3>memmove()</h3>
+<ul>
+<li>函数原型</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-c1">*</span> <span class="pl-en">memmove</span> ( <span class="pl-smi">void</span> <span class="pl-c1">*</span> <span class="pl-s1">destination</span>, <span class="pl-k">const</span> <span class="pl-smi">void</span> <span class="pl-c1">*</span> <span class="pl-s1">source</span>, <span class="pl-smi">size_t</span> <span class="pl-s1">num</span> );</pre></div>
+<p><a href="https://legacy.cplusplus.com/reference/cstring/memmove/?kw=memmove" rel="nofollow">原文链接</a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5de099d3873ea63d1ecc900d95c7f3964df5545403c958c3845bd091f34faf27/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36643566346537333562363834306433386232343033313433633635356631642e706e67"><img src="https://camo.githubusercontent.com/5de099d3873ea63d1ecc900d95c7f3964df5545403c958c3845bd091f34faf27/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36643566346537333562363834306433386232343033313433633635356631642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/6d5f4e735b6840d38b2403143c655f1d.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">arr1</span>[<span class="pl-c1">10</span>] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>,<span class="pl-c1">4</span>,<span class="pl-c1">5</span>,<span class="pl-c1">6</span>,<span class="pl-c1">7</span>,<span class="pl-c1">8</span>,<span class="pl-c1">9</span>,<span class="pl-c1">10</span> };
+
+	<span class="pl-en">memmove</span>(<span class="pl-s1">arr1</span> <span class="pl-c1">+</span> <span class="pl-c1">2</span>, <span class="pl-s1">arr1</span>, <span class="pl-c1">20</span>);
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">10</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">arr1</span>[<span class="pl-s1">i</span>]);
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/786c8eefd1283e3c6981fa660f828adebe14f4764aa37e1124f9f99e76345ee2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62613264623264633032316434313466393431323964333437316363653336382e706e67"><img src="https://camo.githubusercontent.com/786c8eefd1283e3c6981fa660f828adebe14f4764aa37e1124f9f99e76345ee2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62613264623264633032316434313466393431323964333437316363653336382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/ba2db2dc021d414f94129d3471cce368.png" style="max-width: 100%;"></a></p>
+<h3>模拟实现</h3>
+<blockquote>
+<p>接下去的话我们就来模拟实现这个memmove()函数</p>
+</blockquote>
+<ul>
+<li>对于这个函数的实现来说，比较复杂，要分为三种情况进行讨论</li>
+</ul>
+<p><strong>流程图示：</strong></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f8ec5edf82945bd4e8fcaadc0a83a5d8a23ace0d77a29cc317cbf0c62492f721/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31383664386430383662306534653466616632366435626232356663306333342e706e67"><img src="https://camo.githubusercontent.com/f8ec5edf82945bd4e8fcaadc0a83a5d8a23ace0d77a29cc317cbf0c62492f721/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31383664386430383662306534653466616632366435626232356663306333342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/186d8d086b0e4e4faf26d5bb25fc0c34.png" style="max-width: 100%;"></a></p>
+<p><strong>分析：</strong></p>
+<ul>
+<li>对于数组的空间排布来说，前面是低地址，后面是高地址，如果你自己看下图的话，就可以发现它被分成了三块区域，对于 <code class="notranslate">dest</code>来说，一个是在src前面，需要从前往后进行拷贝，一个是在<code class="notranslate">src</code>后面，需要从后往前进行拷贝，还有一个便是两块内存空间不会进行覆盖， 但还是存在与一个连续的空间即数组中，这个时候无论是【从前往后】还是【从后往前】都是可以的，那这样分成三个区域太麻烦了，这里我推荐分成两块区域，通过地址的大小进行比较</li>
+<li>当<code class="notranslate">dest &lt; src</code>时，我们<strong>从前往后</strong>进行逐一字节的拷贝</li>
+<li>当<code class="notranslate">dest &gt;= src</code>时，我们<strong>从后往前</strong>进行逐一字节的拷贝<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/294baa07e7797fc52e08ed9a7f27c59139a73349554a73e04b4907d0f6da2a12/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38656262666163316438633434623931393436616262316663336561373838632e706e67"><img src="https://camo.githubusercontent.com/294baa07e7797fc52e08ed9a7f27c59139a73349554a73e04b4907d0f6da2a12/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38656262666163316438633434623931393436616262316663336561373838632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/8ebbfac1d8c44b91946abb1fc3ea788c.png" style="max-width: 100%;"></a></li>
+</ul>
+<p><strong>动画图解：</strong></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9004e1ae4544cd5fb503a36ab47ddc0e0d742460becb1797f0057cfc809f219b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39653334643131356362633834613335393639333438373538666431346463642e676966"><img src="https://camo.githubusercontent.com/9004e1ae4544cd5fb503a36ab47ddc0e0d742460becb1797f0057cfc809f219b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39653334643131356362633834613335393639333438373538666431346463642e676966" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/9e34d115cbc84a35969348758fd14dcd.gif" style="max-width: 100%;"></a></p>
+<p><strong>代码展示：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-en">my_mommove</span>(<span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-s1">dest</span>, <span class="pl-k">const</span> <span class="pl-smi">void</span><span class="pl-c1">*</span> <span class="pl-s1">src</span>, <span class="pl-smi">size_t</span> <span class="pl-s1">num</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">dest</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">src</span>);
+	<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">start</span> <span class="pl-c1">=</span> <span class="pl-s1">dest</span>;
+	<span class="pl-k">if</span> (<span class="pl-s1">dest</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">src</span>)
+	{
+		<span class="pl-c">//memcpy()的拷贝逻辑</span>
+		<span class="pl-k">while</span> (<span class="pl-s1">num</span><span class="pl-c1">--</span>)
+		{
+			<span class="pl-c1">*</span>(<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-s1">dest</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span>(<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-s1">src</span>;
+			<span class="pl-s1">dest</span> <span class="pl-c1">=</span> (<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-s1">dest</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>;
+			<span class="pl-s1">src</span> <span class="pl-c1">=</span> (<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-s1">src</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>;
+		}
+	}
+	<span class="pl-k">else</span>	<span class="pl-c">//dest &gt;= src</span>
+	{
+		<span class="pl-k">while</span> (<span class="pl-s1">num</span><span class="pl-c1">--</span>)
+		{
+			<span class="pl-c1">*</span>((<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-s1">dest</span> <span class="pl-c1">+</span> <span class="pl-s1">num</span>) <span class="pl-c1">=</span> <span class="pl-c1">*</span>((<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-s1">src</span> <span class="pl-c1">+</span> <span class="pl-s1">num</span>);
+		}
+	}
+	<span class="pl-k">return</span> <span class="pl-s1">start</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0544cda525c07f3ee8dc46c0055f3408c28318daf17243bd5dcc3443f737a4b7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30356338333238306130333934626334613837333034323865333132623263332e706e67"><img src="https://camo.githubusercontent.com/0544cda525c07f3ee8dc46c0055f3408c28318daf17243bd5dcc3443f737a4b7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30356338333238306130333934626334613837333034323865333132623263332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/05c83280a0394bc4a8730428e312b2c3.png" style="max-width: 100%;"></a></p>
+<p><strong>代码分析：</strong></p>
+<ul>
+<li>我主要来讲一下从后往前拷的这段逻辑，因为一个整型元素是四个字节，我们这里把它做一个分割就可以看出，若是我们要拷贝20个字节的数据的话，最后的末尾自己便是20，往前一个字节就是需要拷贝的实际数据，<strong>以此类推，一个个字节往前数就可以拷贝完所有的数据</strong>，不仅是对于整型元素，浮点型元素也是类同</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/fe3f6975d1e9f8f8c1c6a40a07cea29b4673740ada526d9295c6f452a48cdbc3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66306464383966346431363034353565386334313662653135356639353765372e706e67"><img src="https://camo.githubusercontent.com/fe3f6975d1e9f8f8c1c6a40a07cea29b4673740ada526d9295c6f452a48cdbc3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66306464383966346431363034353565386334313662653135356639353765372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/f0dd89f4d160455e8c416be155f957e7.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>那我们要如何去获取到这个19,18,17,16,15个字节呢？很简单，只需要把<code class="notranslate">dest</code>和<code class="notranslate">src</code>强转为<code class="notranslate">char*</code>类型的地址即可，此时再加上一个【num】便可以偏移到指定的位置处，随着【num】的不断变化，就可以将数据从后往前进行一一拷贝</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">while</span> (<span class="pl-s1">num</span><span class="pl-c1">--</span>)
+{
+	<span class="pl-c1">*</span>((<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-s1">dest</span> <span class="pl-c1">+</span> <span class="pl-s1">num</span>) <span class="pl-c1">=</span> <span class="pl-c1">*</span>((<span class="pl-smi">char</span><span class="pl-c1">*</span>)<span class="pl-s1">src</span> <span class="pl-c1">+</span> <span class="pl-s1">num</span>);
+}</pre></div>
+<h3>memset()</h3>
+<ul>
+<li>函数原型</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-c1">*</span> <span class="pl-en">memset</span> ( <span class="pl-smi">void</span> <span class="pl-c1">*</span> <span class="pl-s1">ptr</span>, <span class="pl-smi">int</span> <span class="pl-s1">value</span>, <span class="pl-smi">size_t</span> <span class="pl-s1">num</span> );</pre></div>
+<p><a href="https://legacy.cplusplus.com/reference/cstring/memset/?kw=memset" rel="nofollow">原文链接</a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/21922a1fef6aa51292767d9afde5019998426100c463b7dafa44bf8fbc8957d1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63356232316632616663326534316662613431376432396364333762323338642e706e67"><img src="https://camo.githubusercontent.com/21922a1fef6aa51292767d9afde5019998426100c463b7dafa44bf8fbc8957d1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63356232316632616663326534316662613431376432396364333762323338642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/c5b21f2afc2e41fba417d29cd37b238d.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">arr</span>[<span class="pl-c1">10</span>];
+	<span class="pl-smi">int</span> <span class="pl-s1">sz</span> <span class="pl-c1">=</span> <span class="pl-k">sizeof</span>(<span class="pl-smi">arr</span>) / <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>[<span class="pl-c1">0</span>]);
+
+	<span class="pl-en">memset</span>(<span class="pl-s1">arr</span>, <span class="pl-c1">0</span>, <span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>) <span class="pl-c1">*</span> <span class="pl-s1">sz</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/fd5227e3e7d50784107402677c3be1a6986026172fcce0859565e4ffe150a86d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34336633623330313131366334393730626137366139653765643539393031342e706e67"><img src="https://camo.githubusercontent.com/fd5227e3e7d50784107402677c3be1a6986026172fcce0859565e4ffe150a86d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34336633623330313131366334393730626137366139653765643539393031342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/43f3b301116c4970ba76a9e7ed599014.png" style="max-width: 100%;"></a></p>
+<h3>注意事项</h3>
+<p>要将数组中的数据都初始化成【1】呢，此时还能成功吗？</p>
+<ul>
+<li>可以看到，似乎数组的每个值并没有初始化成功，而是变成了一个很大的数，这是为什么呢？</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/17702dbf0910f89a7b45f5be4490ebb83d2a604712f60f9226d785ac84adad61/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61613630386331646565373434656432386330383136646335653865386165352e706e67"><img src="https://camo.githubusercontent.com/17702dbf0910f89a7b45f5be4490ebb83d2a604712f60f9226d785ac84adad61/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61613630386331646565373434656432386330383136646335653865386165352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/aa608c1dee744ed28c0816dc5e8e8ae5.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们可以通过【内存】的形式去观察一下。此时就可以观察到每一个字节都被初始化成了1，那么4个字节的话其实就不再是1了，而是一个很大的数，回想<code class="notranslate">memset()</code>的特性，是以字节为单位去进行一个初始化，那就可以看出问题出在哪里了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/a2eef4a05de05690675f0b365e40842f16abc211d7ea0f27e2732738072258d4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39636130333732303564376634383139623334653564306238643764383462372e706e67"><img src="https://camo.githubusercontent.com/a2eef4a05de05690675f0b365e40842f16abc211d7ea0f27e2732738072258d4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39636130333732303564376634383139623334653564306238643764383462372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/9ca037205d7f4819b34e5d0b8d7d84b7.png" style="max-width: 100%;"></a></p>
+<p>所以我们在使用<code class="notranslate">memset()</code>的时候一定要注意以上这一点</p>
+<h3>memcmp()</h3>
+<ul>
+<li>函数原型</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">memcmp</span> ( <span class="pl-k">const</span> <span class="pl-smi">void</span> <span class="pl-c1">*</span> <span class="pl-s1">ptr1</span>, <span class="pl-k">const</span> <span class="pl-smi">void</span> <span class="pl-c1">*</span> <span class="pl-s1">ptr2</span>, <span class="pl-smi">size_t</span> <span class="pl-s1">num</span> );</pre></div>
+<p><a href="https://legacy.cplusplus.com/reference/cstring/memcmp/?kw=memcmp" rel="nofollow">原文链接</a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4bec93c7dac2be49b7e6b94290d5db0d36eb303c5f59964e5f654c567bc857cc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65366234326664393839656634623438626334613632396439353433356436612e706e67"><img src="https://camo.githubusercontent.com/4bec93c7dac2be49b7e6b94290d5db0d36eb303c5f59964e5f654c567bc857cc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65366234326664393839656634623438626334613632396439353433356436612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/e6b42fd989ef4b48bc4a629d95435d6a.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">arr1</span>[<span class="pl-c1">10</span>] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>,<span class="pl-c1">4</span>,<span class="pl-c1">5</span> };
+	<span class="pl-smi">int</span> <span class="pl-s1">arr2</span>[<span class="pl-c1">10</span>] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>,<span class="pl-c1">3</span>,<span class="pl-c1">2</span> };
+
+	<span class="pl-smi">int</span> <span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-en">memcmp</span>(<span class="pl-s1">arr1</span>, <span class="pl-s1">arr2</span>, <span class="pl-c1">12</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-s1">ret</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>这里可以看到，我比较了两个数组的前12个字节，即数组的前3个元素，然后返回的是-1，这是为何呢？它是如何去进行比较的呢？</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ce426bc0cf75b4e5c361017556f228792ea19615d53fbfba733d0c0c546f7c8a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32313037653364373765663234333539616439623462323930366464396130662e706e67"><img src="https://camo.githubusercontent.com/ce426bc0cf75b4e5c361017556f228792ea19615d53fbfba733d0c0c546f7c8a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32313037653364373765663234333539616439623462323930366464396130662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/2107e3d77ef24359ad9b4b2906dd9a0f.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>对于这个函数的返回值来说，和<code class="notranslate">strcmp()</code>一样，为&lt; 0、= 0或者&gt; 0的数值</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b28a42e5840fabc8dfaf8e0eb9ea91fddd50264a9b943c73dffd0c57b4dccb21/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34623930396265666562306534303632393336626434373637633861376537662e706e67"><img src="https://camo.githubusercontent.com/b28a42e5840fabc8dfaf8e0eb9ea91fddd50264a9b943c73dffd0c57b4dccb21/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34623930396265666562306534303632393336626434373637633861376537662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/4b909befeb0e4062936bd4767c8a7e7f.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>那我们现在可以来看一下它们在内存中的样子，对于VS来说是小端存放，因此数组arr1存放在内存中便是</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">01</span> <span class="pl-c1">00</span> <span class="pl-c1">00</span> <span class="pl-c1">00</span> <span class="pl-c1">02</span> <span class="pl-c1">00</span> <span class="pl-c1">00</span> <span class="pl-c1">00</span> <span class="pl-c1">03</span> <span class="pl-c1">00</span> <span class="pl-c1">00</span> <span class="pl-c1">00</span> <span class="pl-c1">04</span> <span class="pl-c1">00</span> <span class="pl-c1">00</span> <span class="pl-c1">00</span> <span class="pl-c1">05</span> <span class="pl-c1">00</span> <span class="pl-c1">00</span> <span class="pl-c1">00</span>  </pre></div>
+<ul>
+<li>数组arr2存放在内存中为</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">01</span> <span class="pl-c1">00</span> <span class="pl-c1">00</span> <span class="pl-c1">00</span> <span class="pl-c1">03</span> <span class="pl-c1">00</span> <span class="pl-c1">00</span> <span class="pl-c1">00</span> <span class="pl-c1">02</span> <span class="pl-c1">00</span> <span class="pl-c1">00</span> <span class="pl-c1">00</span> </pre></div>
+<ul>
+<li>要知道，<code class="notranslate">memcmp()</code>可是一个字节一个字节进行比较，那么此时当他们比较到【02】和【03】的时候就已经不相等了，因为前一个小于后一个，所以便会返回 <code class="notranslate">&lt; 0</code>的数字</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/bb6fb78f433544f350b40accccbf08cacaef56390ef085149913d383e8b6cf06/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33613938356135323364363134623762626464326364633439366335303936362e706e67"><img src="https://camo.githubusercontent.com/bb6fb78f433544f350b40accccbf08cacaef56390ef085149913d383e8b6cf06/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33613938356135323364363134623762626464326364633439366335303936362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/3a985a523d614b7bbdd2cdc496c50966.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>但此时若我将arr2数组去做一个变化的话，返回的便是 = 0的值</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d1e1fc60545119c26a4f17106c51365e846ef13594257d8b7456b746c074c5e3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38313739366239356362323534663966626432303138356636666165353836332e706e67"><img src="https://camo.githubusercontent.com/d1e1fc60545119c26a4f17106c51365e846ef13594257d8b7456b746c074c5e3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38313739366239356362323534663966626432303138356636666165353836332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/81796b95cb254f9fbd20185f6fae5863.png" style="max-width: 100%;"></a></p></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

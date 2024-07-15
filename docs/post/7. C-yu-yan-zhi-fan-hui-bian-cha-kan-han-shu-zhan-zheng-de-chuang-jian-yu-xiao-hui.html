@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="# 一、 什么是函数栈帧？
+
+
+**函数栈帧是用于在计算机程序中实现函数调用的一种数据结构。">
+<meta property="og:title" content="7. C语言之反汇编查看函数栈帧的创建与销毁">
+<meta property="og:description" content="# 一、 什么是函数栈帧？
+
+
+**函数栈帧是用于在计算机程序中实现函数调用的一种数据结构。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/7.%20C-yu-yan-zhi-fan-hui-bian-cha-kan-han-shu-zhan-zheng-de-chuang-jian-yu-xiao-hui.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>7. C语言之反汇编查看函数栈帧的创建与销毁</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">7. C语言之反汇编查看函数栈帧的创建与销毁</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/31" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h1>一、 什么是函数栈帧？</h1>
+<p><strong>函数栈帧是用于在计算机程序中实现函数调用的一种数据结构。在函数调用过程中，每个函数都需要在内存中创建一个栈帧，用于存储局部变量、返回地址和参数等。</strong></p>
+<ul>
+<li>
+<p>具体来说，函数栈帧通常包含以下部分：</p>
+</li>
+<li>
+<p>局部变量表：存储函数的局部变量，包括基本数据类型（如整数、浮点数等）和对象引用（如指针）。</p>
+</li>
+<li>
+<p>返回地址：存储函数的返回地址，即函数执行完毕后需要跳转到的地址。</p>
+</li>
+<li>
+<p>参数表：存储函数的输入参数，通常按照传递的顺序排列。</p>
+</li>
+<li>
+<p>操作数栈：用于存储函数的临时数据和中间结果，通常使用栈结构进行操作。</p>
+</li>
+<li>
+<p>当一个函数被调用时，会在内存中创建一个新的栈帧，并将其压入调用该函数的栈中。当函数执行完毕后，该栈帧会被弹出栈并销毁。因此，函数栈帧在函数调用过程中起到了存储和传递数据的作用。</p>
+</li>
+</ul>
+<p>函数栈帧的实现方式取决于具体的编程语言和编译器。在一些高级编程语言中，编译器通常会为每个函数自动创建和销毁栈帧，而无需程序员手动管理。而在低级编程语言或手动控制内存分配的情况下，程序员需要手动创建和销毁栈帧。</p>
+<h1>二、 理解函数栈帧能解决什么问题呢？</h1>
+<p>理解函数栈帧有什么用呢？<br>
+只要理解了函数栈帧的创建和销毁，以下问题就能够很好的额理解了：</p>
+<ul>
+<li><strong>局部变量是如何创建的？</strong></li>
+<li><strong>为什么局部变量不初始化内容是随机的？</strong></li>
+<li><strong>函数调用时参数时如何传递的？传参的顺序是怎样的？</strong></li>
+<li><strong>函数的形参和实参分别是怎样实例化的？</strong></li>
+<li><strong>函数调用是怎么做的？函数的返回值是如何带会的？</strong></li>
+</ul>
+<p>让我们一起走进函数栈帧的创建和销毁的过程中。</p>
+<h1>三、 函数栈帧的创建和销毁解析</h1>
+<h2>3.1、什么是栈？</h2>
+<blockquote>
+<p>栈（stack）是现代计算机程序里最为重要的概念之一，几乎每一个程序都使用了栈，没有栈就没有函数，没有局部变量，也就没有我们如今看到的所有的计算机语言。</p>
+</blockquote>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c77129b759bef6f54d6b3f50edc67b90688de4ca67ce933f2949fa43cb2d8066/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63633437336464323866323534396330623938653462653134393536663532352e706e67"><img src="https://camo.githubusercontent.com/c77129b759bef6f54d6b3f50edc67b90688de4ca67ce933f2949fa43cb2d8066/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63633437336464323866323534396330623938653462653134393536663532352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/cc473dd28f2549c0b98e4be14956f525.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>在经典的计算机科学中，栈被定义为一种特殊的容器，用户可以将数据压入栈（Push）：将数据项添加到栈的顶部。这相当于把数据放到栈的最上面。出栈（Pop）：从栈的顶部移除数据项。这相当于移除栈顶的数据项。但是栈这个容器必须遵守一条规则：先入栈的数据后出栈（First In Last Out， FIFO）。就像一个桶，先放的东西最后才能拿出</li>
+<li>在计算机系统中，栈则是一个具有以上属性的动态内存区域。程序可以将数据压入栈中，也可以将数据从栈顶弹出。压栈操作使得栈增大，而弹出操作使得栈减小。</li>
+</ul>
+<blockquote>
+<p><strong>在经典的操作系统中，栈总是向下增长（由高地址向低地址）的</strong><br>
+<strong>在我们常见的i386或者x86-64下，栈顶由成为 esp 的寄存器进行定位的</strong></p>
+</blockquote>
+<h2>3.2、认识相关寄存器和汇编指令</h2>
+<h3>3.2.1 相关寄存器</h3>
+<blockquote>
+<ul>
+<li>【eax】：通用寄存器，保留临时数据，常用于返回值</li>
+<li>【ebx】 ：通用寄存器，保留临时数据</li>
+<li>【ebp】：栈底寄存器</li>
+<li>【esp】：栈顶寄存器</li>
+<li>【eip】：指令寄存器，保存当前指令的下一条指令的地址</li>
+</ul>
+</blockquote>
+<h3>3.2.2 相关汇编命令</h3>
+<blockquote>
+<ul>
+<li>【mov】：数据转移指令</li>
+<li>【push】：数据入栈，同时esp栈顶寄存器也要发生改变</li>
+<li>【pop】：数据弹出至指定位置，同时esp栈顶寄存器也要发生改变</li>
+<li>【add】：加法命令</li>
+<li>【sub】：减法命令</li>
+<li>【lea】 ：<strong>load effective address</strong>，加载有效地址</li>
+<li>【call】：函数调用，1. 压入返回地址 2. 转入目标函数</li>
+<li>【jump】：通过修改eip，转入目标函数，进行调用</li>
+<li>【ret】：恢复返回地址，压入eip，类似pop eip命令</li>
+</ul>
+</blockquote>
+<h2>3.3、 解析函数栈帧的创建和销毁</h2>
+<ul>
+<li>首先我们达成一些预备知识才能有效的帮助我们理解，函数栈帧的创建和销毁。</li>
+</ul>
+<h3>3.3.1 预备知识</h3>
+<ul>
+<li><strong>每一次函数调用</strong>，都要为本次函数调用开辟空间，就是函数栈帧的空间</li>
+<li>这块空间的维护是使用了2个寄存器： <code class="notranslate">esp</code> 和 <code class="notranslate">ebp</code> ，【ebp】 记录的是<strong>栈底</strong>的地址， <code class="notranslate">esp</code> 记录的是<strong>栈顶</strong>的地址</li>
+</ul>
+<p>如图所示：</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2136f6bf635b3e3e5e21c25a8170e66b6e3ab0c1d60aef4bfb44abf809f8a4bc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61373631353639363763653034363165383734653337373234663238336436342e706e67"><img src="https://camo.githubusercontent.com/2136f6bf635b3e3e5e21c25a8170e66b6e3ab0c1d60aef4bfb44abf809f8a4bc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61373631353639363763653034363165383734653337373234663238336436342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/a76156967ce0461e874e37724f283d64.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>函数栈帧的创建和销毁过程，在不同的编译器上实现的方法大同小异，本次演示以VS2022为例。</li>
+</ul>
+<h3>3.3.2 代码和环境搭建</h3>
+<ul>
+<li>这段代码，如果我们在VS2019编译器上调试，调试进入Add函数后，我们就可以观察到函数的调用堆栈</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+
+<span class="pl-smi">int</span> <span class="pl-en">Add</span>(<span class="pl-smi">int</span> <span class="pl-s1">x</span>, <span class="pl-smi">int</span> <span class="pl-s1">y</span>)
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">z</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-s1">z</span> <span class="pl-c1">=</span> <span class="pl-s1">x</span> <span class="pl-c1">+</span> <span class="pl-s1">y</span>;
+	<span class="pl-k">return</span> <span class="pl-s1">z</span>;
+}
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">20</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">c</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+
+	<span class="pl-s1">c</span> <span class="pl-c1">=</span> <span class="pl-en">Add</span>(<span class="pl-s1">a</span>, <span class="pl-s1">b</span>);
+
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-s1">c</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>首先我们来做一些环境的搭建工作</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/37fab301dc4834d4960064f85c2e6446a10477631fcb6f435deff1847193b324/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36333531633761353565643934393032393734313462653766623732613666382e706e67"><img src="https://camo.githubusercontent.com/37fab301dc4834d4960064f85c2e6446a10477631fcb6f435deff1847193b324/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36333531633761353565643934393032393734313462653766623732613666382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/6351c7a55ed9490297414be7fb72a6f8.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/37f5446061c2ad09b9c21a5b14b985e0578d44ff7fa4d43218fdb996471d8deb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62633438633266396336336134383934623533383839396363313234616563612e706e67"><img src="https://camo.githubusercontent.com/37f5446061c2ad09b9c21a5b14b985e0578d44ff7fa4d43218fdb996471d8deb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62633438633266396336336134383934623533383839396363313234616563612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/bc48c2f9c63a4894b538899cc124aeca.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>首先直接在键盘上按下F10【笔记本按下Fn + F10】。</p>
+</li>
+<li>
+<p>以往写代码的时候，我们都知道要写这么一个main函数，程序就是从这里开始运行的</p>
+</li>
+<li>
+<p>接下去在按下F10后到监视窗口打开【调用堆栈】的窗口</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6fc3348f3dc1312c0a44cc39556e31da0537c491b898f8e628aa2bcb00a7e203/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62633635396262316636353634613961626666373131333533376561623835332e706e67"><img src="https://camo.githubusercontent.com/6fc3348f3dc1312c0a44cc39556e31da0537c491b898f8e628aa2bcb00a7e203/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62633635396262316636353634613961626666373131333533376561623835332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/bc659bb1f6564a9abff7113537eab853.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>然后就出现了这样的界面。此时我们的main函数就从第13行开始运行了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ab04b4f0a6eeeacc266fea4570becda9ff74e52dbc96732ba4b720888587e5c7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63373636626662626630376534343562623166326439313034316335313033612e706e67"><img src="https://camo.githubusercontent.com/ab04b4f0a6eeeacc266fea4570becda9ff74e52dbc96732ba4b720888587e5c7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63373636626662626630376534343562623166326439313034316335313033612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/c766bfbbf07e445bb1f2d91041c5103a.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>一直按F10，当调试箭头运行到第【22行】的时候，就会自动进入到<strong>exe_common.inl</strong>，此时我们就可以观察到底是哪个函数调用了<strong>main</strong>函数</p>
+</li>
+<li>
+<p>通过下图可知是<strong>invoke_main</strong>这个函数调用的，我们了解到这里就可以了~~</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/83b422e0108d9c4c773a49901af44c29596435d9e166e534fbb99002c12efe7f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61346232356333393238346334343866386434623662316565633336393138382e706e67"><img src="https://camo.githubusercontent.com/83b422e0108d9c4c773a49901af44c29596435d9e166e534fbb99002c12efe7f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61346232356333393238346334343866386434623662316565633336393138382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/a4b25c39284c448f8d4b6b1eec369188.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>然后，关掉这个【调用堆栈】的窗口后，重新调试起来</li>
+<li>调出【反汇编】【内存】【监视】这三个窗口</li>
+</ul>
+<p>【反汇编】<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/46399c3418a36236d63208c86280b0671dfd063d794a56d7cc04646e5351ac2a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38643864366261373361386334663639616138313063636266363334666164392e706e67"><img src="https://camo.githubusercontent.com/46399c3418a36236d63208c86280b0671dfd063d794a56d7cc04646e5351ac2a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38643864366261373361386334663639616138313063636266363334666164392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/8d8d6ba73a8c4f69aa810ccbf634fad9.png" style="max-width: 100%;"></a><br>
+【内存】</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5d19cec895b65333e8bd46088892005a03a5b42ea33916cd0aa7e64c45d76eca/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30643334613662616665326134646634393333353333356339306465346339642e706e67"><img src="https://camo.githubusercontent.com/5d19cec895b65333e8bd46088892005a03a5b42ea33916cd0aa7e64c45d76eca/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30643334613662616665326134646634393333353333356339306465346339642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/0d34a6bafe2a4df49335335c90de4c9d.png" style="max-width: 100%;"></a></p>
+<p>【监视】<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3b3539d10a0d8ae60a4298bd9e41c45864e8e26bb7be55a34c974e727d8bb315/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35353434643466323338313134663933626434316538373537626634323463662e706e67"><img src="https://camo.githubusercontent.com/3b3539d10a0d8ae60a4298bd9e41c45864e8e26bb7be55a34c974e727d8bb315/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35353434643466323338313134663933626434316538373537626634323463662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/5544d4f238114f93bd41e8757bf424cf.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1cfdf51ecb1c54af1c06195bd1736f651d30b2f20eaa120b65dc9c1e660252a8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63323634636335383561626534656631613236313530393566303938386566362e706e67"><img src="https://camo.githubusercontent.com/1cfdf51ecb1c54af1c06195bd1736f651d30b2f20eaa120b65dc9c1e660252a8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63323634636335383561626534656631613236313530393566303938386566362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/c264cc585abe4ef1a2615095f0988ef6.png" style="max-width: 100%;"></a></p>
+<blockquote>
+<p>好，现在我们的环境已经全部搭建好了</p>
+</blockquote>
+<h3>3.3.3 函数栈帧的创建</h3>
+<ul>
+<li>接下去，我们正式开始分析函数栈帧究竟是如何创建的</li>
+<li>去掉符号名，方便看内存</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e6d1baef7f89387466a4a9bd30646a94657623f8c1c87b3b478170e48a55f58e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66303265323138386533316134353930616433363162666234663638623866632e706e67"><img src="https://camo.githubusercontent.com/e6d1baef7f89387466a4a9bd30646a94657623f8c1c87b3b478170e48a55f58e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66303265323138386533316134353930616433363162666234663638623866632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/f02e2188e31a4590ad361bfb4f68b8fc.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>从上图看到已经进入到main函数了</li>
+<li>main函数是由invoke_main这个函数来进行调用的，所以我们先画出它的函数栈帧</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b36b2a4040333b9fb891cba65bfc74121f13d31374d9ec7bde9dc1e931635d4c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66613031373933366162393134346139386130393332316431646266613434662e706e67"><img src="https://camo.githubusercontent.com/b36b2a4040333b9fb891cba65bfc74121f13d31374d9ec7bde9dc1e931635d4c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66613031373933366162393134346139386130393332316431646266613434662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/fa017936ab9144a98a09321d1dbfa44f.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>首先看到左边的两个寄存器【esp】和【ebp】，分别用来维护栈顶和栈顶。</li>
+<li>对于栈来说是从【高地址】向【低地址】使用的。</li>
+</ul>
+<hr>
+<ul>
+<li>好，接下去的话就要执行第一条指令。将栈中push一个ebp，也就是<strong>将ebp中的值进行一个压栈的操作，此时的ebp中存放的是invoke_main函数栈帧的ebp</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">00EE18D0</span>  <span class="pl-smi">push</span>        <span class="pl-s1">ebp</span></pre></div>
+<ul>
+<li>
+<p>随着<strong>push</strong>入栈的操作，维护栈顶的<strong>esp</strong>就要往上<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/207548f2aea62323c72cec0a71a8e4760dacef1bbda746c0b6d73155ce79efac/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61366333613231313038623134313136393532666531326531646138653338302e706e67"><img src="https://camo.githubusercontent.com/207548f2aea62323c72cec0a71a8e4760dacef1bbda746c0b6d73155ce79efac/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61366333613231313038623134313136393532666531326531646138653338302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/a6c3a21108b14116952fe12e1da8e380.png" style="max-width: 100%;"></a></p>
+</li>
+<li>
+<p>然后我们看寄存器的变化</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/243164d31792914ba1e1300f4fba691d5a4f5241ca9d54c0bc110138a8ee8718/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62386635386662313939663334666537616430326362303433386532306564382e706e67"><img src="https://camo.githubusercontent.com/243164d31792914ba1e1300f4fba691d5a4f5241ca9d54c0bc110138a8ee8718/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62386635386662313939663334666537616430326362303433386532306564382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/b8f58fb199f34fe7ad02cb0438e20ed8.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们再继续执行一下push这句指令，你就会发现【esp】中所存放的地址变小了，原来存的是【ebp】中的值，只是这个存放的形式是倒着存放的，是因为有大小端存储的问题</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5045ac015baa06806701ea7228a84f91c6ea5fb74ff0f5d882fa561aaa47fa79/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39653633356530333432666334363465623736326137396534343637653931392e706e67"><img src="https://camo.githubusercontent.com/5045ac015baa06806701ea7228a84f91c6ea5fb74ff0f5d882fa561aaa47fa79/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39653633356530333432666334363465623736326137396534343637653931392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/9e635e0342fc464eb762a79e4467e919.png" style="max-width: 100%;"></a></p>
+<hr>
+<ul>
+<li>接下来第二条，【mov】，我们在上面有讲到过是一个数据转移指令，这条指令的含义就是<strong>把esp的值存放到ebp中去</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">00EE18D1</span>  <span class="pl-smi">mov</span>         <span class="pl-s1">ebp</span>,<span class="pl-s1">esp</span></pre></div>
+<ul>
+<li>此时<strong>相当于产生了main函数的【ebp】，这个值就是invoke_main函数栈帧的【esp】</strong>，从这里开始就要开始维护main函数的函数栈帧了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e4d4c457cae0064efcccb25df59e04dbd20cb330da502ae2cb02791560139d86/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38633534323839656163336434653439393638646330366131353163656361372e706e67"><img src="https://camo.githubusercontent.com/e4d4c457cae0064efcccb25df59e04dbd20cb330da502ae2cb02791560139d86/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38633534323839656163336434653439393638646330366131353163656361372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/8c54289eac3d4e49968dc06a151ceca7.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>通过VS再来看一下，【ebp】中就会存放【esp】的地址了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1d792a91c70a253d0a8599e0a0a2667177de5074764e9b3a8cc178e308af671e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33666335386637633539356234383366396439323939623161666234306465632e706e67"><img src="https://camo.githubusercontent.com/1d792a91c70a253d0a8599e0a0a2667177de5074764e9b3a8cc178e308af671e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33666335386637633539356234383366396439323939623161666234306465632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/3fc58f7c595b483f9d9299b1afb40dec.png" style="max-width: 100%;"></a><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/aaddf21e6ae23c47fad66f572e24ef61db9f689dd629aee181898e59bf8d73ce/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38303866326538313730343534666562623035613566373561353639353663352e706e67"><img src="https://camo.githubusercontent.com/aaddf21e6ae23c47fad66f572e24ef61db9f689dd629aee181898e59bf8d73ce/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38303866326538313730343534666562623035613566373561353639353663352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/808f2e8170454febb05a5f75a56956c5.png" style="max-width: 100%;"></a></p>
+<hr>
+<p>第三条指令</p>
+<ul>
+<li>接下来第三条，sub是一条减法命令，那意思就是<strong>让esp中的地址减去一个16进制数字【0xe4】,产生新的esp，此时的esp是main函数栈帧的esp</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">00EE18D3</span>  <span class="pl-s1">sub</span>         <span class="pl-s1">esp</span>,<span class="pl-c1">0E4</span><span class="pl-s1">h</span></pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/af285c74000d16916a43ff37eca9bdcc206b7fa04a8ca8aeda8b68164cd7cd3a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62386265633764646436396334396433396434366564383563376339623039622e706e67"><img src="https://camo.githubusercontent.com/af285c74000d16916a43ff37eca9bdcc206b7fa04a8ca8aeda8b68164cd7cd3a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62386265633764646436396334396433396434366564383563376339623039622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/b8bec7ddd69c49d39d46ed85c7c9b09b.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>此时结合上一条指令的ebp和当前的esp，<strong>ebp和esp之间维护了一个块栈空间</strong>，这块栈空间就是为<strong>main函数</strong>开辟的，就是main函数的栈帧空间，这一段空间中将存储<strong>main函数中的局部变量，临时数据以及调试信息</strong>等</p>
+</li>
+<li>
+<p>通过图，此时你也可以认为【esp】指向了低地址的一块空间<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c5a2aac2ef803730647ff452ca4a10bc9abe1a98c61477e0f5c9081f6c3306f9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63356237653131303263643734353466393639393764393765356439616332312e706e67"><img src="https://camo.githubusercontent.com/c5a2aac2ef803730647ff452ca4a10bc9abe1a98c61477e0f5c9081f6c3306f9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63356237653131303263643734353466393639393764393765356439616332312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/c5b7e1102cd7454f96997d97e5d9ac21.png" style="max-width: 100%;"></a></p>
+</li>
+<li>
+<p>来看一下寄存器中存放的内存变化</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/fb8eddbec9a0a3da7f348ce9a6d2a46da3855905828da191f3c199cc2fd169da/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66373166366530643463653034633134613132303663616165333665373264362e706e67"><img src="https://camo.githubusercontent.com/fb8eddbec9a0a3da7f348ce9a6d2a46da3855905828da191f3c199cc2fd169da/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66373166366530643463653034633134613132303663616165333665373264362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/f71f6e0d4ce04c14a1206caae36e72d6.png" style="max-width: 100%;"></a><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6473d351828d379fd81a1c4bd5303f68aad2b2cf834c37922d0464d6014a10c8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38373236383838633865353634346661613466623332343733303738646530342e706e67"><img src="https://camo.githubusercontent.com/6473d351828d379fd81a1c4bd5303f68aad2b2cf834c37922d0464d6014a10c8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38373236383838633865353634346661613466623332343733303738646530342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/8726888c8e5644faa4fb32473078de04.png" style="max-width: 100%;"></a></p>
+<hr>
+<p>第四、五、六条指令</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">00EE18D9</span>  <span class="pl-smi">push</span>        <span class="pl-s1">ebx</span>   <span class="pl-c">//将寄存器ebx的值压栈，esp-4</span>
+<span class="pl-c1">00EE18DA</span>  <span class="pl-s1">push</span>        <span class="pl-s1">esi</span>   <span class="pl-c">//将寄存器esi的值压栈，esp-4</span>
+<span class="pl-c1">00EE18DB</span>  <span class="pl-smi">push</span>        <span class="pl-s1">edi</span>   <span class="pl-c">//将寄存器edi的值压栈，esp-4</span></pre></div>
+<ul>
+<li>上面3条指令<strong>保存了3个寄存器的值</strong>在栈区，这3个寄存器的在函数随后执行中可能会被修改，所以先保存寄存器原来的值，<strong>以便在退出函数时恢复</strong></li>
+<li>那随着寄存器的入栈，维护栈顶的寄存器也将发生变化</li>
+<li>此时esp也随着压栈而变化</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e212d42accfb67617435f103d2168f18deddfc7f053d38575a964604ae4c1636/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30393436383231616638343534363065616336316336656237306165636266352e706e67"><img src="https://camo.githubusercontent.com/e212d42accfb67617435f103d2168f18deddfc7f053d38575a964604ae4c1636/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30393436383231616638343534363065616336316336656237306165636266352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/0946821af845460eac61c6eb70aecbf5.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>到VS里来看一下三次的变化：</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/23298c1ab0ccac4ed7ac9cad2f4b79803b6a255166c20bdefa5ff2c9a66e3a8a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32623765313734303930366634643763383530386436353436326535326465622e706e67"><img src="https://camo.githubusercontent.com/23298c1ab0ccac4ed7ac9cad2f4b79803b6a255166c20bdefa5ff2c9a66e3a8a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32623765313734303930366634643763383530386436353436326535326465622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/2b7e1740906f4d7c8508d65462e52deb.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/707c917e84b1bc43a76cf4112304f4f298f9d75927aa41bad92145c09dd94450/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63323062393837303532663734376635616435376462353635346261633966372e706e67"><img src="https://camo.githubusercontent.com/707c917e84b1bc43a76cf4112304f4f298f9d75927aa41bad92145c09dd94450/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63323062393837303532663734376635616435376462353635346261633966372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/c20b987052f747f5ad57db5654bac9f7.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/00edea621c004bc52616aff4a4a13948f9af3e922e3ec9646a8bae0f5eef2a62/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33336137356438393532303434613136393861366238616264313730653266632e706e67"><img src="https://camo.githubusercontent.com/00edea621c004bc52616aff4a4a13948f9af3e922e3ec9646a8bae0f5eef2a62/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33336137356438393532303434613136393861366238616264313730653266632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/33a75d8952044a1698a6b8abd170e2fc.png" style="max-width: 100%;"></a></p>
+<hr>
+<p>第七、八、九、十条指令</p>
+<ul>
+<li>下面的代码是在初始化main函数的栈帧空间，【非常重要】</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">00EE18DC</span>  <span class="pl-smi">lea</span>         <span class="pl-s1">edi</span>,[<span class="pl-s1">ebp</span><span class="pl-c1">-</span><span class="pl-c1">24</span><span class="pl-s1">h</span>]   
+<span class="pl-c1">00EE18DF</span>  <span class="pl-s1">mov</span>         <span class="pl-s1">ecx</span>,<span class="pl-c1">9</span>  
+<span class="pl-c1">00EE18E4</span>  <span class="pl-s1">mov</span>         <span class="pl-s1">eax</span>,<span class="pl-c1">0</span><span class="pl-s1">CCCCCCCCh</span>  
+<span class="pl-c1">00EE18E9</span>  <span class="pl-s1">rep</span> <span class="pl-s1">stos</span>    <span class="pl-s1">dword</span> <span class="pl-s1">ptr</span> <span class="pl-s1">es</span>:[<span class="pl-s1">edi</span>] </pre></div>
+<p>上面的这段代码最后4句，等价于下面的伪代码：</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-s1">edi</span> <span class="pl-c1">=</span> <span class="pl-s1">ebp</span><span class="pl-c1">-</span><span class="pl-c1">0x24</span>;
+<span class="pl-s1">ecx</span> <span class="pl-c1">=</span> <span class="pl-c1">9</span>;
+<span class="pl-s1">eax</span> <span class="pl-c1">=</span> <span class="pl-c1">0xCCCCCCCC</span>;
+<span class="pl-k">for</span>(; <span class="pl-s1">ecx</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-c1">--</span><span class="pl-s1">ecx</span>,<span class="pl-s1">edi</span><span class="pl-c1">+=</span><span class="pl-c1">4</span>)
+{
+	<span class="pl-c1">*</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-s1">edi</span> <span class="pl-c1">=</span> <span class="pl-s1">eax</span>;
+}</pre></div>
+<ul>
+<li>首先要来看的就是【lea】就是我们在上面讲到过的【load effective address】<strong>加载有效地址的意思</strong>，那也就是<strong>从【ebp】这个维护栈顶的寄存器减去24h的位置，加载到寄存器【edi】里面去</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7aa83dcc5076af011ed4268cbea0eb095f1a326fbff0a47da1971eae8116b4af/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35343539346230326530663834366437623439616363303431393734653635312e706e67"><img src="https://camo.githubusercontent.com/7aa83dcc5076af011ed4268cbea0eb095f1a326fbff0a47da1971eae8116b4af/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35343539346230326530663834366437623439616363303431393734653635312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/54594b02e0f846d7b49acc041974e651.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>然后再将9放到【ecx】中去；以及将【0CCCCCCCCh】这块地址存到【eax】中去；</p>
+</li>
+<li>
+<p>从【edi】所存放的这块地址的开始，每次初始化4个字节的数据，<strong>dword值就是4个字节的大小</strong></p>
+</li>
+<li>
+<p>这4句话的操作就是<strong>从edi开始，每次初始化4个字节的数据，总共初始化ecx次，初始化的内容为【0xCCCCCCCC】，总共初始化到ebp的地址结束</strong></p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/234ed5df0f6e7eec09f679a7b5ac4290ce3257a592e4467df3c9ac5e368d9dd9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66646134366461366631303234396630623439613639666636323532666235622e706e67"><img src="https://camo.githubusercontent.com/234ed5df0f6e7eec09f679a7b5ac4290ce3257a592e4467df3c9ac5e368d9dd9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66646134366461366631303234396630623439613639666636323532666235622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/fda46da6f10249f0b49a69ff6252fb5b.png" style="max-width: 100%;"></a><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4dd45a04fee7fd9d6a4da77ade71b7c4a62db1bb9e8f22dbaa553f192e481a80/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37666366613232646637363334366161616266306531333638366564636237652e706e67"><img src="https://camo.githubusercontent.com/4dd45a04fee7fd9d6a4da77ade71b7c4a62db1bb9e8f22dbaa553f192e481a80/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37666366613232646637363334366161616266306531333638366564636237652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/7fcfa22df76346aaabf0e13686edcb7e.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>到这里，<strong>main函数</strong>才刚刚被初始化完成</li>
+<li>那么里面的<strong>cccccccc</strong>是初始化的什么内容呢?--&gt;我们来看一下</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-s1">arr</span>[<span class="pl-c1">20</span>];
+<span class="pl-en">printf</span>(<span class="pl-s">"%s"</span>,<span class="pl-s1">arr</span>);</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6db5fd1f898b52c46844597a331a4635600a48b8fa3b2fb5c9e016f1d655c45b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66363931383365383862666634353238383637626163616232633761643536662e706e67"><img src="https://camo.githubusercontent.com/6db5fd1f898b52c46844597a331a4635600a48b8fa3b2fb5c9e016f1d655c45b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66363931383365383862666634353238383637626163616232633761643536662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/f69183e88bff4528867bacab2c7ad56f.png" style="max-width: 100%;"></a></p>
+<ul>
+<li><strong>可以看到上面的程序输出“烫烫烫烫烫烫烫烫烫烫”这一串，是因为main函数调用时，在栈区开辟的空间的其中每一个字节都被初始化为0xCC，上图中arr数组是一个未初始化的数组，恰好在这块空间上创建的，0xCCCC（两个连续排列的0xCC）的汉字编码就是“烫”，所以0xCCCC被当作文本就是“烫”，烫烫烫就这么来的</strong></li>
+</ul>
+<hr>
+<p>第十一、十二、十三条指令</p>
+<ul>
+<li>我们开始初始化三个变量，每条指令对应上一条代码</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate">	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+<span class="pl-c1">00EE18F5</span>  <span class="pl-s1">mov</span>         <span class="pl-smi">dword</span> <span class="pl-s1">ptr</span> [<span class="pl-s1">ebp</span><span class="pl-c1">-</span><span class="pl-c1">8</span>],<span class="pl-c1">0</span><span class="pl-s1">Ah</span>  
+	<span class="pl-s1">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">20</span>;
+<span class="pl-c1">00EE18FC</span>  <span class="pl-s1">mov</span>         <span class="pl-smi">dword</span> <span class="pl-s1">ptr</span> [<span class="pl-s1">ebp</span><span class="pl-c1">-</span><span class="pl-c1">14</span><span class="pl-s1">h</span>],<span class="pl-c1">14</span><span class="pl-s1">h</span>  
+	<span class="pl-s1">int</span> <span class="pl-s1">c</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+<span class="pl-c1">00EE1903</span>  <span class="pl-s1">mov</span>         <span class="pl-smi">dword</span> <span class="pl-s1">ptr</span> [<span class="pl-s1">ebp</span><span class="pl-c1">-</span><span class="pl-c1">20</span><span class="pl-s1">h</span>],<span class="pl-c1">0</span></pre></div>
+<ul>
+<li>
+<p>其中【mov】是数据转移指令，也就是是将10这个值【ebp - 8】这块地址上</p>
+</li>
+<li>
+<p><strong>为什么说0Ah就是10呢？因为0Ah是10的十六进制表示形式，在十六进制中A值得就是10</strong></p>
+</li>
+<li>
+<p>对于<strong>14h</strong>的话就是16 * 1 + 4 = 20，那就是将<strong>20</strong>这个值放到【ebp - 14】这块地址上去</p>
+</li>
+<li>
+<p>最后一句就是将0这个值放到【ebp - 20】这块地址上去</p>
+</li>
+<li>
+<p>对于为什么-8，-14，-20呢，这是取决于编译器本身的，我是用的是VS2022，可能你到其他编译器上就不一样了</p>
+</li>
+<li>
+<p>这就可以得出一个结论：<strong>我们所定义的变量在栈内存中并不是呈现一个连续存放的，可能是分散的</strong>，</p>
+</li>
+<li>
+<p>接下去继续来看这三次的存放值的变化~~</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/54c2f425dc6b61530db14bb31e7aebc11c416743abcbea734efc9062d41b65b3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39383439666361636330363634323538396164356136616332366231323436652e706e67"><img src="https://camo.githubusercontent.com/54c2f425dc6b61530db14bb31e7aebc11c416743abcbea734efc9062d41b65b3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39383439666361636330363634323538396164356136616332366231323436652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/9849fcacc06642589ad5a6ac26b1246e.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/577a0fb1d0027b30336064f1bda237acafd329610cb6d83ed9c9dfbfd57aaaf8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31613962636135666265646534636633396337333734353465623439373863302e706e67"><img src="https://camo.githubusercontent.com/577a0fb1d0027b30336064f1bda237acafd329610cb6d83ed9c9dfbfd57aaaf8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31613962636135666265646534636633396337333734353465623439373863302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/1a9bca5fbede4cf39c737454eb4978c0.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/43380feec85b1d019a53bc7da3f02586112f87586a910356fe88e568737b23b6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34616265396364353032656134326261386537623634383466316662633865632e706e67"><img src="https://camo.githubusercontent.com/43380feec85b1d019a53bc7da3f02586112f87586a910356fe88e568737b23b6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34616265396364353032656134326261386537623634383466316662633865632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/4abe9cd502ea42ba8e7b6484f1fbc8ec.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们再来看图，也将这些画出来。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/018c1819d0398c752102df0f94704c25c63f950b765dfe42a2f80ca60e873b0f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65623963353435653366323334663631623634313236303935346432333031652e706e67"><img src="https://camo.githubusercontent.com/018c1819d0398c752102df0f94704c25c63f950b765dfe42a2f80ca60e873b0f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65623963353435653366323334663631623634313236303935346432333031652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/eb9c545e3f234f61b641260954d2301e.png" style="max-width: 100%;"></a></p>
+<hr>
+<p>第十四、十五、十六、十七条指令</p>
+<ul>
+<li>此时main函数中的变量创建好了，那就要调用Add函数了</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">00EE190A</span>  <span class="pl-smi">mov</span>         <span class="pl-s1">eax</span>,<span class="pl-s1">dword</span> <span class="pl-s1">ptr</span> [<span class="pl-s1">ebp</span><span class="pl-c1">-</span><span class="pl-c1">14</span><span class="pl-s1">h</span>]  
+<span class="pl-c1">00EE190D</span>  <span class="pl-s1">push</span>        <span class="pl-s1">eax</span>  
+<span class="pl-c1">00EE190E</span>  <span class="pl-smi">mov</span>         <span class="pl-s1">ecx</span>,<span class="pl-s1">dword</span> <span class="pl-s1">ptr</span> [<span class="pl-s1">ebp</span><span class="pl-c1">-</span><span class="pl-c1">8</span>]  
+<span class="pl-c1">00EE1911</span>  <span class="pl-s1">push</span>        <span class="pl-s1">ecx</span></pre></div>
+<ul>
+<li>来看第一条，将【ebp-14h】这块地址的内容放到寄存器【eax】中去，那这个时候你就会想到这个【ebp-14】是刚才放数值<strong>20</strong>，然后压栈。</li>
+<li>第三条就是将【ebp-8】中的内容放到寄存器【ecx】中去，它【ebp-8】的地方存放的就是我们刚才放<strong>10</strong>的地方，然后压栈。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6414b544affb645570624589fcd060f7ffab68761c0c8eca1bf66d6cc18bbae3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62346462666635626438613534386137613962363138613534353034343462642e706e67"><img src="https://camo.githubusercontent.com/6414b544affb645570624589fcd060f7ffab68761c0c8eca1bf66d6cc18bbae3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62346462666635626438613534386137613962363138613534353034343462642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/b4dbff5bd8a548a7a9b618a5450444bd.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这样就可以看出，这两个变量相当于实参的一份临时拷贝，这里就回到我们前面学的函数的形参就是实参的一份临时拷贝</li>
+</ul>
+<p><strong>再来到VS中看看</strong></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/16b123fa18e2eae130881ebbf4e9b289e5504704bfbf703bf3ca665ebfe63f12/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62353966653661376261626434616134393733626434346139303532313862622e706e67"><img src="https://camo.githubusercontent.com/16b123fa18e2eae130881ebbf4e9b289e5504704bfbf703bf3ca665ebfe63f12/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62353966653661376261626434616134393733626434346139303532313862622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/b59fe6a7babd4aa4973bd44a905218bb.png" style="max-width: 100%;"></a></p>
+<p>第十八条指令</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">00EE1912</span>  <span class="pl-s1">call</span>        <span class="pl-c1">00EE10B9</span></pre></div>
+<ul>
+<li>对于这条【call】指令而言，比较特殊，它有两个作用</li>
+</ul>
+<blockquote>
+<p><strong>①压入返回地址</strong><br>
+<strong>②转入目标函数</strong></p>
+</blockquote>
+<ul>
+<li>这里就是要压的是 <strong>call指令的下一条地址</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">00EE1917</span>  <span class="pl-c">//这条就是要压入的地址</span></pre></div>
+<ul>
+<li>然后我们来在vs中看一下，当运行到图中的那条语句的时候就要按F11，不能按F10，和调试一个道理</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1c895d7a78c29b6c8e88686f3bd274205ec0fe6f119d5e3bfef5ab8508707061/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63313566336631656439663834366634613931353266346133623131383462392e706e67"><img src="https://camo.githubusercontent.com/1c895d7a78c29b6c8e88686f3bd274205ec0fe6f119d5e3bfef5ab8508707061/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63313566336631656439663834366634613931353266346133623131383462392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/c15f3f1ed9f846f4a9152f4a3b1184b9.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>把这块地址压入栈中<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6c8293fd91790d5a591cb4b6c27e023092fa350f9d876001d920d521f2a17622/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39663564366432313430306434363935626465636533613065383934356166382e706e67"><img src="https://camo.githubusercontent.com/6c8293fd91790d5a591cb4b6c27e023092fa350f9d876001d920d521f2a17622/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39663564366432313430306434363935626465636533613065383934356166382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/9f5d6d21400d4695bdece3a0e8945af8.png" style="max-width: 100%;"></a></li>
+</ul>
+<hr>
+<p>第十九、二十、二一条指令</p>
+<ul>
+<li>到19条指令开始，就进入Add函数了，这里的函数前面和在main函数中的前面也是非常的相似</li>
+<li>所以这个就是在开辟栈帧</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">00EE1790</span>  <span class="pl-smi">push</span>        <span class="pl-s1">ebp</span>  
+<span class="pl-c1">00EE1791</span>  <span class="pl-s1">mov</span>         <span class="pl-s1">ebp</span>,<span class="pl-s1">esp</span>  
+<span class="pl-c1">00EE1793</span>  <span class="pl-s1">sub</span>         <span class="pl-s1">esp</span>,<span class="pl-c1">0</span><span class="pl-s1">CCh</span>  
+<span class="pl-c1">00EE1799</span>  <span class="pl-s1">push</span>        <span class="pl-s1">ebx</span>  
+<span class="pl-c1">00EE179A</span>  <span class="pl-s1">push</span>        <span class="pl-s1">esi</span>  
+<span class="pl-c1">00EE179B</span>  <span class="pl-s1">push</span>        <span class="pl-s1">edi</span></pre></div>
+<ul>
+<li>首先来看第一条指令。也就是将之前的【ebp】栈底寄存器的值压入到栈顶中</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">00EE1790</span>  <span class="pl-smi">push</span>        <span class="pl-s1">ebp</span>  </pre></div>
+<ul>
+<li>对于此处的【ebp】,自从它在维护main函数的栈底后就没有再动过来，所以这里push上来的就是main函数的【ebp】</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e474d85750830a9b57f1ecbcfd3be17f46dc195d13b14078027a6f815bec50a4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33313734343535623863623434363832396234346439323739643433366161392e706e67"><img src="https://camo.githubusercontent.com/e474d85750830a9b57f1ecbcfd3be17f46dc195d13b14078027a6f815bec50a4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33313734343535623863623434363832396234346439323739643433366161392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/3174455b8cb446829b44d9279d436aa9.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">00EE1791</span>  <span class="pl-smi">mov</span>         <span class="pl-s1">ebp</span>,<span class="pl-s1">esp</span></pre></div>
+<ul>
+<li>接着再来看第二条，也就是将main函数的【esp】重新赋给【ebp】，这里要注意了，不要搞混，此时的【ebp】应该算是在维护Add函数的栈底了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9519112d12f1dfcc6826c80f6059586aae5df17d0f0597dadc2ed16b8543f8df/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39366137613431396438313834636430396664393532623731336435666531332e706e67"><img src="https://camo.githubusercontent.com/9519112d12f1dfcc6826c80f6059586aae5df17d0f0597dadc2ed16b8543f8df/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39366137613431396438313834636430396664393532623731336435666531332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/96a7a419d8184cd09fd952b713d5fe13.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>于是，栈就变成了这样：</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7f257cf2f4fa16187c4423bb63ff63d9c5871f6836cd24f8e2b0eb6ac464fa16/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39663063376664646663363834623431393966393862633039663664626536382e706e67"><img src="https://camo.githubusercontent.com/7f257cf2f4fa16187c4423bb63ff63d9c5871f6836cd24f8e2b0eb6ac464fa16/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39663063376664646663363834623431393966393862633039663664626536382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/9f0c7fddfc684b4199f98bc09f6dbe68.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">00EE1793</span>  <span class="pl-s1">sub</span>         <span class="pl-s1">esp</span>,<span class="pl-c1">0</span><span class="pl-s1">CCh</span></pre></div>
+<ul>
+<li>接着第三条，【sub】命令使得【esp】存放的地址块减去一个CC的大小，继续结合上面那条指令，此时Add函数的栈顶和栈底都被找到了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b6c29e6c2e6b8d0c38ae1e84f5873cce9777770d45d6872b2b79deca2360c2d4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37353765363330393761303534373230613933336662363030363437333731372e706e67"><img src="https://camo.githubusercontent.com/b6c29e6c2e6b8d0c38ae1e84f5873cce9777770d45d6872b2b79deca2360c2d4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37353765363330393761303534373230613933336662363030363437333731372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/757e63097a054720a933fb6006473717.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>此时就相当于是在做一个迭代的操作</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c164152eaede8063b3ca8b4be2c8f44cb7b3e132f5bce24f2251c4ac57db0495/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32393934353435383832623034663266623939333764343839333864363339622e706e67"><img src="https://camo.githubusercontent.com/c164152eaede8063b3ca8b4be2c8f44cb7b3e132f5bce24f2251c4ac57db0495/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32393934353435383832623034663266623939333764343839333864363339622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/2994545882b04f2fb9937d48938d639b.png" style="max-width: 100%;"></a></p>
+<hr>
+<p>第二二、二三、二四条指令</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">00EE1799</span>  <span class="pl-smi">push</span>        <span class="pl-s1">ebx</span>  
+<span class="pl-c1">00EE179A</span>  <span class="pl-s1">push</span>        <span class="pl-s1">esi</span>  
+<span class="pl-c1">00EE179B</span>  <span class="pl-smi">push</span>        <span class="pl-s1">edi</span></pre></div>
+<ul>
+<li>接下去还是一样的三条压栈操作</li>
+<li>来到VS中观看【esp】的变化</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6a55ee0e9045f2ca7c278bdd09abde62160b91e29cb54c9ce1f8d8d3d965e397/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31663062356561343361363934333238626335353766313333633539383361612e706e67"><img src="https://camo.githubusercontent.com/6a55ee0e9045f2ca7c278bdd09abde62160b91e29cb54c9ce1f8d8d3d965e397/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31663062356561343361363934333238626335353766313333633539383361612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/1f0b5ea43a694328bc557f133c5983aa.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>接着将这三个寄存器压入栈</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/8e15d77e55ed6e5d3cf5bcf73331f99169e26fbbb5093dcdb489d7009b5ad74e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61303536363239343835633334383137613364313439633261633562646661382e706e67"><img src="https://camo.githubusercontent.com/8e15d77e55ed6e5d3cf5bcf73331f99169e26fbbb5093dcdb489d7009b5ad74e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61303536363239343835633334383137613364313439633261633562646661382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/a056629485c34817a3d149c2ac5bdfa8.png" style="max-width: 100%;"></a></p>
+<p>第二五、二六、二七、二八条指令</p>
+<ul>
+<li>对于这四条指令和上面main函数的创建过程类似，便不做不过分析</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">00EE179C</span>  <span class="pl-smi">lea</span>         <span class="pl-s1">edi</span>,[<span class="pl-s1">ebp</span><span class="pl-c1">-</span><span class="pl-c1">0</span><span class="pl-s1">Ch</span>]  
+<span class="pl-c1">00EE179F</span>  <span class="pl-s1">mov</span>         <span class="pl-s1">ecx</span>,<span class="pl-c1">3</span>  
+<span class="pl-c1">00EE17A4</span>  <span class="pl-s1">mov</span>         <span class="pl-s1">eax</span>,<span class="pl-c1">0</span><span class="pl-s1">CCCCCCCCh</span>  
+<span class="pl-c1">00EE17A9</span>  <span class="pl-s1">rep</span> <span class="pl-s1">stos</span>    <span class="pl-s1">dword</span> <span class="pl-s1">ptr</span> <span class="pl-s1">es</span>:[<span class="pl-s1">edi</span>]</pre></div>
+<ul>
+<li>继续到VS中观看的变化</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e6d1fdfbd831215b4bf0d5818a617efe8e561893a75dd79a0fd3fe89fc8ffb45/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64633362653163393532373134306533383131396231633835656431303035332e706e67"><img src="https://camo.githubusercontent.com/e6d1fdfbd831215b4bf0d5818a617efe8e561893a75dd79a0fd3fe89fc8ffb45/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64633362653163393532373134306533383131396231633835656431303035332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/dc3be1c9527140e38119b1c85ed10053.png" style="max-width: 100%;"></a></p>
+<p>第二十九条指令</p>
+<ul>
+<li>接下去我们进入第二十九条指令，也就是对Add函数中存放计算总和的变量z进行初始化操作。</li>
+<li>【mov】做数据转移，将0放到【ebp-8】这块地址上去</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate">	<span class="pl-smi">int</span> <span class="pl-s1">z</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+<span class="pl-c1">00EE17B5</span>  <span class="pl-s1">mov</span>         <span class="pl-smi">dword</span> <span class="pl-s1">ptr</span> [<span class="pl-s1">ebp</span><span class="pl-c1">-</span><span class="pl-c1">8</span>],<span class="pl-c1">0</span> </pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2eb843b48e3aedad2a60c306e8e09f0b5dbbf4fa5ff4c9ce2d04736720444cca/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64633464333533373663613634343162613465356639363439336235643432612e706e67"><img src="https://camo.githubusercontent.com/2eb843b48e3aedad2a60c306e8e09f0b5dbbf4fa5ff4c9ce2d04736720444cca/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64633464333533373663613634343162613465356639363439336235643432612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/dc4d35376ca6441ba4e5f96493b5d42a.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>然后我们在Add的栈帧中初始化这个变量z<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/90a9a012c9f8a56a4881c331d3a3f84609471e91769ef53f6eea503bfd722f86/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37356631303465366165323434343734623937663861653631336464373730352e706e67"><img src="https://camo.githubusercontent.com/90a9a012c9f8a56a4881c331d3a3f84609471e91769ef53f6eea503bfd722f86/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37356631303465366165323434343734623937663861653631336464373730352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/75f104e6ae244474b97f8ae613dd7705.png" style="max-width: 100%;"></a></li>
+</ul>
+<p>第三十、三十一、三十二条指令</p>
+<ul>
+<li>接下去的三条指令就是对两个形参的值进行一个相加</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate">	<span class="pl-s1">z</span> <span class="pl-c1">=</span> <span class="pl-s1">x</span> <span class="pl-c1">+</span> <span class="pl-s1">y</span>;
+<span class="pl-c1">00EE17BC</span>  <span class="pl-smi">mov</span>         <span class="pl-s1">eax</span>,<span class="pl-s1">dword</span> <span class="pl-s1">ptr</span> [<span class="pl-s1">ebp</span><span class="pl-c1">+</span><span class="pl-c1">8</span>]  
+<span class="pl-c1">00EE17BF</span>  <span class="pl-s1">add</span>         <span class="pl-s1">eax</span>,<span class="pl-s1">dword</span> <span class="pl-s1">ptr</span> [<span class="pl-s1">ebp</span><span class="pl-c1">+</span><span class="pl-c1">0</span><span class="pl-s1">Ch</span>]  
+<span class="pl-c1">00EE17C2</span>  <span class="pl-s1">mov</span>         <span class="pl-s1">dword</span> <span class="pl-s1">ptr</span> [<span class="pl-s1">ebp</span><span class="pl-c1">-</span><span class="pl-c1">8</span>],<span class="pl-s1">eax</span></pre></div>
+<ul>
+<li>那么上面不是只初始化了一个变量z吗，变量x和变量y在哪里呢？</li>
+<li>我们之前有做过了一步操作，也就是将这两个实参的拷贝进行了一个压栈操作，那时就说了对于这个就是形参</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">00EE190A</span>  <span class="pl-smi">mov</span>         <span class="pl-s1">eax</span>,<span class="pl-s1">dword</span> <span class="pl-s1">ptr</span> [<span class="pl-s1">ebp</span><span class="pl-c1">-</span><span class="pl-c1">14</span><span class="pl-s1">h</span>]  
+<span class="pl-c1">00EE190D</span>  <span class="pl-s1">push</span>        <span class="pl-s1">eax</span>  
+<span class="pl-c1">00EE190E</span>  <span class="pl-smi">mov</span>         <span class="pl-s1">ecx</span>,<span class="pl-s1">dword</span> <span class="pl-s1">ptr</span> [<span class="pl-s1">ebp</span><span class="pl-c1">-</span><span class="pl-c1">8</span>]  
+<span class="pl-c1">00EE1911</span>  <span class="pl-s1">push</span>        <span class="pl-s1">ecx</span></pre></div>
+<ul>
+<li>此时我们就要通过这三句指令去找回这两个形参的值，关键的就是【ebp+8】和【ebp+0Ch】。因为我们在入栈的时候【ebp】寄存器存放的地址都是逐渐变小的，因为 <strong>栈是从高地址往低地址生长的</strong>，所以我们要去找回之前压入的内容，就要把地址加回去</li>
+<li>如下图所示</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2792b17e9b87220f6e662fb5a7f9035457ff88c143b335b6bc17c0589d41b9d0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65633563663464303133633634306565393238393432633934643665393664612e706e67"><img src="https://camo.githubusercontent.com/2792b17e9b87220f6e662fb5a7f9035457ff88c143b335b6bc17c0589d41b9d0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65633563663464303133633634306565393238393432633934643665393664612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/ec5cf4d013c640ee928942c94d6e96da.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>找到这两个值之后，首先将【10】放到【eax】寄存器中去，然后再将【20】在加到寄存器【eax】原有的值上去，此时【eax】中存放的便是【30】</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e55c5a5864095364c5e3f9de658c75807a892dcf3d28ddac7ebbf71a126ba7ff/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66333263373966636362333634383033613435313137653334326237396236662e706e67"><img src="https://camo.githubusercontent.com/e55c5a5864095364c5e3f9de658c75807a892dcf3d28ddac7ebbf71a126ba7ff/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66333263373966636362333634383033613435313137653334326237396236662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/f32c79fccb364803a45117e342b79b6f.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>注意看寄存器【eax】的变化</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ca9033b565d8ae6a0963d7599e004b61363bcd3396252490c8de6966e97adbd9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64383230353735623063333034633738386461663562313866613538356562662e706e67"><img src="https://camo.githubusercontent.com/ca9033b565d8ae6a0963d7599e004b61363bcd3396252490c8de6966e97adbd9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64383230353735623063333034633738386461663562313866613538356562662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/d820575b0c304c788daf5b18fa585ebf.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这里还可以直接到指令这里来看。直接将鼠标放到【z】上面就可以看到了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/bd5de95a82be86e1ba7ebf153cf9cfab09d0ab557ac89b792fc9cb6413715e0d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33326465316162653834373134333033616530363032623762306437393862632e706e67"><img src="https://camo.githubusercontent.com/bd5de95a82be86e1ba7ebf153cf9cfab09d0ab557ac89b792fc9cb6413715e0d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33326465316162653834373134333033616530363032623762306437393862632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/32de1abe84714303ae0602b7b0d798bc.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>然后再将计算出来存放在【eax】中的值再放回【ebp-8】这块地址上去</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">00EE17C2</span>  <span class="pl-s1">mov</span>         <span class="pl-smi">dword</span> <span class="pl-s1">ptr</span> [<span class="pl-s1">ebp</span><span class="pl-c1">-</span><span class="pl-c1">8</span>],<span class="pl-s1">eax</span></pre></div>
+<ul>
+<li>首先到VS中来看看变化</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/28cc7d3a94a33824b8cca8c8b2618f77424c120302f036589db518cf5b398721/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34323465363166303766376134333565613462343662623231663066633563322e706e67"><img src="https://camo.githubusercontent.com/28cc7d3a94a33824b8cca8c8b2618f77424c120302f036589db518cf5b398721/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34323465363166303766376134333565613462343662623231663066633563322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/424e61f07f7a435ea4b46bb21f0fc5c2.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>然后修改一下之前Add函数栈帧中存放z的内容</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/22171424164050a06959d238e472aae47b997093564e4643c321135c8ccf94dc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35383364333035366231643734386238383937626439346134316431626266312e706e67"><img src="https://camo.githubusercontent.com/22171424164050a06959d238e472aae47b997093564e4643c321135c8ccf94dc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35383364333035366231643734386238383937626439346134316431626266312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/583d3056b1d748b8897bd94a41d1bbf1.png" style="max-width: 100%;"></a></p>
+<p>第三十三条指令</p>
+<ul>
+<li><code class="notranslate">z</code>计算出来了，此时就要执行【return z】这句代码，将z返回给main函数，但是函数栈帧中可不是这么做的</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate">	<span class="pl-k">return</span> <span class="pl-s1">z</span>;
+<span class="pl-c1">00EE17C5</span>  <span class="pl-smi">mov</span>         <span class="pl-s1">eax</span>,<span class="pl-s1">dword</span> <span class="pl-s1">ptr</span> [<span class="pl-s1">ebp</span><span class="pl-c1">-</span><span class="pl-c1">8</span>]</pre></div>
+<ul>
+<li>看上面的指令可以看到，是将【ebp-8】中的内容转存到寄存器【eax】中去</li>
+<li>从【eax】~【ebx】这些寄存器都可以用来存放临时数据，并不是说上一次用过了就不能再用了，这其实和我们在定义一个变量后进行反复使用是一个道理。</li>
+<li>然后在Add函数调用结束后，它所对应的<strong>函数栈帧就会被销毁</strong>，此时被创建出来的临时变量【z】就不复存在了，因为【z】也是存放在Add的函数栈帧中的，<strong>所以这一步的操作其实就是将我们在Add函数中计算出来的值给保存起来，因为寄存器而言程序没有结束的话它是不会被销毁的，我们后面还可以到这个寄存器中去取数据</strong></li>
+</ul>
+<h3>3.3.4 函数栈帧的销毁</h3>
+<blockquote>
+<p>接下去要进行的就是<strong>函数栈帧的销毁</strong>操作</p>
+</blockquote>
+<p>第三十四、三十五、三十六条指令</p>
+<ul>
+<li>接下来就是三条pop的指令，也就是在栈顶弹出对应的值，然后放到对应的寄存器中去</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">00EE17C8</span>  <span class="pl-smi">pop</span>         <span class="pl-s1">edi</span>      <span class="pl-c">//在栈顶弹出一个值，存放到edi中，esp+4</span>
+<span class="pl-c1">00EE17C9</span>  <span class="pl-s1">pop</span>         <span class="pl-s1">esi</span>     <span class="pl-c">//在栈顶弹出一个值，存放到esi中，esp+4</span>
+<span class="pl-c1">00EE17CA</span>  <span class="pl-smi">pop</span>         <span class="pl-s1">ebx</span>     <span class="pl-c">//在栈顶弹出一个值，存放到ebx中，esp+4</span></pre></div>
+<ul>
+<li>我们先到VS中来看看</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b3f028599865aff7b95b2c4775ecbf98c688fa9888268bb524e998e5a2174a6c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33646265623364646637333434396563386432323231646136663936386635662e706e67"><img src="https://camo.githubusercontent.com/b3f028599865aff7b95b2c4775ecbf98c688fa9888268bb524e998e5a2174a6c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33646265623364646637333434396563386432323231646136663936386635662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/3dbeb3ddf73449ec8d2221da6f968f5f.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>通过图示来看一下<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f3059dc2b034933d433facdfcbf2a6857526ac90061c45b2646f5aa48a6969b0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37653730613737313036326134376362393834333930393130343032616232642e706e67"><img src="https://camo.githubusercontent.com/f3059dc2b034933d433facdfcbf2a6857526ac90061c45b2646f5aa48a6969b0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37653730613737313036326134376362393834333930393130343032616232642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/7e70a771062a47cb984390910402ab2d.png" style="max-width: 100%;"></a></li>
+</ul>
+<p>第三十七条指令</p>
+<ul>
+<li>当给Add函数<strong>预</strong>开辟函数栈帧的时候，最后一步是把【esp】中存放的内容给到【ebp】，也就是相当于就是让【ebp】指向和【esp】的同一块空间</li>
+<li>下面这句指令就是将【ebp】中存放的内容给到【esp】，那其实就是让【esp】指向和【ebp】的同一块空间</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">00EE17D8</span>  <span class="pl-smi">mov</span>         <span class="pl-s1">esp</span>,<span class="pl-s1">ebp</span></pre></div>
+<ul>
+<li>通过图示来看一下</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/df4bbda7176be80c824fca1acea5fd33bbc9822ba1e6528511479bdaf2f5ff02/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33643363636231353330393734616565613761613832313662336364633365632e706e67"><img src="https://camo.githubusercontent.com/df4bbda7176be80c824fca1acea5fd33bbc9822ba1e6528511479bdaf2f5ff02/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33643363636231353330393734616565613761613832313662336364633365632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/3d3ccb1530974aeea7aa8216b3cdc3ec.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>到VS中来看一下</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/36108b0166391dea636aa4fb556c72a0e87f339cb92594af81f6b2ce0a682f22/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38386462326162333361343534313562396463373635633634333736646531362e706e67"><img src="https://camo.githubusercontent.com/36108b0166391dea636aa4fb556c72a0e87f339cb92594af81f6b2ce0a682f22/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38386462326162333361343534313562396463373635633634333736646531362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/88db2ab33a45415b9dc765c64376de16.png" style="max-width: 100%;"></a></p>
+<p>第三十八条指令</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">00EE17DA</span>  <span class="pl-smi">pop</span>         <span class="pl-s1">ebp</span></pre></div>
+<ul>
+<li>这句指令很重要，因为此时Add函数的函数栈帧已经被销毁了，此时我们要回到main函数的函数栈帧，那么两个维护栈顶和栈底的寄存器就要发生变化，此时我们要<strong>pop</strong>的【ebp】是之前压栈进来的main函数的ebp</li>
+<li><strong>pop的作用：数据弹出至指定位置</strong>，同时<strong>esp</strong>栈顶寄存器也要发生改变</li>
+<li><strong>pop</strong>了之后【esp】也要发生一个变化</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/51c06711c8b54eb4ba21e7a77124efc851666db1a1f99e465e55da2684560293/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37393739333665633532383134303131623233376333663237636462373264642e706e67"><img src="https://camo.githubusercontent.com/51c06711c8b54eb4ba21e7a77124efc851666db1a1f99e465e55da2684560293/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37393739333665633532383134303131623233376333663237636462373264642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/797936ec52814011b237c3f27cdb72dd.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>到VS中再来看一下变化。此时不要混淆了，栈是从高地址往低地址增长的，所以栈底的地址来的大一些</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3e6f926c27b88fb0228c31c5eb342153ef64e3ece588bd0d62a52814112a2680/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30313837323166663066393034343337383934366332323936393666376262332e706e67"><img src="https://camo.githubusercontent.com/3e6f926c27b88fb0228c31c5eb342153ef64e3ece588bd0d62a52814112a2680/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30313837323166663066393034343337383934366332323936393666376262332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/018721ff0f9044378946c229696f7bb3.png" style="max-width: 100%;"></a></p>
+<p>第三十九条指令</p>
+<ul>
+<li>这里只有一个【ret】，这个指令会从栈顶弹出一个值，那这个时候从上图其实可以看到此时的【esp】栈顶寄存器指向的这块地址，这块地址是<strong>call指令的下一条指令地址</strong>，就是我们在进入Add函数前提前压入的地址</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">00EE17DB</span>  <span class="pl-s1">ret</span></pre></div>
+<ul>
+<li>此时就会<strong>直接跳转到call指令下一条指令的地址处，继续往下执行</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/cac1d1b2dc7b0690de490299ee13a9c825304c45372113502df3c3ac02d0cc7d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61396466356131393665386634313661383664616366633133643833626539322e706e67"><img src="https://camo.githubusercontent.com/cac1d1b2dc7b0690de490299ee13a9c825304c45372113502df3c3ac02d0cc7d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61396466356131393665386634313661383664616366633133643833626539322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/a9df5a196e8f416a86dacfc13d83be92.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>再来看看【esp】的变化</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c8105ed66db37873ffd6ae77449b9aa306db0384898cf0c4e990792f3132c44a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38623233633131623835343534306433616435356339663266356333363230642e706e67"><img src="https://camo.githubusercontent.com/c8105ed66db37873ffd6ae77449b9aa306db0384898cf0c4e990792f3132c44a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38623233633131623835343534306433616435356339663266356333363230642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/8b23c11b854540d3ad55c9f2f5c3620d.png" style="max-width: 100%;"></a></p>
+<p><strong>第四十条指令</strong></p>
+<ul>
+<li>有的同学看到的就是一个【esp】的变化，【add】是加法命令，也就是将【esp】的位置加上一个8，一块内存空间是4,加8的话那此时【esp】是不是就来到了【edi】的位置</li>
+<li><strong>这其实就是在【销毁Add函数的函数形参x，y】，这下你应该明白函数形参是在什么时候销毁的了吧，没错，就是从Add函数回到main函数之后</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">0046185</span><span class="pl-c1">D</span> <span class="pl-c1">83</span> <span class="pl-c1">C4</span> <span class="pl-c1">08</span>      <span class="pl-smi">add</span>      <span class="pl-s1">esp</span>,<span class="pl-c1">8</span></pre></div>
+<ul>
+<li>我们来看看示意图：</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/dbe657e38a57c50e4d6ca93790ad7e5586b60bc22493c26728af2d98f3457c5f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64376363373166333664333834333732393237336332373134656632653463342e706e67"><img src="https://camo.githubusercontent.com/dbe657e38a57c50e4d6ca93790ad7e5586b60bc22493c26728af2d98f3457c5f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64376363373166333664333834333732393237336332373134656632653463342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/d7cc71f36d3843729273c2714ef2e4c4.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>一样，VS也来看看【esp】的变化</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/819fa2e1c3bcab3d91c50c8586c1ecda7b333391732f18e0430015fb4ff6d718/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61333361363432363533313934333437626365366233393331323266363032632e706e67"><img src="https://camo.githubusercontent.com/819fa2e1c3bcab3d91c50c8586c1ecda7b333391732f18e0430015fb4ff6d718/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61333361363432363533313934333437626365366233393331323266363032632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/a33a642653194347bce6b393122f602c.png" style="max-width: 100%;"></a></p>
+<p>第四十一条指令</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c1">00EE191A</span>  <span class="pl-s1">mov</span>         <span class="pl-smi">dword</span> <span class="pl-s1">ptr</span> [<span class="pl-s1">ebp</span><span class="pl-c1">-</span><span class="pl-c1">20</span><span class="pl-s1">h</span>],<span class="pl-s1">eax</span></pre></div>
+<ul>
+<li>
+<p>将eax中值，存档到ebp-0x20的地址处，其实就是<strong>存储到main函数中ret变量</strong>中，而此时eax中就是Add函数中计算的x和y的和，可以看出来，本次函数的返回值是由eax寄存器带回来的。程序是在函数调用返回之后，在eax中去读取返回值的。</p>
+</li>
+<li>
+<p>先前在Add函数中计算出来的30，首先放到【eax】寄存器中保存起来，现在过来好几条指令后，它还保存在里面，我们只需要使用【mov】将数据做一个转移即可</p>
+</li>
+<li>
+<p>到VS里来看看变化</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4d78fda2a0571bfc2c34f5080acedc3ae0d1136effff322f20c5682b16376bb1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65336431376262303138323134326630623930666266356663336139643565392e706e67"><img src="https://camo.githubusercontent.com/4d78fda2a0571bfc2c34f5080acedc3ae0d1136effff322f20c5682b16376bb1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65336431376262303138323134326630623930666266356663336139643565392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/e3d17bb0182142f0b90fbf5fc3a9d5e9.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>最后main函数栈帧的销毁也同理，这里就不再介绍了</li>
+</ul>
+<hr>
+<ul>
+<li>以下是这个栈的全局浏览图<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6fcba5d7a690ab5ce17c5a50d2474a84c93c5b175116f68648c2e9090ed2c7f3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35383163326362333861393734343132393962653963306364633262646564372e706e67"><img src="https://camo.githubusercontent.com/6fcba5d7a690ab5ce17c5a50d2474a84c93c5b175116f68648c2e9090ed2c7f3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35383163326362333861393734343132393962653963306364633262646564372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/581c2cb38a97441299be9c0cdc2bded7.png" style="max-width: 100%;"></a></li>
+</ul>
+<p><strong>拓展了解：</strong></p>
+<blockquote>
+<p>其实返回对象时内置类型时，一般都是通过寄存器来带回返回值的，返回对象如果时较大的对象时，一般会在主调函数的栈帧中开辟一块空间，然后把这块空间的地址，隐式传递给被调函数，在被调函数中通过地址找到主调函数中预留的空间，将返回值直接保存到主调函数的。具体可以参考《程序员的自我修养》一书的第10章。</p>
+</blockquote>
+<h1>四、总结与开局疑难解答</h1>
+<p>① 局部变量是如何创建的？</p>
+<ul>
+<li>首先为函数分配好栈帧空间，将这块栈帧空间初始化好后，然后给局部在栈帧里分配空间</li>
+</ul>
+<p>② 为什么局部变量不初始化内容是随机的？</p>
+<ul>
+<li>因为函数栈帧中的空间是预先初始化好的【0xCCCCCCCCh】，若是不为变量初始化内容，那使用的就是初始化好后的内容，以字符的形式打印出来便是<strong>烫烫烫烫烫烫</strong></li>
+</ul>
+<p>③ 函数调用时参数时如何传递的？传参的顺序是怎样的？</p>
+<ul>
+<li>当还没有进入函数的时候，就已经将函数实参做了一份临时拷贝，并从右向左压入栈中【FILO】，当真正进入到函数栈帧中时，通过指针的偏移量，就可以顺着找回来，<strong>找到这份临时拷贝的形参</strong></li>
+</ul>
+<p>④ 函数的形参和实参分别是怎样实例化的？</p>
+<ul>
+<li>形参确实是我在压栈的时候开辟的一块空间，它和实参<strong>只是值相同，但是空间是独立的</strong>，所以形参是实参的一份临时拷贝，改变形参的值不会影响到实参</li>
+</ul>
+<p>⑤ 函数调用是怎么做的？返回值是如何带会的？</p>
+<ul>
+<li>当执行到【call】指令的时候，把call指令的下一条指令地址压入栈中，相当于记住了这个地址。接着进入到函数中，当函数执行结束的时候，回到主函数中，再执行【ret】指令就可以回到call指令的下一条指令地址</li>
+<li>返回值是通过寄存器带回来的、将函数中计算出来的返回值存放到寄存器中，因为寄存器不会随着函数的调用结束而被销毁，最后再将寄存器中存放的数据转存回对应的内存块中即可</li>
+</ul></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

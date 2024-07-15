@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## 一、一维数组的创建和初始化
+
+### 1、数组的创建
+
+数组是一组相同类型元素的集合。">
+<meta property="og:title" content="3. C语言之详解数组">
+<meta property="og:description" content="## 一、一维数组的创建和初始化
+
+### 1、数组的创建
+
+数组是一组相同类型元素的集合。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/3.%20C-yu-yan-zhi-xiang-jie-shu-zu.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>3. C语言之详解数组</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">3. C语言之详解数组</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/27" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>一、一维数组的创建和初始化</h2>
+<h3>1、数组的创建</h3>
+<p>数组是一组相同类型元素的集合。<br>
+数组的创建方式：</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">type_t</span>   <span class="pl-s1">arr_name</span>   [<span class="pl-s1">const_n</span>];
+<span class="pl-c">//type_t 是指数组的元素类型</span>
+<span class="pl-c">//const_n 是一个常量表达式，用来指定数组的大小</span></pre></div>
+<p>首先我们就来看看数组如何创建~~</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">a1</span>[<span class="pl-c1">5</span>];
+<span class="pl-smi">char</span> <span class="pl-s1">a2</span>[<span class="pl-c1">6</span>];
+<span class="pl-smi">float</span> <span class="pl-s1">a3</span>[<span class="pl-c1">7</span>];
+<span class="pl-smi">double</span> <span class="pl-s1">a4</span>[<span class="pl-c1">4</span> <span class="pl-c1">+</span> <span class="pl-c1">4</span>];	<span class="pl-c">//也可以是一个表达式</span></pre></div>
+<ul>
+<li>
+<p>对于整型、字符型、浮点型的数据可以创建</p>
+</li>
+<li>
+<p><code class="notranslate">[]</code>内的数字便是这个数组的大小，表示这个数组中可以存放多少元素。</p>
+</li>
+<li>
+<p>除了数字也可以是一个表达式放里面</p>
+</li>
+<li>
+<p>虽然指定数组大小可以是一个常量，但VS不支持是一个变量</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">n</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+<span class="pl-en">scanf</span>(<span class="pl-s">"%d"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">n</span>);
+<span class="pl-smi">int</span> <span class="pl-s1">arr</span>[<span class="pl-s1">n</span>];</pre></div>
+<ul>
+<li>其实这种写法是可以的，因为在C99中引入了<code class="notranslate">变长数组</code>的概念</li>
+<li>变长数组支持数组的大小使用变量来指定。</li>
+<li>但是变长数组不是数组的长度可以变化，<strong>而是数组的大小可以用变量来指定</strong></li>
+</ul>
+<h3>2、数组的初始化</h3>
+<ul>
+<li>首先要来辨析一下初始化和赋值的区别。千万不可以混淆</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">n</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;	<span class="pl-c">//初始化</span>
+
+<span class="pl-smi">int</span> <span class="pl-s1">m</span>;
+<span class="pl-s1">m</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;		<span class="pl-c">//赋值</span></pre></div>
+<ul>
+<li>
+<p>接下去就来看看数组的初始化</p>
+</li>
+<li>
+<p>首先是整型数组</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//1.不完全初始化，数组个数10个。第一个元素为1，其余9个位0</span>
+<span class="pl-smi">int</span> <span class="pl-s1">arr1</span>[<span class="pl-c1">10</span>] <span class="pl-c1">=</span> { <span class="pl-c1">1</span> };		
+<span class="pl-c">//2.完全初始化，数组个数10个</span>
+<span class="pl-smi">int</span> <span class="pl-s1">arr2</span>[<span class="pl-c1">10</span>] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>,<span class="pl-c1">4</span>,<span class="pl-c1">5</span>,<span class="pl-c1">6</span>,<span class="pl-c1">7</span>,<span class="pl-c1">8</span>,<span class="pl-c1">9</span>,<span class="pl-c1">10</span> };
+<span class="pl-c">//3.若没有指定数组的个数，则初始化了几个这个数组的大小就为几</span>
+<span class="pl-smi">int</span> <span class="pl-s1">arr3</span>[] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>,<span class="pl-c1">4</span>,<span class="pl-c1">5</span> };</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1aa2ae70c5731221ec47421f2d2e4a1ccda0340436e82aa22af203f000672b9d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31616665303765326434373534613930613231656635393137633233366639342e706e67"><img src="https://camo.githubusercontent.com/1aa2ae70c5731221ec47421f2d2e4a1ccda0340436e82aa22af203f000672b9d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31616665303765326434373534613930613231656635393137633233366639342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/1afe07e2d4754a90a21ef5917c236f94.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>然后是字符数组</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//1.数组大小为4，初始化四位，abc + '\0'</span>
+<span class="pl-smi">char</span> <span class="pl-s1">ch1</span>[] <span class="pl-c1">=</span> <span class="pl-s">"abc"</span>;
+<span class="pl-c">//2.数组大小为3，初始化前三位，abc</span>
+<span class="pl-smi">char</span> <span class="pl-s1">ch2</span>[] <span class="pl-c1">=</span> { <span class="pl-c1">'a'</span>, <span class="pl-c1">'b'</span>, <span class="pl-c1">'c'</span> };</pre></div>
+<ul>
+<li>如果以字符串的形式进行初始化，则默认在最后加上一个<code class="notranslate">\0</code>；</li>
+<li>若是以单个字符的形式初始化，则数组大小即为初始化的字符个数</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e206cf87b7b25d291564cfaacab8962a3436344c9ad3fbfaad10fd05568ad273/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66616532343865643435313734623937613832386165323937356330326531642e706e67"><img src="https://camo.githubusercontent.com/e206cf87b7b25d291564cfaacab8962a3436344c9ad3fbfaad10fd05568ad273/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66616532343865643435313734623937613832386165323937356330326531642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/fae248ed45174b97a828ae2975c02e1d.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>其中在数组未完全初始化中，后面默认是<code class="notranslate">0</code>，在ASCLL码中0就是<code class="notranslate">\0</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c47f1193cc4e43295a95c47cf4be6a2c2527550e789b2549d5f7d7b57c89db96/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36623366626231333336643834393934393333356436366433666630336631642e706e67"><img src="https://camo.githubusercontent.com/c47f1193cc4e43295a95c47cf4be6a2c2527550e789b2549d5f7d7b57c89db96/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36623366626231333336643834393934393333356436366433666630336631642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/6b3fbb1336d849949335d66d3ff03f1d.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们打印一下看一下~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b006297ebde3f952a58be086c4fb7c070ff983633da8b87f2c55998c87fa6c2a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62616135363064613365396434383435616161653230383932343462333436322e706e67"><img src="https://camo.githubusercontent.com/b006297ebde3f952a58be086c4fb7c070ff983633da8b87f2c55998c87fa6c2a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62616135363064613365396434383435616161653230383932343462333436322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/baa560da3e9d4845aaae2089244b3462.png" style="max-width: 100%;"></a></p>
+<ul>
+<li><strong>注意：</strong> 当变量在<code class="notranslate">全局范围</code>默认初始化为0，当变量在<code class="notranslate">局部范围</code>内默认没有初始化，放的是随机值</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/355bfc6cf377d7e4bec0d0ebc34bbac16b70d8b067e1a648953e00ccc62bf4ca/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30666462636439396362303234333363393037626565666261333464663239352e706e67"><img src="https://camo.githubusercontent.com/355bfc6cf377d7e4bec0d0ebc34bbac16b70d8b067e1a648953e00ccc62bf4ca/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30666462636439396362303234333363393037626565666261333464663239352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/0fdbcd99cb02433c907beefba34df295.png" style="max-width: 100%;"></a></p>
+<h3>3、一维数组的使用</h3>
+<p>对于数组的使用，我们有一个操作符 <code class="notranslate">[]</code>，下标引用操作符，它其实就<strong>数组访问的操作符</strong></p>
+<ul>
+<li>我们来通过这个操作符来访问数组中的内容</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">arr</span>[] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>,<span class="pl-c1">4</span>,<span class="pl-c1">5</span>,<span class="pl-c1">6</span>,<span class="pl-c1">7</span>,<span class="pl-c1">8</span>,<span class="pl-c1">9</span>,<span class="pl-c1">10</span> };
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">10</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">arr</span>[<span class="pl-s1">i</span>]);
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/a2062651a68691021898fad667602dae580c506d7027783d2b864dc890e1ef2c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63323562313261303939333734643166393133396630303361653031666134622e706e67"><img src="https://camo.githubusercontent.com/a2062651a68691021898fad667602dae580c506d7027783d2b864dc890e1ef2c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63323562313261303939333734643166393133396630303361653031666134622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/c25b12a099374d1f9139f003ae01fa4b.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>上面这种对于循环中要访问的数组个数已经写死了，如果修改一下数组的元素个数，那循环的结束条件就也要修改，此时我们就可以考虑使用到<code class="notranslate">sizeof()</code>去首先计算出数组的大小~~</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">arr</span>[] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>,<span class="pl-c1">4</span>,<span class="pl-c1">5</span>,<span class="pl-c1">6</span>,<span class="pl-c1">7</span>,<span class="pl-c1">8</span>,<span class="pl-c1">9</span>,<span class="pl-c1">10</span> };
+	<span class="pl-smi">int</span> <span class="pl-s1">sz</span> <span class="pl-c1">=</span> <span class="pl-k">sizeof</span>(<span class="pl-smi">arr</span>) / <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>[<span class="pl-c1">0</span>]);
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">sz</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">arr</span>[<span class="pl-s1">i</span>]);
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/cc6dccb7eb6eb7c06c280159785edd2f68c1cc416a16e8d3530ea0ecbc0b52d7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35333839666631346337306534663232623438633237666131666165363366652e706e67"><img src="https://camo.githubusercontent.com/cc6dccb7eb6eb7c06c280159785edd2f68c1cc416a16e8d3530ea0ecbc0b52d7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35333839666631346337306534663232623438633237666131666165363366652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/5389ff14c70e4f22b48c27fa1fae63fe.png" style="max-width: 100%;"></a></p>
+<p><strong>注意：</strong> 在数组创建的时候不能使用变量，而在使用的时候就可以~~</p>
+<hr>
+<p><strong>小结：</strong></p>
+<ol>
+<li>数组是使用下标来访问的，下标是从0开始</li>
+<li>数组的大小可以通过计算得到</li>
+</ol>
+<h3>4、 一维数组在内存中的存储</h3>
+<ul>
+<li>要想知道数组是如何在内存中存放的，那就要将每一个元素的地址打印出来观察一下</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">arr</span>[] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>,<span class="pl-c1">4</span>,<span class="pl-c1">5</span>,<span class="pl-c1">6</span>,<span class="pl-c1">7</span>,<span class="pl-c1">8</span>,<span class="pl-c1">9</span>,<span class="pl-c1">10</span> };
+	<span class="pl-smi">int</span> <span class="pl-s1">sz</span> <span class="pl-c1">=</span> <span class="pl-k">sizeof</span>(<span class="pl-smi">arr</span>) / <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>[<span class="pl-c1">0</span>]);
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">sz</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"&amp;arr[%d] = %p \n"</span>, <span class="pl-s1">i</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">arr</span>[<span class="pl-s1">i</span>]);
+	}	
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ccb849964785864febfb003bbbdeadda6567fcb5aeacc39f97abe74752aaf466/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65656434346563366232663234313838386636656532336535633061623765382e706e67"><img src="https://camo.githubusercontent.com/ccb849964785864febfb003bbbdeadda6567fcb5aeacc39f97abe74752aaf466/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65656434346563366232663234313838386636656532336535633061623765382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/eed44ec6b2f241888f6ee23e5c0ab7e8.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以看到，对于每一个数组元素之间，在内存中都是差了4个字节，因为整型是4个字节</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/42a525a724b9274f329c158aa75107fd758f27e6ae8d3c94f9a998dab25d40f9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66316132393066636435353134333864386231616330643631666636313765362e706e67"><img src="https://camo.githubusercontent.com/42a525a724b9274f329c158aa75107fd758f27e6ae8d3c94f9a998dab25d40f9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66316132393066636435353134333864386231616330643631666636313765362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/f1a290fcd551438d8b1ac0d61ff617e6.png" style="max-width: 100%;"></a></p>
+<hr>
+<p><strong>小结：</strong></p>
+<ol>
+<li>一维数组在内存中是连续存放的</li>
+<li>随着数组下标的增长，地址是由低到高变化的</li>
+</ol>
+<h2>二、二维数组的创建和初始化</h2>
+<h3>1、二维数组的创建</h3>
+<ul>
+<li>首先那来看一下各种数据类型的二维数组创建</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">arr1</span>[<span class="pl-c1">3</span>][<span class="pl-c1">4</span>];			<span class="pl-c">//整型二维数组</span>
+	<span class="pl-smi">double</span> <span class="pl-s1">arr2</span>[<span class="pl-c1">3</span>][<span class="pl-c1">5</span>];		<span class="pl-c">//字符型二维数组</span>
+	<span class="pl-smi">float</span> <span class="pl-s1">arr3</span>[<span class="pl-c1">4</span>][<span class="pl-c1">5</span>];		<span class="pl-c">//浮点型二维数组</span>
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h3>2、二维数组的初始化</h3>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">arr1</span>[<span class="pl-c1">3</span>][<span class="pl-c1">4</span>] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>,<span class="pl-c1">4</span> };
+	<span class="pl-smi">int</span> <span class="pl-s1">arr2</span>[<span class="pl-c1">3</span>][<span class="pl-c1">4</span>] <span class="pl-c1">=</span> { {<span class="pl-c1">1</span>,<span class="pl-c1">2</span>},{<span class="pl-c1">4</span>,<span class="pl-c1">5</span>} };
+	<span class="pl-smi">int</span> <span class="pl-s1">arr3</span>[][<span class="pl-c1">4</span>] <span class="pl-c1">=</span> { {<span class="pl-c1">2</span>,<span class="pl-c1">3</span>},{<span class="pl-c1">4</span>,<span class="pl-c1">5</span>} };
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>创建完后，那还要对其对其进行初始化。</li>
+<li>可以看到我默认初始化了五个元素之后，因为这个二维数组的是<strong>三行四列</strong>的，所以<strong>第五个元素自动归位第二行的第一个元素</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b863997664f68b3a84d540aa37c1774770086fc87850d1dc8e8c3d474ddde8dd/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61653639643763366639623734616439626562313532636164633337613731392e706e67"><img src="https://camo.githubusercontent.com/b863997664f68b3a84d540aa37c1774770086fc87850d1dc8e8c3d474ddde8dd/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61653639643763366639623734616439626562313532636164633337613731392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/ae69d7c6f9b74ad9beb152cadc37a719.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们还可以指定初始化每一行的元素，一行表示一个大括号，只需要在大括号里为每一行也加上花括号，然后在括号里写上这一行要初始化的数据</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/8ac23a6d02b75f5a85fda78f54b87b03e27308d523268beabf98ab6c1d5bd3a7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65363763383564386130323634613130613138376139623661396133303136312e706e67"><img src="https://camo.githubusercontent.com/8ac23a6d02b75f5a85fda78f54b87b03e27308d523268beabf98ab6c1d5bd3a7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65363763383564386130323634613130613138376139623661396133303136312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/e67c85d8a0264a10a187a9b6a9a30161.png" style="max-width: 100%;"></a></p>
+<hr>
+<ul>
+<li><code class="notranslate">对于二维数组在初始化的时候可以省略行，但是不可以省略列</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d33ad3940aa4e7f30816a69c5d5f9f5d30a7bf1bf9b7bf1fcb3dd9bc1e685a07/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34393430623032613563326334313163623833623164643238636437653862632e706e67"><img src="https://camo.githubusercontent.com/d33ad3940aa4e7f30816a69c5d5f9f5d30a7bf1bf9b7bf1fcb3dd9bc1e685a07/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34393430623032613563326334313163623833623164643238636437653862632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/4940b02a5c2c411cb83b1dd28cd7e8bc.png" style="max-width: 100%;"></a></p>
+<hr>
+<ul>
+<li>那么为什么不能省略列呢？</li>
+</ul>
+<p>在C语言中，数组的大小在声明时需要指定，包括行和列。这是因为C语言中的数组是一块连续的内存空间，编译器在编译时需要知道数组的大小以便正确分配内存。</p>
+<p>如果省略列，编译器将无法确定每个元素在内存中的偏移量，因此无法正确计算数组的地址。指定列数有助于编译器进行正确的地址计算和内存分配</p>
+<h3>3、二维数组的使用</h3>
+<blockquote>
+<p>初始化好了，我们可以将一个二维数组打印在屏幕上</p>
+</blockquote>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">arr</span>[][<span class="pl-c1">4</span>] <span class="pl-c1">=</span> { {<span class="pl-c1">1</span>,<span class="pl-c1">2</span>},{<span class="pl-c1">3</span>,<span class="pl-c1">4</span>},{<span class="pl-c1">5</span>} };
+<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">3</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+{
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">j</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">4</span>; <span class="pl-s1">j</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">arr</span>[<span class="pl-s1">i</span>][<span class="pl-s1">j</span>]);
+	}
+	<span class="pl-en">printf</span>(<span class="pl-s">"\n"</span>);
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4f2bfb918aaff8c5cdd99970c16f260bcbdb0d8d8fc9f69b63048e72dd580584/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62343331613466353962346234623937626430653331353432363561393832312e706e67"><img src="https://camo.githubusercontent.com/4f2bfb918aaff8c5cdd99970c16f260bcbdb0d8d8fc9f69b63048e72dd580584/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62343331613466353962346234623937626430653331353432363561393832312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/b431a4f59b4b4b97bd0e3154265a9821.png" style="max-width: 100%;"></a></p>
+<h3>4、二维数组在内存中的存储</h3>
+<blockquote>
+<p>那么数组再内存中是怎么存储的呢？</p>
+</blockquote>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">arr</span>[][<span class="pl-c1">4</span>] <span class="pl-c1">=</span> { {<span class="pl-c1">1</span>,<span class="pl-c1">2</span>},{<span class="pl-c1">3</span>,<span class="pl-c1">4</span>},{<span class="pl-c1">5</span>} };
+<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">3</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+{
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">j</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">4</span>; <span class="pl-c1">++</span><span class="pl-s1">j</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"&amp;arr[%d][%d] = %p\n"</span>, <span class="pl-s1">i</span>, <span class="pl-s1">j</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">arr1</span>[<span class="pl-s1">i</span>][<span class="pl-s1">j</span>]);
+	}
+	<span class="pl-en">printf</span>(<span class="pl-s">"\n"</span>);
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/085292c9666411ea7b03ec38aa1bcffebe1c9f983234db794cef0cf7b8b336cd/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61383636636364363966616534333437623563333334626462313037623734632e706e67"><img src="https://camo.githubusercontent.com/085292c9666411ea7b03ec38aa1bcffebe1c9f983234db794cef0cf7b8b336cd/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61383636636364363966616534333437623563333334626462313037623734632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/a866ccd69fae4347b5c334bdb107b74c.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>对于二维数组来说，内存中是连续存放的<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d5bd0415621a2f717b857de1ba1e2f9803e0c7c71bb1549d50f478f51fd62b9a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30643666613335636332373134323938623365613962633730646235346265612e706e67"><img src="https://camo.githubusercontent.com/d5bd0415621a2f717b857de1ba1e2f9803e0c7c71bb1549d50f478f51fd62b9a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30643666613335636332373134323938623365613962633730646235346265612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/0d6fa35cc2714298b3ea9bc70db54bea.png" style="max-width: 100%;"></a></li>
+</ul>
+<hr>
+<p><strong>数组首元素地址</strong>：</p>
+<ul>
+<li>
+<p>对于一个数组的数组名来说就是这个数组的首元素地址，我们可以根据一个数组的首元素地址来访问到这个数组，然后就可以访问到这个数组中的所有内容</p>
+</li>
+<li>
+<p>对于这个二维数组来说，因为它一行就是一个一维数组，因此我们就可以说</p>
+<ul>
+<li><code class="notranslate">arr[1]</code>是第一行的首元素地址</li>
+<li><code class="notranslate">arr[2]</code>是第二行的首元素地址</li>
+<li><code class="notranslate">arr[3]</code>是第三行的首元素地址</li>
+</ul>
+</li>
+<li>
+<p>然后便可以根据每一行的首元素地址的偏移量访问到这行的所有内容</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ab42dbfe0b33135e215d00dac78ef02203697fff90c2ded691d9abd8174eae8a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63326330316338306634373734623236396366313135363866626231393531332e706e67"><img src="https://camo.githubusercontent.com/ab42dbfe0b33135e215d00dac78ef02203697fff90c2ded691d9abd8174eae8a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63326330316338306634373734623236396366313135363866626231393531332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/c2c01c80f4774b269cf11568fbb19513.png" style="max-width: 100%;"></a></p>
+</li>
+</ul>
+<h2>三、数组越界</h2>
+<h3>边界值考虑不当导致越界访问</h3>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">arr</span>[<span class="pl-c1">3</span>][<span class="pl-c1">4</span>] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>,<span class="pl-c1">4</span>,<span class="pl-c1">5</span>,<span class="pl-c1">6</span>,<span class="pl-c1">7</span>,<span class="pl-c1">8</span>,<span class="pl-c1">9</span>,<span class="pl-c1">10</span>,<span class="pl-c1">11</span>,<span class="pl-c1">12</span> };
+
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">3</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+	{
+		<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">j</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">5</span>; <span class="pl-c1">++</span><span class="pl-s1">j</span>)
+		{
+			<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">arr</span>[<span class="pl-s1">i</span>][<span class="pl-s1">j</span>]);
+		}
+		<span class="pl-en">printf</span>(<span class="pl-s">"\n"</span>);
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>对于每一行的内部访问，从<code class="notranslate">0~4</code>会依次访问五个元素，但是每一行只有四个元素</li>
+<li>当本行访问完后就会去访问下一行的第一个元素。然后第二行又从下标为0的位置开始访问，到了最后一行的时候，没有再下一行可以访问了，那第五个访问到的也就是一个随机值</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d438633feaada865a1c5a25471acd7a14ec24741da6d68edb4cd655f80e520d1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31643239313763313233376334636662616433656466366639623434343765332e706e67"><img src="https://camo.githubusercontent.com/d438633feaada865a1c5a25471acd7a14ec24741da6d68edb4cd655f80e520d1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31643239313763313233376334636662616433656466366639623434343765332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/1d2917c1237c4cfbad3edf6f9b4447e3.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以通过图示看一下在内存中是如何进行访问的</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/fc5ba7b7ded4205659177154c421e1a4c03048fc553f61066863e3d973c14f30/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37393863613235333165393634333732613265623761363733346130666632642e706e67"><img src="https://camo.githubusercontent.com/fc5ba7b7ded4205659177154c421e1a4c03048fc553f61066863e3d973c14f30/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37393863613235333165393634333732613265623761363733346130666632642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/798ca2531e964372a2eb7a6734a0ff2d.png" style="max-width: 100%;"></a></p>
+<h3>数组大小不足以承载输入的字符数</h3>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-s1">arr</span>[] <span class="pl-c1">=</span> <span class="pl-s">""</span>;
+<span class="pl-en">scanf</span>(<span class="pl-s">"%s"</span>, <span class="pl-s1">arr</span>);
+
+<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">arr</span>);</pre></div>
+<ul>
+<li>上面题目中<code class="notranslate">arr[]</code>并没有指定数组的大小，因此数组大小由初始化的字符个数决定。</li>
+<li>可以看到这里只初始化了一个空字符，也就相当于只有一个<code class="notranslate">\0</code>，那么这个数组的大小即为1。所以当我<code class="notranslate">scanf</code>输入一个长度大于1的字符串时，其实就会造成数组越界的问题【arr数组周围的堆栈被破坏即为数组越界】</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e8b7c4848102f2f86e98e7d7b619cc7c98cca05d4ac26b1318bf2f7fc1af82dc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39313330383032656362313434643064393534313539346238613039653662352e706e67"><img src="https://camo.githubusercontent.com/e8b7c4848102f2f86e98e7d7b619cc7c98cca05d4ac26b1318bf2f7fc1af82dc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39313330383032656362313434643064393534313539346238613039653662352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/9130802ecb144d0d9541594b8a09e6b5.png" style="max-width: 100%;"></a></p>
+<hr>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">arr1</span>[] <span class="pl-c1">=</span> { <span class="pl-c1">0</span> };
+<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">10</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+{
+	<span class="pl-s1">arr1</span>[<span class="pl-s1">i</span>] <span class="pl-c1">=</span> <span class="pl-s1">i</span>;
+}</pre></div>
+<ul>
+<li>这个整型数组的大小为初始化内容的大小，但是下面的操作访问了10个字节，会越界访问~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4ad404750256debc97e0886ff1a1646b4ba9bcc8c87b7472a77b2c68cb8d060a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39343138323335383131626534313430613039346631353362666235653764392e706e67"><img src="https://camo.githubusercontent.com/4ad404750256debc97e0886ff1a1646b4ba9bcc8c87b7472a77b2c68cb8d060a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39343138323335383131626534313430613039346631353362666235653764392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/9418235811be4140a094f153bfb5e7d9.png" style="max-width: 100%;"></a></p>
+<h2>四、数组作为函数参数</h2>
+<h3>1、冒泡排序函数的错误设计</h3>
+<ul>
+<li>然后让我们来看看错误的冒泡排序</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">PrintArray</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">n</span>)
+{
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">n</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">a</span>[<span class="pl-s1">i</span>]);
+	}
+	<span class="pl-en">printf</span>(<span class="pl-s">"\n"</span>);
+}
+
+<span class="pl-smi">void</span> <span class="pl-en">BubbleSort</span>(<span class="pl-smi">int</span> <span class="pl-s1">a</span>[<span class="pl-c1">10</span>])
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">n</span> <span class="pl-c1">=</span> <span class="pl-k">sizeof</span>(<span class="pl-smi">a</span>) / <span class="pl-k">sizeof</span>(<span class="pl-s1">a</span>[<span class="pl-c1">0</span>]);
+
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">n</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+	{
+		<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">j</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">n</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span> <span class="pl-c1">-</span> <span class="pl-s1">i</span>; <span class="pl-c1">++</span><span class="pl-s1">j</span>)
+		{
+			<span class="pl-k">if</span> (<span class="pl-s1">a</span>[<span class="pl-s1">j</span>] <span class="pl-c1">&gt;</span> <span class="pl-s1">a</span>[<span class="pl-s1">j</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>])
+			{
+				<span class="pl-smi">int</span> <span class="pl-s1">t</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span>[<span class="pl-s1">j</span>];
+				<span class="pl-s1">a</span>[<span class="pl-s1">j</span>] <span class="pl-c1">=</span> <span class="pl-s1">a</span>[<span class="pl-s1">j</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>];
+				<span class="pl-s1">a</span>[<span class="pl-s1">j</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>] <span class="pl-c1">=</span> <span class="pl-s1">t</span>;
+			}
+		}
+	}
+}
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">arr</span>[] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>,<span class="pl-c1">4</span>,<span class="pl-c1">5</span>,<span class="pl-c1">6</span>,<span class="pl-c1">7</span>,<span class="pl-c1">8</span>,<span class="pl-c1">9</span>,<span class="pl-c1">10</span> };
+	<span class="pl-smi">int</span> <span class="pl-s1">sz</span> <span class="pl-c1">=</span> <span class="pl-k">sizeof</span>(<span class="pl-smi">arr</span>) / <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>[<span class="pl-c1">0</span>]);
+	
+	<span class="pl-en">PrintArray</span>(<span class="pl-s1">arr</span>, <span class="pl-s1">sz</span>);
+
+	<span class="pl-en">BubbleSort</span>(<span class="pl-s1">arr</span>);
+
+	<span class="pl-en">PrintArray</span>(<span class="pl-s1">arr</span>, <span class="pl-s1">sz</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2aa86c5aba0946cd1e3b7ea0740592e1c7c8abc316e9cb49c0fae40cd472c992/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34623739633039366363343734643632383562336338383931376463323633302e706e67"><img src="https://camo.githubusercontent.com/2aa86c5aba0946cd1e3b7ea0740592e1c7c8abc316e9cb49c0fae40cd472c992/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34623739633039366363343734643632383562336338383931376463323633302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/4b79c096cc474d6285b3c88917dc2630.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>为什么会发生这样的情况呢？我们通过DeBug来调试看看</li>
+<li>这里n应该为10而不是1</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/82793992fdb1da258e982861d71de2ca9b03670c86168263ede4de1216249c55/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64386565343930316330343634333966396132623433303564336230323338362e706e67"><img src="https://camo.githubusercontent.com/82793992fdb1da258e982861d71de2ca9b03670c86168263ede4de1216249c55/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64386565343930316330343634333966396132623433303564336230323338362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/d8ee4901c046439f9a2b4305d3b02386.png" style="max-width: 100%;"></a></p>
+<blockquote>
+<p>接下来就来介绍一下为什么是1而不是10</p>
+</blockquote>
+<h3>2、数组名意味着什么？</h3>
+<ul>
+<li>对于数组名而言，当我们将一个数组作为函数的参数进行传递的时候，传入的仅仅这个数组的<code class="notranslate">首元素地址</code>，而并不是把整个数组作为参数传递过去</li>
+</ul>
+<h4>情况1：sizeof(数组名)</h4>
+<p><strong>sizeof(数组名)求解的是整个数组的字节大小</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">arr</span>[] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>,<span class="pl-c1">4</span>,<span class="pl-c1">5</span>,<span class="pl-c1">6</span>,<span class="pl-c1">7</span>,<span class="pl-c1">8</span>,<span class="pl-c1">9</span>,<span class="pl-c1">10</span> };
+<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>));</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1b5f8c010ec35565eb4ae11b62edbb0c37419c7651d372ee5e5bb5e165b2410a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38343531343438356561323734376464616532653166653766636162666265372e706e67"><img src="https://camo.githubusercontent.com/1b5f8c010ec35565eb4ae11b62edbb0c37419c7651d372ee5e5bb5e165b2410a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38343531343438356561323734376464616532653166653766636162666265372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/84514485ea2747ddae2e1fe7fcabfbe7.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以看到输出的结果为【40】，我们刚才说到数组名指的是首元素地址，刚才在【冒泡排序】中计算<code class="notranslate">sizeof(a)</code>得出的结果为4，但是这个为什么是40呢</li>
+<li><code class="notranslate">sizeof(数组名)</code>计算的就是整个数组的大小，因为arr数组中有十个元素，一个整型元素占4个字节，所以整个数组的大小即为40</li>
+</ul>
+<h4>情况2：&amp;数组名</h4>
+<p><strong>&amp;数组名为整个数组的地址</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%p\n"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">arr</span>[<span class="pl-c1">0</span>]);
+<span class="pl-en">printf</span>(<span class="pl-s">"%p\n"</span>, <span class="pl-s1">arr</span>);
+<span class="pl-en">printf</span>(<span class="pl-s">"%p\n"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">arr</span>);</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/34652b458b87d94785074ee42333ac20f89e9924fe47e28ca1284a75565a378b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31313635663138666463303934393162623334616632343730323163393163382e706e67"><img src="https://camo.githubusercontent.com/34652b458b87d94785074ee42333ac20f89e9924fe47e28ca1284a75565a378b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31313635663138666463303934393162623334616632343730323163393163382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/1165f18fdc09491bb34af247021c91c8.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>三个打印出来的结果都是一样的，对于第一个<code class="notranslate">arr[0]</code>指的是首元素，<code class="notranslate">&amp;arr[0]</code>指的便是首元素的地址；对于<code class="notranslate">arr</code>来说也是一样为首元素地址</li>
+<li>而对于&amp;arr来说，指的则是整个数组的地址，它和数组首元素地址是一样的，所以三者地址相同</li>
+</ul>
+<h3>小结一下</h3>
+<ul>
+<li><strong>&amp;数组名：数组名表示整个数组。取出的是整个数组的地址</strong></li>
+<li><strong>sizeof(数组名)：数组名表示整个数组。求解的是整个数组的大小，单位是字节</strong></li>
+<li><strong>除此之外见到数组名全部都为该数组的首元素地址</strong></li>
+</ul>
+<h3>3、冒泡排序函数的改进</h3>
+<ul>
+<li>通过上面的分析可以知晓出错的地方是在数组的个数，所以我们在排序外面计算完再把这个数组的大小传进去就行</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">bubble_sort</span>(<span class="pl-smi">int</span> <span class="pl-s1">arr</span>[], <span class="pl-smi">int</span> <span class="pl-s1">sz</span>)
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-c">//确定冒泡排序的趟数</span>
+	<span class="pl-k">for</span> (<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">sz</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-c">//假设数组是有序的</span>
+		<span class="pl-smi">int</span> <span class="pl-s1">flag</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+		<span class="pl-c">//一趟冒泡进行多少对比较</span>
+		<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+		<span class="pl-k">for</span> (<span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">j</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">sz</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span> <span class="pl-c1">-</span> <span class="pl-s1">i</span>; <span class="pl-s1">j</span><span class="pl-c1">++</span>)
+		{
+			<span class="pl-c">//交换</span>
+			<span class="pl-k">if</span> (<span class="pl-s1">arr</span>[<span class="pl-s1">j</span>] <span class="pl-c1">&lt;</span> <span class="pl-s1">arr</span>[<span class="pl-s1">j</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>])
+			{
+				<span class="pl-smi">int</span> <span class="pl-s1">tmp</span> <span class="pl-c1">=</span> <span class="pl-s1">arr</span>[<span class="pl-s1">j</span>];
+				<span class="pl-s1">arr</span>[<span class="pl-s1">j</span>] <span class="pl-c1">=</span> <span class="pl-s1">arr</span>[<span class="pl-s1">j</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>];
+				<span class="pl-s1">arr</span>[<span class="pl-s1">j</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>] <span class="pl-c1">=</span> <span class="pl-s1">tmp</span>;
+				<span class="pl-s1">flag</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+			}
+		}
+		<span class="pl-c">// 这一趟没交换就说明已经有序，后续无序排序了</span>
+		<span class="pl-k">if</span> (<span class="pl-s1">flag</span> <span class="pl-c1">==</span> <span class="pl-c1">1</span>)
+		{
+			<span class="pl-k">break</span>;
+		}
+	}
+}
+
+<span class="pl-smi">void</span> <span class="pl-en">print_arr</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">arr</span>, <span class="pl-smi">int</span> <span class="pl-s1">sz</span>)
+{
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">sz</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">arr</span>[<span class="pl-s1">i</span>]);
+	}
+}
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">arr</span>[] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>,<span class="pl-c1">4</span>,<span class="pl-c1">5</span>,<span class="pl-c1">6</span>,<span class="pl-c1">7</span>,<span class="pl-c1">8</span>,<span class="pl-c1">9</span>,<span class="pl-c1">10</span> };
+	<span class="pl-smi">int</span> <span class="pl-s1">sz</span> <span class="pl-c1">=</span> <span class="pl-k">sizeof</span>(<span class="pl-smi">arr</span>) / <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>[<span class="pl-c1">0</span>]);
+	<span class="pl-en">print_arr</span>(<span class="pl-s1">arr</span>, <span class="pl-s1">sz</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"\n"</span>);
+	<span class="pl-en">bubble_sort</span>(<span class="pl-s1">arr</span>, <span class="pl-s1">sz</span>);
+	<span class="pl-en">print_arr</span>(<span class="pl-s1">arr</span>, <span class="pl-s1">sz</span>);
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/cee73d5998cf079732e2515c1169f189427032e22b0feed1431b82940c277b1d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63313231313834616430353334643534613362376532366364636235303035352e706e67"><img src="https://camo.githubusercontent.com/cee73d5998cf079732e2515c1169f189427032e22b0feed1431b82940c277b1d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63313231313834616430353334643534613362376532366364636235303035352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/c121184ad0534d54a3b7e26cdcb50055.png" style="max-width: 100%;"></a></p>
+<h3>4、数组地址与指针</h3>
+<h4>数组地址偏移量与指针偏移量</h4>
+<ul>
+<li>在C语言中，我们可以通过指针来访问数组的元素，利用指针进行数组元素的遍历和访问。首先，我们将数组的首元素地址赋给一个指针变量，然后通过逐步向后移动指针来访问数组的各个元素。</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">arr</span>[<span class="pl-c1">10</span>] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>,<span class="pl-c1">4</span>,<span class="pl-c1">5</span>,<span class="pl-c1">6</span>,<span class="pl-c1">7</span>,<span class="pl-c1">8</span>,<span class="pl-c1">9</span>,<span class="pl-c1">10</span> };
+<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">p</span> <span class="pl-c1">=</span> <span class="pl-c1">&amp;</span><span class="pl-s1">arr</span>[<span class="pl-c1">0</span>];</pre></div>
+<ul>
+<li>现在，指针变量 <code class="notranslate">p</code> 中存放着数组 <code class="notranslate">arr</code> 的首元素地址。要通过这个指针变量访问后面的所有元素，我们可以使用循环，通过 <code class="notranslate">p + i</code> 的方式来获取元素的地址，然后通过解引用操作 <code class="notranslate">*(p + i)</code> 来访问元素的值。</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">10</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+{
+    <span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-c1">*</span>(<span class="pl-s1">p</span> <span class="pl-c1">+</span> <span class="pl-s1">i</span>));
+}
+<span class="pl-en">printf</span>(<span class="pl-s">"\n"</span>);</pre></div>
+<ul>
+<li>在循环中，<code class="notranslate">*(p + i)</code> 表示访问数组中第 <code class="notranslate">i</code> 个元素的值。这种方式可以适用于任何一维数组，因为一维数组在内存中是一块连续的存储空间，通过指针的偏移可以依次访问数组的所有元素。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/acabfb6971e73e1bb1b02fdff34f11cd8f3a18f8912c9c39d5cb7c31c24b39ee/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39353536653561616565383834383136396233326664656633316463636363322e706e67"><img src="https://camo.githubusercontent.com/acabfb6971e73e1bb1b02fdff34f11cd8f3a18f8912c9c39d5cb7c31c24b39ee/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39353536653561616565383834383136396233326664656633316463636363322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/9556e5aaee8848169b32fdef31dcccc2.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>通过将数组的首元素地址赋值给指针变量 <code class="notranslate">p</code>，然后逐个递增指针，每次递增一个元素的大小（在这里是4个字节，假设是int类型数组），第 <code class="notranslate">i</code> 个元素的地址即为 <code class="notranslate">p + i</code>。当我们需要访问这个地址的内容时，通过对指针进行解引用 <code class="notranslate">*(p + i)</code>，就能够获取数组中第 <code class="notranslate">i</code> 个元素的值。这种方式可以灵活地遍历数组中的所有元素，而不需要直接使用数组下标。在循环中，这个过程被用来打印数组中的十个元素。</li>
+</ul>
+<hr>
+<h4>指针变量与数组名的置换</h4>
+<ul>
+<li>回到我们的【数组名 == 首元素地址】，那么<code class="notranslate">int* p = &amp;arr[0]</code>可以写成<code class="notranslate">int* p = arr</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d36efd407a677ca77a4352bdef17dc1d698467c86883440ca26f767264cfedc2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31353134313239623461383134656135613430336537363765666333303630392e706e67"><img src="https://camo.githubusercontent.com/d36efd407a677ca77a4352bdef17dc1d698467c86883440ca26f767264cfedc2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31353134313239623461383134656135613430336537363765666333303630392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/1514129b4a814ea5a403e767efc30609.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>也就是把我这个arr赋值给了p，所以我们在使用arr的时候可以换成p，使用p的时候可以换成arr</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0de713cec44a7b863ba877a972f9b3884d1045fcd6e265fae490ae4f3383009b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31623330626432356339326434333431393065353139323235353630396139342e706e67"><img src="https://camo.githubusercontent.com/0de713cec44a7b863ba877a972f9b3884d1045fcd6e265fae490ae4f3383009b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31623330626432356339326434333431393065353139323235353630396139342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/1b30bd25c92d434190e5192255609a94.png" style="max-width: 100%;"></a></p>
+<hr>
+<ul>
+<li>在C语言中，数组名（如<code class="notranslate">arr</code>）表示该数组的首元素地址。</li>
+<li>当首元素地址向后偏移 <code class="notranslate">i</code> 个位置时，就到达了下标为 <code class="notranslate">i</code> 的元素所在的位置。通过对其进行解引用，就可以获取下标为 <code class="notranslate">i</code> 的元素。这可以表示为 <code class="notranslate">*(arr + i)</code>。</li>
+<li>对于数组访问操作符 <code class="notranslate">[]</code>，它有交换律。将 <code class="notranslate">arr[i]</code> 转换为 <code class="notranslate">*(arr + i)</code> 时，括号中的操作数可以进行交换，变成 <code class="notranslate">*(i + arr)</code>。</li>
+<li>进一步推导，<code class="notranslate">*(i + arr)</code> 也可以写成 <code class="notranslate">i[arr]</code>。</li>
+<li>因此，<code class="notranslate">*(arr + i)</code> 可以等价于 <code class="notranslate">arr[i]</code>，同时也可以写成 <code class="notranslate">i[arr]</code>。</li>
+<li>那么<code class="notranslate">*(i + arr)</code>是否可以写成<code class="notranslate">i[arr]</code>呢</li>
+</ul>
+<p>此刻我们再进行代码演示一下~~</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4edea21d35875467dfa02c138690430d767a32030434d5bc76d414802570f735/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65646465653735343939646434303136383063313339646630333132336566302e706e67"><img src="https://camo.githubusercontent.com/4edea21d35875467dfa02c138690430d767a32030434d5bc76d414802570f735/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65646465653735343939646434303136383063313339646630333132336566302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/eddee75499dd401680c139df03123ef0.png" style="max-width: 100%;"></a></p>
+<hr>
+<ul>
+<li>那这里也可以写成<code class="notranslate">p[i]</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0328e62c3b5c61efbb609aa0926f1cf5a2708d2a8e44e021de4ede10a8c2703f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34336465633131383730383334326363623062653635643932373563336139312e706e67"><img src="https://camo.githubusercontent.com/0328e62c3b5c61efbb609aa0926f1cf5a2708d2a8e44e021de4ede10a8c2703f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34336465633131383730383334326363623062653635643932373563336139312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/43dec118708342ccb0be65d9275c3a91.png" style="max-width: 100%;"></a></p>
+<h3>小结一下</h3>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">arr</span>[<span class="pl-c1">10</span>] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>,<span class="pl-c1">4</span>,<span class="pl-c1">5</span>,<span class="pl-c1">6</span>,<span class="pl-c1">7</span>,<span class="pl-c1">8</span>,<span class="pl-c1">9</span>,<span class="pl-c1">10</span> };
+	<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">p</span> <span class="pl-c1">=</span> <span class="pl-s1">arr</span>;
+
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">10</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">arr</span>[<span class="pl-s1">i</span>]);
+	}
+	<span class="pl-en">printf</span>(<span class="pl-s">"\n\n\n"</span>);
+
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">10</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-c1">*</span>(<span class="pl-s1">arr</span> <span class="pl-c1">+</span> <span class="pl-s1">i</span>));
+	}
+	<span class="pl-en">printf</span>(<span class="pl-s">"\n\n\n"</span>);
+
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">10</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-c1">*</span>(<span class="pl-s1">p</span> <span class="pl-c1">+</span> <span class="pl-s1">i</span>));
+	}
+	<span class="pl-en">printf</span>(<span class="pl-s">"\n\n\n"</span>);
+
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">10</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">p</span>[<span class="pl-s1">i</span>]);
+	}
+	<span class="pl-en">printf</span>(<span class="pl-s">"\n\n\n"</span>);
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li><strong>arr[i] == *(arr + i) == *(p + i) == p[i]</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/083bca21dc78ee541015918a17e01d00355a8e0d32b9dc938b196f05fb1b3522/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31653938366365623539396434353362613439343939353938306335363563372e706e67"><img src="https://camo.githubusercontent.com/083bca21dc78ee541015918a17e01d00355a8e0d32b9dc938b196f05fb1b3522/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31653938366365623539396434353362613439343939353938306335363563372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/1e986ceb599d453ba494995980c565c7.png" style="max-width: 100%;"></a></p></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

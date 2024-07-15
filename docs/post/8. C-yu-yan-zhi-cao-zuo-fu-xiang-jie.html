@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## 一、算术操作符
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/b665f25d5d764c4697b5a003dd2fb930.png)
+
+
+
+
+- 除了 【%】 操作符之外，其他的几个操作符可以作用于整数和浮点数。">
+<meta property="og:title" content="8. C语言之操作符详解">
+<meta property="og:description" content="## 一、算术操作符
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/b665f25d5d764c4697b5a003dd2fb930.png)
+
+
+
+
+- 除了 【%】 操作符之外，其他的几个操作符可以作用于整数和浮点数。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/8.%20C-yu-yan-zhi-cao-zuo-fu-xiang-jie.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>8. C语言之操作符详解</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">8. C语言之操作符详解</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/32" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>一、算术操作符</h2>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/262def8bd62593e78bf1f4b7e0d82daca7c0cd03686ba8fcc4466cf310879f92/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62363635663235643564373634633436393762356130303364643266623933302e706e67"><img src="https://camo.githubusercontent.com/262def8bd62593e78bf1f4b7e0d82daca7c0cd03686ba8fcc4466cf310879f92/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62363635663235643564373634633436393762356130303364643266623933302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/b665f25d5d764c4697b5a003dd2fb930.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>除了 【%】 操作符之外，其他的几个操作符可以作用于整数和浮点数。</p>
+</li>
+<li>
+<p>对于【/】 操作符如果两个操作数都为整数，执行<strong>整数除法</strong>。而只要<strong>有浮点数执行的就是浮点数除法。</strong></p>
+</li>
+<li>
+<p>【%】 操作符的两个操作数必须为整数。返回的是整除之后的余数。</p>
+</li>
+<li>
+<p>整数除法：</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0e0b6f416ce28da9387640dfec3f469fbbf996d9fae66440b72e96d7865db4f3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31353831373566633436383634613665396133346136343338643736376163652e706e67"><img src="https://camo.githubusercontent.com/0e0b6f416ce28da9387640dfec3f469fbbf996d9fae66440b72e96d7865db4f3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31353831373566633436383634613665396133346136343338643736376163652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/158175fc46864a6e9a34a6438d767ace.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>浮点数除法：</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5f1757e942b3ea8b79bfe016700721e12e3498d4a4e6cc4eb762dabe33f2cc1b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35633739323161383538656634616531623736646162373765386438353531612e706e67"><img src="https://camo.githubusercontent.com/5f1757e942b3ea8b79bfe016700721e12e3498d4a4e6cc4eb762dabe33f2cc1b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35633739323161383538656634616531623736646162373765386438353531612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/5c7921a858ef4ae1b76dab77e8d8551a.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>取余操作符</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/56b69250a317d654bc1365a8517f47cb5bf73ec61ff78053e2584ec9dd27e7c5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61396264393636303862376234373535613064323030386362643834353166382e706e67"><img src="https://camo.githubusercontent.com/56b69250a317d654bc1365a8517f47cb5bf73ec61ff78053e2584ec9dd27e7c5/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61396264393636303862376234373535613064323030386362643834353166382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/a9bd96608b7b4755a0d2008cbd8451f8.png" style="max-width: 100%;"></a></p>
+<h2>二、移位操作符</h2>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6a1ebe0bdf6b0130ad0c0fa30b98631e6239333d90699a4ef5e84b6e0677933c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62666334633839653831643534656538386365363737333964656263346561322e706e67"><img src="https://camo.githubusercontent.com/6a1ebe0bdf6b0130ad0c0fa30b98631e6239333d90699a4ef5e84b6e0677933c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62666334633839653831643534656538386365363737333964656263346561322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/bfc4c89e81d54ee88ce67739debc4ea2.png" style="max-width: 100%;"></a></p>
+<h3>1、 原码、反码、补码</h3>
+<ul>
+<li>其实我们经常能听到2进制、8进制、10进制、16进制这样的讲法，那是什么意思呢？其实2进制、8进制、10进制、16进制是数值的不同表示形式而已。</li>
+<li>比如：数值15的各种进制的表示形式：</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c1">15</span>的<span class="pl-c1">2</span>进制：<span class="pl-c1">1111</span>
+<span class="pl-c1">15</span>的<span class="pl-c1">8</span>进制：<span class="pl-c1">17</span>
+<span class="pl-c1">15</span>的<span class="pl-c1">10</span>进制：<span class="pl-c1">15</span>
+<span class="pl-c1">15</span>的<span class="pl-c1">16</span>进制：F</pre></div>
+<ul>
+<li>
+<p>对于一个整数来说，在内存中的二进制表示形式有 <strong>【原码】【反码】【补码】</strong> 三种，写成二进制位的形式也就是32位二进制，例如整数4，它的原码即为<code class="notranslate">0 0000000000000000000000000000100</code>。最高位对于32个二进制位来说，叫做<code class="notranslate">符号位</code></p>
+<ul>
+<li>符号位是0，表示正整数</li>
+<li>符号位是1，表示负整数</li>
+</ul>
+</li>
+<li>
+<p>而对于一个正数来说，它的原码、反码、补码都是相同的</p>
+</li>
+<li>
+<p>对于一个负数来说：</p>
+<ul>
+<li>原码：直接将数值按照正负数的形式翻译成二进制得到的就是原码。</li>
+<li>反码：将原码的符号位不变，其他位依次按位取反就可以得到反码。</li>
+<li>补码：反码+1就得到补码。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>对于整形来说：数据存放内存中其实存放的是补码。</li>
+<li>为什么呢？</li>
+</ul>
+<blockquote>
+<p>在计算机系统中，数值⼀律⽤补码来表⽰和存储。原因在于，使⽤补码，可以将符号位和数值域统⼀处理；同时，加法和减法也可以统⼀处理（CPU只有加法器）此外，补码与原码相互转换，其运算过程是相同的，不需要额外的硬件电路。</p>
+</blockquote>
+<hr>
+<ul>
+<li>在计算机中都是使用二进制数的<strong>补码</strong>进行运算的，但是在计算完之后输出的结果都要再转化为<strong>原码</strong>的形式</li>
+</ul>
+<h3>2、左移操作符</h3>
+<p><strong>【移位规则】：左边抛弃、右边补0</strong></p>
+<ul>
+<li>下面计算一个数字4左移1位后的，将其运算后的结果放到b里面去。</li>
+<li>在内存中进行计算都是使用<strong>补码的形式</strong>，因为依次写出<code class="notranslate">4</code>的原、反、补码，因为它是<strong>正数</strong>，所以均是相同的</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">4</span>;
+	<span class="pl-c">//0 0000000000000000000000000000100 - 4的原码</span>
+	<span class="pl-c">//0 0000000000000000000000000000100 - 4的反码</span>
+	<span class="pl-c">//0 0000000000000000000000000000100 - 4的补码</span>
+
+	<span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span> &lt;&lt; <span class="pl-c1">1</span>;		<span class="pl-c">//把a向左移动一位</span>
+	<span class="pl-en">printf</span>(<span class="pl-s">"a = %d, b = %d\n"</span>, <span class="pl-s1">a</span>, <span class="pl-s1">b</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/bce0a8dfcfc43adab72f8342f99d23d175311d3cc852f148b080a938ae747c2e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38343432666362343439616534663338383439626135643237396333353361342e706e67"><img src="https://camo.githubusercontent.com/bce0a8dfcfc43adab72f8342f99d23d175311d3cc852f148b080a938ae747c2e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38343432666362343439616534663338383439626135643237396333353361342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/8442fcb449ae4f38849ba5d279c353a4.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>从上图也可以看出，执行<strong>左边丢弃，右边补0</strong>，也就是相当于<code class="notranslate">乘2</code>，结果就是<code class="notranslate">8</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/840032b1b65f3a8b5597f80121c5d07331fb3dd6e16b48dc075c9aee10cafbd4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37653332373365643762666534373634613761366634363234313566343236382e706e67"><img src="https://camo.githubusercontent.com/840032b1b65f3a8b5597f80121c5d07331fb3dd6e16b48dc075c9aee10cafbd4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37653332373365643762666534373634613761366634363234313566343236382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/7e3273ed7bfe4764a7a6f462415f4268.png" style="max-width: 100%;"></a></p>
+<hr>
+<p><strong>接着我们再来看看负数的情况：</strong></p>
+<ul>
+<li>对于负数来说，首先要进行的就是<strong>取反操作，然后+1</strong>就算出了他的补码，然后再进行移位</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">-4</span>;
+	<span class="pl-c">//1 0000000000000000000000000000100 - -4的原码</span>
+	<span class="pl-c">//1 1111111111111111111111111111011 - -4的反码</span>
+	<span class="pl-c">//1 1111111111111111111111111111100 - -4的补码</span>
+
+	<span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span> &lt;&lt; <span class="pl-c1">1</span>;		<span class="pl-c">//把a向左移动一位</span>
+
+	<span class="pl-c">//1 1111111111111111111111111111000 - -4移位后的的补码</span>
+	<span class="pl-c">//1 1111111111111111111111111110111 - -4移位后的的反码</span>
+	<span class="pl-c">//1 0000000000000000000000000001000 - -4移位后的的原码</span>
+	<span class="pl-en">printf</span>(<span class="pl-s">"a = %d, b = %d\n"</span>, <span class="pl-s1">a</span>, <span class="pl-s1">b</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/28a040e1297332a311ffe4d0fb9bd911056a7fea8a1119282a2818d6355f3274/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63323963666633383064666434613162396263303861386233613033373162342e706e67"><img src="https://camo.githubusercontent.com/28a040e1297332a311ffe4d0fb9bd911056a7fea8a1119282a2818d6355f3274/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63323963666633383064666434613162396263303861386233613033373162342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/c29cff380dfd4a1b9bc08a8b3a0371b4.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们再将移位后的结果再次变成原码的操作，也就是 <strong>-1再取反</strong> 即可变成原码</li>
+<li>最后得出的结果再转换为十进制便是<code class="notranslate">8</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2196250bb71ad92d33b55863e4caadfcd9ca4c3f21fc7eb58519a4327e937274/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37343037373963356231386434383837386538323139636466393433666630372e706e67"><img src="https://camo.githubusercontent.com/2196250bb71ad92d33b55863e4caadfcd9ca4c3f21fc7eb58519a4327e937274/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37343037373963356231386434383837386538323139636466393433666630372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/740779c5b18d48878e8219cdf943ff07.png" style="max-width: 100%;"></a></p>
+<h3>3、右移操作符</h3>
+<p><strong>【移位规则】：</strong></p>
+<ul>
+<li>
+<p>逻辑移位</p>
+<ul>
+<li>左边用0填充，右边丢弃</li>
+</ul>
+</li>
+<li>
+<p>算术移位</p>
+<ul>
+<li>左边用原该值的符号位填充，右边丢弃</li>
+</ul>
+</li>
+<li>
+<p>对于右移操作符，和左移不同的是它的运算规则比较复杂，在不同编译器下对于移位后的符号位填充是有所不同的，但是在<strong>VS</strong>下采用的是第二种<code class="notranslate">算术移位</code></p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/a5eb77c7db19afa68d54220ce600889a5a44c3274f9fd1e1bf2813b688ca3a95/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37353437663566396130343734353863393835643233366532646533326332622e706e67"><img src="https://camo.githubusercontent.com/a5eb77c7db19afa68d54220ce600889a5a44c3274f9fd1e1bf2813b688ca3a95/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37353437663566396130343734353863393835643233366532646533326332622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/7547f5f9a047458c985d236e2de32c2b.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>对于右移从结果来看就相当于是缩小的形式</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/74d5c74a04c75ce9fe383b7c0c4119a85104c3be45aeff381f763d65ad2ae544/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38376662633461616564623534366134613966373762373935663335343034372e706e67"><img src="https://camo.githubusercontent.com/74d5c74a04c75ce9fe383b7c0c4119a85104c3be45aeff381f763d65ad2ae544/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38376662633461616564623534366134613966373762373935663335343034372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/87fbc4aaedb546a4a9f77b795f354047.png" style="max-width: 100%;"></a></p>
+<hr>
+<p><strong>然后我们再来看看负数的情况：</strong></p>
+<ul>
+<li>对于负数来说，会在计算机内部转化成补码再运算，运算完成后再转换成原码</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/696e2ffbaeaaa8e5f1954972a2d7deb5d081a9af045ce23c34dd6571f3c6dd16/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34373339393230306536353634386537613261633661353037346661623461332e706e67"><img src="https://camo.githubusercontent.com/696e2ffbaeaaa8e5f1954972a2d7deb5d081a9af045ce23c34dd6571f3c6dd16/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34373339393230306536353634386537613261633661353037346661623461332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/47399200e65648e7a2ac6a5074fab4a3.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>如下图所示：</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0d0113c8e3bf27dabcaca5d75a32664769cfa8ecf60d9907ba35053742fcc90c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33623565666231636430343634653061613861623635643666336663643838362e706e67"><img src="https://camo.githubusercontent.com/0d0113c8e3bf27dabcaca5d75a32664769cfa8ecf60d9907ba35053742fcc90c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33623565666231636430343634653061613861623635643666336663643838362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/3b5efb1cd0464e0aa8ab65d6f3fcd886.png" style="max-width: 100%;"></a></p>
+<ul>
+<li><strong>对于移位运算符，不要移动负数位，这个是标准未定义的</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">num</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+<span class="pl-s1">num</span>&gt;&gt;<span class="pl-c1">-1</span>;<span class="pl-c">//error</span></pre></div>
+<h2>三、位操作符</h2>
+<h3>1、按位与【&amp;】</h3>
+<ul>
+<li><strong>【规则】：全1为1，有0为0</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//按位与 - 全1为1，有0为0</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">3</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">-5</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">c</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span> <span class="pl-c1">&amp;</span> <span class="pl-s1">b</span>;
+	<span class="pl-en">printf</span>(<span class="pl-s">"c = %d\n"</span>, <span class="pl-s1">c</span>);
+	<span class="pl-c">//00000000000000000000000000000011 - 3的原码、反码、补码</span>
+
+	<span class="pl-c">//10000000000000000000000000000101 - -5的原码</span>
+	<span class="pl-c">//11111111111111111111111111111010 - -5的反码</span>
+	<span class="pl-c">//11111111111111111111111111111011 - -5的补码</span>
+
+	<span class="pl-c">//00000000000000000000000000000011</span>
+	<span class="pl-c">//11111111111111111111111111111011</span>
+	<span class="pl-c">//00000000000000000000000000000011 - 3【补码即为原码】</span>
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>根据<code class="notranslate">按位与</code>的运算规则，我们就可以得出最后的结果为3</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/030bc8cee4d266fdc5635d1c4dcb4824f1ad1927adbeec64b3cd3123cf87ac64/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65353266666664636137333534653734393339656636643433363466353765652e706e67"><img src="https://camo.githubusercontent.com/030bc8cee4d266fdc5635d1c4dcb4824f1ad1927adbeec64b3cd3123cf87ac64/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65353266666664636137333534653734393339656636643433363466353765652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/e52fffdca7354e74939ef6d4364f57ee.png" style="max-width: 100%;"></a></p>
+<h3>2、按位或【|】</h3>
+<ul>
+<li><strong>【规则】：有1为1，全0为0</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//按位或 - 有1为1，全0为0</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">3</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">-5</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">c</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span> | <span class="pl-s1">b</span>;
+	<span class="pl-en">printf</span>(<span class="pl-s">"c = %d\n"</span>, <span class="pl-s1">c</span>);
+	<span class="pl-c">//00000000000000000000000000000011 - 3的原码、反码、补码</span>
+
+	<span class="pl-c">//10000000000000000000000000000101 - -5的原码</span>
+	<span class="pl-c">//11111111111111111111111111111010 - -5的反码</span>
+	<span class="pl-c">//11111111111111111111111111111011 - -5的补码</span>
+
+	<span class="pl-c">//00000000000000000000000000000011</span>
+	<span class="pl-c">//11111111111111111111111111111011</span>
+<span class="pl-c">// --------------------------------------</span>
+	<span class="pl-c">//11111111111111111111111111111011 |</span>
+	<span class="pl-c">//11111111111111111111111111111010 |</span>
+	<span class="pl-c">//10000000000000000000000000000101 | - 5</span>
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>根据<code class="notranslate">按位或</code>的运算规则，我们就可以得出最后的结果为-5</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/38c2f149b88b52e8d3b6723c39f2bb120bb8c078f2df4abb3fddc51a055e30f8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65643031353235633266313234316333626237633630633437376536646137662e706e67"><img src="https://camo.githubusercontent.com/38c2f149b88b52e8d3b6723c39f2bb120bb8c078f2df4abb3fddc51a055e30f8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65643031353235633266313234316333626237633630633437376536646137662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/ed01525c2f1241c3bb7c60c477e6da7f.png" style="max-width: 100%;"></a></p>
+<h3>3、按位异或【^】</h3>
+<ul>
+<li><strong>【规则】：相同为0，相异为1</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//按位异或 - 相同为0，相异为1</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">3</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">-5</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">c</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span> ^ <span class="pl-s1">b</span>;
+	<span class="pl-en">printf</span>(<span class="pl-s">"c = %d\n"</span>, <span class="pl-s1">c</span>);
+	<span class="pl-c">//00000000000000000000000000000011 - 3的原码、反码、补码</span>
+
+	<span class="pl-c">//10000000000000000000000000000101 - -5的原码</span>
+	<span class="pl-c">//11111111111111111111111111111010 - -5的反码</span>
+	<span class="pl-c">//11111111111111111111111111111011 - -5的补码</span>
+
+	<span class="pl-c">//00000000000000000000000000000011</span>
+	<span class="pl-c">//11111111111111111111111111111011</span>
+<span class="pl-c">// --------------------------------------</span>
+	<span class="pl-c">//11111111111111111111111111111000</span>
+	<span class="pl-c">//11111111111111111111111111110111</span>
+	<span class="pl-c">//10000000000000000000000000001000 -&gt; -8</span>
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>根据<code class="notranslate">按位异或</code>的运算规则，我们就可以得出最后的结果为-8</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d26f994691cd3268817272eb7d23f2b1c6ccd7d383880488d5d05e8147d66a41/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61643662633236343462306534613038393231373665653337363761653361642e706e67"><img src="https://camo.githubusercontent.com/d26f994691cd3268817272eb7d23f2b1c6ccd7d383880488d5d05e8147d66a41/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61643662633236343462306534613038393231373665653337363761653361642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/ad6bc2644b0e4a0892176ee3767ae3ad.png" style="max-width: 100%;"></a></p>
+<p><strong>注意：</strong></p>
+<ul>
+<li><strong>两个相同的数异或为0</strong>【<code class="notranslate">a ^ a = 0</code>】</li>
+<li><strong>任何数和0异或均为那个数本身</strong>【<code class="notranslate">a ^ 0 = a</code>】</li>
+</ul>
+<hr>
+<h3>4、按位取反【~】</h3>
+<p><strong>【规则】：1变0, 0变1</strong></p>
+<ul>
+<li>取反直接就可以将<strong>1变成0，0变成1</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> ~<span class="pl-s1">a</span>;
+	<span class="pl-en">printf</span>(<span class="pl-s">"b = %d\n"</span>, <span class="pl-s1">b</span>);
+
+	<span class="pl-c">//00000000000000000000000000000000</span>
+	<span class="pl-c">//11111111111111111111111111111111  按位取反【补码】	</span>
+	<span class="pl-c">//11111111111111111111111111111110	【反码】</span>
+	<span class="pl-c">//10000000000000000000000000000001 -&gt; -1【原码】</span>
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>那么0按位取反之后就变成了<code class="notranslate">-1</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/bc198ceb1942897ce2c0626e04e4cf0703350821f4e868b47de08b6e71ef39b3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39306563666430663861313034323466626338376538323333386130383334622e706e67"><img src="https://camo.githubusercontent.com/bc198ceb1942897ce2c0626e04e4cf0703350821f4e868b47de08b6e71ef39b3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39306563666430663861313034323466626338376538323333386130383334622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/90ecfd0f8a10424fbc87e82338a0834b.png" style="max-width: 100%;"></a></p>
+<h3>5、两道面试题</h3>
+<p><strong>两数交换</strong></p>
+<ul>
+<li>
+<p>我们之前学的是使用第三方临时变量做一个存放，进行交换</p>
+</li>
+<li>
+<p>还有以一种方法就是通过加减的方式来交换一下这两个数</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">3</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">5</span>;
+	<span class="pl-en">printf</span>(<span class="pl-s">"a = %d, b = %d\n"</span>, <span class="pl-s1">a</span>, <span class="pl-s1">b</span>);
+
+	<span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span> <span class="pl-c1">+</span> <span class="pl-s1">b</span>;
+	<span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span> <span class="pl-c1">-</span> <span class="pl-s1">b</span>;	
+	<span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span> <span class="pl-c1">-</span> <span class="pl-s1">b</span>;		
+
+	<span class="pl-en">printf</span>(<span class="pl-s">"a = %d, b = %d\n"</span>, <span class="pl-s1">a</span>, <span class="pl-s1">b</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>首先将两个数相加放到a中，再将a-b的值放到b中，此时a中右a和b的值，b中有a的值，最后再将a-b就是b的值</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/fb7f86a1ef04f26f065385356007d17ba410207b5fb0f1f35758b580d0cf0db9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31643961633530323330313934393138623464303930633430656433653534382e706e67"><img src="https://camo.githubusercontent.com/fb7f86a1ef04f26f065385356007d17ba410207b5fb0f1f35758b580d0cf0db9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31643961633530323330313934393138623464303930633430656433653534382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/1d9ac50230194918b4d090c40ed3e548.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>上面这种方法有一点不太好，就是当两个很大的数的时候，会出现数据溢出的情况，所以我们还需要另外一种方法：使用<strong>异或</strong></li>
+</ul>
+<hr>
+<ul>
+<li>首先<code class="notranslate">a = a ^ b</code>将a和b异或后的结果暂存到a里面去，然后再去异或b的话就相当于是<code class="notranslate">a ^ b ^ b</code>，根据规则便可以得出结果为a，将其放入b中</li>
+<li>然后<code class="notranslate">a = a ^ b</code>，就相当于是<code class="notranslate">a ^ b ^ a</code>，那么结果就是b，将其放入a中</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">3</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">5</span>;
+	<span class="pl-en">printf</span>(<span class="pl-s">"a = %d, b = %d\n"</span>, <span class="pl-s1">a</span>, <span class="pl-s1">b</span>);
+
+	<span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span> ^ <span class="pl-s1">b</span>;
+	<span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span> ^ <span class="pl-s1">b</span>;		<span class="pl-c">//a ^ b ^ b = a ^ 0 = a</span>
+	<span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span> ^ <span class="pl-s1">b</span>;		<span class="pl-c">//a ^ b ^ a = b ^ 0 = b</span>
+
+	<span class="pl-en">printf</span>(<span class="pl-s">"a = %d, b = %d\n"</span>, <span class="pl-s1">a</span>, <span class="pl-s1">b</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>最后打印出来就是交换之后的结果</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/fa8c317f8d5470ef8b3dad89ba96515c5d1537efe2f072551b742a461de7e539/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63363632663266383465373134633437393764633531386632646466646231332e706e67"><img src="https://camo.githubusercontent.com/fa8c317f8d5470ef8b3dad89ba96515c5d1537efe2f072551b742a461de7e539/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63363632663266383465373134633437393764633531386632646466646231332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/c662f2f84e714c4797dc518f2ddfdb13.png" style="max-width: 100%;"></a></p>
+<h3>6、进制定位</h3>
+<h4>将变量a的第n位置为1</h4>
+<p><strong>思路分析：</strong></p>
+<ul>
+<li>首先就是要使用到我们上面学习过的<code class="notranslate">按位或 | </code>运算，将第三位按位或上一个1，那么这一位就变成了1，但是又不想让其他位置发生变化，那此时就<code class="notranslate">让其他位按位或上一个0</code>即可，<strong>若是那个位上为0，那么就是0，若是那个位上为1，那也为1</strong>，那也就是<code class="notranslate">00000000000000000000000000000100</code>，但是要如何去获取到这个二进制数呢，此时就又需要使用到我们上面讲到过的一个操作符叫做<code class="notranslate">左移&lt;&lt;</code>那也就是将一个数扩大两倍，这里我们对1进行操作，扩大2倍就是2，再扩大两倍就是我们想要的4，即<code class="notranslate">1 &lt;&lt; 2</code></li>
+<li>具体的表达式应该为：<code class="notranslate">[a = a | 1 &lt;&lt; 2]</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0e609ee5fd40a86eb2a5dd053e80c094fdc64be160a238ef78a890bce6e284ae/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33623665313136306561363734333865386538343465393334633335643762642e706e67"><img src="https://camo.githubusercontent.com/0e609ee5fd40a86eb2a5dd053e80c094fdc64be160a238ef78a890bce6e284ae/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33623665313136306561363734333865386538343465393334633335643762642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/3b6e1160ea67438e8e844e934c35d7bd.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>此时我们已经完成了第一步，若是你想要置哪个位上的数为1的话，那就修改表达式的最后一个数字即可，这样比较麻烦，需要每次运行前做一个修改，此时我们就来实现题目中的需求：</p>
+</li>
+<li>
+<p>可以再来修改一个位上的数，若是我们要将第5位置为1的话，左移4位即可那也就是<code class="notranslate">1 &lt;&lt; 4</code>，最后的结果就是26</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2dd969082d9facca286618277db3f8413ad911b9654729a93d0739cfe354dadc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33393231653135373062316534383039393361343065323562343861623338662e706e67"><img src="https://camo.githubusercontent.com/2dd969082d9facca286618277db3f8413ad911b9654729a93d0739cfe354dadc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33393231653135373062316534383039393361343065323562343861623338662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/3921e1570b1e480993a40e25b48ab38f.png" style="max-width: 100%;"></a></p>
+<p><strong>规律总结</strong></p>
+<ul>
+<li>若是要置【第3位】的数为1的话，使用数字1左移2位<code class="notranslate">1 &lt;&lt; 2</code>；</li>
+<li>若是要置【第5位】的数为1的话，使用数字1左移4位<code class="notranslate">1 &lt;&lt; 4</code>;</li>
+<li>若是要置【第n位】的数为1的话，使用数字1左移(n - 1)位<code class="notranslate">1 &lt;&lt; (n - 1)</code>;</li>
+</ul>
+<hr>
+<ul>
+<li>那么此时的话就可以将这个n作为我们自己输入的一个变量，每次想要修改哪一个直接输入即可</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">n</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+
+	<span class="pl-en">scanf</span>(<span class="pl-s">"%d"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">n</span>);
+	<span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span> | <span class="pl-c1">1</span> &lt;&lt; (<span class="pl-s1">n</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>);
+	<span class="pl-c">//把变量a的第n为置1</span>
+	<span class="pl-c">//000000000000000000001010</span>
+	<span class="pl-c">//000000000000000000010000</span>
+<span class="pl-c">//--------------------------------</span>
+	<span class="pl-c">//000000000000000000001110</span>
+	<span class="pl-en">printf</span>(<span class="pl-s">"a = %d\n"</span>, <span class="pl-s1">a</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ea35e63a5849532f1a2650ad8f2459e761130e192ef79f36a05584be6c610d48/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62653337643465356461363934613931393537663238316632323839316634662e706e67"><img src="https://camo.githubusercontent.com/ea35e63a5849532f1a2650ad8f2459e761130e192ef79f36a05584be6c610d48/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62653337643465356461363934613931393537663238316632323839316634662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/be37d4e5da694a91957f281f22891f4f.png" style="max-width: 100%;"></a></p>
+<hr>
+<h4>将变量a的第n位置为0</h4>
+<ul>
+<li>要将一个二进制位置为0的话就又需要使用到我们上面所学习过的<code class="notranslate">按位与&amp;</code>，也就是将需要置0的那一位按位与上一个0即可，<strong>因为任何数和0进行与都为0</strong>，但是呢又不能使得其他二进制位发生改变，那就要使其他二进制位按位与上一个1即可，<strong>若是那个位上为0，那么就是0，若是那个位上为1，那也为1</strong>，那此时我们再对刚才的第三位进行一个按位与即<code class="notranslate">11111111111111111111111111111011</code></li>
+<li>刚才使用的1 &lt;&lt; 2，即<code class="notranslate">00000000000000000000000000000100</code>，仔细观察就可以看出这两个二进制位其实每个位呈现的都是一个相反的趋势，那么我们在上面使用到的位操作符中哪个具有取反的功能呢，就是<code class="notranslate">按位取反</code>，那其实只需要将刚才求出的那个表达式外层再加上一个按位取反符就可以了</li>
+<li>具体的表达式应该为：<code class="notranslate">[a = a &amp; ~(1 &lt;&lt; (n - 1))]</code></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b19a824c5ae74240d3e135fcb7ee71f4ef23dbba50e56f372b8b70b8cf762a30/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39353065373138393133336634313761626563396637616439383934363833652e706e67"><img src="https://camo.githubusercontent.com/b19a824c5ae74240d3e135fcb7ee71f4ef23dbba50e56f372b8b70b8cf762a30/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39353065373138393133336634313761626563396637616439383934363833652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/950e7189133f417abec9f7ad9894683e.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">n</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+
+	<span class="pl-k">while</span> (<span class="pl-en">scanf</span>(<span class="pl-s">"%d"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">n</span>)<span class="pl-c1">!=</span><span class="pl-c1">EOF</span>)
+	{
+		<span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span> | <span class="pl-c1">1</span> &lt;&lt; (<span class="pl-s1">n</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>);
+		<span class="pl-c">//把变量a的第n为置1</span>
+		<span class="pl-c">//000000000000000000001010</span>
+		<span class="pl-c">//000000000000000000010000</span>
+	<span class="pl-c">//--------------------------------</span>
+		<span class="pl-c">//000000000000000000001110</span>
+		<span class="pl-en">printf</span>(<span class="pl-s">"置1：a = %d\n"</span>, <span class="pl-s1">a</span>);
+
+
+		<span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span> <span class="pl-c1">&amp;</span> ~(<span class="pl-c1">1</span> &lt;&lt; (<span class="pl-s1">n</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>));
+		<span class="pl-c">//把变量a的第n为置0</span>
+		<span class="pl-c">//000000000000000000001110</span>
+		<span class="pl-c">//111111111111111111111011</span>
+	<span class="pl-c">//--------------------------------</span>
+		<span class="pl-c">//000000000000000000001010</span>
+		<span class="pl-en">printf</span>(<span class="pl-s">"置0：a = %d\n"</span>, <span class="pl-s1">a</span>);
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h2>四、赋值操作符</h2>
+<ul>
+<li>赋值操作符是一个很棒的操作符，他可以让你得到一个你之前不满意的值。也就是你可以给自己重新赋值</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">weight</span> <span class="pl-c1">=</span> <span class="pl-c1">120</span>;	<span class="pl-c">//体重</span>
+<span class="pl-s1">weight</span> <span class="pl-c1">=</span> <span class="pl-c1">89</span>;		<span class="pl-c">//不满意就赋值</span>
+<span class="pl-smi">double</span> <span class="pl-s1">salary</span> <span class="pl-c1">=</span> <span class="pl-c1">10000.0</span>;
+<span class="pl-s1">salary</span> <span class="pl-c1">=</span> <span class="pl-c1">20000.0</span>;	<span class="pl-c">//使用赋值操作符赋值</span></pre></div>
+<ul>
+<li>不仅如此，赋值操作符还可以进行连续使用</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span> <span class="pl-c1">+=</span> <span class="pl-c1">10</span>;</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e0d9cfcc8b26089d5585407ca87d897754c5d3fce54d68a57fcc5ba715f4799d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37323839366335343065393234393637396364376133653664663430303861362e706e67"><img src="https://camo.githubusercontent.com/e0d9cfcc8b26089d5585407ca87d897754c5d3fce54d68a57fcc5ba715f4799d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37323839366335343065393234393637396364376133653664663430303861362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/72896c540e9249679cd7a3e6df4008a6.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>但是对于上面这样的代码其实是不太好的~~</li>
+<li>但如果写成像下面这样的话就显得<strong>非常清爽而且易于调试</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-s1">a</span> <span class="pl-c1">+=</span> <span class="pl-c1">10</span>;
+<span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span>;</pre></div>
+<h3>1、复合赋值符</h3>
+<ul>
+<li>对于赋值操作符来说，还可以和其他操作符进行一个复合的操作</li>
+<li>例如：【+=】、【-=】、【*=】、【/=】、【%=】、【&gt;&gt;=】、【&lt;&lt;=】、【^=】等等~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b28fb206e5e69c7b142fe290e8ce73ad6555545cd4f7ef58a83c73f273bf69b3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39323734356230626463656534373539386531666664386365656632663561352e706e67"><img src="https://camo.githubusercontent.com/b28fb206e5e69c7b142fe290e8ce73ad6555545cd4f7ef58a83c73f273bf69b3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39323734356230626463656534373539386531666664386365656632663561352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/92745b0bdcee47598e1ffd8ceef2f5a5.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7f39374d4515577d1307f8c4e8c7f049355388d2e02be9991334538f5e42cfef/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65373634383662386433373934623635393133373232336632633035306465622e706e67"><img src="https://camo.githubusercontent.com/7f39374d4515577d1307f8c4e8c7f049355388d2e02be9991334538f5e42cfef/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65373634383662386433373934623635393133373232336632633035306465622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/e76486b8d3794b659137223f2c050deb.png" style="max-width: 100%;"></a></p>
+<h2>五、单目操作符</h2>
+<h3>1、单目操作符介绍</h3>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/37529c025684b95a32c3b396e61c10e77ddd9f2595774845f5248a5663af98b2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38613261613335636333653334643638613463646134393339333531643464332e706e67"><img src="https://camo.githubusercontent.com/37529c025684b95a32c3b396e61c10e77ddd9f2595774845f5248a5663af98b2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38613261613335636333653334643638613463646134393339333531643464332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/8a2aa35cc3e34d68a4cda4939351d4d3.png" style="max-width: 100%;"></a></p>
+<h3>2、【!】逻辑反操作</h3>
+<ul>
+<li>对于逻辑取反操作符来说，就是<code class="notranslate">[真变假，假变真]</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">flag</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-k">if</span> (!<span class="pl-s1">flag</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"haha\n"</span>);
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d28c7a66352375710dc7be4d4b1be4c17a01d6e46d4a92cc95af099be8e4b698/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36616638323132373863353834356262393031306134316634633631383966312e706e67"><img src="https://camo.githubusercontent.com/d28c7a66352375710dc7be4d4b1be4c17a01d6e46d4a92cc95af099be8e4b698/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36616638323132373863353834356262393031306134316634633631383966312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/6af821278c5845bb9010a41f4c6189f1.png" style="max-width: 100%;"></a></p>
+<h3>3、【&amp;】和【*】</h3>
+<ul>
+<li>【&amp;】来说叫做取地址操作符，可以获取一个变量在内存中的地址</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5e97f81cdf0b00947dab9e3da11a3615bc38fdf280f7e07b801b68d579b04267/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38356531393831396364666534643534383431343830303933373739393437612e706e67"><img src="https://camo.githubusercontent.com/5e97f81cdf0b00947dab9e3da11a3615bc38fdf280f7e07b801b68d579b04267/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38356531393831396364666534643534383431343830303933373739393437612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/85e19819cdfe4d54841480093779947a.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们还可以将其给到一个指针变量~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b53e4c4e46dd6bd389354fe391fb4755f5dc60c2787b92438b3ff6f3f265f595/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61383235353162396133626434356432623537616138646136636162303031322e706e67"><img src="https://camo.githubusercontent.com/b53e4c4e46dd6bd389354fe391fb4755f5dc60c2787b92438b3ff6f3f265f595/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61383235353162396133626434356432623537616138646136636162303031322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/a82551b9a3bd45d2b57aa8da6cab0012.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>那这个时候我要获取到这个指针所指向的地址就是要用到【*】这个解引用操作符</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ab84ae57371b76f464f6e74d4c33f5b1b80a5c43006150b913fe32b2aaac6c5a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31333235663636353039323234396133396465623537306330633163356565612e706e67"><img src="https://camo.githubusercontent.com/ab84ae57371b76f464f6e74d4c33f5b1b80a5c43006150b913fe32b2aaac6c5a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31333235663636353039323234396133396465623537306330633163356565612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/1325f665092249a39deb570c0c1c5eea.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这一步操作就是在使这个指针变量重新指向一块新的地址，即<code class="notranslate">00000014</code>，转换为十进制也就是【20】</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/11be70d423fba4872c712b997f9f8a5533e7a4998f770c10f5fd7d9d19c94eb4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39646534393538383732613234376333613965386262306430316339643861392e706e67"><img src="https://camo.githubusercontent.com/11be70d423fba4872c712b997f9f8a5533e7a4998f770c10f5fd7d9d19c94eb4/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39646534393538383732613234376333613965386262306430316339643861392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/9de4958872a247c3a9e8bb0d01c9d8a9.png" style="max-width: 100%;"></a></p>
+<h3>4、【-】和【+】</h3>
+<ul>
+<li>对于这两个操作符并不常用，不能完全说只是单目操作符，在特定的场景下它们也可以算是一个<code class="notranslate">双目操作符</code>，例如：<code class="notranslate">-6</code>的话就只一个单目操作符，<code class="notranslate">8 - 3</code>的话就是第一个双目操作符，【+】的话也是同理</li>
+</ul>
+<h3>5、sizeof</h3>
+<ul>
+<li>
+<p>对于sizeof来说，这个操作符是用来计算数据类型的大小的，字节为单位</p>
+</li>
+<li>
+<p>对于<code class="notranslate">sizeof()</code>而言有其特定的返回值打印格式【<code class="notranslate">%zu</code>】</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">p</span>;
+<span class="pl-smi">int</span> <span class="pl-s1">arr</span>[<span class="pl-c1">10</span>];
+
+<span class="pl-en">printf</span>(<span class="pl-s">"%zu\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">a</span>));			<span class="pl-c">//int 4</span>
+<span class="pl-en">printf</span>(<span class="pl-s">"%zu\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">p</span>));			<span class="pl-c">//int 4</span>
+<span class="pl-en">printf</span>(<span class="pl-s">"%zu\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>));		<span class="pl-c">//特殊，计算的是整个数组的大小</span>
+<span class="pl-en">printf</span>(<span class="pl-s">"%zu\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>[<span class="pl-c1">0</span>]));	<span class="pl-c">//int [10] 40</span>
+<span class="pl-en">printf</span>(<span class="pl-s">"%zu\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>[<span class="pl-c1">10</span>]));	<span class="pl-c">//int 4</span></pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6b5d4c04ab97a9a2b532c90bf8a40eb97ac12d99eae5bea8bc3386c5917cf7de/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61666639333162633132616334633339386637383464383930326633356134332e706e67"><img src="https://camo.githubusercontent.com/6b5d4c04ab97a9a2b532c90bf8a40eb97ac12d99eae5bea8bc3386c5917cf7de/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61666639333162633132616334633339386637383464383930326633356134332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/aff931bc12ac4c398f784d8902f35a43.png" style="max-width: 100%;"></a></p>
+<p><strong>sizeof后可省略</strong></p>
+<ul>
+<li>sizeof是一个操作符，而不是函数，函数后面必须带一个括号，而操作符可以不带，下面我们就可以验证一下，后面的（）其实是可以省略的</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/beece760c93aaf46cf92e288398b6ba739aa3ba5fffd02562f551852970dae56/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33313332616663333035393934623232383833343336656433386535333338612e706e67"><img src="https://camo.githubusercontent.com/beece760c93aaf46cf92e288398b6ba739aa3ba5fffd02562f551852970dae56/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33313332616663333035393934623232383833343336656433386535333338612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/3132afc305994b22883436ed38e5338a.png" style="max-width: 100%;"></a></p>
+<p><strong>sizeof()内部表达式不参与计算</strong></p>
+<ul>
+<li>我在sizeof()内部写了一个表达式，这其实也是合法的</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">short</span> <span class="pl-s1">s</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">2</span>;
+	
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">s</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span> <span class="pl-c1">+</span> <span class="pl-c1">2</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-s1">s</span>);
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d0530ce93eae65b29e83662c7b270dd92d6cd9df9fb1b746abdd7fc4319b4131/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64663438353735353038646134643461613134613363306635613463623635322e706e67"><img src="https://camo.githubusercontent.com/d0530ce93eae65b29e83662c7b270dd92d6cd9df9fb1b746abdd7fc4319b4131/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64663438353735353038646134643461613134613363306635613463623635322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/df48575508da4d4aa14a3c0f5a4cb652.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>虽然sizeof()内部是可以放表达式的，但是呢这个表达式是不参与运算的</p>
+</li>
+<li>
+<p>我们在看这个sizeof()最后的结果时其实只需要看这个<code class="notranslate">s</code>即可，短整型为2个字节，那如果这个表达式不计算的话s的值也就不会发生变化了，所以最后打印出来是<code class="notranslate">10</code></p>
+</li>
+</ul>
+<blockquote>
+<p>那为什么这个表达式不参与运算呢？</p>
+</blockquote>
+<ul>
+<li>在编译阶段的时候，表达式就不存在了，已经替换成<strong>short</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/15ce84d1c8597c62d51daf58500050b82d820937ff5ac74a5db3d9a778a34c38/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33353933336333373233613034626131383334376165326363393063616165632e706e67"><img src="https://camo.githubusercontent.com/15ce84d1c8597c62d51daf58500050b82d820937ff5ac74a5db3d9a778a34c38/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33353933336333373233613034626131383334376165326363393063616165632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/35933c3723a04ba18347ae2cc90caaec.png" style="max-width: 100%;"></a></p>
+<p><strong>sizeof() 与数组</strong></p>
+<ul>
+<li>我们来看下面的代码~~</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">void</span> <span class="pl-en">test1</span>(<span class="pl-smi">int</span> <span class="pl-s1">arr</span>[])
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>));
+}
+
+<span class="pl-smi">void</span> <span class="pl-en">test2</span>(<span class="pl-smi">char</span> <span class="pl-s1">ch</span>[])
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">ch</span>));
+}
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">arr</span>[<span class="pl-c1">10</span>] <span class="pl-c1">=</span> {<span class="pl-c1">0</span>};
+	<span class="pl-smi">char</span> <span class="pl-s1">ch</span>[<span class="pl-c1">10</span>] <span class="pl-c1">=</span> {<span class="pl-c1">0</span>};
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>));
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-k">sizeof</span>(<span class="pl-s1">ch</span>));
+	<span class="pl-en">test1</span>(<span class="pl-s1">arr</span>);
+	<span class="pl-en">test2</span>(<span class="pl-s1">ch</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>
+<p>我们要明确，数组名是数组首元素的地址，但是有两个特殊情况</p>
+<ul>
+<li>sizeof(数组名) —— 计算的是<code class="notranslate">整个数组的大小</code>【特殊情况1】</li>
+<li>&amp;数组名 —— 获取<code class="notranslate">整个数组的地址</code>【特殊情况2】</li>
+</ul>
+</li>
+<li>
+<p>首先第一个【sizeof(arr)】，arr表示数组名，那么计算的就是整个数组的大小，这是一个整型数组，数组中有10个元素，每个元素4个字节，那么整个数组的大小就是40个字节</p>
+</li>
+<li>
+<p>对于【sizeof(ch)】而言也是同理，这是一个字符型数组，数组中有10个元素，每个元素1个字节，那么整个数组的大小就是10个字节</p>
+</li>
+<li>
+<p>接下去就是将数组名传入函数中，除了两种特殊的情况而言，数组名就相当于是首元素地址，然后函数形参中便是指针进行接受，那对于一个指针而言，无论它是【整型指针】、【字符型指针】【浮点型指针】均为4个字节，当然这是在32为系统下，若是在64位系统下就为8个字节，这其实取决于计算机内存中<code class="notranslate">地址总线</code>的长度，有兴趣可以去了解一下</p>
+</li>
+<li>
+<p>那既然上面说到一个指针均为4个字节，就可以得出为什么最后一个<code class="notranslate">sizeof(ch)</code>为4了，这也只是在求一个指针的大小，不要和字符串数据所占字节数混淆了</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/dd250b73e6cfc4f02146daa4f527f75a708a8b5c9ba61134fe54f9935ccb2d8e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38373239346163643036656434633865623962616339666431663634616366312e706e67"><img src="https://camo.githubusercontent.com/dd250b73e6cfc4f02146daa4f527f75a708a8b5c9ba61134fe54f9935ccb2d8e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38373239346163643036656434633865623962616339666431663634616366312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/87294acd06ed4c8eb9bac9fd1f64acf1.png" style="max-width: 100%;"></a></p>
+<h3>6、【++】和【- -】</h3>
+<p><strong>前置++和后置++</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+<span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">++</span><span class="pl-s1">a</span>;
+<span class="pl-c">//a = a + 1; b = a;</span>
+
+<span class="pl-en">printf</span>(<span class="pl-s">"a = %d, b = %d\n"</span>, <span class="pl-s1">a</span>, <span class="pl-s1">b</span>);
+<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+<span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span><span class="pl-c1">++</span>;
+<span class="pl-c">//b = a; a = a + 1; </span>
+
+<span class="pl-en">printf</span>(<span class="pl-s">"a = %d, b = %d\n"</span>, <span class="pl-s1">a</span>, <span class="pl-s1">b</span>);</pre></div>
+<ul>
+<li>可以看到，这里的<code class="notranslate">b = ++a</code>相当于就是先让a++，然后再把a的值给到b</li>
+<li>可以看到，这里的<code class="notranslate">b = a++</code>相当于就是先把a的值给到b，然后再让a++</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e3b227fee61f82117f8ded1d10253087f343973659adc91a1956ab48152e3eaa/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62393339333437303233366434663365393730336165336635396561326666342e706e67"><img src="https://camo.githubusercontent.com/e3b227fee61f82117f8ded1d10253087f343973659adc91a1956ab48152e3eaa/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62393339333437303233366434663365393730336165336635396561326666342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/b9393470236d4f3e9703ae3f59ea2ff4.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3a622840d550e27526e28172c2e11c719a5a47841f2dc0beb3f4e77603732d59/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38303232333038383732393534393762613361656565656337656635663634612e706e67"><img src="https://camo.githubusercontent.com/3a622840d550e27526e28172c2e11c719a5a47841f2dc0beb3f4e77603732d59/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38303232333038383732393534393762613361656565656337656635663634612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/802230887295497ba3aeeeec7ef5f64a.png" style="max-width: 100%;"></a></p>
+<hr>
+<p><strong>接着再来看看前置- -和后置- -</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+<span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">--</span><span class="pl-s1">a</span>;
+<span class="pl-c">//a = a - 1; b = a;</span>
+<span class="pl-en">printf</span>(<span class="pl-s">"a = %d, b = %d\n"</span>, <span class="pl-s1">a</span>, <span class="pl-s1">b</span>);
+
+<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+<span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span><span class="pl-c1">--</span>;
+<span class="pl-c">//b = a; a = a - 1; </span>
+
+<span class="pl-en">printf</span>(<span class="pl-s">"a = %d, b = %d\n"</span>, <span class="pl-s1">a</span>, <span class="pl-s1">b</span>);</pre></div>
+<ul>
+<li>对于这里的<code class="notranslate">b = --a</code>相当于就是先让a- -，然后再把a的值给到b</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b9e23911465ffcd702600e51b2f9c5c1b3c68dcc49de69777d4ec0500960e082/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30306630396431633438623034623461393833653937653337623438343236612e706e67"><img src="https://camo.githubusercontent.com/b9e23911465ffcd702600e51b2f9c5c1b3c68dcc49de69777d4ec0500960e082/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30306630396431633438623034623461393833653937653337623438343236612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/00f09d1c48b04b4a983e97e37b48426a.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>对于这里的<code class="notranslate">b = a--</code>相当于就是先把a的值给到b，然后再让a- -</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2e7237a0434af6b7a158d03d4b0176444ebcd90e945cebe5d2920ce1a0c6797a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31623165366334333661363534396435396434306437323737663238643636322e706e67"><img src="https://camo.githubusercontent.com/2e7237a0434af6b7a158d03d4b0176444ebcd90e945cebe5d2920ce1a0c6797a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31623165366334333661363534396435396434306437323737663238643636322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/1b1e6c436a6549d59d40d7277f28d662.png" style="max-width: 100%;"></a></p>
+<h3>7、强制类型转换</h3>
+<ul>
+<li>如果我需要将一个浮点类型的数据赋值给一个整形，编译器会报一个警告【精度丢失】，若要强制赋值，就需要做一个强制类型转换</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7ab49861284f8ddabcbcaf58e02e278c75577f967d106a3372403efeaa94d37f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33333766633761653631356634666536613866343034346432356433323666322e706e67"><img src="https://camo.githubusercontent.com/7ab49861284f8ddabcbcaf58e02e278c75577f967d106a3372403efeaa94d37f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33333766633761653631356634666536613866343034346432356433323666322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/337fc7ae615f4fe6a8f4044d25d326f2.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以看到这样就不会出现问题了，要想要把一个不同数据类型的值给到一个另一个数据类型的变量，就可以使用<code class="notranslate">强制类型转换</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span>)<span class="pl-c1">3.14</span>;</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ff66c8a044455ddad502a3992701b06d22cb4208e8bc685237129b6cf52ec287/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30356437616132356264656534303765626530663133666463666533616666342e706e67"><img src="https://camo.githubusercontent.com/ff66c8a044455ddad502a3992701b06d22cb4208e8bc685237129b6cf52ec287/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30356437616132356264656534303765626530663133666463666533616666342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/05d7aa25bdee407ebe0f13fdcfe3aff4.png" style="max-width: 100%;"></a></p>
+<h2>六、关系操作符</h2>
+<ul>
+<li>
+<p>关系操作符主要有下面这些：<br>
+【&gt;】、【&gt;=】、【&lt;】、【&lt;=】、【! =】、【==】</p>
+</li>
+<li>
+<p>这些我们在使用的时候都会用到，也很简单，就不再多赘述了~~</p>
+</li>
+<li>
+<p>但是这里需要强调的一点就是【==】，在我们平时写代码的时候写这个判断是否等于，容易少一写一个，所以我们建议反着写比如：<code class="notranslate">a == 10</code>，我们就可以写成<code class="notranslate">10 == a</code></p>
+</li>
+</ul>
+<h2>七、逻辑操作符</h2>
+<ul>
+<li>这两个操作符很像前面学过的，但是要区分开</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e518debfb818adce05c998ca79e16e58420202aafcbbea8f2a25f5ae6e3bfdbb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32373636626331353339616434323861616239343662613064393836653163642e706e67"><img src="https://camo.githubusercontent.com/e518debfb818adce05c998ca79e16e58420202aafcbbea8f2a25f5ae6e3bfdbb/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32373636626331353339616434323861616239343662613064393836653163642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/2766bc1539ad428aab946ba0d986e1cd.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>要区分<strong>逻辑与</strong>和<strong>按位与</strong></li>
+<li>要区分<strong>逻辑或</strong>和<strong>按位或</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7f9f03a109cf37ae5be18916c6080fe9ae8be08ed46a9df354a8fe886bea2bba/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32333662366231636232373034346364613133653965393636343661386632302e706e67"><img src="https://camo.githubusercontent.com/7f9f03a109cf37ae5be18916c6080fe9ae8be08ed46a9df354a8fe886bea2bba/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32333662366231636232373034346364613133653965393636343661386632302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/236b6b1cb27044cda13e9e96646a8f20.png" style="max-width: 100%;"></a></p>
+<p><strong>特点：</strong></p>
+<p><strong>【逻辑与&amp;&amp;】：</strong> 表达式两边<strong>均为真才是真</strong>，若第一个为假，那么整个表达式为假，第二个表达式不参与运算<br>
+<strong>【逻辑或 ||】：</strong> 表达式两边有 <strong>一边为真即为真</strong>，若第一个为真，那么整个表达式为真，第二个表达式不参与运算</p>
+<h4>一道笔试题~~</h4>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+    <span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>, <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>, <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">2</span>, <span class="pl-s1">c</span> <span class="pl-c1">=</span> <span class="pl-c1">3</span>, <span class="pl-s1">d</span> <span class="pl-c1">=</span> <span class="pl-c1">4</span>;
+    <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span><span class="pl-c1">++</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-c1">++</span><span class="pl-s1">b</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">d</span><span class="pl-c1">++</span>;
+    
+    <span class="pl-en">printf</span>(<span class="pl-s">"a = %d\nb = %d\nc = %d\nd = %d\n"</span>, <span class="pl-s1">a</span>, <span class="pl-s1">b</span>, <span class="pl-s1">c</span>, <span class="pl-s1">d</span>);
+    <span class="pl-en">printf</span>(<span class="pl-s">"------\n"</span>);
+    <span class="pl-en">printf</span>(<span class="pl-s">"i = %d\n"</span>, <span class="pl-s1">i</span>);
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7438abee493c48940fbc5b1702c3f8ab5876dd58f61f03e7063cd85f50476713/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63303837306435336333646334306436626637626266623033323434636465342e706e67"><img src="https://camo.githubusercontent.com/7438abee493c48940fbc5b1702c3f8ab5876dd58f61f03e7063cd85f50476713/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63303837306435336333646334306436626637626266623033323434636465342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/c0870d53c3dc40d6bf7bbfb03244cde4.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>来分析一下其实就可以看出 ，因为a一开始为0，所以前两个逻辑与之后的结果一定为0，那么除了第一个<code class="notranslate">a++</code>表达式需要运算之外后面的表达式都不会参与运算，因此最后的结果为<code class="notranslate">1 2 3 4</code>，【i】的结果即为0</li>
+<li>这里要注意的一点就是逻辑与前面一个表达式已为假那么第二个表达式是不会参与运算的</li>
+</ul>
+<hr>
+<h2>八、条件操作符</h2>
+<ul>
+<li><strong>三目操作符：</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/46f55f4f188a3c46f7b1482a8e7bd9f0ea5550af5cfb84f1764a8bed91ecf8ce/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66363937336661626339313634643137383533326566303264313031613361372e706e67"><img src="https://camo.githubusercontent.com/46f55f4f188a3c46f7b1482a8e7bd9f0ea5550af5cfb84f1764a8bed91ecf8ce/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66363937336661626339313634643137383533326566303264313031613361372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/f6973fabc9164d178532ef02d101a3a7.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>就比如下面这段代码，显示的非常冗余，这个时候我们就可以用到<code class="notranslate">条件操作符</code>了</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">5</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+
+	<span class="pl-k">if</span> (<span class="pl-c1">5</span> <span class="pl-c1">==</span> <span class="pl-s1">a</span>)
+		<span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">3</span>;
+	<span class="pl-k">else</span>
+		<span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">-3</span>;
+
+	<span class="pl-en">printf</span>(<span class="pl-s">"a = %d\n"</span>, <span class="pl-s1">a</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"b = %d\n"</span>, <span class="pl-s1">b</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>当条件成立的时候，执行第一个<code class="notranslate">表达式</code>，当条件不成立的时候，执行第二个<code class="notranslate">表达式</code>。</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-s1">b</span> <span class="pl-c1">=</span> (<span class="pl-c1">5</span> <span class="pl-c1">==</span> <span class="pl-s1">a</span>) ? <span class="pl-c1">3</span> : <span class="pl-c1">-3</span>;</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/986488dbda963e1b41c6b53faada0184a4622025937aca4f57f7519d0fbcf27e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63636334376262653132353434393261393537373035393938656239303234652e706e67"><img src="https://camo.githubusercontent.com/986488dbda963e1b41c6b53faada0184a4622025937aca4f57f7519d0fbcf27e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63636334376262653132353434393261393537373035393938656239303234652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/ccc47bbe1254492a957705998eb9024e.png" style="max-width: 100%;"></a></p>
+<hr>
+<blockquote>
+<p>然后我们使用这个条件操作符来练习一下求解两个数的较大值</p>
+</blockquote>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">5</span>;
+<span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">3</span>;
+
+<span class="pl-smi">int</span> <span class="pl-s1">ret</span> <span class="pl-c1">=</span> (<span class="pl-s1">a</span> <span class="pl-c1">&gt;</span> <span class="pl-s1">b</span>) ? <span class="pl-s1">a</span> : <span class="pl-s1">b</span>;
+<span class="pl-en">printf</span>(<span class="pl-s">"ret = %d\n"</span>, <span class="pl-s1">ret</span>);</pre></div>
+<h2>九、逗号表达式</h2>
+<p>【格式】：<code class="notranslate">exp1, exp2, exp3, …expN</code></p>
+<p>【运算规则】：从左向右依次计算，整个表达式的结果是<strong>最后一个表达式的结果</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//代码1</span>
+<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+<span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">2</span>;
+<span class="pl-smi">int</span> <span class="pl-s1">c</span> <span class="pl-c1">=</span> (<span class="pl-s1">a</span> <span class="pl-c1">&gt;</span> <span class="pl-s1">b</span>, <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-s1">b</span> <span class="pl-c1">+</span> <span class="pl-c1">10</span>, <span class="pl-s1">a</span>, <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>);<span class="pl-c">//逗号表达式</span>
+<span class="pl-en">printf</span>(<span class="pl-s">"c = %d\n"</span>, <span class="pl-s1">c</span>);</pre></div>
+<ul>
+<li>
+<p>最后的结果是<code class="notranslate">13</code>~~</p>
+</li>
+<li>
+<p>根据逗号表达式的运算规则可以知道它是<strong>从左向右进行计算的</strong>，最终结果取的是最后一个表达式的结果，那么根据前面的计算可以得知<code class="notranslate">b = 12</code>，那么最后再计算便是13</p>
+</li>
+</ul>
+<hr>
+<ul>
+<li>再来看一句代码，可以看到这不是一个结果的运算，而是将逗号表达式放在一个if分支判断中，可以看到最后一个逗号后面的表达式为<code class="notranslate">d &gt; 0</code>，那此时我们就要去看看前面一些表达式的运算会不会使得这个d变化，若不会那么这个if判断其实就等价于<code class="notranslate">if(d &gt; 0)</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//代码2</span>
+<span class="pl-k">if</span> (<span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-s1">b</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>, <span class="pl-s1">c</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span> / <span class="pl-c1">2</span>, <span class="pl-s1">d</span> <span class="pl-c1">&gt;</span> <span class="pl-c1">0</span>)</pre></div>
+<hr>
+<ul>
+<li>最后再来看看下面这段代码，就是不断地在计算一个a的值然后求和，若是a什么时候到0了，便跳出这个while()循环，但是可以看到<code class="notranslate">a = get_val()</code>和<code class="notranslate"> count_val(a)</code>这两个表达式在while()循环上面调用了一次，然后再while()循环中在调用，显得就有些冗余了，那此时我们就可以使用【逗号表达式】去进行一个优化</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//代码3</span>
+<span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-en">get_val</span>();
+<span class="pl-en">count_val</span>(<span class="pl-s1">a</span>);
+<span class="pl-k">while</span> (<span class="pl-s1">a</span> <span class="pl-c1">&gt;</span> <span class="pl-c1">0</span>)
+{
+ 	<span class="pl-c">//业务处理</span>
+    <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-en">get_val</span>();
+    <span class="pl-en">count_val</span>(<span class="pl-s1">a</span>);
+}</pre></div>
+<ul>
+<li>可以看到，通过逗号表达式的一个优化，代码看起来就显得很简洁，当while()循环一进来，就会执行<code class="notranslate">a = get_val(), count_val(a)</code>这两个表示，最后起作用的还是<code class="notranslate">a &gt; 0</code>，前面两个表达式只是有可能会使a的值发生一个变化罢了</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">while</span> (<span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-en">get_val</span>(), <span class="pl-en">count_val</span>(<span class="pl-s1">a</span>), <span class="pl-s1">a</span> <span class="pl-c1">&gt;</span> <span class="pl-c1">0</span>)
+{
+      <span class="pl-c">//业务处理</span>
+}</pre></div>
+<h2>十、下标引用、函数调用和结构成员</h2>
+<h3>1、下标引用操作符 [ ]</h3>
+<p>【操作数】：一个数组名 + 一个索引值</p>
+<ul>
+<li>这个操作符我们在讲数组的时候也有用到过，可能我们大家在使用的时候都是<code class="notranslate">arr[1]</code>，不过既然它一个操作符，那么对于操作数来说其实没有位置的一个限制，其实是可以写成<code class="notranslate">1[arr]</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">arr</span>[] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>,<span class="pl-c1">4</span>,<span class="pl-c1">5</span> };
+	<span class="pl-smi">int</span> <span class="pl-s1">sz</span> <span class="pl-c1">=</span> <span class="pl-k">sizeof</span>(<span class="pl-smi">arr</span>) / <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>[<span class="pl-c1">0</span>]);
+
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">sz</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">arr</span>[<span class="pl-s1">i</span>]);
+	}
+	<span class="pl-en">printf</span>(<span class="pl-s">"\n"</span>);
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">sz</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">i</span>[<span class="pl-s1">arr</span>]);
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/367cd8810fb1a5b4bef69ac3bb3d591a028ae6bd11abde048f494178b6ea5e69/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32373363626661386333323234366531383731646266336239313736326438342e706e67"><img src="https://camo.githubusercontent.com/367cd8810fb1a5b4bef69ac3bb3d591a028ae6bd11abde048f494178b6ea5e69/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32373363626661386333323234366531383731646266336239313736326438342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/273cbfa8c32246e1871dbf3b91762d84.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以看出两种语法都是可行的</li>
+</ul>
+<h3>2、函数调用操作符 ( )</h3>
+<p>接受<code class="notranslate">一个或者多个</code>操作数：第一个操作数是函数名，剩余的操作数就是传递给函数的参数</p>
+<ul>
+<li>对于<code class="notranslate">test1()</code>来说它的操作符为<code class="notranslate">()</code>，只有一个操作数就是函数名test1</li>
+<li>再看到<code class="notranslate">test2("hello bit.")</code>，对于它来说操作符也为<code class="notranslate">()</code>，操作数的话有两个，一个为函数名test1，另一个则为函数参数"hello bit."</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">test1</span>()
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"hehe\n"</span>);
+}
+
+<span class="pl-smi">void</span> <span class="pl-en">test2</span>(<span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">str</span>)
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">str</span>);
+}
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>(<span class="pl-smi">void</span>)
+{
+	<span class="pl-en">test1</span>();				<span class="pl-c">//实用（）作为函数调用操作符。</span>
+	<span class="pl-en">test2</span>(<span class="pl-s">"hello bit."</span>);	<span class="pl-c">//实用（）作为函数调用操作符。</span>
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h3>3、结构成员调用操作符 . 和 -&gt;</h3>
+<ul>
+<li>首先看到下面声明了一个结构体，是一本书，结构成员有<strong>作家</strong>和<strong>价格</strong>。然后我声明了一个结构体成员，初始化了它的成员变量</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">typedef</span> <span class="pl-k">struct</span> <span class="pl-smi">book</span> {
+	<span class="pl-smi">char</span> <span class="pl-c1">writer</span>[<span class="pl-c1">20</span>];
+	<span class="pl-smi">double</span> <span class="pl-c1">price</span>;
+}<span class="pl-smi">st</span>;
+
+<span class="pl-smi">st</span> <span class="pl-s1">s1</span> <span class="pl-c1">=</span> { <span class="pl-s">"罗曼·罗兰"</span>, <span class="pl-c1">50</span> };</pre></div>
+<ul>
+<li>首先我使用<code class="notranslate">.</code>操作符先进行访问，可以看到获取了这个成员所有的成员变量</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">st</span> <span class="pl-s1">s1</span> <span class="pl-c1">=</span> { <span class="pl-s">"罗曼·罗兰"</span>, <span class="pl-c1">50</span> };
+	<span class="pl-en">printf</span>(<span class="pl-s">"name = %s\n"</span>, <span class="pl-s1">s1</span>.<span class="pl-c1">writer</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"price = %f\n"</span>,<span class="pl-s1">s1</span>.<span class="pl-c1">price</span>);  <span class="pl-c">//结构体变量.结构体成员名</span>
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/345e19e41643d0783c100ca0d6fa08130133003314947703d322f1dc10360302/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32386335653862636165306134306330383630656235376666643361316563612e706e67"><img src="https://camo.githubusercontent.com/345e19e41643d0783c100ca0d6fa08130133003314947703d322f1dc10360302/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32386335653862636165306134306330383630656235376666643361316563612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/28c5e8bcae0a40c0860eb57ffd3a1eca.png" style="max-width: 100%;"></a></p>
+<hr>
+<ul>
+<li>我们使用这个指针变量解引用是不是取到了这个结构体的值，此时就可以去访问这些结构体成员了</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">st</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span> <span class="pl-c1">=</span> <span class="pl-c1">&amp;</span><span class="pl-s1">s1</span>;
+
+<span class="pl-en">printf</span>(<span class="pl-s">"name = %s\n"</span>, (<span class="pl-c1">*</span><span class="pl-s1">ps</span>).<span class="pl-c1">writer</span>);</pre></div>
+<ul>
+<li>我们用<code class="notranslate">-&gt;</code>操作符来使用</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"name = %s\n"</span>, <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">writer</span>);	<span class="pl-c">//结构体指针-&gt;结构体成员名</span>
+<span class="pl-en">printf</span>(<span class="pl-s">"price = %f\n"</span>, <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">price</span>);</pre></div>
+<ul>
+<li>可以看到对于这三种形式都是可以访问到这个结构体变量的成员</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e12d484dce0ecafe4831c6f175470d6b0d7da5448b1f4848095a613b1ccf58ba/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30353638653836646133323734633137623262633732353537633131313363372e706e67"><img src="https://camo.githubusercontent.com/e12d484dce0ecafe4831c6f175470d6b0d7da5448b1f4848095a613b1ccf58ba/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30353638653836646133323734633137623262633732353537633131313363372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/0568e86da3274c17b2bc72557c1113c7.png" style="max-width: 100%;"></a></p>
+<h2>十一、表达式求值</h2>
+<h3>1、隐式类型转换【整型提升】</h3>
+<ul>
+<li>C的整型算术运算总是至少以缺省整型类型的精度来进行的<br>
+为了获得这个精度，表达式中的<strong>字符型</strong>和<strong>短整型</strong>操作数在使用之前被转换为普通整型，这种转换称为<code class="notranslate">[整型提升]</code></li>
+</ul>
+<h4>整型提升的意义</h4>
+<ul>
+<li>表达式的整型运算要在CPU的相应运算器件内执行，CPU内整型运算器(ALU)的操作数的字节长度一般就是<strong>int的字节长度</strong>，同时也是CPU的通用寄存器的长度。</li>
+<li>因此，即使两个char类型的相加，在CPU执行时实际上也要先转换为<strong>CPU内整型操作数的标准长度</strong>。</li>
+<li>通用CPU（general-purpose CPU）是难以直接实现两个8比特字节直接相加运算（虽然机器指令中可能有这种字节相加指令）。所以，表达式中各种长度可能小于int长度的整型值，都必须先转换为<code class="notranslate">int</code>或<code class="notranslate">unsigned int</code>，然后才能送入CPU去执行运算</li>
+</ul>
+<p><strong>如何进行整型提升</strong></p>
+<ul>
+<li>整形提升是按照变量的数据类型的<strong>符号位</strong>来提升的</li>
+</ul>
+<p><strong>正数的整形提升</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-s1">c1</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;</pre></div>
+<ul>
+<li>正数的原反补码是相同的</li>
+<li>再将一个整数1赋值给一个char类型的变量c1，此时就会发生截断，字符类型在内存中只占一个字节（8个比特）</li>
+<li>接下来c1会进行整形提升，在会提升成<code class="notranslate">00000000000000000000000000000001</code>达到<strong>整型4个字节32个比特位在内存中</strong>的要求</li>
+</ul>
+<p><strong>负数的整型提升</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-s1">c2</span> <span class="pl-c1">=</span> <span class="pl-c1">-1</span>;</pre></div>
+<ul>
+<li>
+<p>负数在内存中存放的是<code class="notranslate">11111111111111111111111111111111</code>，将其给到一个整型的变量之后就会发生截断即为<code class="notranslate">11111111</code></p>
+</li>
+<li>
+<p>那这个时候再进行一个整型提升就和正数不一样了，因为负数的符号位为1，而整型提升在高位是要补充符号位，所以会在前头加上<strong>24个1</strong>，那其实也就变回了和之前-1的补码一般的样子，为32个1</p>
+</li>
+</ul>
+<h3>2、算术转换</h3>
+<ul>
+<li>如果某个操作符的各个操作数属于不同的类型，那么除非其中一个操作数的转换为另一个操作数的类型，否则操作就无法进行</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f907afb5a6937e6b280aab74a8bdf9c21148ff4f48cbcf63b0153ab89bd4a2f1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65636438636434643733336634303939613638396164613962323465633537332e706e67"><img src="https://camo.githubusercontent.com/f907afb5a6937e6b280aab74a8bdf9c21148ff4f48cbcf63b0153ab89bd4a2f1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65636438636434643733336634303939613638396164613962323465633537332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/ecd8cd4d733f4099a689ada9b24ec573.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>如果某个操作数的类型在上面这个列表中排名较低，那么首先要转换为另外一个操作数的类型后执行运算。【排名从上面最高，下面最低】</li>
+<li>例如<code class="notranslate">int</code>和<code class="notranslate">unsigned int</code>一起进行算术运算的时候这个<strong>前者就要转换为后者</strong>的类型</li>
+<li>例如<code class="notranslate">long int</code>和<code class="notranslate">long double</code>一起进行算术运算的时候这个<strong>前者就要转换为后者</strong>的类型</li>
+<li>那其实可以看出，在char和short面前称霸的int如今沦落为了小弟</li>
+</ul>
+<hr>
+<p><strong>【注意】：</strong><br>
+<strong>但是算术转换要合理，要不然会有一些潜在的问题</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">float</span> <span class="pl-s1">f</span> <span class="pl-c1">=</span> <span class="pl-c1">3.14</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">num</span> <span class="pl-c1">=</span> <span class="pl-s1">f</span>;<span class="pl-c">//隐式转换，会有精度丢失</span>
+
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-s1">num</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0ad068338be3982513d92d4013cfe93306f026ee9b2aa8e401607fbacafd41f8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65653935366130653937616534613233393632383936363530656539396336612e706e67"><img src="https://camo.githubusercontent.com/0ad068338be3982513d92d4013cfe93306f026ee9b2aa8e401607fbacafd41f8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65653935366130653937616534613233393632383936363530656539396336612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/ee956a0e97ae4a23962896650ee99c6a.png" style="max-width: 100%;"></a></p>
+<h3>3、操作符的属性【附优先级列表】</h3>
+<p>复杂表达式的求值有三个影响的因素</p>
+<ol>
+<li>操作符的优先级</li>
+<li>操作符的结合性</li>
+<li>是否控制求值顺序</li>
+</ol>
+<ul>
+<li>两个相邻的操作符先执行哪个？取决于他们的<code class="notranslate">优先级</code>。如果两者的优先级相同，取决于他们的<code class="notranslate">结合性</code></li>
+</ul>
+<p>下面有一张关于操作符优先级的列表~~</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/15e01759800203d5d1649eaa3bc87eb92dd9d092a57666d1e83d25531a1c15e9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31333932383131316234383634386637626534346665633932616163303935362e706e67"><img src="https://camo.githubusercontent.com/15e01759800203d5d1649eaa3bc87eb92dd9d092a57666d1e83d25531a1c15e9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31333932383131316234383634386637626534346665633932616163303935362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/13928111b48648f7be44fec92aac0956.png" style="max-width: 100%;"></a></p>
+<h3>4、问题表达式</h3>
+<blockquote>
+<p><strong>表达式的求值部分由操作符的优先级决定</strong>，优先级只能决定先算谁，但是哪个表达式先调用要取决于编译器</p>
+</blockquote>
+<ul>
+<li>对于有些表达式而言，其实在不同的编译器上所呈现的结果是不同的，我们将其称作为【问题表达式】</li>
+</ul>
+<h4>问题表达式1</h4>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-s1">a</span><span class="pl-c1">*</span><span class="pl-s1">b</span> <span class="pl-c1">+</span> <span class="pl-s1">c</span><span class="pl-c1">*</span><span class="pl-s1">d</span> <span class="pl-c1">+</span> <span class="pl-s1">e</span><span class="pl-c1">*</span><span class="pl-s1">f</span></pre></div>
+<ul>
+<li>来看上面这段代码，通过上面的优先级列表可以看出<code class="notranslate">[*]</code>的优先级一定是比<code class="notranslate">[+]</code>要来得高，因此可以保证<code class="notranslate">[*]</code>两端的数字先进行运算，但是却不能保证第三个*比第一个+早执行</li>
+</ul>
+<hr>
+<h4>问题表达式2</h4>
+<ul>
+<li>继续来看下一个问题表达式</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//表达式2</span>
+<span class="pl-s1">c</span> <span class="pl-c1">+</span> <span class="pl-c1">--</span><span class="pl-s1">c</span>;
+<span class="pl-c1">12</span></pre></div>
+<ul>
+<li>虽然对于这个<code class="notranslate">[--]</code>操作符来说比<code class="notranslate">[+]</code>操作符的优先级来得高，但是呢我们却不知道在编译器运算的时候这个【c】是什么时候准备好</li>
+</ul>
+<hr>
+<h4>问题表达式3</h4>
+<ul>
+<li>对于下面这段代码，也是存在很大的争议，特别是对于<code class="notranslate">++</code>和<code class="notranslate">--</code>混搭的这种表达式尤其严重，你可以去不同的编译器上运行看看，结果都是不一样的~~</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//代码3-非法表达式</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+	<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-s1">i</span><span class="pl-c1">--</span> <span class="pl-c1">-</span> <span class="pl-c1">--</span><span class="pl-s1">i</span> <span class="pl-c1">*</span> ( <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">-3</span> ) <span class="pl-c1">*</span> <span class="pl-s1">i</span><span class="pl-c1">++</span> <span class="pl-c1">+</span> <span class="pl-c1">++</span><span class="pl-s1">i</span>;
+	<span class="pl-en">printf</span>(<span class="pl-s">"i = %d\n"</span>, <span class="pl-s1">i</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>下面是在不同的编译器上运行出来的结果，可见这个表达式<code class="notranslate">问题</code>有多大！！！</li>
+</ul>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>值</th>
+<th>编译器</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>- 128</td>
+<td>Tandy 6000 Xenix 3.2</td>
+</tr>
+<tr>
+<td>- 95</td>
+<td>Think C 5.02(Macintosh)</td>
+</tr>
+<tr>
+<td>- 86</td>
+<td>IBM PowerPC AIX 3.2.5</td>
+</tr>
+<tr>
+<td>- 85</td>
+<td>Sun Sparc cc(K&amp;C编译器)</td>
+</tr>
+<tr>
+<td>- 63</td>
+<td>gcc，HP_UX 9.0，Power C 2.0.0</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Sun Sparc acc(K&amp;C编译器)</td>
+</tr>
+<tr>
+<td>21</td>
+<td>Turbo C/C++ 4.5</td>
+</tr>
+<tr>
+<td>22</td>
+<td>FreeBSD 2.1 R</td>
+</tr>
+<tr>
+<td>30</td>
+<td>Dec Alpha OSF1 2.0</td>
+</tr>
+<tr>
+<td>36</td>
+<td>TDec VAX/VMS</td>
+</tr>
+<tr>
+<td>42</td>
+<td>Microsoft C 5.1</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<hr>
+<h4>问题表达式4</h4>
+<ul>
+<li>看到main函数中的函数调用表达式<code class="notranslate">answer = fun() - fun() * fun();</code>其实也是存在一个歧义的，因为你完全不知道编译器先调用的是哪个fun()</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//代码4</span>
+<span class="pl-smi">int</span> <span class="pl-en">fun</span>()
+{
+     <span class="pl-k">static</span> <span class="pl-smi">int</span> <span class="pl-s1">count</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+     <span class="pl-k">return</span> <span class="pl-c1">++</span><span class="pl-s1">count</span>;
+}
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+     <span class="pl-smi">int</span> <span class="pl-s1">answer</span>;
+     <span class="pl-s1">answer</span> <span class="pl-c1">=</span> <span class="pl-en">fun</span>() <span class="pl-c1">-</span> <span class="pl-en">fun</span>() <span class="pl-c1">*</span> <span class="pl-en">fun</span>();
+     <span class="pl-en">printf</span>( <span class="pl-s">"%d\n"</span>, <span class="pl-s1">answer</span>);<span class="pl-c">//输出多少？</span>
+     <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>
+<p>可以看到，若是前面的fun()先执行的话，最后的结果就是<code class="notranslate">-10</code>，若是后面的fun()先执行的话，最后的结果就是<code class="notranslate">-2</code></p>
+</li>
+<li>
+<p>正常来说大家应该都认为是第二个表达式符合我们的运算规则，因为<code class="notranslate">先乘除后加减</code>，可是呢我们最常用的VS出来的结果都不是我们想要的</p>
+</li>
+</ul>
+<blockquote>
+<p>我们可以到不同编译器上面去观察一下</p>
+</blockquote>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9eb60532e292bf2e2948249e202bbffbf9f7f7c969ce8df2f496edb10a9674fd/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33373035396265663961643834626138613361393465616334353632633465332e706e67"><img src="https://camo.githubusercontent.com/9eb60532e292bf2e2948249e202bbffbf9f7f7c969ce8df2f496edb10a9674fd/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33373035396265663961643834626138613361393465616334353632633465332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/37059bef9ad84ba8a3a94eac4562c4e3.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以看到，虽然在【VS】和【Linux】在执行的结果是<code class="notranslate">-10</code>，而且在大多数的编译器下都是这个，但是呢对于函数的调用先后顺序无法通过操作符的优先级确定，因此这也是一个问题表达式</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2c211986f3d8ca8d0c02f8dd1b78896050e7c2e1dd8ec9a56bc44e6f6f540c73/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32343031323537646461646534333536396662623534643861646362316566302e706e67"><img src="https://camo.githubusercontent.com/2c211986f3d8ca8d0c02f8dd1b78896050e7c2e1dd8ec9a56bc44e6f6f540c73/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32343031323537646461646534333536396662623534643861646362316566302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/2401257ddade43569fbb54d8adcb1ef0.png" style="max-width: 100%;"></a></p>
+<hr>
+<h4>⑤ 问题表达式5</h4>
+<ul>
+<li>有关<code class="notranslate">++</code>和<code class="notranslate">+</code>结合的问题表达式</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//代码5</span>
+<span class="pl-k">#include</span> <span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">ret</span> <span class="pl-c1">=</span> (<span class="pl-c1">++</span><span class="pl-s1">i</span>) <span class="pl-c1">+</span> (<span class="pl-c1">++</span><span class="pl-s1">i</span>) <span class="pl-c1">+</span> (<span class="pl-c1">++</span><span class="pl-s1">i</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-s1">ret</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d\n"</span>, <span class="pl-s1">i</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2b2bff565fb74d4741c2cd1f5f96592756f8d6c4d7772dc489b4045a7ca5bb4b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39633931313133356137663934393731396264393766633632633965316161612e706e67"><img src="https://camo.githubusercontent.com/2b2bff565fb74d4741c2cd1f5f96592756f8d6c4d7772dc489b4045a7ca5bb4b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39633931313133356137663934393731396264393766633632633965316161612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/9c911135a7f949719bd97fc62c9e1aaa.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以看到，这里就出现了两个不同的结果，VS里运行出来是【12】，在linux里面运行出来是【10】</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ce73300cdc84d56d51f38e58b0c533c674ff4575f25c0d981fd31fdd9fc9022d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32346336663565623638373334376464626134356266343266643337373566332e706e67"><img src="https://camo.githubusercontent.com/ce73300cdc84d56d51f38e58b0c533c674ff4575f25c0d981fd31fdd9fc9022d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32346336663565623638373334376464626134356266343266643337373566332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/24c6f5eb687347ddba45bf42fd3775f3.png" style="max-width: 100%;"></a></p></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

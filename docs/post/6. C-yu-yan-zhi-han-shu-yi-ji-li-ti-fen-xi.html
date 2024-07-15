@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="# 前言
+>在C语言中，这个函数时必不可少的，没有函数没有灵魂，要不然代码就会乱成一团，所以我们要学函数，接下来就开始函数之旅~~
+
+## 一、函数是什么？
+
+- 数学中我们其实就见过函数的概念，比如：一次函数y=kx+b ，k和b都是常数，给一个任意的x，就得到一个y值。">
+<meta property="og:title" content="6. C语言之函数以及例题分析">
+<meta property="og:description" content="# 前言
+>在C语言中，这个函数时必不可少的，没有函数没有灵魂，要不然代码就会乱成一团，所以我们要学函数，接下来就开始函数之旅~~
+
+## 一、函数是什么？
+
+- 数学中我们其实就见过函数的概念，比如：一次函数y=kx+b ，k和b都是常数，给一个任意的x，就得到一个y值。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/6.%20C-yu-yan-zhi-han-shu-yi-ji-li-ti-fen-xi.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>6. C语言之函数以及例题分析</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">6. C语言之函数以及例题分析</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/30" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h1>前言</h1>
+<blockquote>
+<p>在C语言中，这个函数时必不可少的，没有函数没有灵魂，要不然代码就会乱成一团，所以我们要学函数，接下来就开始函数之旅~~</p>
+</blockquote>
+<h2>一、函数是什么？</h2>
+<ul>
+<li>
+<p>数学中我们其实就见过函数的概念，比如：一次函数y=kx+b ，k和b都是常数，给一个任意的x，就得到一个y值。其实在C语言也引入<strong>函数（function）</strong> 的概念，有些翻译为：子程序，子程序这种翻译更加准确一些。<strong>C语言中的函数就是一个完成某项特定的任务的一小段代码</strong>。</p>
+</li>
+<li>
+<p>这段代码是有特殊的写法和调用方法的。C语言的程序其实是由无数个小的函数组合而成的，也可以说：一个大的计算任务可以分解成若干个较小的函数（对应较小的任务）完成。同时一个函数如果能完成某项特定任务的话，这个函数也是可以复用的，提升了开发软件的效率。</p>
+</li>
+<li>
+<p>在C语言中我们一般会见到两类函数：</p>
+<ul>
+<li>库函数</li>
+<li>自定义函数</li>
+</ul>
+</li>
+</ul>
+<h2>二、C语言中函数的分类</h2>
+<h3>1、库函数</h3>
+<ul>
+<li>C语言标准中规定了C语言的各种语法规则，C语言并不提供库函数；C语言的国际标准ANSI C规定了一些常用的函数的标准，被称为标准库，那不同的编译器厂商根据ANSI提供的C语言标准就给出了一系列函数的实现。这些函数就被称为库函数。</li>
+</ul>
+<blockquote>
+<p>我们前面内容中学到的printf 、scanf 都是库函数，库函数的也是函数，不过这些函数已经是现成的，我们只要学会就能直接使用了。有了库函数，一些常见的功能就不需要程序员自己实现了，一定程度提升了效率；同时库函数的质量和执行效率上都更有保证。</p>
+</blockquote>
+<ul>
+<li>各种编译器的标准库中提供了一系列的库函数，这些库函数根据功能的划分，都在不同的头文件中进行了声明。</li>
+<li>库函数相关头文件：<a href="https://zh.cppreference.com/w/c/header" rel="nofollow">https://zh.cppreference.com/w/c/header</a></li>
+</ul>
+<blockquote>
+<p>有数学相关的，有字符串相关的，有日期相关的等，每一个头文件中都包含了，相关的函数和类型等信息，库函数的学习不用着急一次性全部学会，慢慢学习，各个击破就行。</p>
+</blockquote>
+<ul>
+<li>C语言常用的库函数都有：</li>
+</ul>
+<blockquote>
+<ul>
+<li>IO函数</li>
+<li>字符串操作函数</li>
+<li>字符操作函数</li>
+<li>内存操作函数</li>
+<li>时间/日期函数</li>
+<li>数学函数</li>
+<li>其他库函数</li>
+</ul>
+</blockquote>
+<p>接下来，我会参照文档，给大家将两个常用的库函数，来教会大家如何入阅读英文文档</p>
+<ul>
+<li>首先我们看函数原形：</li>
+</ul>
+<p><a href="https://legacy.cplusplus.com/reference/cstring/strcpy/?kw=strcpy" rel="nofollow">strcpy</a></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-en">strcpy</span> ( <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">destination</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">source</span> );</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/69b200ac8be393b69d834b994c0497a03667638d7d529d50cb9891d5154132e1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33313036663366363136386234366131626531653834373337356237643730372e706e67"><img src="https://camo.githubusercontent.com/69b200ac8be393b69d834b994c0497a03667638d7d529d50cb9891d5154132e1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33313036663366363136386234366131626531653834373337356237643730372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/3106f3f6168b46a1be1e847375b7d707.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>再到代码中来看看它的实际应用场景，在使用这个函数的时候需要引入头文件 <strong>【string.h】</strong></li>
+<li>那么怎么看一个库函数改引入什么头文件呢？可以打开上面那个网站，搜索库函数，然后在左面就会有</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4a46f4d9c8b8393768db5f04a01224c8aa87cfc9d652fec8b336b2fdefb40b0e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35393838343064623365636434656564626332306537333562613939346266632e706e67"><img src="https://camo.githubusercontent.com/4a46f4d9c8b8393768db5f04a01224c8aa87cfc9d652fec8b336b2fdefb40b0e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35393838343064623365636434656564626332306537333562613939346266632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/598840db3ecd4eedbc20e735ba994bfc.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span><span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-k">#include</span><span class="pl-s">&lt;string.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">arr1</span>[] <span class="pl-c1">=</span> <span class="pl-s">"###########"</span>;
+	<span class="pl-smi">char</span> <span class="pl-s1">arr2</span>[] <span class="pl-c1">=</span> <span class="pl-s">"hello word"</span>;
+	<span class="pl-c">//strcpy在拷贝的时候'\0'也会被拷贝过来</span>
+	<span class="pl-en">strcpy</span>(<span class="pl-s1">arr1</span>, <span class="pl-s1">arr2</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"%s"</span>, <span class="pl-s1">arr1</span>);
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>再来看看运行结果</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3a2da1fe45accc3089ca8063e291da3a80b86a51b620ff5830838591e82f0588/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66353961306234663639376334313838613364616230336534633662643135642e706e67"><img src="https://camo.githubusercontent.com/3a2da1fe45accc3089ca8063e291da3a80b86a51b620ff5830838591e82f0588/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66353961306234663639376334313838613364616230336534633662643135642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/f59a0b4f697c4188a3dab03e4c6bd15d.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9d727c622679ff6f9e8c78df3689daaf4c42736e1c4d2e01c12466b8859b581f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62623962376336303730653934646439393539633035343164376165623161302e706e67"><img src="https://camo.githubusercontent.com/9d727c622679ff6f9e8c78df3689daaf4c42736e1c4d2e01c12466b8859b581f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62623962376336303730653934646439393539633035343164376165623161302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/bb9b7c6070e94dd9959c0541d7aeb1a0.png" style="max-width: 100%;"></a></p>
+<hr>
+<p><strong>接下去再来看一库函数【memset】</strong></p>
+<p><a href="https://legacy.cplusplus.com/reference/cstring/strcpy/?kw=strcpy" rel="nofollow">memset</a></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-c1">*</span> <span class="pl-en">memset</span> ( <span class="pl-smi">void</span> <span class="pl-c1">*</span> <span class="pl-s1">ptr</span>, <span class="pl-smi">int</span> <span class="pl-s1">value</span>, <span class="pl-smi">size_t</span> <span class="pl-s1">num</span> );</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/49b055c7c8931e7c956d83209ea587fb6bc4aa31f22fe6af900a89bbc8eb6991/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63313131303563333266313334613263393330376131643736343638323537332e706e67"><img src="https://camo.githubusercontent.com/49b055c7c8931e7c956d83209ea587fb6bc4aa31f22fe6af900a89bbc8eb6991/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63313131303563333266313334613263393330376131643736343638323537332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/c11105c32f134a2c9307a1d764682573.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>一样来看一下代码该如何书写</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-s1">arr</span>[] <span class="pl-c1">=</span> <span class="pl-s">"hello bit"</span>;
+<span class="pl-en">memset</span>(<span class="pl-s1">arr</span>, <span class="pl-c1">'x'</span>, <span class="pl-c1">5</span>);
+<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">arr</span>);</pre></div>
+<ul>
+<li>来看一下上面这段代码的执行结果。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f35ca6ab007ebb6cb99d1215f336f039fb406a95e84bf417d548fa46a4b93273/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65326237333662386262643634646432383935623464373965633863333539662e706e67"><img src="https://camo.githubusercontent.com/f35ca6ab007ebb6cb99d1215f336f039fb406a95e84bf417d548fa46a4b93273/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65326237333662386262643634646432383935623464373965633863333539662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/e2b736b8bbd64dd2895b4d79ec8c359f.png" style="max-width: 100%;"></a></p>
+<p><strong>注：</strong><br>
+<strong>但是库函数必须知道的一个秘密就是：使用库函数，必须包含 #include 对应的头文件。<br>
+这里对照文档来学习上面几个库函数，目的是掌握库函数的使用方法。</strong></p>
+<p><strong>如何学会使用库函数？</strong></p>
+<blockquote>
+<p>需要全部记住吗？<br>
+No 需要学会查询工具的使用：<br>
+MSDN(Microsoft Developer Network)<br>
+<a href="https://en.cppreference.com/w/" rel="nofollow">en.cppreference.com</a>【英文版】<br>
+<a href="https://zh.cppreference.com/w/%E9%A6%96%E9%A1%B5" rel="nofollow">zh.cppreference.com</a>【中文版】</p>
+</blockquote>
+<hr>
+<h3>2、自定义函数</h3>
+<ul>
+<li>如果库函数能干所有的事情，那还要程序员干什么？</li>
+<li>所以更加重要的是【<strong>自定义函数</strong>】</li>
+<li>自定义函数和库函数一样，有函数名，返回值类型和函数参数。但是不一样的是这些都是我们自己来设计。这给程序员一个很大的发挥空间</li>
+</ul>
+<p>函数的组成：</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">ret_type</span> <span class="pl-en">fun_name</span>(<span class="pl-smi">para1</span>,<span class="pl-smi"></span> <span class="pl-c1">*</span> )
+{
+	<span class="pl-s1">statement</span>;<span class="pl-c">//语句项</span>
+}</pre></div>
+<ul>
+<li>ret_type 返回类型</li>
+<li>fun_name 函数名</li>
+<li>para1    函数参数</li>
+</ul>
+<p><strong>我们首先来举一个例子：</strong></p>
+<blockquote>
+<p>写一个函数可以找出两个整数中的最大值。</p>
+</blockquote>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">Get_Max</span>(<span class="pl-smi">int</span> <span class="pl-s1">x</span>, <span class="pl-smi">int</span> <span class="pl-s1">y</span>)
+{
+	<span class="pl-k">return</span> (<span class="pl-s1">x</span> <span class="pl-c1">&gt;</span> <span class="pl-s1">y</span> ? <span class="pl-s1">x</span> : <span class="pl-s1">y</span>);
+}
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-en">scanf</span>(<span class="pl-s">"%d %d"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">a</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">b</span>);
+
+	<span class="pl-smi">int</span> <span class="pl-s1">max</span> <span class="pl-c1">=</span> <span class="pl-en">Get_Max</span>(<span class="pl-s1">a</span>, <span class="pl-s1">b</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"二者中的较大值为：%d\n"</span>, <span class="pl-s1">max</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>
+<p>然后给大家讲解一下这个函数<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1cf2a87ce8a88866519a99082b411dec036001f177f040730aadaf583b4e95d9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32613338363561613935363034323932393964653639663863666433623539652e706e67"><img src="https://camo.githubusercontent.com/1cf2a87ce8a88866519a99082b411dec036001f177f040730aadaf583b4e95d9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32613338363561613935363034323932393964653639663863666433623539652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/2a3865aa9560429299de69f8cfd3b59e.png" style="max-width: 100%;"></a></p>
+</li>
+<li>
+<p>接下去我们再来举一个例子，也是函数这一块最经典的案例：<strong>【数值交换】</strong></p>
+</li>
+<li>
+<p>将交换两个数这个逻辑单独封装成了一个函数，因为它是作为一个功能出现的</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">swap</span>(<span class="pl-smi">int</span> <span class="pl-s1">x</span>, <span class="pl-smi">int</span> <span class="pl-s1">y</span>)
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">t</span> <span class="pl-c1">=</span> <span class="pl-s1">x</span>;
+	<span class="pl-s1">x</span> <span class="pl-c1">=</span> <span class="pl-s1">y</span>;
+	<span class="pl-s1">y</span> <span class="pl-c1">=</span> <span class="pl-s1">t</span>;
+}
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">20</span>;
+	
+	<span class="pl-en">printf</span>(<span class="pl-s">"交换前：a = %d, b = %d\n"</span>,<span class="pl-s1">a</span>, <span class="pl-s1">b</span>);
+	<span class="pl-en">swap</span>(<span class="pl-s1">a</span>, <span class="pl-s1">b</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"交换后：a = %d, b = %d\n"</span>, <span class="pl-s1">a</span>, <span class="pl-s1">b</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>来看一下运行结果。可以看到两个数并没有发生交换</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4a1de54e9d3494bed3273569d38a6d5677290a067ba704d2d9bdcb9990f7a50d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36643037363966656337333934336238393832363364316137653432346236652e706e67"><img src="https://camo.githubusercontent.com/4a1de54e9d3494bed3273569d38a6d5677290a067ba704d2d9bdcb9990f7a50d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36643037363966656337333934336238393832363364316137653432346236652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/6d0769fec73943b898263d1a7e424b6e.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>那有小伙伴就很诧异，这是为什么呢？我们一起来调试分析一下</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/a9045afd0d3350257bd0cac58578f5f9f2c3bbe5e918ddd4a2fd24637158d7fc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64393961366439383930656534653762396363356631663565323338323761342e706e67"><img src="https://camo.githubusercontent.com/a9045afd0d3350257bd0cac58578f5f9f2c3bbe5e918ddd4a2fd24637158d7fc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64393961366439383930656534653762396363356631663565323338323761342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/d99a6d9890ee4e7b9cc5f1f5e23827a4.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/851d9227d928cf0bef2a5011beed34f717c70f66d285eef0d7628da63ab75d1d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66646666393363343264613234643330626466333935383862393530363833332e706e67"><img src="https://camo.githubusercontent.com/851d9227d928cf0bef2a5011beed34f717c70f66d285eef0d7628da63ab75d1d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66646666393363343264613234643330626466333935383862393530363833332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/fdff93c42da24d30bdf39588b9506833.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9fa833624984559c02a7d9d7cc82b642cf71f128694fbd7c530df4b9f330ad6b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34323665376538303366636434316364396561656361313230303130343034352e706e67"><img src="https://camo.githubusercontent.com/9fa833624984559c02a7d9d7cc82b642cf71f128694fbd7c530df4b9f330ad6b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34323665376538303366636434316364396561656361313230303130343034352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/426e7e803fcd41cd9eaeca1200104045.png" style="max-width: 100%;"></a></p>
+<p><strong>结论：</strong> 形参实例化之后其实相当于实参的一份临时拷贝</p>
+<ul>
+<li>
+<p>上面这一个，叫做【传值调用】，函数内部形参的修改是不会影响实参的，接下来我们来讲讲【传址调用】</p>
+</li>
+<li>
+<p>先看一下代码，然后我们再通过<strong>DeBug</strong>来展开分析一下</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">swap</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">px</span>, <span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">py</span>)
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">t</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">px</span>;
+	<span class="pl-c1">*</span><span class="pl-s1">px</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">py</span>;
+	<span class="pl-c1">*</span><span class="pl-s1">py</span> <span class="pl-c1">=</span> <span class="pl-s1">t</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6fc6660af25861454942cd570af23b39b2d6452229bd70079c75f48aad400543/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32303766323538656333306334326438396464323436323838643938303036642e706e67"><img src="https://camo.githubusercontent.com/6fc6660af25861454942cd570af23b39b2d6452229bd70079c75f48aad400543/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32303766323538656333306334326438396464323436323838643938303036642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/207f258ec30c42d89dd246288d98006d.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6d9d5feb5ecd5eb8c797f1eb0d202dab8ea32607de9d8478b06f610dd1606213/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39396636323964306635393434643961393931363132316435316161313934622e706e67"><img src="https://camo.githubusercontent.com/6d9d5feb5ecd5eb8c797f1eb0d202dab8ea32607de9d8478b06f610dd1606213/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39396636323964306635393434643961393931363132316435316161313934622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/99f629d0f5944d9a9916121d51aa194b.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6567e36ed10bc028aafefa1e8671e9e5487231767428069b045b0aa2c2830a93/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61353061386666346238386134643061623035663266623063626436383237342e706e67"><img src="https://camo.githubusercontent.com/6567e36ed10bc028aafefa1e8671e9e5487231767428069b045b0aa2c2830a93/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61353061386666346238386134643061623035663266623063626436383237342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/a50a8ff4b88a4d0ab05f2fb0cbd68274.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>最后来看一下运行结果，已经交换成功了~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/cd8f27da7f9f469441254a0d4c178e0c893e4d63a7ee6255ca46846d71aef0a9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32366639373137373833366534646632613933633962323331613762656434352e706e67"><img src="https://camo.githubusercontent.com/cd8f27da7f9f469441254a0d4c178e0c893e4d63a7ee6255ca46846d71aef0a9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32366639373137373833366534646632613933633962323331613762656434352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/26f97177836e4df2a93c9b231a7bed45.png" style="max-width: 100%;"></a></p>
+<h2>三、函数的参数</h2>
+<h3>1、实际参数（实参）</h3>
+<ul>
+<li>
+<p>真实传给函数的参数，叫<strong>实参</strong></p>
+</li>
+<li>
+<p>对于实参而言，它可以是【常量】、【变量】、【表达式】、【函数】等。我们到VS里来测试一下</p>
+</li>
+<li>
+<p>无论实参是何种类型的量，在进行函数调用时，它们都必须有<strong>确定的值</strong>，以便把这些值传送给形参</p>
+</li>
+</ul>
+<h3>2、形式参数（形参）</h3>
+<ul>
+<li>形式参数是指函数名后括号中的变量，因为形式参数只有在函数<strong>被调用的过程中才实例化</strong>（分配内存单元），所以叫形式参数。形式参数当函数调用完成之后就<strong>自动销毁</strong>了。因此形式参数只在函数中有效。</li>
+</ul>
+<p><strong>所以我们可以总结出来一句话：</strong></p>
+<blockquote>
+<p>函数调用时，实参传递给形参，形参是实参的一份临时拷贝，形参的改变不影响实参</p>
+</blockquote>
+<h2>四、函数的调用</h2>
+<ul>
+<li>这里我们再来说一下函数的【传值调用】和【传址调用】</li>
+</ul>
+<h3>1、传值调用</h3>
+<blockquote>
+<p>函数的形参和实参分别占有不同内存块，对形参的修改不会影响实参</p>
+</blockquote>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9e00381d8327313c70b5746365cfb40c29610fc030cea79934d27a4bdaa05d5b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34613765363163386163386234333263383463336337353463653462633731302e706e67"><img src="https://camo.githubusercontent.com/9e00381d8327313c70b5746365cfb40c29610fc030cea79934d27a4bdaa05d5b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34613765363163386163386234333263383463336337353463653462633731302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/4a7e61c8ac8b432c84c3c754ce4bc710.png" style="max-width: 100%;"></a></p>
+<h3>2、传址调用</h3>
+<ul>
+<li>传址调用是把函数外部创建变量的<strong>内存地址</strong>传递给函数参数的一种调用函数的方式。</li>
+<li>这种传参方式可以让函数和函数外边的变量<strong>建立起真正的联系</strong>，也就是函数内部可以<strong>直接操</strong>作函数外部的变量。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d88f5b11d1ab7b008e7db9514d79a179d586ae4015c27a93e3ea0fbbad316557/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66626337383230636538383734663466626432653934353664316363623066612e706e67"><img src="https://camo.githubusercontent.com/d88f5b11d1ab7b008e7db9514d79a179d586ae4015c27a93e3ea0fbbad316557/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66626337383230636538383734663466626432653934353664316363623066612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/fbc7820ce8874f4fbd2e9456d1ccb0fa.png" style="max-width: 100%;"></a></p>
+<h3>3、专项练习</h3>
+<h4>3.1 素数判断</h4>
+<ul>
+<li>【素数】又叫质数。素数，指的是<strong>大于1的整数中，只能被1和这个数本身整除的数</strong></li>
+<li>知道了规则，那代码就好写了。我们来输出一下100~200的所有素数。在外部写一个循环，就可以获取100 - 200之间的数字了，然后对于素数的求解，<strong>可以单独封装为一个函数</strong></li>
+</ul>
+<hr>
+<ul>
+<li>首先来思考需要传入哪些参数，很明显：<strong>只需要传入被判断的数字即可，然后就要去思考这个函数的返回值，可以这样设定：在函数内部若是判断出其为素数，那么就返回1，否则就返回0，然后在主函数外部进行一个判断即可</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">100</span>; <span class="pl-s1">i</span> &lt;= <span class="pl-c1">200</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+	{
+		<span class="pl-k">if</span> (<span class="pl-en">IsPrime</span>(<span class="pl-s1">i</span>) <span class="pl-c1">==</span> <span class="pl-c1">1</span>)
+		{
+			<span class="pl-en">printf</span>(<span class="pl-s">"%d是素数\n"</span>, <span class="pl-s1">i</span>);
+		}
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>
+<p>接下去我们来看看函数的部分</p>
+</li>
+<li>
+<p>如果i能够被**2, sqrt(i)**之间的任意数据整除，则<code class="notranslate">i</code>不是素数</p>
+</li>
+<li>
+<p>原因：如果 m 能被 <strong>2 ~ m-1</strong> 之间任一整数整除，其二个因子必定有一个小于或等于 <strong>sqrt(m)</strong>，另一个大于或等于<code class="notranslate">sqrt(m)</code>。</p>
+</li>
+<li>
+<p><strong>注意：</strong> 在使用<code class="notranslate">sqrt</code>的时候需要引入头文件<code class="notranslate">math.h</code></p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">/*素数判断*/</span>
+<span class="pl-smi">int</span> <span class="pl-en">IsPrime</span>(<span class="pl-smi">int</span> <span class="pl-s1">n</span>)
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">2</span>; <span class="pl-s1">j</span> <span class="pl-c1">&lt;</span> <span class="pl-en">sqrt</span>(<span class="pl-s1">n</span>); <span class="pl-s1">j</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-k">if</span> (<span class="pl-s1">n</span> % <span class="pl-s1">j</span> <span class="pl-c1">==</span> <span class="pl-c1">0</span>)
+			<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">1</span>;
+}</pre></div>
+<ul>
+<li>然后我们来看一下运行结果</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/aa2745dc48cd0427a119091485cb72f0a21c094844c43979b6599d5a9cc9f8be/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64653339303563373433366134396562386564353662653832393930643266652e706e67"><img src="https://camo.githubusercontent.com/aa2745dc48cd0427a119091485cb72f0a21c094844c43979b6599d5a9cc9f8be/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64653339303563373433366134396562386564353662653832393930643266652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/de3905c7436a49eb8ed56be82990d2fe.png" style="max-width: 100%;"></a></p>
+<h4>3.2 闰年判断</h4>
+<ul>
+<li><strong>【闰年】公历年份是4的倍数，且不是100的倍数，为普通闰年。公历年份是整百数，且必须是400的倍数才是世纪闰年</strong></li>
+<li>一样，我们先将主函数写好。需求是输出一下1000~2000之间的所有闰年</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">1000</span>; <span class="pl-s1">i</span> &lt;= <span class="pl-c1">2000</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+{
+	<span class="pl-k">if</span> (<span class="pl-en">Isleap</span>(<span class="pl-s1">i</span>) <span class="pl-c1">==</span> <span class="pl-c1">1</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">i</span>);
+	}
+}</pre></div>
+<ul>
+<li>然后的各方面条件和上面是一样的，便不做详解，我们来看看函数体~~</li>
+<li>这一块我给出两种方法，第一种就是直接了当一些，若是<strong>能被4整数但是不能被100整数，或者可以被400整数的数</strong>，那就是一个闰年，此时返回1即可，反之返回0，利用到了【<strong>逻辑操作符</strong>】</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">Isleap</span>(<span class="pl-smi">int</span> <span class="pl-s1">year</span>)
+{
+	<span class="pl-k">if</span> ((<span class="pl-s1">year</span> % <span class="pl-c1">4</span> <span class="pl-c1">==</span> <span class="pl-c1">0</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">year</span> % <span class="pl-c1">100</span> <span class="pl-c1">!=</span> <span class="pl-c1">0</span>) <span class="pl-c1">||</span> (<span class="pl-s1">year</span> % <span class="pl-c1">400</span> <span class="pl-c1">==</span> <span class="pl-c1">0</span>))
+	{
+		<span class="pl-k">return</span> <span class="pl-c1">1</span>;
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>第二种方法就是一个if的嵌套判断，这里要注意的一点是对400取余的条件外面要写成【if】，不要写成【else if】，否则两个判断条件就只会进去一个了，那就回漏掉几个年份</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">Isleap</span>(<span class="pl-smi">int</span> <span class="pl-s1">year</span>)
+{
+	<span class="pl-k">if</span> (<span class="pl-s1">year</span> % <span class="pl-c1">4</span> <span class="pl-c1">==</span> <span class="pl-c1">0</span>)
+	{
+		<span class="pl-k">if</span> (<span class="pl-s1">year</span> % <span class="pl-c1">100</span> <span class="pl-c1">!=</span> <span class="pl-c1">0</span>)
+		{
+			<span class="pl-k">return</span> <span class="pl-c1">1</span>;
+		}
+	}
+	<span class="pl-k">if</span> (<span class="pl-s1">year</span> % <span class="pl-c1">400</span> <span class="pl-c1">==</span> <span class="pl-c1">0</span>)
+		<span class="pl-k">return</span> <span class="pl-c1">1</span>;
+}</pre></div>
+<ul>
+<li>第三种方法是可以直接return<code class="notranslate">(year % 4 == 0 &amp;&amp; year % 100 != 0) || (year % 400 == 0)</code>，如果为真，就返回<code class="notranslate">1</code>，如果为假，就返回<code class="notranslate">0</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">return</span> (<span class="pl-s1">year</span> % <span class="pl-c1">4</span> <span class="pl-c1">==</span> <span class="pl-c1">0</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">year</span> % <span class="pl-c1">100</span> <span class="pl-c1">!=</span> <span class="pl-c1">0</span>) <span class="pl-c1">||</span> (<span class="pl-s1">year</span> % <span class="pl-c1">400</span> <span class="pl-c1">==</span> <span class="pl-c1">0</span>);</pre></div>
+<ul>
+<li>来看一下运行结果~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9811c5da17efcda9c4c278a208d94aaa7b59b9d444175cdf4ce61d489b37eb96/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36303563633061656366663234626661396262666664383363326134383837632e706e67"><img src="https://camo.githubusercontent.com/9811c5da17efcda9c4c278a208d94aaa7b59b9d444175cdf4ce61d489b37eb96/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36303563633061656366663234626661396262666664383363326134383837632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/605cc0aecff24bfa9bbffd83c2a4887c.png" style="max-width: 100%;"></a></p>
+<h4>3.3 二分查找</h4>
+<ul>
+<li>首先我们需要设定一个有序数组，因为二分查找只能在序列有序的情况下才可以进行</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">arr</span>[] <span class="pl-c1">=</span> { <span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>,<span class="pl-c1">4</span>,<span class="pl-c1">5</span>,<span class="pl-c1">6</span>,<span class="pl-c1">7</span>,<span class="pl-c1">8</span>,<span class="pl-c1">9</span> };
+<span class="pl-smi">int</span> <span class="pl-s1">sz</span> <span class="pl-c1">=</span> <span class="pl-k">sizeof</span>(<span class="pl-smi">arr</span>) / <span class="pl-k">sizeof</span>(<span class="pl-s1">arr</span>[<span class="pl-c1">0</span>]);
+<span class="pl-smi">int</span> <span class="pl-s1">k</span> <span class="pl-c1">=</span> <span class="pl-c1">7</span>;</pre></div>
+<ul>
+<li>可以看到，上面除了设定数组以外，我还求出这个数组的元素个数，因为在进行函数传参的时候需要使用到</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">pos</span> <span class="pl-c1">=</span> <span class="pl-en">BinarySearch</span>(<span class="pl-s1">arr</span>, <span class="pl-s1">sz</span>, <span class="pl-s1">k</span>);</pre></div>
+<ul>
+<li>来看如何传值以及接收返回值，首先我们需要将这个数组的【首元素地址】传入</li>
+<li>除了要传入数组的首元素地址之外，还需要传入我在上面求出来的【sz】，也就是数组的个数</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//int BinarySearch(int* a, int n, int k)   //指针接收地址</span>
+<span class="pl-smi">int</span> <span class="pl-en">BinarySearch</span>(<span class="pl-smi">int</span> <span class="pl-s1">a</span>[], <span class="pl-smi">int</span> <span class="pl-s1">n</span>, <span class="pl-smi">int</span> <span class="pl-s1">k</span>)	   <span class="pl-c">//数组接收数组</span>
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">left</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">right</span> <span class="pl-c1">=</span> <span class="pl-s1">n</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>;
+	<span class="pl-k">while</span> (<span class="pl-s1">left</span> &lt;= <span class="pl-s1">right</span>)
+	{
+		<span class="pl-smi">int</span> <span class="pl-s1">mid</span> <span class="pl-c1">=</span> <span class="pl-s1">left</span> <span class="pl-c1">+</span> (<span class="pl-s1">right</span> <span class="pl-c1">-</span> <span class="pl-s1">left</span>) / <span class="pl-c1">2</span>;
+		<span class="pl-k">if</span> (<span class="pl-s1">k</span> <span class="pl-c1">&gt;</span> <span class="pl-s1">a</span>[<span class="pl-s1">mid</span>])
+			<span class="pl-s1">left</span> <span class="pl-c1">=</span> <span class="pl-s1">mid</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>;
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (<span class="pl-s1">k</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">a</span>[<span class="pl-s1">mid</span>])
+			<span class="pl-s1">right</span> <span class="pl-c1">=</span> <span class="pl-s1">mid</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>;
+		<span class="pl-k">else</span>
+			<span class="pl-k">return</span> <span class="pl-s1">mid</span>;
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">-1</span>;
+}</pre></div>
+<h4>3.4 修改数值</h4>
+<ul>
+<li>通过函数内部的修改带动函数外部数组的修改，这里就要使用到我们上面所说的【传址调用】</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">change</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">px</span>)
+{
+	(<span class="pl-c1">*</span><span class="pl-s1">px</span>)<span class="pl-c1">++</span>;
+}
+<span class="pl-smi">int</span> <span class="pl-s1">num</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+<span class="pl-en">change</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">num</span>);
+<span class="pl-en">printf</span>(<span class="pl-s">"num = %d\n"</span>, <span class="pl-s1">num</span>);</pre></div>
+<ul>
+<li>在函数外部，我传入了num值的地址，然后在函数体的形参中使用指针来进行接收，此时对这个指针进行解引用就可以获取到外部的实参，就可以直接对其进行修改了</li>
+<li>这里主要写成<code class="notranslate">(*px)++</code>，不能写成<code class="notranslate">*px++</code>，因为【++】的优先级比【*】来得高，所以会先对这个指针变量进行一个++，然后再对其进行一个解引用的操作，但是当这个指针后移的时候，就已经变成了野指针，此时再去访问这个野指针就会出现问题</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/54844e265cf74253ffc3f0a3f8748d21d958ec0c3a72de1cba24a68f95843a6e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39613333326231643466386134636162623739623531323434643530323463362e706e67"><img src="https://camo.githubusercontent.com/54844e265cf74253ffc3f0a3f8748d21d958ec0c3a72de1cba24a68f95843a6e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39613333326231643466386134636162623739623531323434643530323463362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/9a332b1d4f8a4cabb79b51244d5024c6.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>但是我们上<code class="notranslate">*px</code>外的括号去掉再看看</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/72b58b0305ec0b8b932d646fd45807918f5cbfc6aef6c817d4f2334532e6ee1b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38633739666266623561646234636334626338343266383936353138326538642e706e67"><img src="https://camo.githubusercontent.com/72b58b0305ec0b8b932d646fd45807918f5cbfc6aef6c817d4f2334532e6ee1b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38633739666266623561646234636334626338343266383936353138326538642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/8c79fbfb5adb4cc4bc842f8965182e8d.png" style="max-width: 100%;"></a></p>
+<h2>五、函数的嵌套调用和链式访问</h2>
+<h3>1、嵌套调用</h3>
+<blockquote>
+<p>函数和函数之间可以根据实际的需求进行组合的，也就是互相调用的</p>
+</blockquote>
+<ul>
+<li>首先来看第一个例子~~</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">print</span>()
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"haha\n"</span>);
+}
+
+<span class="pl-smi">void</span> <span class="pl-en">three</span>()
+{
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">3</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+	{
+		<span class="pl-en">print</span>();
+	}
+}
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-en">three</span>();
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e874cb22eefe8c3a2a851c5d78049681b4800bc15ae9947c1221ad5930ff3cf7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61376131663335393231623634646662626431336364393866373531343537662e706e67"><img src="https://camo.githubusercontent.com/e874cb22eefe8c3a2a851c5d78049681b4800bc15ae9947c1221ad5930ff3cf7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61376131663335393231623634646662626431336364393866373531343537662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/a7a1f35921b64dfbbd13cd98f751457f.png" style="max-width: 100%;"></a></p>
+<blockquote>
+<p>函数可以嵌套调用，但是不能嵌套定义</p>
+</blockquote>
+<h3>2、链式访问</h3>
+<blockquote>
+<p>把一个函数的返回值作为另外一个函数的参数</p>
+</blockquote>
+<ul>
+<li>这里我先介绍一下【<a href="https://legacy.cplusplus.com/reference/cstring/strlen/?kw=strlen" rel="nofollow">strlen</a>】这个函数</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b3dd52d35c5c4e6a4b21635923e23ed978e91a5218e939d55bceff3800156534/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63653330373337346263333034643461626633366337313633383535363632362e706e67"><img src="https://camo.githubusercontent.com/b3dd52d35c5c4e6a4b21635923e23ed978e91a5218e939d55bceff3800156534/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63653330373337346263333034643461626633366337313633383535363632362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/ce307374bc304d4abf36c71638556626.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们到代码里面来用一下</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-s1">a</span>[] <span class="pl-c1">=</span> <span class="pl-s">"hello world"</span>;
+<span class="pl-smi">int</span> <span class="pl-s1">len</span> <span class="pl-c1">=</span> <span class="pl-en">strlen</span>(<span class="pl-s1">a</span>);
+<span class="pl-en">printf</span>(<span class="pl-s">"len = %d\n"</span>, <span class="pl-s1">len</span>);</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/952b0e8f3cd31c2d44afcb22e27c5375bfdbc87101772d6b35b5fbbb5a46317a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33366637316432656531346434306161393433653364353664343462336339382e706e67"><img src="https://camo.githubusercontent.com/952b0e8f3cd31c2d44afcb22e27c5375bfdbc87101772d6b35b5fbbb5a46317a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33366637316432656531346434306161393433653364353664343462336339382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/36f71d2ee14d40aa943e3d56d44b3c98.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>这里要注意一点的是strlen()去求字符串长度的时候是不算’\0’的</p>
+</li>
+<li>
+<p>接着再来介绍一个函数【<a href="https://legacy.cplusplus.com/reference/cstring/strcat/?kw=strcat" rel="nofollow">strcat</a>】</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3bc2d0cb293f3bec4d8abe24aabd52227f5e27a7fef3a46c87951ac1ccf2d56a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35363963393166376436393634343936383132323330346363643134376465342e706e67"><img src="https://camo.githubusercontent.com/3bc2d0cb293f3bec4d8abe24aabd52227f5e27a7fef3a46c87951ac1ccf2d56a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35363963393166376436393634343936383132323330346363643134376465342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/569c91f7d69644968122304ccd147de4.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>接下去我们来看看如何做到<strong>链式访问</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-s1">a</span>[<span class="pl-c1">10</span>] <span class="pl-c1">=</span> <span class="pl-s">"hello"</span>;
+<span class="pl-smi">int</span> <span class="pl-s1">len</span> <span class="pl-c1">=</span> <span class="pl-en">strlen</span>(<span class="pl-en">strcat</span>(<span class="pl-s1">a</span>, <span class="pl-s">"bit"</span>));
+<span class="pl-en">printf</span>(<span class="pl-s">"len = %d\n"</span>, <span class="pl-s1">len</span>);</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/16d4752a2a61ff6aeff5cab6bf5a9c84d1218ecc42f34f5018c5d0964b2be0ef/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61353831663431616465666634366166613961336431353232646236623736362e706e67"><img src="https://camo.githubusercontent.com/16d4752a2a61ff6aeff5cab6bf5a9c84d1218ecc42f34f5018c5d0964b2be0ef/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61353831663431616465666634366166613961336431353232646236623736362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/a581f41adeff46afa9a3d1522db6b766.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>接下去再来看一下链式访问的例子。你知道这句代码输出的结果是多少吗</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">printf</span>(<span class="pl-s">"%d"</span>, <span class="pl-en">printf</span>(<span class="pl-s">"%d"</span>, <span class="pl-en">printf</span>(<span class="pl-s">"43"</span>)));</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c02d9917af0b37f4fee0ff027fee21a7a29978f013b8dfbffcd775452e1eb33a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30383263376131323866356434643331396538313337373737616164663564342e706e67"><img src="https://camo.githubusercontent.com/c02d9917af0b37f4fee0ff027fee21a7a29978f013b8dfbffcd775452e1eb33a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30383263376131323866356434643331396538313337373737616164663564342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/082c7a128f5d4d319e8137777aadf5d4.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>为什么这句代码的输出是【4321】呢，我们来看一下【<a href="https://legacy.cplusplus.com/reference/cstdio/printf/?kw=printf" rel="nofollow">printf</a>】这个函数</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/161fb09434f2b5d9caeaf65f6242ff4fea6b1481954a0948137d7f9abaa9e555/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37623531336565623366346434363035386334323231643133633665636435322e706e67"><img src="https://camo.githubusercontent.com/161fb09434f2b5d9caeaf65f6242ff4fea6b1481954a0948137d7f9abaa9e555/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37623531336565623366346434363035386334323231643133633665636435322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/7b513eeb3f4d46058c4221d13c6ecd52.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以看到对于printf的返回值是输出字符的个数，那这就可以解释通了：对于内层的<code class="notranslate"> printf("43")</code>输出的字符个数有2个，然后再看外层的<code class="notranslate">printf("%d", printf("43"))</code>便会在输出一个2，它的返回值就是输出了一个字符，那么整体的这个<code class="notranslate">printf("%d", printf("%d", printf("43")))</code>就会在输出一个1，作为返回值</li>
+</ul>
+<h2>六、函数的声明和定义</h2>
+<h3>1、函数声明</h3>
+<ol>
+<li>告诉编译器有一个函数叫什么，参数是什么，返回类型是什么。但是具体是不是存在，函数<br>
+声明决定不了。</li>
+<li>函数的声明一般出现在<strong>函数的使用之前</strong>。要满足先声明后使用。</li>
+<li>函数的声明一般要放在<strong>头文件</strong>中的</li>
+</ol>
+<ul>
+<li>来看一下代码</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">Add</span>(<span class="pl-smi">int</span> <span class="pl-s1">x</span>, <span class="pl-smi">int</span> <span class="pl-s1">y</span>);
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">b</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-en">scanf</span>(<span class="pl-s">"%d %d"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">a</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">b</span>);
+
+	<span class="pl-smi">int</span> <span class="pl-s1">sum</span> <span class="pl-c1">=</span> <span class="pl-en">Add</span>(<span class="pl-s1">a</span>, <span class="pl-s1">b</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"sum = %d\n"</span>, <span class="pl-s1">sum</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}
+
+<span class="pl-smi">int</span> <span class="pl-en">Add</span>(<span class="pl-smi">int</span> <span class="pl-s1">x</span>, <span class="pl-smi">int</span> <span class="pl-s1">y</span>)
+{
+	<span class="pl-k">return</span> <span class="pl-s1">x</span> <span class="pl-c1">+</span> <span class="pl-s1">y</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c0c05ed3c9ac5da739aa2282672f3e969f1d47e179a65ae958227026955c2272/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63303933613130616534656634383135623537303130326366383735323764622e706e67"><img src="https://camo.githubusercontent.com/c0c05ed3c9ac5da739aa2282672f3e969f1d47e179a65ae958227026955c2272/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63303933613130616534656634383135623537303130326366383735323764622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/c093a10ae4ef4815b570102cf87527db.png" style="max-width: 100%;"></a></p>
+<h3>2、函数定义</h3>
+<blockquote>
+<p>函数的定义是指函数的具体实现，交待函数的功能实现</p>
+</blockquote>
+<ul>
+<li>对于上面的代码，我们可以对其做一个分解，将【add】这个功能单独放到一个.c的文件中，然后再写一个.h的文件去声明一下这个函数。因为在日常的项目工程中，是有很多程序员一起写代码的，但是他们不可能在一个.c文件中一起书写，也不能等一个人写好之后另一个人再接着写，这样就会降低开发效率</li>
+<li>所以我们就有一个分模块编写的说法，也就是在一个头文件中先写好函数的声明和各种库函数的引用和定义，然后每个程序员都可以创立自己的.c文件，然后去书写自己的那段逻辑，最后将大家的代码进行一个整合，就完成了整个项目</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/fecff028ba97f40d8cde376f54802e5d0f6e409b804e329bd8a7dbbec6416908/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38323764383733646633373134333531396232383063303361323736653230342e706e67"><img src="https://camo.githubusercontent.com/fecff028ba97f40d8cde376f54802e5d0f6e409b804e329bd8a7dbbec6416908/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38323764383733646633373134333531396232383063303361323736653230342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/827d873df37143519b280c03a276e204.png" style="max-width: 100%;"></a></p>
+<h2>七、函数递归</h2>
+<blockquote>
+<p>接下去我们来说说函数递归，这也是函数这一块最难理解的内容</p>
+</blockquote>
+<h3>1、什么是函数递归？</h3>
+<blockquote>
+<p>程序调用自身的编程技巧称为递归（ recursion）<br>
+只需少量的程序就可描述出解题过程所需要的多次重复计算，<strong>大大地减少了程序的代码量</strong><br>
+<strong>递归的主要思考方式在于：把大事化小</strong></p>
+</blockquote>
+<h3>2、函数递归的两个必要条件</h3>
+<ul>
+<li>存在<strong>限制条件</strong>，当满足这个限制条件的时候，递归便不再继续。</li>
+<li>每次递归调用之后越<strong>来越接近</strong>这个限制条件</li>
+</ul>
+<h3>3、题目的展开与剖析</h3>
+<h4>3.1 例题1：打印数字</h4>
+<ul>
+<li>
+<p>【要求】：输入1234，打印1 2 3 4</p>
+</li>
+<li>
+<p>在之前我们学习分支和循环的时候有做过类似的题目，那个时候我们是利用取余【%】和整除【/】倒着打印一个数字的每个数位，也就是下面这段代码</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">print1</span>(<span class="pl-smi">int</span> <span class="pl-s1">num</span>)
+{
+	<span class="pl-k">while</span> (<span class="pl-s1">num</span> <span class="pl-c1">&gt;</span> <span class="pl-c1">0</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">num</span> % <span class="pl-c1">10</span>);
+		<span class="pl-s1">num</span> /= <span class="pl-c1">10</span>;
+	}
+}
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-en">print1</span>(<span class="pl-c1">1234</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><strong>运行结果如下</strong></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2a9d7e6e5335fdbb0f5aebb5dc0af83448e12aead020feb4cc295402dcba44ec/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36386134393464356132656634383132626330386632326434646431303832302e706e67"><img src="https://camo.githubusercontent.com/2a9d7e6e5335fdbb0f5aebb5dc0af83448e12aead020feb4cc295402dcba44ec/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36386134393464356132656634383132626330386632326434646431303832302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/68a494d5a2ef4812bc08f22d4dd10820.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>现在我们要顺着将这个数的每一个数位进行一个打印，这该怎么去做呢？我们来分析一下</li>
+<li>我们在屏幕上通过scanf输入一个数，然后通过封装好的一个函数传入<code class="notranslate">print(num)</code>，即<code class="notranslate">print(1234)</code>，那既然上面讲到了这个分割数字的思路，这里我们也可以使用这个思路来完成，</li>
+<li>对于<code class="notranslate">print(1234)</code>我们可以拆成<code class="notranslate">print(123) 4</code></li>
+<li>对于<code class="notranslate">print(123)</code>又可以拆成<code class="notranslate">print(12) 3</code></li>
+<li>对于<code class="notranslate">print(12)</code>又可以拆成<code class="notranslate">print(1) 2</code></li>
+<li>那<code class="notranslate">print(1234)</code>就被拆成了<code class="notranslate">print(1) 2 3 4</code>，也就是当这个num &lt; 10为一个个位数时，就做一个打印，否则的话就不断将其以十分之一倍得进行缩小。我们将其转化为代码的形式就【一目了然】了</li>
+<li>可以看到，这里是使用到了一个递归的逻辑，上面说到递归都是具有结束条件的，若是不符合的话就层层递归下去，知道当前传入的num值为个位数为止才进行一个回调</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">print2</span>(<span class="pl-smi">int</span> <span class="pl-s1">num</span>)
+{
+	<span class="pl-k">if</span> (<span class="pl-s1">num</span> <span class="pl-c1">&gt;</span> <span class="pl-c1">9</span>)
+	{
+		<span class="pl-en">print2</span>(<span class="pl-s1">num</span> / <span class="pl-c1">10</span>);
+	}
+	<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">num</span> % <span class="pl-c1">10</span>);
+}</pre></div>
+<p><strong>运行结果如下</strong></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d3426abce7b93774a7f68701b1045b3f26d7fc446df4d05d7a643bbae384d7dc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37383162303066643935346234363735623365663666346164613538363330382e706e67"><img src="https://camo.githubusercontent.com/d3426abce7b93774a7f68701b1045b3f26d7fc446df4d05d7a643bbae384d7dc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37383162303066643935346234363735623365663666346164613538363330382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/781b00fd954b4675b3ef6f4ada586308.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们通过递归展开图再来看看~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/09b199f7fd9977cc3f569f221b08958407781b3402a4a8ffba1dcbc8ac9f4dfc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66643531323630623166643834363234613032353263373931333931386264382e706e67"><img src="https://camo.githubusercontent.com/09b199f7fd9977cc3f569f221b08958407781b3402a4a8ffba1dcbc8ac9f4dfc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66643531323630623166643834363234613032353263373931333931386264382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/fd51260b1fd84624a0252c7913918bd8.png" style="max-width: 100%;"></a></p>
+<h4>3.2 例题2：求字符串长度</h4>
+<ul>
+<li>
+<p>【要求】：输入abc，输出其长度为3</p>
+</li>
+<li>
+<p>上面有讲到过<code class="notranslate">strlen()</code>这个函数，其可以求出一个字符串的长度，我们首先通过这个函数来试试</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">char</span> <span class="pl-s1">str</span>[] <span class="pl-c1">=</span> <span class="pl-s">"abc"</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">len</span> <span class="pl-c1">=</span> <span class="pl-en">strlen</span>(<span class="pl-s1">str</span>);		<span class="pl-c">//利用库函数进行求解</span>
+	<span class="pl-en">printf</span>(<span class="pl-s">"len = %d\n"</span>, <span class="pl-s1">len</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>接下去的话我们将这个<strong>strlen</strong>()函数改成<strong>my_strlen()</strong>，我们自己来实现一下这个底层的逻辑。</li>
+<li>对于<code class="notranslate">int len = my_strlen(str);</code>，我们传入了字符数组str的首元素地址，那上面有讲到过对于地址要使用指针来进行接收，最后还要返回求出的长度，所以对于函数我们可以定义成这样</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">my_strlen</span>(<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">str</span>)</pre></div>
+<ul>
+<li>
+<p>对于str这个字符指针现在是指向传入字符数组的首元素地址，也就是【a】，【\0】是一个字符串的结束标志，可以让这个字符指针不断后移，每一次对其进行解引用看看是否为【\0】即可，有了思路我们就可以写出代码了</p>
+</li>
+<li>
+<p>在这里的话还需要设置计数器，我们我们要去求解这个字符串的长度，因此判断到它不为【\0】的时候就count++，然后让这个字符指针进行后移即可。</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">my_strlen</span>(<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">str</span>)
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">count</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-k">while</span> ((<span class="pl-c1">*</span><span class="pl-s1">str</span>) <span class="pl-c1">!=</span> <span class="pl-c1">'\0'</span>)
+	{
+		<span class="pl-s1">count</span><span class="pl-c1">++</span>;	<span class="pl-c">//计数器累加</span>
+		<span class="pl-s1">str</span><span class="pl-c1">++</span>;		<span class="pl-c">//字符指针后移</span>
+	}
+	<span class="pl-k">return</span> <span class="pl-s1">count</span>;
+}</pre></div>
+<ul>
+<li>那我们现在的要求是不可以使用计数器进行求解字符串的长度</li>
+<li>一样，我们可以使用到上面的分割思想</li>
+<li>对于<code class="notranslate">my_strlen(abc)</code>我们可以拆成<code class="notranslate">1 + my_strlen(bc)</code></li>
+<li>对于<code class="notranslate">my_strlen(bc)</code>我们可以拆成<code class="notranslate">1 + my_strlen(c)</code></li>
+<li>对于<code class="notranslate">my_strlen(c)</code>我们可以拆成<code class="notranslate">1 + my_strlen('\0')</code></li>
+<li>那<code class="notranslate">my_strlen(abc)</code>就相当于是<code class="notranslate">1 + 1 + 1 + 0</code>。也是使用字符指针去进行一个后移，若其不为【\0】时，就不断对这个字符串进行拆分，然后直到遇到【\0】时便<code class="notranslate">return 0</code>。接下去就可以写出代码了</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">my_strlen</span>(<span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">str</span>)
+{
+	<span class="pl-k">if</span> (<span class="pl-c1">*</span><span class="pl-s1">str</span> <span class="pl-c1">!=</span> <span class="pl-c1">'\0'</span>)
+	{
+		<span class="pl-k">return</span> <span class="pl-c1">1</span> <span class="pl-c1">+</span> <span class="pl-en">my_strlen</span>(<span class="pl-s1">str</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>);
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>然后来看一下结果吧，上面三段代码的结果都是一样的，所以一起展示了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/cfc0ee4907e8ba0aa08a6b5686b23366a08e1e5aaa9a52324e95bf4c3aa2b3fe/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37613935643438393637366434393630623135663166643963396630613631372e706e67"><img src="https://camo.githubusercontent.com/cfc0ee4907e8ba0aa08a6b5686b23366a08e1e5aaa9a52324e95bf4c3aa2b3fe/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37613935643438393637366434393630623135663166643963396630613631372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/7a95d489676d4960b15f1fd9c9f0a617.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>一样，我们来画一下递归展开图</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/6e2172d2b5be75ce5151c398528ea61341873bf3b4fe55865192cbfc74cb61a3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61376439333563383437663134613664613538313463613837303935653733642e706e67"><img src="https://camo.githubusercontent.com/6e2172d2b5be75ce5151c398528ea61341873bf3b4fe55865192cbfc74cb61a3/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f61376439333563383437663134613664613538313463613837303935653733642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/a7d935c847f14a6da5814ca87095e73d.png" style="max-width: 100%;"></a></p>
+<h4>3.3 例题3：阶乘求解</h4>
+<ul>
+<li>【要求】：输入一个数，输出其求阶乘后的结果</li>
+<li>阶乘就是从从一个数开始乘，慢慢减少，一直乘到1为止，举个例子3! = 3 * (3 - 1) * (3 - 2) = 3 * 2 * 1 = 6</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/a6ddbfa90da57ffcae5470811d961c336a176567b7b50ca81be61a8659897b9a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30346531653431333863383034613732383164346439633534656335616139382e706e67"><img src="https://camo.githubusercontent.com/a6ddbfa90da57ffcae5470811d961c336a176567b7b50ca81be61a8659897b9a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30346531653431333863383034613732383164346439633534656335616139382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/04e1e4138c804a7281d4d9c54ec5aa98.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>也就是当【n &lt;= 1】时，即0的阶乘和1的阶乘最后都是1，当【n &gt;= 2】时，最后的结果就是n去乘以它减1的阶乘，于是我们就可以得出<strong>递归的代码</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">Func1</span>(<span class="pl-smi">int</span> <span class="pl-s1">n</span>)
+{
+	<span class="pl-k">if</span> (<span class="pl-s1">n</span> &lt;= <span class="pl-c1">1</span>)
+		<span class="pl-k">return</span> <span class="pl-c1">1</span>;
+	<span class="pl-k">else</span>
+		<span class="pl-k">return</span> <span class="pl-s1">n</span> <span class="pl-c1">*</span> <span class="pl-en">Func1</span>(<span class="pl-s1">n</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>);
+}</pre></div>
+<ul>
+<li>对于阶乘来说，不仅可以使用递归实现，还可以使用循环的方式来是实现</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">Func2</span>(<span class="pl-smi">int</span> <span class="pl-s1">n</span>)
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span> &lt;= <span class="pl-s1">n</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+	{
+		<span class="pl-s1">ret</span> *= <span class="pl-s1">i</span>;
+	}
+	<span class="pl-k">return</span> <span class="pl-s1">ret</span>;
+}</pre></div>
+<p>这里再对上面的递归实现做一个递归展开图的分析</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b13771cb975f4067ee56d7fcb12acf043c75683c4d6acaba41c6252be30fb281/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38333963623538313166663134383265623130373132326336613362343039302e706e67"><img src="https://camo.githubusercontent.com/b13771cb975f4067ee56d7fcb12acf043c75683c4d6acaba41c6252be30fb281/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38333963623538313166663134383265623130373132326336613362343039302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/839cb5811ff1482eb107122c6a3b4090.png" style="max-width: 100%;"></a></p>
+<h4>3.3 例题4：斐波那契数列</h4>
+<ul>
+<li>
+<p>【要求】：输入一个数，输出从1到这个数的斐波那契数</p>
+</li>
+<li>
+<p>斐波那契数就是前两个数加起来等于第三个数</p>
+</li>
+<li>
+<p>这里给出从1~10的斐波那契数列 <strong>【1 1 2 3 5 8 13 21 34 55】</strong>，可以看出对于1，2两个数来说都是<code class="notranslate">1</code>，后面就是数就是前两个数之和，因此我们可以列出下面的公式</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/8b1d58a1a3e73b2caf67b61c1d337a84442e11a3531b3f29803459b4a8448c8f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64326538646164373832653834636439396361316337633138326430333838322e706e67"><img src="https://camo.githubusercontent.com/8b1d58a1a3e73b2caf67b61c1d337a84442e11a3531b3f29803459b4a8448c8f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64326538646164373832653834636439396361316337633138326430333838322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/d2e8dad782e84cd99ca1c7c182d03882.png" style="max-width: 100%;"></a></p>
+</li>
+<li>
+<p>然后根据这个公式写出代码</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">Fib1</span>(<span class="pl-smi">int</span> <span class="pl-s1">n</span>)
+{
+	<span class="pl-k">if</span> (<span class="pl-s1">n</span> &lt;= <span class="pl-c1">2</span>)
+		<span class="pl-k">return</span> <span class="pl-c1">1</span>;
+	<span class="pl-k">else</span>
+		<span class="pl-k">return</span> <span class="pl-en">Fib1</span>(<span class="pl-s1">n</span> <span class="pl-c1">-</span> <span class="pl-c1">2</span>) <span class="pl-c1">+</span> <span class="pl-en">Fib1</span>(<span class="pl-s1">n</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>);
+}</pre></div></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

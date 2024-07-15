@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="# 前言
+>三子棋是一种民间传统游戏，又叫九宫棋、圈圈叉叉棋、一条龙、井字棋等。">
+<meta property="og:title" content="4. C语言之数组应用——三子棋小游戏">
+<meta property="og:description" content="# 前言
+>三子棋是一种民间传统游戏，又叫九宫棋、圈圈叉叉棋、一条龙、井字棋等。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/4.%20C-yu-yan-zhi-shu-zu-ying-yong-%E2%80%94%E2%80%94-san-zi-qi-xiao-you-xi.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>4. C语言之数组应用——三子棋小游戏</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">4. C语言之数组应用——三子棋小游戏</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/28" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h1>前言</h1>
+<blockquote>
+<p>三子棋是一种民间传统游戏，又叫九宫棋、圈圈叉叉棋、一条龙、井字棋等。游戏分为双方对战，双方依次在9宫格棋盘上摆放棋子，率先将自己的三个棋子走成一条线就视为胜利，而对方就算输了，但是三子棋在很多时候会出现和棋的局面。</p>
+</blockquote>
+<p>本篇博客就来进行讲解这个三子棋小游戏，跟着我来一起看把！（本文使用的编译器是<code class="notranslate">VS2022</code>）</p>
+<h2>一、前期准备</h2>
+<h3>模块化设计</h3>
+<p>在写三子棋的时候，我们先要了解一下什么事模块化设计：</p>
+<blockquote>
+<p>模块化程序设计是指在进行程序设计时将一个大程序按照功能划分为若干小程序模块，每个小程序模块完成一个确定的功能，并在这些模块之间建立必要的联系，通过模块的互相协作完成整个功能的程序设计方法</p>
+</blockquote>
+<ul>
+<li>上面是百度百科的介绍，可能有同学看不懂，简单来说就是份文件写</li>
+<li>在我们写一些程序的时候就会遇到一个.c文件里写很多，会显得杂乱，可读性会变的非常差，那么我们就要使用份文件来写代码，这样就会变得条理清晰，可读性强，这样是一种良好的编程习惯，那么怎么做呢？接下来看~~</li>
+</ul>
+<ol>
+<li>建立一个<code class="notranslate">game.h</code>头文件：存储行列信息，包含函数库，对函数进行声明</li>
+<li>建立一个<code class="notranslate">game.c</code>文件：实现游戏中的函数</li>
+<li>建立一个<code class="notranslate">test.c</code>文件：实现函数主体逻辑，在书写时可用此函数进行测试</li>
+<li>将<code class="notranslate">game.c</code>和<code class="notranslate">test.c</code>文件中包含<code class="notranslate">#include"game.h"</code></li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1ecdffa1dd2977e60535199617baf7a9ae11b91fecec58ac6dbbba30c4321c2a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30653763643039323035623834333162623966306237383732373437343165382e706e67"><img src="https://camo.githubusercontent.com/1ecdffa1dd2977e60535199617baf7a9ae11b91fecec58ac6dbbba30c4321c2a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30653763643039323035623834333162623966306237383732373437343165382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/0e7cd09205b8431bb9f0b787274741e8.png" style="max-width: 100%;"></a></p>
+<h2>二、框架搭建</h2>
+<p>创建好文件后，将game.c和test.c引入game.h，头文件的包含和函数的声明就在这里面</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3226ddd56160e1ea7c642d882045cf6510a8cd794378e9c0268240fa828f00da/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63663537343164313432623034303235613933373934653964383331303035312e706e67"><img src="https://camo.githubusercontent.com/3226ddd56160e1ea7c642d882045cf6510a8cd794378e9c0268240fa828f00da/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63663537343164313432623034303235613933373934653964383331303035312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/cf5741d142b04025a93794e9d8310051.png" style="max-width: 100%;"></a></p>
+<p>游戏界面：</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/aab5fe4b4510cedb25e93d1c064cc66d787b9b368482dc8ae7a462baf176fb86/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61393431383332323938336234373435613264343361653263393562666633342e706e67"><img src="https://camo.githubusercontent.com/aab5fe4b4510cedb25e93d1c064cc66d787b9b368482dc8ae7a462baf176fb86/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61393431383332323938336234373435613264343361653263393562666633342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/a9418322983b4745a2d43ae2c95bff34.png" style="max-width: 100%;"></a></p>
+<p>game.h</p>
+<ul>
+<li>这里定义一个三行三列，并且初始化，当想要变成n行m列的只需要改一下这里define定义的就行</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//行</span>
+<span class="pl-k">#define</span> <span class="pl-c1">ROW</span> 3
+<span class="pl-c">//列</span>
+<span class="pl-k">#define</span> <span class="pl-c1">COL</span> 3
+<span class="pl-c">//初始化棋盘</span>
+<span class="pl-smi">void</span> <span class="pl-en">InitBoard</span>(<span class="pl-smi">char</span> <span class="pl-s1">board</span>[<span class="pl-c1">ROW</span>][<span class="pl-c1">COL</span>],<span class="pl-smi">int</span> <span class="pl-s1">row</span>,<span class="pl-smi">int</span> <span class="pl-s1">col</span>);</pre></div>
+<ul>
+<li>玩家输入选择，switch处理对应逻辑，输入值顺便还可以作为循环结束的条件。</li>
+</ul>
+<p>test.c</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#define</span> <span class="pl-s1">_CRT_SECURE_NO_WARNINGS</span> 1
+<span class="pl-k">#include</span><span class="pl-s">"game.h"</span>
+
+<span class="pl-smi">void</span> <span class="pl-en">menu</span>()
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"**************************\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"*****     1.play    ******\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"*****     0.exit    ******\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"**************************\n"</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"\n"</span>);
+}
+
+<span class="pl-smi">void</span> <span class="pl-en">game</span>()
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"玩游戏\n"</span>);
+}
+
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">input</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-k">do</span>
+	{
+		<span class="pl-en">menu</span>();
+		<span class="pl-en">printf</span>(<span class="pl-s">"请选择:&gt;"</span>);
+		<span class="pl-en">scanf</span>(<span class="pl-s">"%d"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">input</span>);
+		<span class="pl-k">switch</span> (<span class="pl-s1">input</span>)
+		{
+		<span class="pl-k">case</span> <span class="pl-c1">1</span>:
+			<span class="pl-en">game</span>();
+			<span class="pl-k">break</span>;
+		<span class="pl-k">case</span> <span class="pl-c1">0</span>:
+			<span class="pl-en">printf</span>(<span class="pl-s">"退出游戏！\n"</span>);
+			<span class="pl-k">break</span>;
+		<span class="pl-k">default</span>:
+			<span class="pl-en">printf</span>(<span class="pl-s">"选择错误，请重新选择！\n"</span>);
+			<span class="pl-k">break</span>;
+		}
+
+	} <span class="pl-k">while</span> (<span class="pl-s1">input</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p>game.h</p>
+<ul>
+<li>在这里把需要引入的头文件写入</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#pragma</span> once
+<span class="pl-k">#include</span><span class="pl-s">&lt;stdio.h&gt;</span></pre></div>
+<ul>
+<li>可以看到，游戏已经正常运行了，但是里面的game函数还没有实现，接下来就让我们继续往下看（完成一部分功能就运行一下看看，及时发现BUG，越早发现越容易找到BUG）</li>
+</ul>
+<h2>三、游戏实现</h2>
+<blockquote>
+<p>创建棋盘&amp;初始化棋盘</p>
+</blockquote>
+<p>game.h</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">InitBoard</span>(<span class="pl-smi">char</span> <span class="pl-s1">board</span>[<span class="pl-c1">ROW</span>][<span class="pl-c1">COL</span>],<span class="pl-smi">int</span> <span class="pl-s1">row</span>,<span class="pl-smi">int</span> <span class="pl-s1">col</span>);</pre></div>
+<p>test.c</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">game</span>()
+{
+	<span class="pl-c">//创建棋盘</span>
+	<span class="pl-smi">char</span> <span class="pl-s1">board</span>[<span class="pl-c1">ROW</span>][<span class="pl-c1">COL</span>];
+	<span class="pl-c">//初始化棋盘</span>
+	<span class="pl-en">InitBoard</span>(<span class="pl-s1">board</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+}</pre></div>
+<p>game.c</p>
+<ul>
+<li>初始化棋盘，将数组所有元素初始化为<code class="notranslate">空格</code></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">InitBoard</span>(<span class="pl-smi">char</span> <span class="pl-s1">board</span>[<span class="pl-c1">ROW</span>][<span class="pl-c1">COL</span>], <span class="pl-smi">int</span> <span class="pl-s1">row</span>, <span class="pl-smi">int</span> <span class="pl-s1">col</span>)
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-k">for</span> (<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">row</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-k">for</span> (<span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">j</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">col</span>; <span class="pl-s1">j</span><span class="pl-c1">++</span>)
+		{
+			<span class="pl-s1">board</span>[<span class="pl-s1">i</span>][<span class="pl-s1">j</span>] <span class="pl-c1">=</span> <span class="pl-c1">' '</span>;<span class="pl-c">//初始化为空格</span>
+		}
+	}
+}</pre></div>
+<h3>打印棋盘</h3>
+<p>game.h<br>
+打印棋盘</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">DisplayBoard</span>(<span class="pl-smi">char</span> <span class="pl-s1">board</span>[<span class="pl-c1">ROW</span>][<span class="pl-c1">COL</span>], <span class="pl-smi">int</span> <span class="pl-s1">row</span>,<span class="pl-smi">int</span> <span class="pl-s1">col</span>);</pre></div>
+<p>test.c</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">DisplayBoard</span>(<span class="pl-s1">board</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);</pre></div>
+<p>game.c</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">DisplayBoard</span>(<span class="pl-smi">char</span> <span class="pl-s1">board</span>[<span class="pl-c1">ROW</span>][<span class="pl-c1">COL</span>], <span class="pl-smi">int</span> <span class="pl-s1">row</span>, <span class="pl-smi">int</span> <span class="pl-s1">col</span>)
+{
+<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-k">for</span> (<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">row</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">" %c | %c | %c \n"</span>, <span class="pl-s1">board</span>[<span class="pl-s1">i</span>][<span class="pl-c1">0</span>], <span class="pl-s1">board</span>[<span class="pl-s1">i</span>][<span class="pl-c1">1</span>], <span class="pl-s1">board</span>[<span class="pl-s1">i</span>][<span class="pl-c1">2</span>]);
+		<span class="pl-k">if</span> (<span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">row</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>)
+			<span class="pl-en">printf</span>(<span class="pl-s">"---|---|---\n"</span>);
+	}
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/51f5014fd1bf849a4d5b6de228d722508c3f9445e470360ca988952868a6a9ab/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32613132396135303032303234393563396435646663353633663937656536332e706e67"><img src="https://camo.githubusercontent.com/51f5014fd1bf849a4d5b6de228d722508c3f9445e470360ca988952868a6a9ab/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32613132396135303032303234393563396435646663353633663937656536332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/2a129a500202495c9d5dfc563f97ee63.png" style="max-width: 100%;"></a><br>
+如果我们要修改棋盘大小，行是循环出来的，但是列就写死了</p>
+<h3>代码优化</h3>
+<ul>
+<li>首先打印<code class="notranslate">空格 空格</code>和<code class="notranslate">|</code>，要打印row行col列，这里要注意的是当col列为col-1时才打印，也就是说打印了2列<code class="notranslate">|</code></li>
+<li>打印<code class="notranslate">---</code>也是一样的，同理</li>
+</ul>
+<p>game.c</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">DisplayBoard</span>(<span class="pl-smi">char</span> <span class="pl-s1">board</span>[<span class="pl-c1">ROW</span>][<span class="pl-c1">COL</span>], <span class="pl-smi">int</span> <span class="pl-s1">row</span>, <span class="pl-smi">int</span> <span class="pl-s1">col</span>)
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-k">for</span> (<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">row</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-k">for</span> (<span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">j</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">col</span>; <span class="pl-s1">j</span><span class="pl-c1">++</span>)
+		{
+			<span class="pl-en">printf</span>(<span class="pl-s">" %c "</span>, <span class="pl-s1">board</span>[<span class="pl-s1">i</span>][<span class="pl-s1">j</span>]);
+			<span class="pl-k">if</span> (<span class="pl-s1">j</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">col</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>)
+				<span class="pl-en">printf</span>(<span class="pl-s">"|"</span>);
+		}
+		<span class="pl-en">printf</span>(<span class="pl-s">"\n"</span>);
+		<span class="pl-k">if</span> (<span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">row</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>)
+		{
+			<span class="pl-k">for</span> (<span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">j</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">col</span>; <span class="pl-s1">j</span><span class="pl-c1">++</span>)
+			{
+				<span class="pl-en">printf</span>(<span class="pl-s">"---"</span>);
+				<span class="pl-k">if</span> (<span class="pl-s1">j</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">col</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>)
+					<span class="pl-en">printf</span>(<span class="pl-s">"|"</span>);
+			}
+			<span class="pl-en">printf</span>(<span class="pl-s">"\n"</span>);
+		}
+	}
+}</pre></div>
+<p>我们将ROW和COL修改成10也是可以打印的</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/8dfefede279750ba412226f9b29cba00fc4909629d839c16f3d2c01a32fd217b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64613764613937613065333834633433396432316661376566323930333663372e706e67"><img src="https://camo.githubusercontent.com/8dfefede279750ba412226f9b29cba00fc4909629d839c16f3d2c01a32fd217b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64613764613937613065333834633433396432316661376566323930333663372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/da7da97a0e384c439d21fa7ef29036c7.png" style="max-width: 100%;"></a></p>
+<h3>玩家下棋</h3>
+<p>game.h</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">PlayMove</span>(<span class="pl-smi">char</span> <span class="pl-s1">board</span>[<span class="pl-c1">ROW</span>][<span class="pl-c1">COL</span>], <span class="pl-smi">int</span> <span class="pl-s1">row</span>, <span class="pl-smi">int</span> <span class="pl-s1">col</span>);</pre></div>
+<p>test.c</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//玩家下棋</span>
+<span class="pl-k">while</span> (<span class="pl-c1">1</span>)
+{
+	<span class="pl-en">PlayMove</span>(<span class="pl-s1">board</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+	<span class="pl-en">DisplayBoard</span>(<span class="pl-s1">board</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+}</pre></div>
+<ul>
+<li>玩家下棋是不是要输入坐标，那么我们就先定义x和y，首先判断玩家输入的xy坐标合法，在棋盘范围内，如果合法，就继续，否则提示</li>
+<li>在玩家下棋时，需要判断是否要下的位置为<code class="notranslate">空格</code>，是空格说明当前位置没有棋子，不是空格说明当前位置已被下棋，就提示重新下棋</li>
+</ul>
+<p>game.c</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">PlayMove</span>(<span class="pl-smi">char</span> <span class="pl-s1">board</span>[<span class="pl-c1">ROW</span>][<span class="pl-c1">COL</span>], <span class="pl-smi">int</span> <span class="pl-s1">row</span>, <span class="pl-smi">int</span> <span class="pl-s1">col</span>)
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">x</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">y</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-en">printf</span>(<span class="pl-s">"玩家下棋\n"</span>);
+	<span class="pl-k">while</span> (<span class="pl-c1">1</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"请输入坐标:&gt;"</span>);
+		<span class="pl-en">scanf</span>(<span class="pl-s">"%d%d"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">x</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">y</span>);
+		<span class="pl-k">if</span> (<span class="pl-s1">x</span> &gt;= <span class="pl-c1">1</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">x</span> &lt;= <span class="pl-s1">row</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">y</span> &gt;= <span class="pl-c1">1</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">y</span> &lt;= <span class="pl-s1">col</span>)
+		{
+			<span class="pl-k">if</span> (<span class="pl-s1">board</span>[<span class="pl-s1">x</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>][<span class="pl-s1">y</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>] <span class="pl-c1">==</span> <span class="pl-c1">' '</span>)
+			{
+				<span class="pl-s1">board</span>[<span class="pl-s1">x</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>][<span class="pl-s1">y</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>] <span class="pl-c1">=</span> <span class="pl-c1">'*'</span>;
+				<span class="pl-k">break</span>;
+			}
+			<span class="pl-k">else</span> 
+			{
+				<span class="pl-en">printf</span>(<span class="pl-s">"该坐标被占用，请输入其他坐标\n"</span>);
+			}
+
+		}
+		<span class="pl-k">else</span> 
+		{
+			<span class="pl-en">printf</span>(<span class="pl-s">"坐标非法，请重新输入\n"</span>);
+		}
+	}
+}</pre></div>
+<h3>电脑下棋</h3>
+<ul>
+<li>电脑下棋要进行</li>
+</ul>
+<p>game.h</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span><span class="pl-s">&lt;time.h&gt;</span>
+<span class="pl-k">#include</span><span class="pl-s">&lt;stdlib.h&gt;</span>
+<span class="pl-smi">void</span> <span class="pl-en">ComputerMove</span>(<span class="pl-smi">char</span> <span class="pl-s1">board</span>[<span class="pl-c1">ROW</span>][<span class="pl-c1">COL</span>], <span class="pl-smi">int</span> <span class="pl-s1">row</span>, <span class="pl-smi">int</span> <span class="pl-s1">col</span>);</pre></div>
+<p>test.c<br>
+在main函数里，调用srand</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">srand</span>((<span class="pl-smi">unsigned <span class="pl-smi">int</span></span>)<span class="pl-en">time</span>(<span class="pl-c1">NULL</span>));</pre></div>
+<p>game函数</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">while</span> (<span class="pl-c1">1</span>)
+{
+	<span class="pl-c">//玩家下棋</span>
+	<span class="pl-en">PlayMove</span>(<span class="pl-s1">board</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+	<span class="pl-en">DisplayBoard</span>(<span class="pl-s1">board</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+	<span class="pl-c">//电脑随机下棋</span>
+	<span class="pl-en">ComputerMove</span>(<span class="pl-s1">board</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+	<span class="pl-en">DisplayBoard</span>(<span class="pl-s1">board</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+}</pre></div>
+<p>game.c</p>
+<ul>
+<li>电脑下棋也是同理，调用rand函数随机生成一个数</li>
+<li>检测要下棋的位置是否为空格，是空格才可以下，不是空格重新生成一个随机数,重新下棋</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">ComputerMove</span>(<span class="pl-smi">char</span> <span class="pl-s1">board</span>[<span class="pl-c1">ROW</span>][<span class="pl-c1">COL</span>], <span class="pl-smi">int</span> <span class="pl-s1">row</span>, <span class="pl-smi">int</span> <span class="pl-s1">col</span>)
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"电脑下棋\n"</span>);
+	<span class="pl-smi">int</span> <span class="pl-s1">x</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">y</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-s1">x</span> <span class="pl-c1">=</span> <span class="pl-en">rand</span>() % <span class="pl-s1">row</span>;
+	<span class="pl-s1">y</span> <span class="pl-c1">=</span> <span class="pl-en">rand</span>() % <span class="pl-s1">col</span>;
+	<span class="pl-k">while</span> (<span class="pl-c1">1</span>)
+	{
+		<span class="pl-k">if</span> (<span class="pl-s1">board</span>[<span class="pl-s1">x</span>][<span class="pl-s1">y</span>] <span class="pl-c1">==</span> <span class="pl-c1">' '</span>)
+		{
+			<span class="pl-s1">board</span>[<span class="pl-s1">x</span>][<span class="pl-s1">y</span>] <span class="pl-c1">=</span> <span class="pl-c1">'#'</span>;
+			<span class="pl-k">break</span>;
+		}
+	}
+}</pre></div>
+<p>这个时候就可以正常下棋了，但是：<code class="notranslate">没有判断输赢，下完了也不会结束，而是死循环</code></p>
+<h3>判断输赢</h3>
+<p>判断输赢有四种状态</p>
+<ul>
+<li>玩家赢</li>
+<li>电脑赢</li>
+<li>平局</li>
+<li>游戏继续</li>
+</ul>
+<blockquote>
+<p>玩家赢返回<code class="notranslate">*</code><br>
+电脑赢返回<code class="notranslate">#</code><br>
+平局返回<code class="notranslate">Q</code><br>
+游戏继续返回<code class="notranslate">C</code></p>
+</blockquote>
+<p>game.h</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-en">IsWin</span>(<span class="pl-smi">char</span> <span class="pl-s1">board</span>[<span class="pl-c1">ROW</span>][<span class="pl-c1">COL</span>], <span class="pl-smi">int</span> <span class="pl-s1">row</span>, <span class="pl-smi">int</span> <span class="pl-s1">col</span>);</pre></div>
+<ul>
+<li>这里判断输赢的时候首先玩家下棋，进行判断有没有输赢，然后电脑下棋，如果有一方输赢了，就进行返回</li>
+</ul>
+<p>test.c</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+<span class="pl-k">while</span> (<span class="pl-c1">1</span>)
+{
+	<span class="pl-c">//玩家下棋</span>
+	<span class="pl-en">PlayMove</span>(<span class="pl-s1">board</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+	<span class="pl-en">DisplayBoard</span>(<span class="pl-s1">board</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+	<span class="pl-c">//判断输赢</span>
+	<span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-en">IsWin</span>(<span class="pl-s1">board</span>,<span class="pl-c1">ROW</span>,<span class="pl-c1">COL</span>);
+	<span class="pl-k">if</span> (<span class="pl-s1">ret</span> <span class="pl-c1">!=</span> <span class="pl-c1">'C'</span>)
+	{
+		<span class="pl-k">break</span>;
+	}
+	<span class="pl-c">//电脑随机下棋</span>
+	<span class="pl-en">ComputerMove</span>(<span class="pl-s1">board</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+	<span class="pl-en">DisplayBoard</span>(<span class="pl-s1">board</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+	<span class="pl-s1">ret</span> <span class="pl-c1">=</span> <span class="pl-en">IsWin</span>(<span class="pl-s1">board</span>, <span class="pl-c1">ROW</span>, <span class="pl-c1">COL</span>);
+	<span class="pl-k">if</span> (<span class="pl-s1">ret</span> <span class="pl-c1">!=</span> <span class="pl-c1">'C'</span>)
+	{
+		<span class="pl-k">break</span>;
+	}
+}
+<span class="pl-k">if</span> (<span class="pl-s1">ret</span> <span class="pl-c1">==</span> <span class="pl-c1">'*'</span>)
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"玩家赢\n"</span>);
+}
+<span class="pl-k">else</span> <span class="pl-k">if</span> (<span class="pl-s1">ret</span> <span class="pl-c1">==</span> <span class="pl-c1">'#'</span>)
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"电脑赢\n"</span>);
+}
+<span class="pl-k">else</span>
+{
+	<span class="pl-en">pprintf</span>(<span class="pl-s">"平局\n"</span>);
+}</pre></div>
+<ul>
+<li>这里是进行判断棋盘输赢的逻辑</li>
+</ul>
+<p>game.c</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">Is_Full</span>(<span class="pl-smi">char</span> <span class="pl-s1">board</span>[<span class="pl-c1">ROW</span>][<span class="pl-c1">COL</span>], <span class="pl-smi">int</span> <span class="pl-s1">row</span>, <span class="pl-smi">int</span> <span class="pl-s1">col</span>)
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-k">for</span> (<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">row</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-k">for</span> (<span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">j</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">col</span>; <span class="pl-s1">j</span><span class="pl-c1">++</span>)
+		{
+			<span class="pl-k">if</span> (<span class="pl-s1">board</span>[<span class="pl-s1">i</span>][<span class="pl-s1">j</span>] <span class="pl-c1">==</span> <span class="pl-c1">' '</span>)
+			{
+				<span class="pl-k">return</span> <span class="pl-c1">0</span>; <span class="pl-c">// 棋盘没满</span>
+			}
+		}
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">1</span>; <span class="pl-c">// 棋盘满了</span>
+}
+
+
+<span class="pl-smi">char</span> <span class="pl-en">IsWin</span>(<span class="pl-smi">char</span> <span class="pl-s1">board</span>[<span class="pl-c1">ROW</span>][<span class="pl-c1">COL</span>], <span class="pl-smi">int</span> <span class="pl-s1">row</span>, <span class="pl-smi">int</span> <span class="pl-s1">col</span>)
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-c">/* 判断三行 */</span>
+	<span class="pl-k">for</span> (<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">row</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-k">if</span> (<span class="pl-s1">board</span>[<span class="pl-s1">i</span>][<span class="pl-c1">0</span>] <span class="pl-c1">==</span> <span class="pl-s1">board</span>[<span class="pl-s1">i</span>][<span class="pl-c1">1</span>] <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">board</span>[<span class="pl-s1">i</span>][<span class="pl-c1">1</span>] <span class="pl-c1">==</span> <span class="pl-s1">board</span>[<span class="pl-s1">i</span>][<span class="pl-c1">2</span>] <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">board</span>[<span class="pl-s1">i</span>][<span class="pl-c1">1</span>] <span class="pl-c1">!=</span> <span class="pl-c1">' '</span>)
+		{
+			<span class="pl-k">return</span>  <span class="pl-s1">board</span>[<span class="pl-s1">i</span>][<span class="pl-c1">1</span>];
+		}
+	}
+
+	<span class="pl-c">/* 判断三列 */</span>
+	<span class="pl-k">for</span> (<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">col</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-k">if</span> (<span class="pl-s1">board</span>[<span class="pl-c1">0</span>][<span class="pl-s1">i</span>] <span class="pl-c1">==</span> <span class="pl-s1">board</span>[<span class="pl-c1">1</span>][<span class="pl-s1">i</span>] <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">board</span>[<span class="pl-c1">1</span>][<span class="pl-s1">i</span>] <span class="pl-c1">==</span> <span class="pl-s1">board</span>[<span class="pl-c1">2</span>][<span class="pl-s1">i</span>] <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">board</span>[<span class="pl-c1">1</span>][<span class="pl-s1">i</span>] <span class="pl-c1">!=</span> <span class="pl-c1">' '</span>)
+		{
+			<span class="pl-k">return</span> <span class="pl-s1">board</span>[<span class="pl-c1">1</span>][<span class="pl-s1">i</span>];
+		}
+	}
+
+	<span class="pl-c">/* 判断对角线 */</span>
+	<span class="pl-k">if</span> (<span class="pl-s1">board</span>[<span class="pl-c1">0</span>][<span class="pl-c1">0</span>] <span class="pl-c1">==</span> <span class="pl-s1">board</span>[<span class="pl-c1">1</span>][<span class="pl-c1">1</span>] <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">board</span>[<span class="pl-c1">1</span>][<span class="pl-c1">1</span>] <span class="pl-c1">==</span> <span class="pl-s1">board</span>[<span class="pl-c1">2</span>][<span class="pl-c1">2</span>] <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">board</span>[<span class="pl-c1">1</span>][<span class="pl-c1">1</span>] <span class="pl-c1">!=</span> <span class="pl-c1">' '</span>)
+	{
+		<span class="pl-k">return</span> <span class="pl-s1">board</span>[<span class="pl-c1">1</span>][<span class="pl-c1">1</span>];
+	}
+	<span class="pl-k">if</span> (<span class="pl-s1">board</span>[<span class="pl-c1">0</span>][<span class="pl-c1">2</span>] <span class="pl-c1">==</span> <span class="pl-s1">board</span>[<span class="pl-c1">1</span>][<span class="pl-c1">1</span>] <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">board</span>[<span class="pl-c1">1</span>][<span class="pl-c1">1</span>] <span class="pl-c1">==</span> <span class="pl-s1">board</span>[<span class="pl-c1">2</span>][<span class="pl-c1">0</span>] <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">board</span>[<span class="pl-c1">1</span>][<span class="pl-c1">1</span>] <span class="pl-c1">!=</span> <span class="pl-c1">' '</span>)
+	{
+		<span class="pl-k">return</span> <span class="pl-s1">board</span>[<span class="pl-c1">1</span>][<span class="pl-c1">1</span>];
+	}
+
+	<span class="pl-c">/* 判断平局 */</span>
+	<span class="pl-c">//如果棋盘满了返回1， 不满返回0</span>
+	<span class="pl-k">if</span> (<span class="pl-en">Is_Full</span>(<span class="pl-s1">board</span>, <span class="pl-s1">row</span>, <span class="pl-s1">col</span>))
+	{
+		<span class="pl-k">return</span> <span class="pl-c1">'Q'</span>;
+	}
+
+	<span class="pl-c">/* 继续 */</span>
+	<span class="pl-k">return</span> <span class="pl-c1">'C'</span>;
+}</pre></div>
+<h2>四、结束</h2>
+<ul>
+<li>最后代码还是可以优化的，比如判断输赢这里是写死了，只能判断三行三列斜线，如果是多行就不能了，还有让电脑下棋智能一点，能判断玩家下棋的位置再进行下棋，这样更有可玩性！</li>
+</ul></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

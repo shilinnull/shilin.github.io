@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## 一、为什么使用文件？
+
+- 我们前面学习结构体时，写了**通讯录的程序**，当通讯录运行起来的时候，可以给通讯录中增加、删除数据，此时数据是存放在内存中，当程序退出的时候，通讯录中的数据自然就不存在了，等下次运行通讯录程序的时候，**数据又得重新录入**，如果使用这样的通讯录就很难受
+
+- 所以就想到了通讯录就应该把**信息记录下来**，只有我们自己选择删除数据的时候，数据才不复存在。">
+<meta property="og:title" content="14. C生万物之文件操作">
+<meta property="og:description" content="## 一、为什么使用文件？
+
+- 我们前面学习结构体时，写了**通讯录的程序**，当通讯录运行起来的时候，可以给通讯录中增加、删除数据，此时数据是存放在内存中，当程序退出的时候，通讯录中的数据自然就不存在了，等下次运行通讯录程序的时候，**数据又得重新录入**，如果使用这样的通讯录就很难受
+
+- 所以就想到了通讯录就应该把**信息记录下来**，只有我们自己选择删除数据的时候，数据才不复存在。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/14.%20C-sheng-wan-wu-zhi-wen-jian-cao-zuo.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>14. C生万物之文件操作</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">14. C生万物之文件操作</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/39" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>一、为什么使用文件？</h2>
+<ul>
+<li>
+<p>我们前面学习结构体时，写了<strong>通讯录的程序</strong>，当通讯录运行起来的时候，可以给通讯录中增加、删除数据，此时数据是存放在内存中，当程序退出的时候，通讯录中的数据自然就不存在了，等下次运行通讯录程序的时候，<strong>数据又得重新录入</strong>，如果使用这样的通讯录就很难受</p>
+</li>
+<li>
+<p>所以就想到了通讯录就应该把<strong>信息记录下来</strong>，只有我们自己选择删除数据的时候，数据才不复存在。这就涉及到了数据持久化的问题，我们一般数据持久化的方法有，把数据存放在【磁盘文件】、存放到【数据库】等方式</p>
+</li>
+</ul>
+<h2>二、什么是文件？</h2>
+<ul>
+<li>
+<p>磁盘上的文件是文件</p>
+</li>
+<li>
+<p>但是在程序设计中，我们一般谈的文件有两种：程序文件、数据文件（从文件功能的角度来分类的）</p>
+</li>
+</ul>
+<h3>1、程序文件</h3>
+<ul>
+<li>
+<p>包括源程序文件（后缀为.c）,目标文件（windows环境后缀为.obj）,可执行程序（windows环境后缀为.exe）。</p>
+</li>
+<li>
+<p>【程序文件】一般指的是我们创建工程时所编写的代码，也就想下面这个【test.c】一样<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e821f1133eb124c828844a1b8a1733ce31636f7dcde716eb254752d3fff000e9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34643339316331643935346534346235613665313763333539323664313338612e706e67"><img src="https://camo.githubusercontent.com/e821f1133eb124c828844a1b8a1733ce31636f7dcde716eb254752d3fff000e9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34643339316331643935346534346235613665313763333539323664313338612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/4d391c1d954e44b5a6e17c35926d138a.png" style="max-width: 100%;"></a></p>
+</li>
+</ul>
+<h3>2、数据文件</h3>
+<ul>
+<li>
+<p>文件的内容不一定是程序，而是程序运行时读写的数据，比如程序运行需要从中读取数据的文件，或者输出内容的文件。</p>
+</li>
+<li>
+<p>【数据文件】一般指通过程序去操纵的那个文件</p>
+</li>
+<li>
+<p>就想上面的这个【test.txt】就是一个数据文件，通过【test.exe】运行起来时，内存中有有了数据，此时我们可以将数据写到这个【test.txt】中，自然也可以从这个文件中读取数据到内存中</p>
+</li>
+</ul>
+<h3>3、文件名</h3>
+<ul>
+<li>
+<p>一个文件要有一个唯一的文件标识，以便用户识别和引用</p>
+</li>
+<li>
+<p>文件名包含3部分：文件路径+文件名主干+文件后缀</p>
+</li>
+<li>
+<p>例如：<code class="notranslate">c:\code\test.txt</code></p>
+</li>
+<li>
+<p>为了方便起见，文件标识常被称为文件名。</p>
+</li>
+</ul>
+<h2>三、文件的打开和关闭</h2>
+<h3>1、文件指针</h3>
+<ul>
+<li>
+<p>缓冲文件系统中，关键的概念是<strong>文件类型指针</strong>，简称<strong>文件指针</strong></p>
+</li>
+<li>
+<p>每个被使用的文件都在内存中开辟了一个相应的文件信息区，用来存放文件的相关信息（如文件的名字，文件状态及文件当前的位置等）。这些信息是保存在一个<strong>结构体变量</strong>中的。该结构体类型是有系统声明的，取名<code class="notranslate">FILE</code></p>
+</li>
+</ul>
+<p>例如，VS2019编译环境提供的 stdio.h 头文件中有以下的文件类型申明：</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">struct</span> <span class="pl-smi">_iobuf</span> {
+        <span class="pl-smi">char</span> <span class="pl-c1">*</span><span class="pl-c1">_ptr</span>;
+        <span class="pl-smi">int</span>   <span class="pl-c1">_cnt</span>;
+        <span class="pl-smi">char</span> <span class="pl-c1">*</span><span class="pl-c1">_base</span>;
+        <span class="pl-smi">int</span>   <span class="pl-c1">_flag</span>;
+        <span class="pl-smi">int</span>   <span class="pl-c1">_file</span>;
+        <span class="pl-smi">int</span>   <span class="pl-c1">_charbuf</span>;
+        <span class="pl-smi">int</span>   <span class="pl-c1">_bufsiz</span>;
+        <span class="pl-smi">char</span> <span class="pl-c1">*</span><span class="pl-c1">_tmpfname</span>;
+       };
+<span class="pl-k">typedef</span> <span class="pl-k">struct</span> <span class="pl-smi">_iobuf</span> <span class="pl-smi">FILE</span>;
+<span class="pl-smi">FILE</span><span class="pl-c1">*</span> <span class="pl-s1">pf</span>;<span class="pl-c">//文件指针变量</span></pre></div>
+<ul>
+<li>不同的C编译器的FILE类型包含的内容不完全相同，但是大同小异。每当打开一个文件的时候，系统会根据文件的情况自动创建一个FILE结构的变量，并填充其中的信息，使用者不必关心细节</li>
+<li>一般都是通过一个FILE的指针来维护这个FILE结构的变量，这样使用起来更加方便。我们来看看如何创建一个<code class="notranslate">FILE*</code>的指针变量</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">FILE</span><span class="pl-c1">*</span> <span class="pl-s1">pf</span>;	<span class="pl-c">//文件指针变量</span></pre></div>
+<ul>
+<li>定义<code class="notranslate">pf</code>是一个指向<code class="notranslate">FILE</code>类型数据的指针变量。可以使<code class="notranslate">pf</code>指向某个文件的<strong>文件信息区</strong>（是一个结构体变量）。通过该文件信息区中的信息就能够访问该文件。也就是说，通过文件指针变量能够找到与它关联的文件</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2b4c7f162d32bff3ef2d42a59582f4961fbc2d4ac52f077c1aa3f6908343caca/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35306539396631326638643334346433623663346535333333393162373861622e706e67"><img src="https://camo.githubusercontent.com/2b4c7f162d32bff3ef2d42a59582f4961fbc2d4ac52f077c1aa3f6908343caca/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35306539396631326638643334346433623663346535333333393162373861622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/50e99f12f8d344d3b6c4e533391b78ab.png" style="max-width: 100%;"></a></p>
+<h3>2、文件的打开和关闭</h3>
+<p><strong>注：文件在读写之前应该先打开文件，在使用结束之后应该关闭文件</strong></p>
+<ul>
+<li>ANSIC 规定使用<code class="notranslate">fopen</code>函数来打开文件，<code class="notranslate">fclose</code>来关闭文件。显示如何打开和关闭文件的个格式</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//打开文件</span>
+<span class="pl-smi">FILE</span> <span class="pl-c1">*</span> <span class="pl-en">fopen</span> ( <span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">filename</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">mode</span> );
+<span class="pl-c">//关闭文件</span>
+<span class="pl-smi">int</span> <span class="pl-en">fclose</span> ( <span class="pl-smi">FILE</span> <span class="pl-c1">*</span> <span class="pl-s1">stream</span> );</pre></div>
+<hr>
+<ul>
+<li>下面是文件的一些打开方式，有很多的操作，大家挑重点记就行</li>
+</ul>
+<p>注：a即append(追加)；b即binary(二进制)</p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>文件使用方式</th>
+<th>含义</th>
+<th>如果指定文件不存在</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>【重点】<strong>“r”（只读）</strong></td>
+<td><strong>为了输入数据，打开一个已经存在的文本文件</strong></td>
+<td><strong>出错</strong></td>
+</tr>
+<tr>
+<td>【重点】<strong>“w”（只写）</strong></td>
+<td><strong>为了输出数据，打开一个文本文件</strong></td>
+<td><strong>建立一个新的文件</strong></td>
+</tr>
+<tr>
+<td>【重点】<strong>“a”（追加）</strong></td>
+<td><strong>向文本文件尾添加数据</strong></td>
+<td><strong>建立一个新的文件</strong></td>
+</tr>
+<tr>
+<td>rb”（只读）</td>
+<td>为了<strong>输入</strong>数据，打开一个二进制文件</td>
+<td>出错</td>
+</tr>
+<tr>
+<td>“wb”（只写）</td>
+<td>为了<strong>输出</strong>数据，打开一个二进制文件</td>
+<td>建立一个新的文件</td>
+</tr>
+<tr>
+<td>“ab”（追加）</td>
+<td>向一个二进制文件尾<strong>添加</strong>数据</td>
+<td>出错</td>
+</tr>
+<tr>
+<td>“r+”（读写）</td>
+<td>为了读和写，打开一个文本文件</td>
+<td>出错</td>
+</tr>
+<tr>
+<td>“w+”（读写）</td>
+<td>为了读和写，建议一个新的文件</td>
+<td>建立一个新的文件</td>
+</tr>
+<tr>
+<td>“a+”（读写）</td>
+<td>打开一个文件，在文件尾进行读写</td>
+<td>建立一个新的文件</td>
+</tr>
+<tr>
+<td>“rb+”（读写）</td>
+<td>为了读和写打开一个二进制文件</td>
+<td>出错</td>
+</tr>
+<tr>
+<td>“wb+”（读写）</td>
+<td>为了读和写，新建一个新的二进制文件</td>
+<td>建立一个新的文件</td>
+</tr>
+<tr>
+<td>“a+”（读写）</td>
+<td>打开一个二进制文件，在文件尾进行读写</td>
+<td>建立一个新的文件</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<hr>
+<p><strong>例：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c">//打开文件</span>
+	<span class="pl-smi">FILE</span><span class="pl-c1">*</span> <span class="pl-s1">pf</span> <span class="pl-c1">=</span> <span class="pl-en">fopen</span>(<span class="pl-s">"test.txt"</span>, <span class="pl-s">"w"</span>);
+	<span class="pl-k">if</span> (<span class="pl-c1">NULL</span> <span class="pl-c1">==</span> <span class="pl-s1">pf</span>)
+	{
+		<span class="pl-en">perror</span>(<span class="pl-s">"fail fopen"</span>);
+		<span class="pl-k">return</span> <span class="pl-c1">1</span>;
+	}
+
+	<span class="pl-c">//写文件</span>
+	<span class="pl-c">// ...</span>
+	
+	<span class="pl-c">//关闭文件</span>
+	<span class="pl-en">fclose</span>(<span class="pl-s1">pf</span>);
+	<span class="pl-s1">pf</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;		<span class="pl-c">//防止野指针</span>
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h2>四、文件的顺序读写</h2>
+<h3>1.   8个重要的库函数</h3>
+<ul>
+<li><strong>下面的8个库函数都很重要，大家最好都要记住，而且对于它们的用法也要熟知</strong></li>
+</ul>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>功能</th>
+<th>函数名</th>
+<th>适用于</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>字符输入函数【读】</td>
+<td>fgetc</td>
+<td>所有输入流</td>
+</tr>
+<tr>
+<td>字符输出函数【写】</td>
+<td>fputc</td>
+<td>所有输出流</td>
+</tr>
+<tr>
+<td>文本行输入函数【读】</td>
+<td>fgets</td>
+<td>所有输入流</td>
+</tr>
+<tr>
+<td>文本行输出函数【写】</td>
+<td>fgets</td>
+<td>所有输入流</td>
+</tr>
+<tr>
+<td>格式化输入函数【读】</td>
+<td>fscanf</td>
+<td>所有输入流</td>
+</tr>
+<tr>
+<td>格式化输出函数【写】</td>
+<td>fprintf</td>
+<td>所有输入流</td>
+</tr>
+<tr>
+<td>二进制输入【读】</td>
+<td>fread</td>
+<td>文件</td>
+</tr>
+<tr>
+<td>二进制输入【写】</td>
+<td>fwrite</td>
+<td>文件</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<p>对于上面的这些函数的使用最关键的一点就是：<strong>【读】对应的输入流，【写】对应的输出流</strong></p>
+<ul>
+<li>在初识C语言时，我们学习了【scanf】和【printf】，只要了如何从键盘读取数据，然后将数据显示在屏幕上</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3f6188508e1a7688355b95759f7bdf49c52476119d24ef80b26b02d6bffb264a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63653433383963313937613034343032613365616161643238636237623538642e706e67"><img src="https://camo.githubusercontent.com/3f6188508e1a7688355b95759f7bdf49c52476119d24ef80b26b02d6bffb264a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63653433383963313937613034343032613365616161643238636237623538642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/ce4389c197a04402a3eaaad28cb7b58d.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>现在我们可以从键盘、屏幕过渡到文件，也可以从文件读、写数据</li>
+</ul>
+<hr>
+<h4>1.1 单字符输入输出【fputc和fgetc】</h4>
+<ul>
+<li>首先我们去<a href="https://legacy.cplusplus.com/reference/" rel="nofollow">cplusplus</a>里面找到这两个函数的描述</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">fputc</span> ( <span class="pl-smi">int</span> <span class="pl-s1">character</span>, <span class="pl-smi">FILE</span> <span class="pl-c1">*</span> <span class="pl-s1">stream</span> );
+<span class="pl-smi">int</span> <span class="pl-en">fgetc</span> ( <span class="pl-smi">FILE</span> <span class="pl-c1">*</span> <span class="pl-s1">stream</span> );</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/8a8aefa2d3350717e453bffcb980395f7495ae31246c835fdd20a21e96578eb6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64336563333833353862616234323539383966623435333034333131623038662e706e67"><img src="https://camo.githubusercontent.com/8a8aefa2d3350717e453bffcb980395f7495ae31246c835fdd20a21e96578eb6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64336563333833353862616234323539383966623435333034333131623038662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/d3ec38358bab425989fb45304311b08f.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/a8a0bab4af4c2f596c14a6adac033aee73a8358f803c87718531e56657feb99d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61313132323130303461363934643733613363623266616461303930656234302e706e67"><img src="https://camo.githubusercontent.com/a8a0bab4af4c2f596c14a6adac033aee73a8358f803c87718531e56657feb99d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61313132323130303461363934643733613363623266616461303930656234302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/a11221004a694d73a3cb2fada090eb40.png" style="max-width: 100%;"></a></p>
+<p>好，有了一个基本的了解后，我们就到VS2019中去实操一下</p>
+<ul>
+<li>首先是写文件，我们往【test.txt】中写一个字符a进去</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span><span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-c">//打开文件</span>
+	<span class="pl-smi">FILE</span><span class="pl-c1">*</span> <span class="pl-s1">pf</span> <span class="pl-c1">=</span> <span class="pl-en">fopen</span>(<span class="pl-s">"data.txt"</span>, <span class="pl-s">"w"</span>);
+	<span class="pl-k">if</span> (<span class="pl-c1">NULL</span> <span class="pl-c1">==</span> <span class="pl-s1">pf</span>)
+	{
+		<span class="pl-en">perror</span>(<span class="pl-s">"fopen"</span>);
+		<span class="pl-k">return</span> <span class="pl-c1">1</span>;
+	}
+	<span class="pl-c">//写文件</span>
+	<span class="pl-en">fputc</span>(<span class="pl-c1">'a'</span>, <span class="pl-s1">pf</span>);
+
+	<span class="pl-c">//关闭文件</span>
+	<span class="pl-en">fclose</span>(<span class="pl-s1">pf</span>);
+	<span class="pl-s1">pf</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2655c260ddbe7ce81635edc144ad469e8036cebaf01c9f35fb6146ab1d4c6dc2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62373938376233326131616434303866623730376566356264623837353834642e706e67"><img src="https://camo.githubusercontent.com/2655c260ddbe7ce81635edc144ad469e8036cebaf01c9f35fb6146ab1d4c6dc2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62373938376233326131616434303866623730376566356264623837353834642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/b7987b32a1ad408fb707ef5bdb87584d.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>既然能写一个，那也就可以写多个</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/a79124212142352d7c9d4050dc81bb632edf93bfeab19c938b09706572ecfb18/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63633531393463643637323634336332623931653330366131366665613761332e706e67"><img src="https://camo.githubusercontent.com/a79124212142352d7c9d4050dc81bb632edf93bfeab19c938b09706572ecfb18/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63633531393463643637323634336332623931653330366131366665613761332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/cc5194cd672643c2b91e306a16fea7a3.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>那我们能不能将26个字母都写进去呢？当然是可以的，不过不是这么一句一句写，要用循环来写</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">for</span> (<span class="pl-smi">char</span> <span class="pl-s1">ch</span> <span class="pl-c1">=</span> <span class="pl-c1">'a'</span>; <span class="pl-s1">ch</span> &lt;= <span class="pl-c1">'z'</span>; <span class="pl-s1">ch</span><span class="pl-c1">++</span>)
+{
+	<span class="pl-en">fputc</span>(<span class="pl-s1">ch</span>, <span class="pl-s1">pf</span>);
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3f939c25252e5522e42f7c4668b5f310ea71c6c7636c8d15d040cedbdd2950a2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33333336616164613863636334646330626135346662396262333637623863342e706e67"><img src="https://camo.githubusercontent.com/3f939c25252e5522e42f7c4668b5f310ea71c6c7636c8d15d040cedbdd2950a2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33333336616164613863636334646330626135346662396262333637623863342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/3336aada8ccc4dc0ba54fb9bb367b8c4.png" style="max-width: 100%;"></a></p>
+<hr>
+<ul>
+<li>可以写数据了，那能不能将我们写进去的内容再读出来呢，这就要用到 <strong>fgetc()</strong> 了，而且在打开文件的时候要以【读】也就是【r】的形式打开</li>
+<li>既然是读取数据，那我们就要去接收读到的这个数据，刚才看到这个库函数的返回值是【int】，是一个ASCLL码值,所以我们就这么去接收</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">ch</span> <span class="pl-c1">=</span> <span class="pl-en">fgetc</span>(<span class="pl-s1">pf</span>);
+<span class="pl-en">printf</span>(<span class="pl-s">"%c"</span>, <span class="pl-s1">ch</span>);</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d09dc73d8c23f59841744010d5a8c117c6e986eb928dbc13bd436045104e6b84/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64666535643061363266383034646339626365333130653739623331616135352e706e67"><img src="https://camo.githubusercontent.com/d09dc73d8c23f59841744010d5a8c117c6e986eb928dbc13bd436045104e6b84/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64666535643061363266383034646339626365333130653739623331616135352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/dfe5d0a62f804dc9bce310e79b31aa55.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>能读一个，那也能读多个，我们多读几个试试</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">ch</span> <span class="pl-c1">=</span> <span class="pl-en">fgetc</span>(<span class="pl-s1">pf</span>);
+<span class="pl-en">printf</span>(<span class="pl-s">"%c"</span>, <span class="pl-s1">ch</span>);
+
+<span class="pl-s1">ch</span> <span class="pl-c1">=</span> <span class="pl-en">fgetc</span>(<span class="pl-s1">pf</span>);
+<span class="pl-en">printf</span>(<span class="pl-s">"%c"</span>, <span class="pl-s1">ch</span>);
+
+<span class="pl-s1">ch</span> <span class="pl-c1">=</span> <span class="pl-en">fgetc</span>(<span class="pl-s1">pf</span>);
+<span class="pl-en">printf</span>(<span class="pl-s">"%c"</span>, <span class="pl-s1">ch</span>);
+
+<span class="pl-s1">ch</span> <span class="pl-c1">=</span> <span class="pl-en">fgetc</span>(<span class="pl-s1">pf</span>);
+<span class="pl-en">printf</span>(<span class="pl-s">"%c"</span>, <span class="pl-s1">ch</span>);</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2566b3ba68125db94a28a7009876c677827dfe590dd1306abb14b70c0e748d28/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64316237333666346461613734316434613538616461623739396532316366352e706e67"><img src="https://camo.githubusercontent.com/2566b3ba68125db94a28a7009876c677827dfe590dd1306abb14b70c0e748d28/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64316237333666346461613734316434613538616461623739396532316366352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/d1b736f4daa741d4a58adab799e21cf5.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>然后我们再把这26个字母都读出来试试</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">26</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"%c"</span>, <span class="pl-en">fgetc</span>(<span class="pl-s1">pf</span>));
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e440fb30196234e83d987d73adf7b2977538bb58186dab6bebfd380ce0b6ba60/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39613866333633346434376234373239393330373539653263306563386638362e706e67"><img src="https://camo.githubusercontent.com/e440fb30196234e83d987d73adf7b2977538bb58186dab6bebfd380ce0b6ba60/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39613866333633346434376234373239393330373539653263306563386638362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/9a8f3634d47b4729930759e2c0ec8f86.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>但是呢，我们平常在读取文件中内容的时候，并不知道里面有什么东西，有多少东西，因此应该写一个通过的程序，才能适应更多的情况</li>
+<li>我们再仔细看看<code class="notranslate">fgetc</code>的简述。可以看到当它读到文件末尾的时候便会返回<code class="notranslate">EOF</code>，即<strong>End Of File（文件结束）</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7a38c946fc01ca7d80bee266581b861494bf7ff99fdd9ff550dcb79a1b9cd07b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31356261653934333234663834663137393964643162653561353063346637362e706e67"><img src="https://camo.githubusercontent.com/7a38c946fc01ca7d80bee266581b861494bf7ff99fdd9ff550dcb79a1b9cd07b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31356261653934333234663834663137393964643162653561353063346637362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/15bae94324f84f1799dd1be5a50c4f76.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>此时我们就可以将代码写成这样。将for循环改为while循环</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">ch</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+<span class="pl-k">while</span> ((<span class="pl-s1">ch</span> <span class="pl-c1">=</span> <span class="pl-en">fgetc</span>(<span class="pl-s1">pf</span>)) <span class="pl-c1">!=</span> <span class="pl-c1">EOF</span>)
+{
+	<span class="pl-en">printf</span>(<span class="pl-s">"%c"</span>, <span class="pl-s1">ch</span>);
+}</pre></div>
+<p>可以看到，一样是可以显示出来的</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/609bd89934382aa1c7b6cec2a674ed0f65ddda670b6deae6a0c659d7e1aa549a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30313136353034373336313134386339623333653966383634646634386434382e706e67"><img src="https://camo.githubusercontent.com/609bd89934382aa1c7b6cec2a674ed0f65ddda670b6deae6a0c659d7e1aa549a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30313136353034373336313134386339623333653966383634646634386434382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/01165047361148c9b33e9f864df48d48.png" style="max-width: 100%;"></a></p>
+<h4>1.2 文本行输入输出【fputs和fgets】</h4>
+<ul>
+<li>首先来了解一下这个两个函数</li>
+</ul>
+<p><a href="https://legacy.cplusplus.com/reference/cstdio/fputs/?kw=fputs" rel="nofollow">fputs</a><br>
+<a href="https://legacy.cplusplus.com/reference/cstdio/fgets/?kw=fgets" rel="nofollow">fgets</a></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">fputs</span> ( <span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">str</span>, <span class="pl-smi">FILE</span> <span class="pl-c1">*</span> <span class="pl-s1">stream</span> );
+<span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-en">fgets</span> ( <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">str</span>, <span class="pl-smi">int</span> <span class="pl-s1">num</span>, <span class="pl-smi">FILE</span> <span class="pl-c1">*</span> <span class="pl-s1">stream</span> );</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d78d11080295524b688e0bedbfa6ac69ad59560775aac6df520365b7e42a309d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30323165656636346431363434626336626262376664656665633862663139372e706e67"><img src="https://camo.githubusercontent.com/d78d11080295524b688e0bedbfa6ac69ad59560775aac6df520365b7e42a309d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30323165656636346431363434626336626262376664656665633862663139372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/021eef64d1644bc6bbb7fdefec8bf197.png" style="max-width: 100%;"></a><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9b2bf391621e61724a27fd3db58d5c49f1570f608bfdf6a9206029ea0d1ed065/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37306661383964366435666134303766383661383236313861653630303332662e706e67"><img src="https://camo.githubusercontent.com/9b2bf391621e61724a27fd3db58d5c49f1570f608bfdf6a9206029ea0d1ed065/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37306661383964366435666134303766383661383236313861653630303332662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/70fa89d6d5fa407f86a82618ae60032f.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>然后我们像向文件中写入一个字符串试试</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2a2d148bd8ed3394015cd1e52dcd053fc75e5c9c3444d86063dafcf872fb0a47/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39623966636539323461343034626135613862393165663435323165623238382e706e67"><img src="https://camo.githubusercontent.com/2a2d148bd8ed3394015cd1e52dcd053fc75e5c9c3444d86063dafcf872fb0a47/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39623966636539323461343034626135613862393165663435323165623238382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/9b9fce924a404ba5a8b91ef4521eb288.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>接下去多写几行试试</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/968a9f1d5f1140d1680fd7bb155c8446018b77daa423e69ee04979188ff099bf/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64323864656539333534666234306132613664313363316465396130306536362e6a706567237069635f63656e746572"><img src="https://camo.githubusercontent.com/968a9f1d5f1140d1680fd7bb155c8446018b77daa423e69ee04979188ff099bf/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64323864656539333534666234306132613664313363316465396130306536362e6a706567237069635f63656e746572" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/d28dee9354fb40a2a6d13c1de9a00e66.jpeg#pic_center" style="max-width: 100%;"></a></p>
+<hr>
+<ul>
+<li>可以写东西进去了，接下去一样，将我们写的东西读出来试试</li>
+<li>可以看到在读取结束之后<code class="notranslate">DeBug</code>和显示窗口都可以看到只有四个字符，并没有5个，这是为什么呢？似乎是读到了一个换行符</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3fa69912e8d7b7c7c4a6337f28ae6b0a59021c0add20ee8ddfda5eab1a822531/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62386336666330376262313734626332393535613238333632386462376636372e706e67"><img src="https://camo.githubusercontent.com/3fa69912e8d7b7c7c4a6337f28ae6b0a59021c0add20ee8ddfda5eab1a822531/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62386336666330376262313734626332393535613238333632386462376636372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/b8c6fc07bb174bc2955a283628db7f67.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>我们再仔细地观察一个这个函数</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9aafca8045ab7a8d39fa88fbb4b74bfd6b19ed274b3af008d17c115943ab64f8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66393831356131373063356334363063613264646537373264336138616666342e706e67"><img src="https://camo.githubusercontent.com/9aafca8045ab7a8d39fa88fbb4b74bfd6b19ed274b3af008d17c115943ab64f8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66393831356131373063356334363063613264646537373264336138616666342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/f9815a170c5c460ca2dde772d3a8aff4.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>看了一些官方文档的描述，应该清楚为什么会只有四个了吧，</li>
+<li>若是最大字符数<strong>num &lt; 本行的字符数</strong>，那么就会显示【num - 1】个，最后一个给到【\0】，也就是对于字符串而言的结束符</li>
+<li>若是最大字符数<strong>num &gt; 本行的字符数</strong>，那么除了显示本行的所有字符之外，还会读入一个换行符，接着就不会往下读了。若是需要读取下一行数据，则需要再次使用这个函数进行读取</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/cd3878d4c67e72728df5a41178b4460b7ca2b2f4f1760e7a769d17ed881d251b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64373335356562383563663634386561626238373364343233303264343665392e706e67"><img src="https://camo.githubusercontent.com/cd3878d4c67e72728df5a41178b4460b7ca2b2f4f1760e7a769d17ed881d251b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64373335356562383563663634386561626238373364343233303264343665392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/d7355eb85cf648eabb873d42302d46e9.png" style="max-width: 100%;"></a></p>
+<h4>1.3 格式化输入输出【fprintf和fscanf】</h4>
+<p><a href="https://legacy.cplusplus.com/reference/cstdio/fprintf/?kw=fprintf" rel="nofollow">fprintf</a><br>
+<a href="https://legacy.cplusplus.com/reference/cstdio/fscanf/?kw=fscanf" rel="nofollow">fscanf</a></p>
+<ul>
+<li>看到这个【fprintf】和【fscanf】是不是又想起来我们之前学的【printf】和【scanf】呢，我们对其进行一个对比。如下图所示</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">fprintf</span> ( <span class="pl-smi">FILE</span> <span class="pl-c1">*</span> <span class="pl-s1">stream</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">format</span>, ... );
+<span class="pl-smi">int</span> <span class="pl-en">fscanf</span> ( <span class="pl-smi">FILE</span> <span class="pl-c1">*</span> <span class="pl-s1">stream</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">format</span>, ... );</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1636616d8ad1ee6f9df03be3df502d347a76b1f99c51ff68656671f8d1114bc7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61653434623561316537656234313332623264383630663861633565373639652e706e67"><img src="https://camo.githubusercontent.com/1636616d8ad1ee6f9df03be3df502d347a76b1f99c51ff68656671f8d1114bc7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61653434623561316537656234313332623264383630663861633565373639652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/ae44b5a1e7eb4132b2d860f8ac5e769e.png" style="max-width: 100%;"></a><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1a22d1b255db609cb90f92e2528c22802c8d3c969e47f892a388b2be0d7e5178/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35666466653530643530623934653661393963346362383832303861666434352e706e67"><img src="https://camo.githubusercontent.com/1a22d1b255db609cb90f92e2528c22802c8d3c969e47f892a388b2be0d7e5178/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f35666466653530643530623934653661393963346362383832303861666434352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/5fdfe50d50b94e6a99c4cb88208afd45.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>既然是进行格式化的输入输出，那我们就来尝试写一些不同格式的内容到文件里去，这里直接定义一个结构体</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">typedef</span> <span class="pl-k">struct</span> <span class="pl-smi">student</span> {
+	<span class="pl-smi">char</span> <span class="pl-c1">name</span>[<span class="pl-c1">20</span>];
+	<span class="pl-smi">int</span> <span class="pl-c1">height</span>;
+	<span class="pl-smi">float</span> <span class="pl-c1">score</span>;
+}<span class="pl-smi">st</span>;
+<span class="pl-smi">st</span> <span class="pl-s1">s</span> <span class="pl-c1">=</span> { <span class="pl-s">"zhangsan"</span>, <span class="pl-c1">175</span>, <span class="pl-c1">95.5</span> };
+	<span class="pl-c">//写文件</span>
+<span class="pl-en">fprintf</span>(<span class="pl-s1">pf</span>, <span class="pl-s">"%s %d %f"</span>, <span class="pl-s1">s</span>.<span class="pl-c1">name</span>, <span class="pl-s1">s</span>.<span class="pl-c1">height</span>, <span class="pl-s1">s</span>.<span class="pl-c1">score</span>);</pre></div>
+<ul>
+<li>可以看到，就写进去了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/dc9b39a2ac47cb1e41ee8298ab8a4dcd452eac0fe7582bf821f76e2a39b7154f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30616635363333366462303934353063383039363464346333323362363166392e706e67"><img src="https://camo.githubusercontent.com/dc9b39a2ac47cb1e41ee8298ab8a4dcd452eac0fe7582bf821f76e2a39b7154f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f30616635363333366462303934353063383039363464346333323362363166392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/0af56336db09450c80964d4c323b61f9.png" style="max-width: 100%;"></a></p>
+<p>还是一样也可以读出来打印</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4c04913d7bd936c72bc7a28c566a643ba4805133cbbb9f4f081b953335bb88fc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33653063616535633839373434656431396236313630653363363935333764322e706e67"><img src="https://camo.githubusercontent.com/4c04913d7bd936c72bc7a28c566a643ba4805133cbbb9f4f081b953335bb88fc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33653063616535633839373434656431396236313630653363363935333764322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/3e0cae5c89744ed19b6160e3c69537d2.png" style="max-width: 100%;"></a></p>
+<h4>1.4 二进制输入输出【fwrite和fread】</h4>
+<p><a href="https://legacy.cplusplus.com/reference/cstdio/fwrite/?kw=fwrite" rel="nofollow">fwite</a><br>
+<a href="https://legacy.cplusplus.com/reference/cstdio/fread/?kw=fread" rel="nofollow">fread</a></p>
+<p>然后继续看一下</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">size_t</span> <span class="pl-en">fwrite</span> ( <span class="pl-k">const</span> <span class="pl-smi">void</span> <span class="pl-c1">*</span> <span class="pl-s1">ptr</span>, <span class="pl-smi">size_t</span> <span class="pl-s1">size</span>, <span class="pl-smi">size_t</span> <span class="pl-s1">count</span>, <span class="pl-smi">FILE</span> <span class="pl-c1">*</span> <span class="pl-s1">stream</span> );
+<span class="pl-smi">size_t</span> <span class="pl-en">fread</span> ( <span class="pl-smi">void</span> <span class="pl-c1">*</span> <span class="pl-s1">ptr</span>, <span class="pl-smi">size_t</span> <span class="pl-s1">size</span>, <span class="pl-smi">size_t</span> <span class="pl-s1">count</span>, <span class="pl-smi">FILE</span> <span class="pl-c1">*</span> <span class="pl-s1">stream</span> );</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e0dd36faaddb0db3ac38dfecf62d01e1f3356052a6e0f96c92f7d89e4f513591/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65633038333239666433396334363336393963323837333831613636306333612e706e67"><img src="https://camo.githubusercontent.com/e0dd36faaddb0db3ac38dfecf62d01e1f3356052a6e0f96c92f7d89e4f513591/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f65633038333239666433396334363336393963323837333831613636306333612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/ec08329fd39c463699c287381a660c3a.png" style="max-width: 100%;"></a><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/02a4db5f4c887e6986b18d2b1a9db9e128f6240809104e3382495853222962d0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63303438363234643239663834353739613733363764643866363863326137622e706e67"><img src="https://camo.githubusercontent.com/02a4db5f4c887e6986b18d2b1a9db9e128f6240809104e3382495853222962d0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63303438363234643239663834353739613733363764643866363863326137622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/c048624d29f84579a7367dd8f68c2a7b.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以看到文件中是写入了一些数据，但是呢写进去的东西是乱码的样子，看不太懂</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9c624d35207f7e859fb8200d6f8a0daa706fdf8d509d557c68452cf85fa6f267/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34636438633233343530313334343035613334383738646334656130363239652e706e67"><img src="https://camo.githubusercontent.com/9c624d35207f7e859fb8200d6f8a0daa706fdf8d509d557c68452cf85fa6f267/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34636438633233343530313334343035613334383738646334656130363239652e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/4cd8c23450134405a34878dc4ea0629e.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>既然都是以二进值写的,那么我们也需要以二进值读<br>
+可以看到,以二进值的方式读出来了<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4aeb9e6bc82cbb79c51f756f6eaf5caadae0a7b4952301b5e92f72603fd8af29/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66363131616432383464633234653365613834323835643734646637383433372e706e67"><img src="https://camo.githubusercontent.com/4aeb9e6bc82cbb79c51f756f6eaf5caadae0a7b4952301b5e92f72603fd8af29/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66363131616432383464633234653365613834323835643734646637383433372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/f611ad284dc24e3ea84285d74df78437.png" style="max-width: 100%;"></a></li>
+</ul>
+<h3>2、拓展：默认打开的三个流</h3>
+<blockquote>
+<p>对于任何一个C语言程序，只要运行起来，就会默认地打开三个流</p>
+</blockquote>
+<ul>
+<li><strong>stdin - 标准输入流 - 键盘</strong></li>
+<li><strong>stdout - 标准输出流 - 屏幕</strong></li>
+<li><strong>stderr - 标准输错误 - 屏幕</strong></li>
+</ul>
+<hr>
+<ul>
+<li>通过观看源码可以知晓，他们都是以宏定义的形式存放在内存中的，之前我们说过，对于宏定义而言是在程序开始之前就定义好的，也就是当程序运行起来之后，那它们就会存在了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ba62d0d68fb11816afe5e37b09eef8b1f0d0845a7402af982812b90e2eff6fde/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66343766613063373563303634323835613034333936303338343739346663332e706e67"><img src="https://camo.githubusercontent.com/ba62d0d68fb11816afe5e37b09eef8b1f0d0845a7402af982812b90e2eff6fde/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66343766613063373563303634323835613034333936303338343739346663332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/f47fa0c75c064285a043960384794fc3.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>然后我们去程序中运行一下试试</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">ch</span> <span class="pl-c1">=</span> <span class="pl-en">fgetc</span>(<span class="pl-s1">stdin</span>);
+<span class="pl-en">fputc</span>(<span class="pl-s1">ch</span>, <span class="pl-s1">stdout</span>);</pre></div>
+<ul>
+<li>然后可以看到，我们确实可以使用【stdin】和【stdout】这两个流来进行输入和输出</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/baf821eeac04677e845282d9d305213ee47858f40e8aad6d1cb528c303b2c78e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66363535303562363965393834323733386534336366313062653965333735392e706e67"><img src="https://camo.githubusercontent.com/baf821eeac04677e845282d9d305213ee47858f40e8aad6d1cb528c303b2c78e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66363535303562363965393834323733386534336366313062653965333735392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/f65505b69e9842738e43cf10be9e3759.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">ch</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+<span class="pl-en">fscanf</span>(<span class="pl-s1">stdin</span>, <span class="pl-s">"%c"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">ch</span>);
+<span class="pl-en">fprintf</span>(<span class="pl-s1">stdout</span>, <span class="pl-s">"%c"</span>, <span class="pl-s1">ch</span>);</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/56b5fd6854d5acecf43859e672894f21e950ad979d1dee5176f56a4172630b74/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63643336613533646366383634393663386431616533376264666361656539322e706e67"><img src="https://camo.githubusercontent.com/56b5fd6854d5acecf43859e672894f21e950ad979d1dee5176f56a4172630b74/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63643336613533646366383634393663386431616533376264666361656539322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/cd36a53dcf86496c8d1ae37bdfcaee92.png" style="max-width: 100%;"></a></p>
+<h3>3、对比一组函数</h3>
+<ul>
+<li>上面讲到了8个有关文件顺序读写的库函数，接下去给大家对比一下一组函数
+<ul>
+<li><strong>scanf / fscanf / sscanf</strong></li>
+<li><strong>printf / fprintf / sprintf</strong></li>
+</ul>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/468d8d92dd465e7ba99b53c999bda138f295680fcdaf5bc23f4842399f9b4fef/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66346438653161663735373834633262396532313530626562326332613263622e706e67"><img src="https://camo.githubusercontent.com/468d8d92dd465e7ba99b53c999bda138f295680fcdaf5bc23f4842399f9b4fef/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66346438653161663735373834633262396532313530626562326332613263622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/f4d8e1af75784c2b9e2150beb2c2a2cb.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>主要还是来看看【<a href="https://legacy.cplusplus.com/reference/cstdio/sprintf/?kw=sprintf" rel="nofollow">sprintf</a>】和【<a href="https://legacy.cplusplus.com/reference/cstdio/sscanf/?kw=sscanf" rel="nofollow">sscanf</a>】这两个新面貌</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">sprintf</span> ( <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">str</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">format</span>, ... );</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d559e93850a7651ac1d4668f34fd798c2f11470ba796296081997f2c5fc3da36/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63396463636161373534636234666139393830306366393730353564303934332e706e67"><img src="https://camo.githubusercontent.com/d559e93850a7651ac1d4668f34fd798c2f11470ba796296081997f2c5fc3da36/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f63396463636161373534636234666139393830306366393730353564303934332e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/c9dccaa754cb4fa99800cf97055d0943.png" style="max-width: 100%;"></a></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">sscanf</span> ( <span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">s</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span> <span class="pl-c1">*</span> <span class="pl-s1">format</span>, ...);</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b90c11c58216cd3d16c71be787426a86da83643a91890870e7b36fbf67c34e1a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39363938316131303231633334353132616463326265653335633538373366632e706e67"><img src="https://camo.githubusercontent.com/b90c11c58216cd3d16c71be787426a86da83643a91890870e7b36fbf67c34e1a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39363938316131303231633334353132616463326265653335633538373366632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/96981a1021c34512adc2bee35c5873fc.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>接下去我们通过代码来看看是不是真的可以实现</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">char</span> <span class="pl-s1">buf</span>[<span class="pl-c1">100</span>] <span class="pl-c1">=</span> { <span class="pl-c1">0</span> };
+<span class="pl-smi">st</span> <span class="pl-s1">s</span> <span class="pl-c1">=</span> { <span class="pl-s">"zhangsan"</span>, <span class="pl-c1">170</span>, <span class="pl-c1">95.5f</span> };
+<span class="pl-smi">st</span> <span class="pl-s1">tmp</span> <span class="pl-c1">=</span> { <span class="pl-c1">0</span> };
+
+<span class="pl-c">//能否将这个结构体的成员转化为字符串</span>
+<span class="pl-en">sprintf</span>(<span class="pl-s1">buf</span>, <span class="pl-s">"%s %d %f"</span>, <span class="pl-s1">s</span>.<span class="pl-c1">name</span>, <span class="pl-s1">s</span>.<span class="pl-c1">height</span>, <span class="pl-s1">s</span>.<span class="pl-c1">score</span>);
+<span class="pl-en">printf</span>(<span class="pl-s">"%s\n"</span>, <span class="pl-s1">buf</span>);
+
+<span class="pl-c">//能否将这个字符串中内容还原为一个结构体数据呢</span>
+<span class="pl-en">sscanf</span>(<span class="pl-s1">buf</span>, <span class="pl-s">"%s %d %f"</span>, <span class="pl-s1">tmp</span>.<span class="pl-c1">name</span>, <span class="pl-c1">&amp;</span>(<span class="pl-s1">tmp</span>.<span class="pl-c1">height</span>), <span class="pl-c1">&amp;</span>(<span class="pl-s1">tmp</span>.<span class="pl-c1">score</span>));
+
+<span class="pl-en">printf</span>(<span class="pl-s">"%s %d %f"</span>, <span class="pl-s1">tmp</span>.<span class="pl-c1">name</span>, <span class="pl-s1">tmp</span>.<span class="pl-c1">height</span>, <span class="pl-s1">tmp</span>.<span class="pl-c1">score</span>);</pre></div>
+<ul>
+<li>可以看到，我将一个结构体数据以格式化的形式写到了一个字符串中，然后又从这个字符串中以格式化的形式读取数据到一个结构体变量中，这么转换来转换去，完全没有问题。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/bb51ef7301351147b84b22862bfec78022fd063886b6cc0c46f34b1458ffb46a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31373833313062316465656534303430393237336437363135313762336561632e706e67"><img src="https://camo.githubusercontent.com/bb51ef7301351147b84b22862bfec78022fd063886b6cc0c46f34b1458ffb46a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f31373833313062316465656534303430393237336437363135313762336561632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/178310b1deee40409273d761517b3eac.png" style="max-width: 100%;"></a></p>
+<hr>
+<ul>
+<li>那可能这么讲还是有点抽象，我们通过一个现实中开发的场景再来描述一下。比如说前端给到用户一个收集信息的表单，用户输入数据之后呢，前端就将这些信息用“+”号做了一个拼接给到后端，后端呢为了要识别这些信息，一定会创建一个结构体，里面包含这些信息的，这个时候就可以使用到我们上面所说的【sscanf】以格式化的方式去读取这个字符串了，然后就可以解析出用户的这些数据，然后去进行一个处理了</li>
+<li>当然在现实的软件开发中，是不会这么去做的，因为有<strong>现成封装的API可以调用</strong>，库里面会提供一个【序列化/反序列化】的API可以调用，开发者无需考虑其底层的实现</li>
+</ul>
+<h2>五、文件的随机读写</h2>
+<h3>1、fseek</h3>
+<p><strong>根据文件指针的位置和偏移量来定位文件指针</strong></p>
+<p><a href="https://legacy.cplusplus.com/reference/cstdio/sprintf/?kw=fseek" rel="nofollow">fseek</a></p>
+<ul>
+<li>首先来看看它的相关介绍</li>
+<li>可以看到，最重要的还是最后的那个参数，因为有三个选项可以使用。</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">fseek</span> ( <span class="pl-smi">FILE</span> <span class="pl-c1">*</span> <span class="pl-s1">stream</span>, <span class="pl-smi">long <span class="pl-smi">int</span></span> <span class="pl-s1">offset</span>, <span class="pl-smi">int</span> <span class="pl-s1">origin</span> );</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/090bd1b1e276b73f896510ae545b1a69897866df3b551d13385c2c5fb966d1ff/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61626330636535643630323034356234383431666435353862653333363031302e706e67"><img src="https://camo.githubusercontent.com/090bd1b1e276b73f896510ae545b1a69897866df3b551d13385c2c5fb966d1ff/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61626330636535643630323034356234383431666435353862653333363031302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/abc0ce5d602045b4841fd558be336010.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>然后通过代码我们再来实现一下这个功能。首先看到是使用到了【SEEK_SET】从文件的起始位置开始偏移，因为文件的起始是从第一个字符开始，向后偏移三位就到了【d】的位置</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/8bf2c39e72edd6ccca9751937f94ce027002fc9f7a13a0f8055f94518553286a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34303333303465363637363934376664623831393133343061646262643466372e706e67"><img src="https://camo.githubusercontent.com/8bf2c39e72edd6ccca9751937f94ce027002fc9f7a13a0f8055f94518553286a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34303333303465363637363934376664623831393133343061646262643466372e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/403304e6676947fdb8191340adbbd4f7.png" style="max-width: 100%;"></a><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ad2c68bda454cf6aa8055fbca03a1dac64c9ff675d7a9fcf4faa4e616105c6dc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62383361613932633935376434383633386661313862323036356261323665662e706e67"><img src="https://camo.githubusercontent.com/ad2c68bda454cf6aa8055fbca03a1dac64c9ff675d7a9fcf4faa4e616105c6dc/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62383361613932633935376434383633386661313862323036356261323665662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/b83aa92c957d48638fa18b2065ba26ef.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>接下来我们再来看一种。刚才是从前往后偏移，现在则是从后往前偏移，那就要使用到【SEEK_END】</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b778202a0de67e7fc9de114dbbdab81bf5db144b554c7ae7b274ac7a3800ce0c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39383863633764636434376334663136616166336362323333636130663130342e706e67"><img src="https://camo.githubusercontent.com/b778202a0de67e7fc9de114dbbdab81bf5db144b554c7ae7b274ac7a3800ce0c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39383863633764636434376334663136616166336362323333636130663130342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/988cc7dcd47c4f16aaf3cb233ca0f104.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>最后一个是【SEEK_CUR】，也就是从当前位置向后偏移</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/727bd4bd22c89016d9d9ef15e63bb19e598e2d12fc533b5aaf2e2c3f634ec984/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36306161666263643263396434373866396264306163336336626536373831352e706e67"><img src="https://camo.githubusercontent.com/727bd4bd22c89016d9d9ef15e63bb19e598e2d12fc533b5aaf2e2c3f634ec984/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36306161666263643263396434373866396264306163336336626536373831352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/60aafbcd2c9d478f9bd0ac3c6be67815.png" style="max-width: 100%;"></a></p>
+<p>补充一个实际案例</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">FILE</span><span class="pl-c1">*</span> <span class="pl-s1">pFile</span>;
+<span class="pl-s1">pFile</span> <span class="pl-c1">=</span> <span class="pl-en">fopen</span>(<span class="pl-s">"example.txt"</span>, <span class="pl-s">"wb"</span>);
+<span class="pl-en">fputs</span>(<span class="pl-s">"This is an apple."</span>, <span class="pl-s1">pFile</span>);
+<span class="pl-en">fseek</span>(<span class="pl-s1">pFile</span>, <span class="pl-c1">9</span>, <span class="pl-c1">SEEK_SET</span>);
+<span class="pl-en">fputs</span>(<span class="pl-s">" sam"</span>, <span class="pl-s1">pFile</span>);
+<span class="pl-en">fclose</span>(<span class="pl-s1">pFile</span>);</pre></div>
+<ul>
+<li>偏移到<code class="notranslate">This is a</code>然后修改后面的内容</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/ae8fbfc888eb7ccabeb9ba10d2c319c16a14f763336bd402459f0608b814a83a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32323065633234626639353434623035396130333731623134613931633639302e706e67"><img src="https://camo.githubusercontent.com/ae8fbfc888eb7ccabeb9ba10d2c319c16a14f763336bd402459f0608b814a83a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32323065633234626639353434623035396130333731623134613931633639302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/220ec24bf9544b059a0371b14a91c690.png" style="max-width: 100%;"></a></p>
+<h3>2、ftell</h3>
+<p><a href="https://legacy.cplusplus.com/reference/cstdio/ftell/?kw=ftell" rel="nofollow">fteel</a></p>
+<ul>
+<li><strong>返回文件指针相对于起始位置的偏移量</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">long <span class="pl-smi">int</span></span> <span class="pl-en">ftell</span> ( <span class="pl-smi">FILE</span> <span class="pl-c1">*</span> <span class="pl-s1">stream</span> );</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/31f10df9274b4c2e8d23cdb9bf6aa0b68c23d722f109987b91f3297805f6ce0d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62393863353366396664333934393666393464383138373431323138643463642e706e67"><img src="https://camo.githubusercontent.com/31f10df9274b4c2e8d23cdb9bf6aa0b68c23d722f109987b91f3297805f6ce0d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f62393863353366396664333934393666393464383138373431323138643463642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/b98c53f9fd39496f94d818741218d4cd.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这个很简单，就是返回当前文件指针所在流中的位置</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c99bd50c0630cfaee2b39a5c8ee0afab1be9412140eda8d03fa822ee9ad4a88b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62643538626264303832343834326533383934616335386639656461653133392e706e67"><img src="https://camo.githubusercontent.com/c99bd50c0630cfaee2b39a5c8ee0afab1be9412140eda8d03fa822ee9ad4a88b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62643538626264303832343834326533383934616335386639656461653133392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/bd58bbd0824842e3894ac58f9edae139.png" style="max-width: 100%;"></a><br>
+补充一个实际案例</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">FILE</span><span class="pl-c1">*</span> <span class="pl-s1">pFile</span>;
+<span class="pl-smi">long</span> <span class="pl-s1">size</span>;
+<span class="pl-s1">pFile</span> <span class="pl-c1">=</span> <span class="pl-en">fopen</span>(<span class="pl-s">"myfile.txt"</span>, <span class="pl-s">"rb"</span>);
+<span class="pl-k">if</span> (<span class="pl-s1">pFile</span> <span class="pl-c1">==</span> <span class="pl-c1">NULL</span>) <span class="pl-en">perror</span>(<span class="pl-s">"Error opening file"</span>);
+<span class="pl-k">else</span>
+{
+	<span class="pl-en">fseek</span>(<span class="pl-s1">pFile</span>, <span class="pl-c1">0</span>, <span class="pl-c1">SEEK_END</span>); <span class="pl-c">//non-portable</span>
+	<span class="pl-s1">size</span> <span class="pl-c1">=</span> <span class="pl-en">ftell</span>(<span class="pl-s1">pFile</span>);
+	<span class="pl-en">fclose</span>(<span class="pl-s1">pFile</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"Size of myfile.txt: %ld bytes.\n"</span>, <span class="pl-s1">size</span>);
+}</pre></div>
+<ul>
+<li>这个案例很巧妙地结合了我们上面所学过的【fseek】和【ftell】，求出了这个文件的字节大小</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/bf01f7f9a093de646badfcfb0726f6c6c621db0397b05eeb8cca23073adffb9b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36373431366631343264376134336438616663613664303534613837373733312e706e67"><img src="https://camo.githubusercontent.com/bf01f7f9a093de646badfcfb0726f6c6c621db0397b05eeb8cca23073adffb9b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36373431366631343264376134336438616663613664303534613837373733312e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/67416f142d7a43d8afca6d054a877731.png" style="max-width: 100%;"></a></p>
+<h3>3、rewind</h3>
+<p><a href="https://legacy.cplusplus.com/reference/cstdio/rewind/?kw=rewind" rel="nofollow">rewind</a></p>
+<ul>
+<li><strong>让文件指针的位置回到文件的起始位置</strong></li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">rewind</span> ( <span class="pl-smi">FILE</span> <span class="pl-c1">*</span> <span class="pl-s1">stream</span> );</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/61dddf8f388bd47e228f8d52e40af63b33ec1702c4d4d5d9b9f13ce48b29b2c2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34656436393366333865346434656334623939346538623663656235303731302e706e67"><img src="https://camo.githubusercontent.com/61dddf8f388bd47e228f8d52e40af63b33ec1702c4d4d5d9b9f13ce48b29b2c2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f34656436393366333865346434656334623939346538623663656235303731302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/4ed693f38e4d4ec4b994e8b6ceb50710.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>可以看到，我们又读到了a，表明文件指针pf确实回到到了起始位置</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/87425ffd78150ca7def4ec5c740e64686a95d12c50fa3713c56daeb6241341fa/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34313239666162633330366534616536626531623861303933313634323961342e706e67"><img src="https://camo.githubusercontent.com/87425ffd78150ca7def4ec5c740e64686a95d12c50fa3713c56daeb6241341fa/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f34313239666162633330366534616536626531623861303933313634323961342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/4129fabc306e4ae6be1b8a09316429a4.png" style="max-width: 100%;"></a></p>
+<hr>
+<p>补充一个实际案例</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">n</span>;
+<span class="pl-smi">FILE</span><span class="pl-c1">*</span> <span class="pl-s1">pFile</span>;
+<span class="pl-smi">char</span> <span class="pl-s1">buffer</span>[<span class="pl-c1">27</span>];
+<span class="pl-s1">pFile</span> <span class="pl-c1">=</span> <span class="pl-en">fopen</span>(<span class="pl-s">"myfile.txt"</span>, <span class="pl-s">"w+"</span>);
+<span class="pl-k">for</span> (<span class="pl-s1">n</span> <span class="pl-c1">=</span> <span class="pl-c1">'A'</span>; <span class="pl-s1">n</span> &lt;= <span class="pl-c1">'Z'</span>; <span class="pl-s1">n</span><span class="pl-c1">++</span>)
+	<span class="pl-en">fputc</span>(<span class="pl-s1">n</span>, <span class="pl-s1">pFile</span>);
+
+<span class="pl-en">rewind</span>(<span class="pl-s1">pFile</span>);	 <span class="pl-c">//当文件指针pFile重新回到起始位置</span>
+<span class="pl-en">fread</span>(<span class="pl-s1">buffer</span>, <span class="pl-c1">1</span>, <span class="pl-c1">26</span>, <span class="pl-s1">pFile</span>);	<span class="pl-c">//通过文件指针读入26个字母到buffer字符数组中</span>
+<span class="pl-en">fclose</span>(<span class="pl-s1">pFile</span>);
+<span class="pl-s1">buffer</span>[<span class="pl-c1">26</span>] <span class="pl-c1">=</span> <span class="pl-c1">'\0'</span>;		<span class="pl-c">//'\0'表示字符串的结束位置</span>
+<span class="pl-en">puts</span>(<span class="pl-s1">buffer</span>);</pre></div>
+<ul>
+<li>这个案例就是将1~26个大写英文字母写入文件，然后在让文件指针回到起始位置，在使用二进制的读取方式将文件中的内容读取到字符数组中，最后为字符串设置结束标志，打印出来便是文件中写入的内容</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e494c6b8af3ec298214524ea476d7c91f52a03c6789459bdb06f08c544c0db51/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37616630383761373832613334366231623263386566633935383933343034352e706e67"><img src="https://camo.githubusercontent.com/e494c6b8af3ec298214524ea476d7c91f52a03c6789459bdb06f08c544c0db51/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37616630383761373832613334366231623263386566633935383933343034352e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/7af087a782a346b1b2c8efc958934045.png" style="max-width: 100%;"></a></p>
+<h2>六、文本文件和二进制文件</h2>
+<ul>
+<li>【二进制文件】：数据在内存中以<strong>二进制</strong>的形式存储。<strong>不加转换的输出到外存</strong></li>
+<li>【文本文件】：以<strong>ASCII字符的形式</strong>存储的文件。在外存上以ASCII码的形式存储，则<strong>需要在存储前转换</strong></li>
+</ul>
+<p><strong>字符一律以ASCII形式存储，数值型数据既可以用ASCII形式存储，也可以使用二进制形式存储</strong><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/471e34f46c8eee1ed035265d78d54d0524b68c866c899ca5e93e64918302146f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36303065333662343161643734653331383538613734663931393033366263642e706e67"><img src="https://camo.githubusercontent.com/471e34f46c8eee1ed035265d78d54d0524b68c866c899ca5e93e64918302146f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36303065333662343161643734653331383538613734663931393033366263642e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/600e36b41ad74e31858a74f919036bcd.png" style="max-width: 100%;"></a></p>
+<p>上面就是一个十进制的数值10相关的两种存储形式，我测试了一下，以二进制的形式存放到文件里只占4个字节，但是以ASCLL码的形式存放到文件里就需要占5个字节</p>
+<ul>
+<li>接下去我们通过下面这段代码来看看二进制的存储形式</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">10000</span>;
+	<span class="pl-smi">FILE</span><span class="pl-c1">*</span> <span class="pl-s1">pf</span> <span class="pl-c1">=</span> <span class="pl-en">fopen</span>(<span class="pl-s">"test.txt"</span>, <span class="pl-s">"wb"</span>);
+	<span class="pl-en">fwrite</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>, <span class="pl-c1">4</span>, <span class="pl-c1">1</span>, <span class="pl-s1">pf</span>);<span class="pl-c">//二进制的形式写到文件中</span>
+	<span class="pl-en">fclose</span>(<span class="pl-s1">pf</span>);
+	<span class="pl-s1">pf</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2010be5b4f6ca04a822ddd464860cb598ac254f2ed68c2832e53f8b5293dcd25/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32616537653830653564316234653166393930633434336236363938383436342e706e67"><img src="https://camo.githubusercontent.com/2010be5b4f6ca04a822ddd464860cb598ac254f2ed68c2832e53f8b5293dcd25/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32616537653830653564316234653166393930633434336236363938383436342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/2ae7e80e5d1b4e1f990c443b66988464.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0a26b92f65111d6b74d4db5a52ee46fd24ef152fc98986a1bdb6070627ca7a45/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66376438333232363130623634316534383630326632343561393966313062632e706e67"><img src="https://camo.githubusercontent.com/0a26b92f65111d6b74d4db5a52ee46fd24ef152fc98986a1bdb6070627ca7a45/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f66376438333232363130623634316534383630326632343561393966313062632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/f7d8322610b641e48602f245a99f10bc.png" style="max-width: 100%;"></a></p>
+<h2>七、文件读取结束的判定</h2>
+<ul>
+<li><strong>牢记：在文件读取过程中，不能用feof函数的返回值直接用来判断文件的是否结束</strong></li>
+</ul>
+<h3>1、被错误使用的feof</h3>
+<ul>
+<li>
+<p>去网上看很多的代码可以发现，大家几乎都错误地使用了【feof】这个函数，认为它和EOF一样就是用来判断文件是否结束，但是并不是这样，我们一起来探究一下这个函数</p>
+</li>
+<li>
+<p>从中我们可以知晓【feof】应用于当文件读取结束的时候，判断是<strong>读取失败</strong>结束，还是<strong>遇到文件尾</strong>结束</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/54d72651d2eda17ecabe80c06c447fc3b78348e4202c98fa22f7a9b5eca78600/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61613139626130323666636234333464396365396335613561306537323265322e706e67"><img src="https://camo.githubusercontent.com/54d72651d2eda17ecabe80c06c447fc3b78348e4202c98fa22f7a9b5eca78600/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61613139626130323666636234333464396365396335613561306537323265322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/aa19ba026fcb434d9ce9c5a5a0e722e2.png" style="max-width: 100%;"></a></p>
+</li>
+</ul>
+<h3>2、fgetc、fgets、fscanf、fread结束判断解读</h3>
+<ul>
+<li>对于上面的四个读取文件函数，要怎么去判断它们是否\结束呢？我们通过观察这些函数的返回值来看看</li>
+</ul>
+<p><strong>fgetc</strong></p>
+<ul>
+<li>如果读取正常，返回读取到的字符的<strong>ASCLL码值</strong></li>
+<li>如果读取失败，返回<strong>EOF</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/56c3cb402fe33ce5e035240f8a4cc4fa7e2c2e6cde36f60336bf15d8ebfc0691/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39663936656130653265643734373763383533613435303563393538323966322e706e67"><img src="https://camo.githubusercontent.com/56c3cb402fe33ce5e035240f8a4cc4fa7e2c2e6cde36f60336bf15d8ebfc0691/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f39663936656130653265643734373763383533613435303563393538323966322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/9f96ea0e2ed7477c853a4505c95829f2.png" style="max-width: 100%;"></a></p>
+<hr>
+<p><strong>fgets</strong></p>
+<ul>
+<li>如果读取正常，返回读取到的<strong>数据的地址</strong></li>
+<li>如果读取失败，返回<strong>NULL</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5f62ee85ccd3d39b4600638a5498ac663389867b0e8b998ee42c2199e0c61e18/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33666431353633646332633334376438393631663130356637656330316435382e706e67"><img src="https://camo.githubusercontent.com/5f62ee85ccd3d39b4600638a5498ac663389867b0e8b998ee42c2199e0c61e18/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f33666431353633646332633334376438393631663130356637656330316435382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/3fd1563dc2c347d8961f105f7ec01d58.png" style="max-width: 100%;"></a></p>
+<hr>
+<p><strong>fscanf</strong></p>
+<ul>
+<li>如果读取正常，返回的是<strong>格式串中指定的数据个数</strong></li>
+<li>如果读取失败，返回的是<strong>小于</strong>格式串中指定的数据个数</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/20aecf08440f4cd8523ac3775d6d1726330ac2b7b034c95a4b70e5a26df244c6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36396165323464346138653734313063393939366466353061353562316130322e706e67"><img src="https://camo.githubusercontent.com/20aecf08440f4cd8523ac3775d6d1726330ac2b7b034c95a4b70e5a26df244c6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36396165323464346138653734313063393939366466353061353562316130322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/69ae24d4a8e7410c9996df50a55b1a02.png" style="max-width: 100%;"></a></p>
+<hr>
+<p><strong>fread</strong></p>
+<ul>
+<li>如果读取正常，返回的是<strong>等于</strong>要读取的数据个数</li>
+<li>如果读取失败，返回的是<strong>小于</strong>要读取的数据个数</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/1329463324ec1f9cd10da4356e6b2e68404722839e20947c758d951594eb59d7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65623739633439336538613934333864623064363562323766386336363832662e706e67"><img src="https://camo.githubusercontent.com/1329463324ec1f9cd10da4356e6b2e68404722839e20947c758d951594eb59d7/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65623739633439336538613934333864623064363562323766386336363832662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/eb79c493e8a9438db0d65b27f8c6682f.png" style="max-width: 100%;"></a></p>
+<h3>3、实例代码走读</h3>
+<p>文本文件操作</p>
+<ul>
+<li>首先通过文件指针以读的形式打开了这个文件，然后去判断一下是否打开成功。<code class="notranslate">(fp == NULL)</code></li>
+<li>因为条件表达式为真也就是1的时候会进入if判断，那<code class="notranslate">!pf == 1</code>可以推出<code class="notranslate">pf == 0</code>等价于<code class="notranslate">pf == NULL</code></li>
+<li>接下去的话就是去这个文件中一个读取内容然后输出，若是文件到达了EOF，也就是【fgetc】的结束判断条件，此时才可以使用【feof】去进行判断，所以可以看出【feof】是在<strong>文件结束之后去判断文件是因为什么而结束的</strong>。【ferror】若是成立的话表示这个文件是因为I/O的读取的问题中断的；若不是【feof】判断满足就表示其是<strong>正常结束</strong>的</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-s1">c</span>; <span class="pl-c">// 注意：int，非char，要求处理EOF</span>
+<span class="pl-smi">FILE</span><span class="pl-c1">*</span> <span class="pl-s1">fp</span> <span class="pl-c1">=</span> <span class="pl-en">fopen</span>(<span class="pl-s">"test.txt"</span>, <span class="pl-s">"r"</span>);
+<span class="pl-k">if</span> (!<span class="pl-s1">fp</span>) {
+	<span class="pl-en">perror</span>(<span class="pl-s">"File opening failed"</span>);
+	<span class="pl-k">return</span> <span class="pl-c1">EXIT_FAILURE</span>;
+}
+<span class="pl-c">//fgetc 当读取失败的时候或者遇到文件结束的时候，都会返回EOF</span>
+<span class="pl-k">while</span> ((<span class="pl-s1">c</span> <span class="pl-c1">=</span> <span class="pl-en">fgetc</span>(<span class="pl-s1">fp</span>)) <span class="pl-c1">!=</span> <span class="pl-c1">EOF</span>) <span class="pl-c">// 标准C I/O读取文件循环</span>
+{
+	<span class="pl-en">putchar</span>(<span class="pl-s1">c</span>);
+}
+<span class="pl-c">//判断是什么原因结束的</span>
+<span class="pl-k">if</span> (<span class="pl-en">ferror</span>(<span class="pl-s1">fp</span>))
+	<span class="pl-en">puts</span>(<span class="pl-s">"I/O error when reading"</span>);
+<span class="pl-k">else</span> <span class="pl-k">if</span> (<span class="pl-en">feof</span>(<span class="pl-s1">fp</span>))
+	<span class="pl-en">puts</span>(<span class="pl-s">"End of file reached successfully"</span>);
+<span class="pl-en">fclose</span>(<span class="pl-s1">fp</span>);</pre></div>
+<p>二进制文件操作</p>
+<ul>
+<li>这是一个二进制的文件操作，所以以二进制的形式打开，然后使用二进制的写法【fwrite】从a这个数组的首元素地址开始拿取SIZE个大小为double的数据通过fp这个文件指针写出到文件中<br>
+讲一下这里的（sizeof *a）是什么意思，a是数组的首元素地址，然后通过【 * 】解引用可以获取到每个数组元素的大小了</li>
+<li>数组a中的数据写入文件后，就要再打开这个文件然后将文件中的内容个读出来，我们将其保存在一个变量中然后对这个变量进行一个判断</li>
+<li>因为这个是一个二进制文件，因此我们要去判断它返回的个数<strong>是否小于需要读取的个数</strong>，若是成立则表示没有读完就结束了，若是和SIZE的个数相同的话表示都读完了，然后我们将读取到数组b中的内容输出一下即可</li>
+<li>若是没有读完但是文件又结束了，那么此时使用【feof】判断成立了，将不对的信息打印出来即可，若是没有到达文件末尾但是又读取结束了，进入了【ferror】的判断，表示文件的I/O流出现问题了</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">enum</span> { <span class="pl-c1">SIZE</span> <span class="pl-c1">=</span> <span class="pl-c1">5</span> };
+<span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+    <span class="pl-smi">double</span> <span class="pl-s1">a</span>[<span class="pl-c1">SIZE</span>] <span class="pl-c1">=</span> { <span class="pl-c1">1.</span>,<span class="pl-c1">2.</span>,<span class="pl-c1">3.</span>,<span class="pl-c1">4.</span>,<span class="pl-c1">5.</span> };
+    <span class="pl-smi">double</span> <span class="pl-s1">b</span>[<span class="pl-c1">SIZE</span>];
+
+    <span class="pl-smi">FILE</span><span class="pl-c1">*</span> <span class="pl-s1">fp</span> <span class="pl-c1">=</span> <span class="pl-en">fopen</span>(<span class="pl-s">"test.bin"</span>, <span class="pl-s">"wb"</span>); <span class="pl-c">// 必须用二进制模式</span>
+    <span class="pl-en">fwrite</span>(<span class="pl-s1">a</span>, <span class="pl-k">sizeof</span> <span class="pl-c1">*</span><span class="pl-s1">a</span>, <span class="pl-c1">SIZE</span>, <span class="pl-s1">fp</span>); <span class="pl-c">// 写 double 的数组</span>
+    <span class="pl-en">fclose</span>(<span class="pl-s1">fp</span>);
+
+    <span class="pl-s1">fp</span> <span class="pl-c1">=</span> <span class="pl-en">fopen</span>(<span class="pl-s">"test.bin"</span>, <span class="pl-s">"rb"</span>);
+    <span class="pl-smi">size_t</span> <span class="pl-s1">ret_code</span> <span class="pl-c1">=</span> <span class="pl-en">fread</span>(<span class="pl-s1">b</span>, <span class="pl-k">sizeof</span> <span class="pl-c1">*</span><span class="pl-s1">b</span>, <span class="pl-c1">SIZE</span>, <span class="pl-s1">fp</span>); <span class="pl-c">// 读 double 的数组</span>
+
+    <span class="pl-k">if</span> (<span class="pl-s1">ret_code</span> <span class="pl-c1">==</span> <span class="pl-c1">SIZE</span>) {
+        <span class="pl-en">puts</span>(<span class="pl-s">"Array read successfully, contents: "</span>);
+        <span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">n</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">n</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">SIZE</span>; <span class="pl-c1">++</span><span class="pl-s1">n</span>) <span class="pl-en">printf</span>(<span class="pl-s">"%f "</span>, <span class="pl-s1">b</span>[<span class="pl-s1">n</span>]);
+        <span class="pl-en">putchar</span>(<span class="pl-c1">'\n'</span>);
+    }
+    <span class="pl-k">else</span> { <span class="pl-c">// error handling</span>
+        <span class="pl-k">if</span> (<span class="pl-en">feof</span>(<span class="pl-s1">fp</span>))
+            <span class="pl-en">printf</span>(<span class="pl-s">"Error reading test.bin: unexpected end of file\n"</span>);
+        <span class="pl-k">else</span> <span class="pl-k">if</span> (<span class="pl-en">ferror</span>(<span class="pl-s1">fp</span>)) {
+            <span class="pl-en">perror</span>(<span class="pl-s">"Error reading test.bin"</span>);
+        }
+    }
+
+    <span class="pl-en">fclose</span>(<span class="pl-s1">fp</span>);
+}</pre></div>
+<h2>八、文件缓冲区</h2>
+<ul>
+<li>
+<p>ANSIC 标准采用【缓冲文件系统】处理的数据文件的，所谓缓冲文件系统是指系统自动地在内存中为程序中每一个正在使用的文件开辟一块“文件缓冲区”。</p>
+</li>
+<li>
+<p>从内存向磁盘<strong>输出数据</strong>【写】会先送到内存中的缓冲区，装满缓冲区后才一起送到磁盘上。</p>
+</li>
+<li>
+<p>如果从磁盘向计算机【读】入数据，则从磁盘文件中读取数据输入到内存缓冲区（充满缓冲区），然后再从缓冲区逐个地将数据送到程序数据区（程序变量等）。</p>
+</li>
+<li>
+<p>缓冲区的大小根据<strong>C编译系统</strong>决定的</p>
+</li>
+</ul>
+<p>下面是有关文件缓冲区的示意图<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b2c7bbe426fe8156a4f163076deecfb04c086dac48a2032aa49515d95c51ad9d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62333432303766616462623634653931623936313634613565383534653732382e706e67"><img src="https://camo.githubusercontent.com/b2c7bbe426fe8156a4f163076deecfb04c086dac48a2032aa49515d95c51ad9d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62333432303766616462623634653931623936313634613565383534653732382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/b34207fadbb64e91b96164a5e854e728.png" style="max-width: 100%;"></a></p>
+<p>下面是实例代码</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">main</span>()
+{
+	<span class="pl-smi">FILE</span><span class="pl-c1">*</span> <span class="pl-s1">pf</span> <span class="pl-c1">=</span> <span class="pl-en">fopen</span>(<span class="pl-s">"test.txt"</span>, <span class="pl-s">"w"</span>);
+	<span class="pl-en">fputs</span>(<span class="pl-s">"abcdef"</span>, <span class="pl-s1">pf</span>);	<span class="pl-c">//先将代码放在输出缓冲区</span>
+
+	<span class="pl-en">printf</span>(<span class="pl-s">"睡眠10秒-已经写数据了，打开test.txt文件，发现文件没有内容\n"</span>);
+	<span class="pl-en">Sleep</span>(<span class="pl-c1">10000</span>);
+	<span class="pl-en">printf</span>(<span class="pl-s">"刷新缓冲区\n"</span>);
+	<span class="pl-en">fflush</span>(<span class="pl-s1">pf</span>);<span class="pl-c">//刷新缓冲区时，才将输出缓冲区的数据写到文件（磁盘）</span>
+	<span class="pl-c">//注：fflush 在高版本的VS上不能使用了</span>
+
+	<span class="pl-en">printf</span>(<span class="pl-s">"再睡眠10秒-此时，再次打开test.txt文件，文件有内容了\n"</span>);
+	<span class="pl-en">Sleep</span>(<span class="pl-c1">10000</span>);
+
+	<span class="pl-en">fclose</span>(<span class="pl-s1">pf</span>);
+	<span class="pl-c">//注：fclose在关闭文件的时候，也会刷新缓冲区</span>
+	<span class="pl-s1">pf</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+	<span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<h2>拓展：文件外排序</h2>
+<h3>1、前言</h3>
+<ul>
+<li>对于文件中的数据，一般都是很大的，不像我们上面所讲的十二十个数，可能会有<strong>成千上百的数据</strong>需要我们去排序，此时效率最高的就是【归并排序】了，因为面对海量的数据而言，像效率较高的【快速排序】需要克服三数取中的困难，还有像【堆排序】【希尔排序】这些，都无法支持随机访问，所以很难去对大量的文件进行一个排序，速度会非常之慢。即使是有文件函数【fseek()】这样的函数可以使<strong>文件指针偏移</strong>，还是很难做到高效。因为磁盘的速度比起内存差了太多太多了，具体的我不太清楚大概有差个几千倍这样，</li>
+<li>所以我们就想到了【归并排序】，它既是内排序，也是外排序，而且性能也不差，算是速度较快的几个排序之一了。但是要如何进行归并呢？</li>
+</ul>
+<h3>2、思路解析</h3>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5037c05cd6b7abce90d75bb687f1ead6caaca6ed39b80a9ad6c701b5c7d488f8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63353134313162396330386634653166386533643937343435396366356138362e706e67"><img src="https://camo.githubusercontent.com/5037c05cd6b7abce90d75bb687f1ead6caaca6ed39b80a9ad6c701b5c7d488f8/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63353134313162396330386634653166386533643937343435396366356138362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/c51411b9c08f4e1f8e3d974459cf5a86.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>回忆一下归并排序的原理，就是两个有序区有序，然后两两一归才使得整体可以有序，如果左右都无需，那么继续对其进行左右分割归并</li>
+<li>但是本次，我要教给你的你是另外一种思路：</li>
+</ul>
+<p><strong>将一个大文件平均分割成N份，保证每份的大小可以加载到内存中，然后使用快排将其排成有序再写回一个个小文件，此时就拥有了文件中归并的先决条件</strong></p>
+<ul>
+<li>具体示意图如下</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f1b8686e034a245e6ccb0904e2fbfa42d2350b8e5a091bf7b9a5c8b159a1f1d6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35616531393865613231363634643333383963626433623332623466373261322e706e67"><img src="https://camo.githubusercontent.com/f1b8686e034a245e6ccb0904e2fbfa42d2350b8e5a091bf7b9a5c8b159a1f1d6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f35616531393865613231363634643333383963626433623332623466373261322e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/5ae198ea21664d3389cbd3b32b4f72a2.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>这里我设置一个这样的规则，令文件1为【1】，文件2位【2】，它们归并之后即为【12】，然后再让【12】和文件3即【3】归并变成【123】，以此类推，所以最后归出的文件名应该是【12345678910】</li>
+</ul>
+<h3>3、代码详解</h3>
+<blockquote>
+<p>下面是大文件分割成10个小文件的逻辑，首先来讲解一下这块，代码中很多内容涉及到文件操作，如果有文件操作还不是很懂的小伙伴记得再去温习一下</p>
+</blockquote>
+<ul>
+<li>整体的逻辑就在于从文件中读取100个数据，但是分批进行读取，每次首先去读9个数，然后当读到第十个数的时候，先将其加入数组中，然后再对数组中的这10个数进行排序。排完序后就将这个10个数通过文件指针再写到一个小文件中</li>
+<li>接着当第二次循环上来的时候，就开始读第11~20个数；以此往复，直到读完这个100个数为止，那此时我们的工程目录下就会出现10个小文件，就是对这100个数的分隔排序后的结果</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">MergeSortFile</span>(<span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">file</span>)
+{
+	<span class="pl-smi">FILE</span><span class="pl-c1">*</span> <span class="pl-s1">fout</span> <span class="pl-c1">=</span> <span class="pl-en">fopen</span>(<span class="pl-s1">file</span>, <span class="pl-s">"r"</span>);
+	<span class="pl-k">if</span> (!<span class="pl-s1">fout</span>)
+	{
+		<span class="pl-en">perror</span>(<span class="pl-s">"fopen fail"</span>);
+		<span class="pl-en">exit</span>(<span class="pl-c1">-1</span>);
+	}
+
+	<span class="pl-smi">int</span> <span class="pl-s1">num</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">n</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">b</span>[<span class="pl-c1">10</span>];
+	<span class="pl-smi">char</span> <span class="pl-s1">subfile</span>[<span class="pl-c1">20</span>];
+	<span class="pl-smi">int</span> <span class="pl-s1">filei</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+	<span class="pl-c">//1.读取大文件，然后将其平均分成N份，加载到内存中后对每份进行排序，然后再写回小文件</span>
+	<span class="pl-en">memset</span>(<span class="pl-s1">b</span>, <span class="pl-c1">0</span>, <span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>) <span class="pl-c1">*</span> <span class="pl-s1">n</span>);
+	<span class="pl-k">while</span> (<span class="pl-en">fscanf</span>(<span class="pl-s1">fout</span>, <span class="pl-s">"%d\n"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">num</span>) <span class="pl-c1">!=</span> <span class="pl-c1">EOF</span>)
+	{
+		<span class="pl-k">if</span> (<span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">n</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>)
+		{
+			<span class="pl-s1">b</span>[<span class="pl-s1">i</span><span class="pl-c1">++</span>] <span class="pl-c1">=</span> <span class="pl-s1">num</span>;	<span class="pl-c">//首先读9个数据到数组中</span>
+		}
+		<span class="pl-k">else</span>
+		{
+			<span class="pl-s1">b</span>[<span class="pl-s1">i</span>] <span class="pl-c1">=</span> <span class="pl-s1">num</span>;		<span class="pl-c">//再将第十个输入放入数组</span>
+			<span class="pl-en">QuickSort</span>(<span class="pl-s1">b</span>, <span class="pl-c1">0</span>, <span class="pl-s1">n</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>);		<span class="pl-c">//对其进行排序</span>
+
+			<span class="pl-en">sprintf</span>(<span class="pl-s1">subfile</span>, <span class="pl-s">"%d"</span>, <span class="pl-s1">filei</span><span class="pl-c1">++</span>);
+
+			<span class="pl-smi">FILE</span><span class="pl-c1">*</span> <span class="pl-s1">fin</span> <span class="pl-c1">=</span> <span class="pl-en">fopen</span>(<span class="pl-s1">subfile</span>, <span class="pl-s">"w"</span>);
+			<span class="pl-k">if</span> (!<span class="pl-s1">fin</span>)
+			{
+				<span class="pl-en">perror</span>(<span class="pl-s">"fopen fail"</span>);
+				<span class="pl-en">exit</span>(<span class="pl-c1">-1</span>);
+			}
+			<span class="pl-c">//再进本轮排好序的10个数以单个小文件的形式写到工程文件下</span>
+			<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">j</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">n</span>; <span class="pl-c1">++</span><span class="pl-s1">j</span>)
+			{
+				<span class="pl-en">fprintf</span>(<span class="pl-s1">fin</span>, <span class="pl-s">"%d\n"</span>, <span class="pl-s1">b</span>[<span class="pl-s1">j</span>]);
+			}
+			<span class="pl-en">fclose</span>(<span class="pl-s1">fin</span>);
+
+			<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;		<span class="pl-c">//i重新置0，方便下一次的读取</span>
+			<span class="pl-en">memset</span>(<span class="pl-s1">b</span>, <span class="pl-c1">0</span>, <span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>) <span class="pl-c1">*</span> <span class="pl-s1">n</span>);
+		}
+	}
+}</pre></div>
+<ul>
+<li>我们来看一下排序的结果</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0002a8db938f8bd8933200f9e2f66bace58bfd1a99c4053f1121fd4f6c29d506/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65326466666262653034313334653365613030383235363235346533613832302e706e67"><img src="https://camo.githubusercontent.com/0002a8db938f8bd8933200f9e2f66bace58bfd1a99c4053f1121fd4f6c29d506/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f65326466666262653034313334653365613030383235363235346533613832302e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/e2dffbbe04134e3ea008256254e3a820.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>将大文件分成10个小文件后，接下去就是要对这个10个小文件进行归并，具体规则我上面已经说了</li>
+<li>下面就是单趟归并的逻辑的，就和我们上面说到的归并排序的代码是很类似的，只不过这里是文件的操作而已。<strong>要注意的是对于文件来说是有一个文件指针的</strong>，若是你读取了一个之后那么文件指针这个结构体中的数据标记就会发生变化，标记为当然所读内容的下一个了</li>
+<li>所以我们<strong>不能将读取读取小文件中的数据的操作放在while循环中，应该单独将其抽离出来进行判断才才对</strong>。若是哪个文件中的数小，那么就将这个数写到新的【mfile】文件中去，然后继续读取当前文件的后一个内容</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span>文件归并逻辑</span>
+<span class="pl-k">void</span> <span class="pl-en">_MergeSortFile</span>(<span class="pl-k">const</span> <span class="pl-k">char</span>* file1, <span class="pl-k">const</span> <span class="pl-k">char</span>* file2, <span class="pl-k">const</span> <span class="pl-k">char</span>* mfile)
+{
+	FILE* fout1 = <span class="pl-c1">fopen</span>(file1, <span class="pl-s"><span class="pl-pds">"</span>r<span class="pl-pds">"</span></span>);
+	<span class="pl-k">if</span> (!fout1)
+	{
+		<span class="pl-c1">perror</span>(<span class="pl-s"><span class="pl-pds">"</span>fopen fail<span class="pl-pds">"</span></span>);
+		<span class="pl-c1">exit</span>(-<span class="pl-c1">1</span>);
+	}
+
+	FILE* fout2 = <span class="pl-c1">fopen</span>(file2, <span class="pl-s"><span class="pl-pds">"</span>r<span class="pl-pds">"</span></span>);
+	<span class="pl-k">if</span> (!fout2)
+	{
+		<span class="pl-c1">perror</span>(<span class="pl-s"><span class="pl-pds">"</span>fopen fail<span class="pl-pds">"</span></span>);
+		<span class="pl-c1">exit</span>(-<span class="pl-c1">1</span>);
+	}
+
+	FILE* fin = <span class="pl-c1">fopen</span>(mfile, <span class="pl-s"><span class="pl-pds">"</span>w<span class="pl-pds">"</span></span>);
+	<span class="pl-k">if</span> (!fin)
+	{
+		<span class="pl-c1">perror</span>(<span class="pl-s"><span class="pl-pds">"</span>fopen fail<span class="pl-pds">"</span></span>);
+		<span class="pl-c1">exit</span>(-<span class="pl-c1">1</span>);
+	}
+
+	<span class="pl-k">int</span> num1, num2;
+	<span class="pl-c"><span class="pl-c">//</span>返回值拿到循环外来接受</span>
+	<span class="pl-k">int</span> ret1 = <span class="pl-c1">fscanf</span>(fout1, <span class="pl-s"><span class="pl-pds">"</span>%d<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, &amp;num1);
+	<span class="pl-k">int</span> ret2 = <span class="pl-c1">fscanf</span>(fout2, <span class="pl-s"><span class="pl-pds">"</span>%d<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, &amp;num2);
+	<span class="pl-k">while</span> (ret1 != EOF &amp;&amp; ret2 != EOF)
+	{
+		<span class="pl-k">if</span> (num1 &lt; num2)
+		{
+			<span class="pl-c1">fprintf</span>(fin, <span class="pl-s"><span class="pl-pds">"</span>%d<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, num1);
+			ret1 = <span class="pl-c1">fscanf</span>(fout1, <span class="pl-s"><span class="pl-pds">"</span>%d<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, &amp;num1);
+		}
+		<span class="pl-k">else</span>
+		{
+			<span class="pl-c1">fprintf</span>(fin, <span class="pl-s"><span class="pl-pds">"</span>%d<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, num2);
+			ret2 = <span class="pl-c1">fscanf</span>(fout2, <span class="pl-s"><span class="pl-pds">"</span>%d<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, &amp;num2);
+		}
+	}
+
+	<span class="pl-k">while</span> (ret1 != EOF)
+	{
+		<span class="pl-c1">fprintf</span>(fin, <span class="pl-s"><span class="pl-pds">"</span>%d<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, num1);
+		ret1 = <span class="pl-c1">fscanf</span>(fout1, <span class="pl-s"><span class="pl-pds">"</span>%d<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, &amp;num1);
+	}
+	<span class="pl-k">while</span> (ret2 != EOF)
+	{
+		<span class="pl-c1">fprintf</span>(fin, <span class="pl-s"><span class="pl-pds">"</span>%d<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, num2);
+		ret2 = <span class="pl-c1">fscanf</span>(fout2, <span class="pl-s"><span class="pl-pds">"</span>%d<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, &amp;num2);
+	}
+
+	<span class="pl-c1">fclose</span>(fout1);
+	<span class="pl-c1">fclose</span>(fout2);
+	<span class="pl-c1">fclose</span>(fin);
+}</pre></div>
+<p><strong>最后在打开文件后不要忘了将文件关闭哦，不然就白操作了</strong></p>
+<ul>
+<li>当然上面是一个单趟的逻辑，我们还要对【file1】【file2】【mfile】进行一个迭代</li>
+</ul>
+<div class="highlight highlight-source-c++"><pre class="notranslate"><span class="pl-c"><span class="pl-c">//</span>利用互相归并到文件，实现整体有序</span>
+<span class="pl-k">char</span> file1[<span class="pl-c1">100</span>] = <span class="pl-s"><span class="pl-pds">"</span>1<span class="pl-pds">"</span></span>;
+<span class="pl-k">char</span> file2[<span class="pl-c1">100</span>] = <span class="pl-s"><span class="pl-pds">"</span>2<span class="pl-pds">"</span></span>;
+<span class="pl-k">char</span> mfile[<span class="pl-c1">100</span>] = <span class="pl-s"><span class="pl-pds">"</span>12<span class="pl-pds">"</span></span>;
+<span class="pl-k">for</span> (<span class="pl-k">int</span> i = <span class="pl-c1">2</span>; i &lt;= n; ++i)
+{
+	<span class="pl-c1">_MergeSortFile</span>(file1, file2, mfile);
+	
+	<span class="pl-c"><span class="pl-c">//</span>迭代</span>
+	<span class="pl-c1">strcpy</span>(file1, mfile);
+	<span class="pl-c1">sprintf</span>(file2, <span class="pl-s"><span class="pl-pds">"</span>%d<span class="pl-pds">"</span></span>, i + <span class="pl-c1">1</span>);
+	<span class="pl-c1">sprintf</span>(mfile, <span class="pl-s"><span class="pl-pds">"</span>%s%d<span class="pl-pds">"</span></span>, mfile, i + <span class="pl-c1">1</span>);
+	
+}</pre></div>
+<ul>
+<li>大概就是这么一个迭代的过程</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/4e5dca14c195bf3bbe4331af69fc7dffd93587f50b007949b688ee315206d19e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64626436656632343435616134363733613336653564346431356136353439362e706e67"><img src="https://camo.githubusercontent.com/4e5dca14c195bf3bbe4331af69fc7dffd93587f50b007949b688ee315206d19e/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f64626436656632343435616134363733613336653564346431356136353439362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/dbd6ef2445aa4673a36e5d4d15a65496.png" style="max-width: 100%;"></a><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/8660a229b33b7356bbf6cde4c6aecd0b1efb6c8312cec809b6a364736d4f9dd2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63663161343365353032313934636261386335376535343864646137646530392e706e67"><img src="https://camo.githubusercontent.com/8660a229b33b7356bbf6cde4c6aecd0b1efb6c8312cec809b6a364736d4f9dd2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f63663161343365353032313934636261386335376535343864646137646530392e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/cf1a43e502194cba8c57e548dda7de09.png" style="max-width: 100%;"></a></p>
+<p>整体代码展示</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//文件归并逻辑</span>
+<span class="pl-smi">void</span> <span class="pl-en">_MergeSortFile</span>(<span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">file1</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">file2</span>, <span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">mfile</span>)
+{
+	<span class="pl-smi">FILE</span><span class="pl-c1">*</span> <span class="pl-s1">fout1</span> <span class="pl-c1">=</span> <span class="pl-en">fopen</span>(<span class="pl-s1">file1</span>, <span class="pl-s">"r"</span>);
+	<span class="pl-k">if</span> (!<span class="pl-s1">fout1</span>)
+	{
+		<span class="pl-en">perror</span>(<span class="pl-s">"fopen fail"</span>);
+		<span class="pl-en">exit</span>(<span class="pl-c1">-1</span>);
+	}
+
+	<span class="pl-smi">FILE</span><span class="pl-c1">*</span> <span class="pl-s1">fout2</span> <span class="pl-c1">=</span> <span class="pl-en">fopen</span>(<span class="pl-s1">file2</span>, <span class="pl-s">"r"</span>);
+	<span class="pl-k">if</span> (!<span class="pl-s1">fout2</span>)
+	{
+		<span class="pl-en">perror</span>(<span class="pl-s">"fopen fail"</span>);
+		<span class="pl-en">exit</span>(<span class="pl-c1">-1</span>);
+	}
+
+	<span class="pl-smi">FILE</span><span class="pl-c1">*</span> <span class="pl-s1">fin</span> <span class="pl-c1">=</span> <span class="pl-en">fopen</span>(<span class="pl-s1">mfile</span>, <span class="pl-s">"w"</span>);
+	<span class="pl-k">if</span> (!<span class="pl-s1">fin</span>)
+	{
+		<span class="pl-en">perror</span>(<span class="pl-s">"fopen fail"</span>);
+		<span class="pl-en">exit</span>(<span class="pl-c1">-1</span>);
+	}
+
+	<span class="pl-smi">int</span> <span class="pl-s1">num1</span>, <span class="pl-s1">num2</span>;
+	<span class="pl-c">//返回值拿到循环外来接受</span>
+	<span class="pl-smi">int</span> <span class="pl-s1">ret1</span> <span class="pl-c1">=</span> <span class="pl-en">fscanf</span>(<span class="pl-s1">fout1</span>, <span class="pl-s">"%d\n"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">num1</span>);
+	<span class="pl-smi">int</span> <span class="pl-s1">ret2</span> <span class="pl-c1">=</span> <span class="pl-en">fscanf</span>(<span class="pl-s1">fout2</span>, <span class="pl-s">"%d\n"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">num2</span>);
+	<span class="pl-k">while</span> (<span class="pl-s1">ret1</span> <span class="pl-c1">!=</span> <span class="pl-c1">EOF</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">ret2</span> <span class="pl-c1">!=</span> <span class="pl-c1">EOF</span>)
+	{
+		<span class="pl-k">if</span> (<span class="pl-s1">num1</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">num2</span>)
+		{
+			<span class="pl-en">fprintf</span>(<span class="pl-s1">fin</span>, <span class="pl-s">"%d\n"</span>, <span class="pl-s1">num1</span>);
+			<span class="pl-s1">ret1</span> <span class="pl-c1">=</span> <span class="pl-en">fscanf</span>(<span class="pl-s1">fout1</span>, <span class="pl-s">"%d\n"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">num1</span>);
+		}
+		<span class="pl-k">else</span>
+		{
+			<span class="pl-en">fprintf</span>(<span class="pl-s1">fin</span>, <span class="pl-s">"%d\n"</span>, <span class="pl-s1">num2</span>);
+			<span class="pl-s1">ret2</span> <span class="pl-c1">=</span> <span class="pl-en">fscanf</span>(<span class="pl-s1">fout2</span>, <span class="pl-s">"%d\n"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">num2</span>);
+		}
+	}
+
+	<span class="pl-k">while</span> (<span class="pl-s1">ret1</span> <span class="pl-c1">!=</span> <span class="pl-c1">EOF</span>)
+	{
+		<span class="pl-en">fprintf</span>(<span class="pl-s1">fin</span>, <span class="pl-s">"%d\n"</span>, <span class="pl-s1">num1</span>);
+		<span class="pl-s1">ret1</span> <span class="pl-c1">=</span> <span class="pl-en">fscanf</span>(<span class="pl-s1">fout1</span>, <span class="pl-s">"%d\n"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">num1</span>);
+	}
+	<span class="pl-k">while</span> (<span class="pl-s1">ret2</span> <span class="pl-c1">!=</span> <span class="pl-c1">EOF</span>)
+	{
+		<span class="pl-en">fprintf</span>(<span class="pl-s1">fin</span>, <span class="pl-s">"%d\n"</span>, <span class="pl-s1">num2</span>);
+		<span class="pl-s1">ret2</span> <span class="pl-c1">=</span> <span class="pl-en">fscanf</span>(<span class="pl-s1">fout2</span>, <span class="pl-s">"%d\n"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">num2</span>);
+	}
+
+	<span class="pl-en">fclose</span>(<span class="pl-s1">fout1</span>);
+	<span class="pl-en">fclose</span>(<span class="pl-s1">fout2</span>);
+	<span class="pl-en">fclose</span>(<span class="pl-s1">fin</span>);
+}
+
+<span class="pl-c">/*文件外排序*/</span>
+<span class="pl-smi">void</span> <span class="pl-en">MergeSortFile</span>(<span class="pl-k">const</span> <span class="pl-smi">char</span><span class="pl-c1">*</span> <span class="pl-s1">file</span>)
+{
+	<span class="pl-en">srand</span>((<span class="pl-smi">unsigned <span class="pl-smi">int</span></span>)<span class="pl-en">time</span>(<span class="pl-c1">NULL</span>));
+	<span class="pl-smi">FILE</span><span class="pl-c1">*</span> <span class="pl-s1">fout</span> <span class="pl-c1">=</span> <span class="pl-en">fopen</span>(<span class="pl-s1">file</span>, <span class="pl-s">"r"</span>);
+	<span class="pl-k">if</span> (!<span class="pl-s1">fout</span>)
+	{
+		<span class="pl-en">perror</span>(<span class="pl-s">"fopen fail"</span>);
+		<span class="pl-en">exit</span>(<span class="pl-c1">-1</span>);
+	}
+
+	<span class="pl-c">//先写100个随机数进文件</span>
+	<span class="pl-c">//for (int i = 0; i &lt; 100; ++i)</span>
+	<span class="pl-c">//{</span>
+	<span class="pl-c">//	int num = rand() % 100;</span>
+	<span class="pl-c">//	fprintf(fout, "%d\n", num);</span>
+	<span class="pl-c">//}</span>
+
+	<span class="pl-smi">int</span> <span class="pl-s1">num</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">n</span> <span class="pl-c1">=</span> <span class="pl-c1">10</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">b</span>[<span class="pl-c1">10</span>];
+	<span class="pl-smi">char</span> <span class="pl-s1">subfile</span>[<span class="pl-c1">20</span>];
+	<span class="pl-smi">int</span> <span class="pl-s1">filei</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+
+	<span class="pl-c">//1.读取大文件，然后将其平均分成N份，加载到内存中后对每份进行排序，然后再写回小文件</span>
+	<span class="pl-en">memset</span>(<span class="pl-s1">b</span>, <span class="pl-c1">0</span>, <span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>) <span class="pl-c1">*</span> <span class="pl-s1">n</span>);
+	<span class="pl-k">while</span> (<span class="pl-en">fscanf</span>(<span class="pl-s1">fout</span>, <span class="pl-s">"%d\n"</span>, <span class="pl-c1">&amp;</span><span class="pl-s1">num</span>) <span class="pl-c1">!=</span> <span class="pl-c1">EOF</span>)
+	{
+		<span class="pl-k">if</span> (<span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">n</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>)
+		{
+			<span class="pl-s1">b</span>[<span class="pl-s1">i</span><span class="pl-c1">++</span>] <span class="pl-c1">=</span> <span class="pl-s1">num</span>;	<span class="pl-c">//首先读9个数据到数组中</span>
+		}
+		<span class="pl-k">else</span>
+		{
+			<span class="pl-s1">b</span>[<span class="pl-s1">i</span>] <span class="pl-c1">=</span> <span class="pl-s1">num</span>;		<span class="pl-c">//再将第十个输入放入数组</span>
+			<span class="pl-en">QuickSort</span>(<span class="pl-s1">b</span>, <span class="pl-c1">0</span>, <span class="pl-s1">n</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>);		<span class="pl-c">//对其进行排序</span>
+
+			<span class="pl-en">sprintf</span>(<span class="pl-s1">subfile</span>, <span class="pl-s">"%d"</span>, <span class="pl-s1">filei</span><span class="pl-c1">++</span>);
+
+			<span class="pl-smi">FILE</span><span class="pl-c1">*</span> <span class="pl-s1">fin</span> <span class="pl-c1">=</span> <span class="pl-en">fopen</span>(<span class="pl-s1">subfile</span>, <span class="pl-s">"w"</span>);
+			<span class="pl-k">if</span> (!<span class="pl-s1">fin</span>)
+			{
+				<span class="pl-en">perror</span>(<span class="pl-s">"fopen fail"</span>);
+				<span class="pl-en">exit</span>(<span class="pl-c1">-1</span>);
+			}
+			<span class="pl-c">//再进本轮排好序的10个数以单个小文件的形式写到工程文件下</span>
+			<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">j</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">n</span>; <span class="pl-c1">++</span><span class="pl-s1">j</span>)
+			{
+				<span class="pl-en">fprintf</span>(<span class="pl-s1">fin</span>, <span class="pl-s">"%d\n"</span>, <span class="pl-s1">b</span>[<span class="pl-s1">j</span>]);
+			}
+			<span class="pl-en">fclose</span>(<span class="pl-s1">fin</span>);
+
+			<span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;		<span class="pl-c">//i重新置0，方便下一次的读取</span>
+			<span class="pl-en">memset</span>(<span class="pl-s1">b</span>, <span class="pl-c1">0</span>, <span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>) <span class="pl-c1">*</span> <span class="pl-s1">n</span>);
+		}
+	}
+
+	<span class="pl-c">//利用互相归并到文件，实现整体有序</span>
+	<span class="pl-smi">char</span> <span class="pl-s1">file1</span>[<span class="pl-c1">100</span>] <span class="pl-c1">=</span> <span class="pl-s">"1"</span>;
+	<span class="pl-smi">char</span> <span class="pl-s1">file2</span>[<span class="pl-c1">100</span>] <span class="pl-c1">=</span> <span class="pl-s">"2"</span>;
+	<span class="pl-smi">char</span> <span class="pl-s1">mfile</span>[<span class="pl-c1">100</span>] <span class="pl-c1">=</span> <span class="pl-s">"12"</span>;
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">2</span>; <span class="pl-s1">i</span> &lt;= <span class="pl-s1">n</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+	{
+		<span class="pl-en">_MergeSortFile</span>(<span class="pl-s1">file1</span>, <span class="pl-s1">file2</span>, <span class="pl-s1">mfile</span>);
+		
+		<span class="pl-c">//迭代</span>
+		<span class="pl-en">strcpy</span>(<span class="pl-s1">file1</span>, <span class="pl-s1">mfile</span>);
+		<span class="pl-en">sprintf</span>(<span class="pl-s1">file2</span>, <span class="pl-s">"%d"</span>, <span class="pl-s1">i</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>);
+		<span class="pl-en">sprintf</span>(<span class="pl-s1">mfile</span>, <span class="pl-s">"%s%d"</span>, <span class="pl-s1">mfile</span>, <span class="pl-s1">i</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>);
+	}
+}</pre></div>
+<p>运行结果展示</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5319d185fde6ab8d6ac058c83706857e3e90c8e31e5145eb8a8447f1bf7046e9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62633631333930326363613234316338613662666134626135393365643765612e706e67"><img src="https://camo.githubusercontent.com/5319d185fde6ab8d6ac058c83706857e3e90c8e31e5145eb8a8447f1bf7046e9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f62633631333930326363613234316338613662666134626135393365643765612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/bc613902cca241c8a6bfa4ba593ed7ea.png" style="max-width: 100%;"></a></p></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer">Copyright © <span id="year"></span><a href="https://xiaolinzi.eu.org"> Shilin' Blog </a>
+<p>
+<span id="runday"></span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a>
+</p>
+
+<script>
+if("06/29/2024"!=""){
+    var now=new Date();
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("year").innerHTML=now.getFullYear();
+    if(""!=""){document.getElementById("runday").innerHTML=" • "+"网站运行"+diffDay+"天"+" • ";}
+    else{document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";}
+}
+</script>
+</div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n\n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

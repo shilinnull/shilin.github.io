@@ -1,5 +1,16 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Shilin' Blog</title><link>https://xiaolinzi.eu.org</link><description>珍惜每一天~</description><copyright>Shilin' Blog</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/108561949?v=4&amp;size=64</url><title>avatar</title><link>https://xiaolinzi.eu.org</link></image><lastBuildDate>Sat, 20 Jul 2024 13:59:08 +0000</lastBuildDate><managingEditor>Shilin' Blog</managingEditor><ttl>60</ttl><webMaster>Shilin' Blog</webMaster><item><title>5. 【数据结构】栈的实现</title><link>https://xiaolinzi.eu.org/post/5.%20%E3%80%90-shu-ju-jie-gou-%E3%80%91-zhan-de-shi-xian.html</link><description>&#13;
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Shilin' Blog</title><link>https://xiaolinzi.eu.org</link><description>珍惜每一天~</description><copyright>Shilin' Blog</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/108561949?v=4&amp;size=64</url><title>avatar</title><link>https://xiaolinzi.eu.org</link></image><lastBuildDate>Sat, 20 Jul 2024 14:00:06 +0000</lastBuildDate><managingEditor>Shilin' Blog</managingEditor><ttl>60</ttl><webMaster>Shilin' Blog</webMaster><item><title>6. 【数据结构】队列的实现</title><link>https://xiaolinzi.eu.org/post/6.%20%E3%80%90-shu-ju-jie-gou-%E3%80%91-dui-lie-de-shi-xian.html</link><description>&#13;
+## 队列的概念及结构&#13;
+&#13;
+- 队列：只允许在一端进行插入数据操作，在另一端进行删除数据操作的特殊线性表，队列具有先进先出`FIFO(First In First Out)` &#13;
+- 入队列：进行插入操作的一端称为队尾 出队列：进行删除操作的一端称为队头&#13;
+&#13;
+![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/b32fa608920d43c2a87f283132dc57ab.png)&#13;
+&#13;
+&#13;
+## 队列的实现&#13;
+&#13;
+- 队列也可以数组和链表的结构实现，使用链表的结构实现更优一些，因为如果使用数组的结构， 出队列在数组头上出数据，效率会比较低。</description><guid isPermaLink="true">https://xiaolinzi.eu.org/post/6.%20%E3%80%90-shu-ju-jie-gou-%E3%80%91-dui-lie-de-shi-xian.html</guid><pubDate>Sat, 20 Jul 2024 13:59:43 +0000</pubDate></item><item><title>5. 【数据结构】栈的实现</title><link>https://xiaolinzi.eu.org/post/5.%20%E3%80%90-shu-ju-jie-gou-%E3%80%91-zhan-de-shi-xian.html</link><description>&#13;
 ## 栈的概念及结构&#13;
 &#13;
 - 栈：一种特殊的线性表，其只允许在固定的一端进行插入和删除元素操作。</description><guid isPermaLink="true">https://xiaolinzi.eu.org/post/5.%20%E3%80%90-shu-ju-jie-gou-%E3%80%91-zhan-de-shi-xian.html</guid><pubDate>Sat, 20 Jul 2024 13:58:48 +0000</pubDate></item><item><title>4. 【数据结构】带头双向循环链表专题</title><link>https://xiaolinzi.eu.org/post/4.%20%E3%80%90-shu-ju-jie-gou-%E3%80%91-dai-tou-shuang-xiang-xun-huan-lian-biao-zhuan-ti.html</link><description>## 带头双向循环链表的结构&#13;

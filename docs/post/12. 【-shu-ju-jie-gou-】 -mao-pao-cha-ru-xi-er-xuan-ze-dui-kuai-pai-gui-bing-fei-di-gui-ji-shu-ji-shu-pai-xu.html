@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="# 前言：
+>排序算法是一种将一组数据按照特定顺序排列的算法。">
+<meta property="og:title" content="12. 【数据结构】 冒泡插入希尔选择堆快排归并非递归计数基数排序">
+<meta property="og:description" content="# 前言：
+>排序算法是一种将一组数据按照特定顺序排列的算法。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/12.%20%E3%80%90-shu-ju-jie-gou-%E3%80%91%20-mao-pao-cha-ru-xi-er-xuan-ze-dui-kuai-pai-gui-bing-fei-di-gui-ji-shu-ji-shu-pai-xu.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>12. 【数据结构】 冒泡插入希尔选择堆快排归并非递归计数基数排序</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">12. 【数据结构】 冒泡插入希尔选择堆快排归并非递归计数基数排序</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/62" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h1>前言：</h1>
+<blockquote>
+<p>排序算法是一种将一组数据按照特定顺序排列的算法。数据结构排序算法的选择取决于数据的特征、规模和性能需求。<br>
+接下来我们就要实现排序~~</p>
+</blockquote>
+<hr>
+<p><strong>我们需要实现的一些功能：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span><span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-k">#include</span><span class="pl-s">&lt;stdlib.h&gt;</span>
+<span class="pl-k">#include</span><span class="pl-s">&lt;string.h&gt;</span>
+<span class="pl-k">#include</span><span class="pl-s">&lt;stdbool.h&gt;</span>
+<span class="pl-k">#include</span><span class="pl-s">&lt;time.h&gt;</span>
+<span class="pl-c">// 打印</span>
+<span class="pl-smi">void</span> <span class="pl-en">Print_a</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">sz</span>);
+<span class="pl-c">// 交换</span>
+<span class="pl-smi">void</span> <span class="pl-en">Swap</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">p1</span>, <span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">p2</span>);
+<span class="pl-c">// 插入排序</span>
+<span class="pl-smi">void</span> <span class="pl-en">InsertSort</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">n</span>);
+<span class="pl-c">// 冒泡排序</span>
+<span class="pl-smi">void</span> <span class="pl-en">BubbleSort</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">n</span>);
+<span class="pl-c">// 希尔排序</span>
+<span class="pl-smi">void</span> <span class="pl-en">ShellSort</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">n</span>);
+<span class="pl-c">// 堆排序</span>
+<span class="pl-smi">void</span> <span class="pl-en">AdjustDwon</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">n</span>, <span class="pl-smi">int</span> <span class="pl-s1">root</span>);
+<span class="pl-smi">void</span> <span class="pl-en">HeapSort</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">n</span>);
+<span class="pl-c">// 选择排序</span>
+<span class="pl-smi">void</span> <span class="pl-en">SelectSort</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">n</span>);
+<span class="pl-c">// ------------------------------------------------------</span>
+<span class="pl-c">// 快速排序hoare版本 </span>
+<span class="pl-smi">int</span> <span class="pl-en">PartSort1</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">begin</span>, <span class="pl-smi">int</span> <span class="pl-s1">end</span>);
+<span class="pl-c">// 快速排序挖坑法</span>
+<span class="pl-smi">int</span> <span class="pl-en">PartSort2</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">begin</span>, <span class="pl-smi">int</span> <span class="pl-s1">end</span>);
+<span class="pl-c">// 快速排序前后指针法 </span>
+<span class="pl-smi">int</span> <span class="pl-en">PartSort3</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">begin</span>, <span class="pl-smi">int</span> <span class="pl-s1">end</span>);
+<span class="pl-c">// 排序函数</span>
+<span class="pl-smi">void</span> <span class="pl-en">QuickSort</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">begin</span>, <span class="pl-smi">int</span> <span class="pl-s1">end</span>);
+<span class="pl-c">//------------------------------------------------------</span>
+<span class="pl-c">// 快速排序 非递归实现 </span>
+<span class="pl-smi">void</span> <span class="pl-en">QuickSortNonR</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">begin</span>, <span class="pl-smi">int</span> <span class="pl-s1">end</span>);
+<span class="pl-c">// 归并排序递归实现 </span>
+<span class="pl-smi">void</span> <span class="pl-en">MergeSort</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">n</span>);
+<span class="pl-c">// 归并排序非递归实现 </span>
+<span class="pl-smi">void</span> <span class="pl-en">MergeSortNonR</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">n</span>);
+<span class="pl-c">// 非比较排序</span>
+<span class="pl-smi">void</span> <span class="pl-en">CountSort</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">n</span>);</pre></div>
+<hr>
+<h2>冒泡排序</h2>
+<ul>
+<li>冒泡排序是一种基本的排序算法，其核心思想是通过多次交换相邻元素的位置，使得每一轮循环都将最大（或最小）的元素移动到序列的最后。这个过程就像气泡逐渐上升到表面一样，因而得名"冒泡排序"。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/fcb4a0e74c406e13a881512254c8fad649e893457d013b2fd2524cd551507e88/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32633732356538353061626134616532623031613631626266343032323661622e676966"><img src="https://camo.githubusercontent.com/fcb4a0e74c406e13a881512254c8fad649e893457d013b2fd2524cd551507e88/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f32633732356538353061626134616532623031613631626266343032323661622e676966" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/2c725e850aba4ae2b01a61bbf40226ab.gif" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b3e33a7a01001bca962acbfccef5f9c30a44526bee1c4b4808d1a4d8d29f7af9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61356433613131636266633034313932386466386638333764636365613363632e706e67"><img src="https://camo.githubusercontent.com/b3e33a7a01001bca962acbfccef5f9c30a44526bee1c4b4808d1a4d8d29f7af9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61356433613131636266633034313932386466386638333764636365613363632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/a5d3a11cbfc041928df8f837dccea3cc.png" style="max-width: 100%;"></a><br>
+<strong>代码实现：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">bubbleSort</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>,<span class="pl-smi">int</span> <span class="pl-s1">n</span>)
+{
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">n</span><span class="pl-c1">-</span><span class="pl-c1">1</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">j</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">n</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span> <span class="pl-c1">-</span> <span class="pl-s1">i</span>; <span class="pl-s1">j</span><span class="pl-c1">++</span>)
+		{
+			<span class="pl-k">if</span> (<span class="pl-s1">a</span>[<span class="pl-s1">j</span>] <span class="pl-c1">&gt;</span> <span class="pl-s1">a</span>[<span class="pl-s1">j</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>])
+			{
+				<span class="pl-en">Swap</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-s1">j</span>], <span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-s1">j</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>]);
+			}
+		}
+	}
+}</pre></div>
+<p><strong>优点：</strong></p>
+<ol>
+<li><strong>简单易懂：</strong> 冒泡排序的思想非常简单，容易理解和实现，适合初学者学习排序算法的基本概念。</li>
+<li><strong>原地排序：</strong> 冒泡排序是一种原地排序算法，不需要额外的空间来存储临时数据，只需要一个常数级的辅助空间。</li>
+<li><strong>稳定性：</strong> 冒泡排序是一种稳定的排序算法，相等元素的相对位置不会发生变化。</li>
+</ol>
+<p><strong>缺点：</strong></p>
+<ol>
+<li><strong>效率低：</strong> 冒泡排序的平均时间复杂度为O(n^2)，在处理大规模数据时性能较差，比较和交换的操作太过频繁。</li>
+<li><strong>不适合大规模数据：</strong> 冒泡排序的性能不如一些更高效的排序算法，如快速排序、归并排序等，特别是在数据规模较大的情况下。</li>
+<li><strong>对基本有序的序列效率低下：</strong> 在实际应用中，如果序列已经基本有序，冒泡排序仍然需要进行多次比较和交换，效率不高。</li>
+</ol>
+<hr>
+<h2>插入排序</h2>
+<ul>
+<li>插入排序是一种简单直观的排序算法，其核心思想是将一个元素插入到已经排好序的数组（或子数组）中的合适位置，以达到整体有序的效果。插入排序的工作方式类似于整理扑克牌的过程：手里的牌是已经有序的部分，新摸到的牌则需要插入到适当的位置，保持有序性。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/19083ce2825462d84faf9ae75b3a5783a0b011e1ab931ca1a081bf884e81109a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39303334303831396536613034623439393437623135656236336237396366362e676966"><img src="https://camo.githubusercontent.com/19083ce2825462d84faf9ae75b3a5783a0b011e1ab931ca1a081bf884e81109a/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39303334303831396536613034623439393437623135656236336237396366362e676966" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/90340819e6a04b49947b15eb63b79cf6.gif" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/93b97a8d6843e9fdd969e031bb07396f439b15dee121c44de9cd577eac3bb767/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36343961616430376664366234343735386535363336353533323135643031382e706e67"><img src="https://camo.githubusercontent.com/93b97a8d6843e9fdd969e031bb07396f439b15dee121c44de9cd577eac3bb767/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f36343961616430376664366234343735386535363336353533323135643031382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/649aad07fd6b44758e5636553215d018.png" style="max-width: 100%;"></a><br>
+<strong>代码实现：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">InsertSort</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">n</span>)
+{
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">n</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-c">// 记录每次i的位置</span>
+		<span class="pl-smi">int</span> <span class="pl-s1">end</span> <span class="pl-c1">=</span> <span class="pl-s1">i</span>;
+		<span class="pl-c">// 将i+1的位置保存</span>
+		<span class="pl-smi">int</span> <span class="pl-s1">tmp</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span>[<span class="pl-s1">end</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>];
+		<span class="pl-c">// 一次排序</span>
+		<span class="pl-k">while</span> (<span class="pl-s1">end</span> &gt;= <span class="pl-c1">0</span>)
+		{
+			<span class="pl-c">// 如果后面的数字小于前面的那一个就进行往后覆盖，</span>
+			<span class="pl-c">// 然后end--，继续排序</span>
+			<span class="pl-k">if</span> (<span class="pl-s1">tmp</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">a</span>[<span class="pl-s1">end</span>])
+			{
+				<span class="pl-s1">a</span>[<span class="pl-s1">end</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>] <span class="pl-c1">=</span> <span class="pl-s1">a</span>[<span class="pl-s1">end</span>];
+				<span class="pl-c1">--</span><span class="pl-s1">end</span>;
+			}
+			<span class="pl-k">else</span>
+			{
+				<span class="pl-c">// 如果大于或者等于了就跳出</span>
+				<span class="pl-k">break</span>;
+			}
+		}
+		<span class="pl-c">// 因为--end了，所以就要在end+1的位置放刚刚保存的值tmp</span>
+		<span class="pl-s1">a</span>[<span class="pl-s1">end</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>] <span class="pl-c1">=</span> <span class="pl-s1">tmp</span>;
+	}
+}</pre></div>
+<p><strong>优点：</strong></p>
+<ol>
+<li><strong>简单易理解：</strong> 插入排序的实现非常简单，易于理解和实现，适用于小规模数据或部分有序的数据。</li>
+<li><strong>稳定性：</strong> 插入排序是一种稳定的排序算法，相等元素的相对位置不会发生变化。</li>
+<li><strong>适应性好：</strong> 如果数据已经基本有序，插入排序的性能会比较好，因为大部分元素都已经在正确的位置上，只需少量的比较和移动。</li>
+<li><strong>原地排序：</strong> 插入排序是一种原地排序算法，不需要额外的空间来存储临时数据。</li>
+</ol>
+<p><strong>缺点：</strong></p>
+<ol>
+<li><strong>效率低：</strong> 插入排序的平均时间复杂度为O(n^2)，在数据规模较大时，性能不如一些更高效的排序算法，如快速排序、归并排序等。</li>
+<li><strong>对大规模数据排序效率低下：</strong> 插入排序在处理大规模数据时性能较差，因为它需要大量的比较和移动操作。</li>
+<li><strong>不适合链表结构：</strong> 插入排序需要频繁地移动元素，对于链表结构来说，由于不支持随机访问，插入排序效率较低。</li>
+</ol>
+<hr>
+<h2>希尔排序</h2>
+<ul>
+<li>希尔排序（Shell Sort）是一种插入排序的改进版本，也称为缩小增量排序。它通过比较相距一定间隔的元素，逐步减小这个间隔，直到间隔为1时完成最后一轮排序。希尔排序的核心思想是先使数组中任意间隔为h的元素有序，然后逐步减小h，最终使整个数组有序。</li>
+</ul>
+<p><strong>代码实现：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">ShellSort</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">n</span>)
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">gap</span> <span class="pl-c1">=</span> <span class="pl-s1">n</span>;
+	
+	<span class="pl-c">// gap &gt; 1时是预排序，目的让他接近有序</span>
+	<span class="pl-c">// gap == 1是直接插入排序，目的是让他有序</span>
+	<span class="pl-k">while</span> (<span class="pl-s1">gap</span> <span class="pl-c1">&gt;</span> <span class="pl-c1">1</span>)
+	{
+		<span class="pl-c">// gap = gap / 2; // log 2 N</span>
+		<span class="pl-s1">gap</span> <span class="pl-c1">=</span> <span class="pl-s1">gap</span> / <span class="pl-c1">3</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>; <span class="pl-c">// log 3 N</span>
+
+		<span class="pl-c">//每次排gap次</span>
+		<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">j</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">n</span> <span class="pl-c1">-</span> <span class="pl-s1">gap</span>; <span class="pl-s1">j</span><span class="pl-c1">++</span>)
+		{
+			<span class="pl-c">//插入排序</span>
+			<span class="pl-smi">int</span> <span class="pl-s1">end</span> <span class="pl-c1">=</span> <span class="pl-s1">j</span>;
+			<span class="pl-smi">int</span> <span class="pl-s1">tmp</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span>[<span class="pl-s1">end</span> <span class="pl-c1">+</span> <span class="pl-s1">gap</span>];
+			<span class="pl-k">while</span> (<span class="pl-s1">end</span> &gt;= <span class="pl-c1">0</span>)
+			{
+				<span class="pl-k">if</span> (<span class="pl-s1">tmp</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">a</span>[<span class="pl-s1">end</span>])
+				{
+					<span class="pl-s1">a</span>[<span class="pl-s1">end</span> <span class="pl-c1">+</span> <span class="pl-s1">gap</span>] <span class="pl-c1">=</span> <span class="pl-s1">a</span>[<span class="pl-s1">end</span>];
+					<span class="pl-s1">end</span> <span class="pl-c1">-=</span> <span class="pl-s1">gap</span>;
+				}
+				<span class="pl-k">else</span>
+				{
+					<span class="pl-k">break</span>;
+				}
+			}
+			<span class="pl-s1">a</span>[<span class="pl-s1">end</span> <span class="pl-c1">+</span> <span class="pl-s1">gap</span>] <span class="pl-c1">=</span> <span class="pl-s1">tmp</span>;
+		}
+	}
+}</pre></div>
+<p><strong>优点：</strong></p>
+<ol>
+<li><strong>相对于插入排序的改进：</strong> 希尔排序是插入排序的改进版本，通过引入间隔（gap）的概念，减少了数据的搬移次数，提高了效率。</li>
+<li><strong>适用于中等规模数据：</strong> 希尔排序相对于一些简单的排序算法，对中等规模的数据表现较好，比如对于几千甚至几万个元素的排序。</li>
+<li><strong>不稳定性：</strong> 相比较于一些稳定排序算法（如归并排序、插入排序），希尔排序的不稳定性可能在某些情况下是一个优势，特别是在排序过程中需要对元素进行位置交换的场景。</li>
+</ol>
+<p><strong>缺点：</strong></p>
+<ol>
+<li><strong>不适用于大规模数据：</strong> 希尔排序的性能相对较好，但在处理非常大规模数据时，效率可能不如一些更为高级的排序算法，比如快速排序、归并排序等。</li>
+<li><strong>不稳定性：</strong> 尽管不稳定性在某些情况下可以是优势，但在某些应用场景下，需要保持相等元素的相对位置不变，这时候希尔排序的不稳定性可能成为一个缺点。</li>
+</ol>
+<hr>
+<h2>选择排序</h2>
+<ul>
+<li>选择排序（Selection Sort）是一种简单直观的排序算法，其基本思想是通过不断选择未排序序列中的最小（或最大）元素，将其与未排序序列的第一个元素交换，从而逐步构建有序序列。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5ac7c2e68890b7c77a50eb706f2fd86dfa239e624c9a40a3d8aa0b9cba77e16b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61623264646134336437653634653937393664313235393032386136313166332e676966"><img src="https://camo.githubusercontent.com/5ac7c2e68890b7c77a50eb706f2fd86dfa239e624c9a40a3d8aa0b9cba77e16b/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f61623264646134336437653634653937393664313235393032386136313166332e676966" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/ab2dda43d7e64e9796d1259028a611f3.gif" style="max-width: 100%;"></a></p>
+<p><strong>代码实现：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">// 选择排序</span>
+<span class="pl-smi">void</span> <span class="pl-en">SelectSort</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">n</span>)
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">begin</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>, <span class="pl-s1">end</span> <span class="pl-c1">=</span> <span class="pl-s1">n</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>;
+	<span class="pl-k">while</span> (<span class="pl-s1">begin</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">end</span>)
+	{
+		<span class="pl-c">// 两头找</span>
+		<span class="pl-smi">int</span> <span class="pl-s1">mini</span> <span class="pl-c1">=</span> <span class="pl-s1">begin</span>, <span class="pl-s1">maxi</span> <span class="pl-c1">=</span> <span class="pl-s1">begin</span>;
+		<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-s1">begin</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span> &lt;= <span class="pl-s1">end</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+		{
+			<span class="pl-c">// 如果i的位置比mini小就更新一下</span>
+			<span class="pl-k">if</span> (<span class="pl-s1">a</span>[<span class="pl-s1">i</span>] <span class="pl-c1">&lt;</span> <span class="pl-s1">a</span>[<span class="pl-s1">mini</span>])
+			{
+				<span class="pl-s1">mini</span> <span class="pl-c1">=</span> <span class="pl-s1">i</span>;
+			}
+			<span class="pl-c">//如果i的位置比maxi大就更新一下</span>
+			<span class="pl-k">if</span> (<span class="pl-s1">a</span>[<span class="pl-s1">i</span>] <span class="pl-c1">&gt;</span> <span class="pl-s1">a</span>[<span class="pl-s1">maxi</span>])
+			{
+				<span class="pl-s1">maxi</span> <span class="pl-c1">=</span> <span class="pl-s1">i</span>;
+			}
+		}
+		<span class="pl-c">// 走到这里就说明小的要和左边交换一下</span>
+		<span class="pl-en">Swap</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-s1">mini</span>], <span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-s1">begin</span>]);
+		<span class="pl-c">// 注意：这里Eugene左边的和maxi相等了要更新一下maxi</span>
+		<span class="pl-k">if</span> (<span class="pl-s1">begin</span> <span class="pl-c1">==</span> <span class="pl-s1">maxi</span>)
+		{
+			<span class="pl-s1">maxi</span> <span class="pl-c1">=</span> <span class="pl-s1">mini</span>;
+		}
+		<span class="pl-c">// 然后交换maxi和end</span>
+		<span class="pl-en">Swap</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-s1">end</span>], <span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-s1">maxi</span>]);
+		<span class="pl-c1">++</span><span class="pl-s1">begin</span>;
+		<span class="pl-c1">--</span><span class="pl-s1">end</span>;
+	}
+}</pre></div>
+<p><strong>优点：</strong></p>
+<ol>
+<li><strong>简单易理解：</strong> 选择排序的实现非常简单，易于理解和实现，适合初学者学习排序算法的基本概念。</li>
+<li><strong>原地排序：</strong> 选择排序是一种原地排序算法，不需要额外的空间来存储临时数据，只需要一个常数级的辅助空间。</li>
+<li><strong>不稳定性：</strong> 选择排序是一种不稳定的排序算法，相等元素的相对位置可能发生变化，但在某些情况下，不稳定性可能是一个优势。</li>
+</ol>
+<p><strong>缺点：</strong></p>
+<ol>
+<li><strong>效率低：</strong> 选择排序的平均时间复杂度为O(n^2)，在处理大规模数据时性能较差，由于每次只能确定一个元素的位置，比较和交换的操作过于频繁。</li>
+<li><strong>对基本有序的序列效率低下：</strong> 在实际应用中，如果序列已经基本有序，选择排序仍然需要进行大量的比较和交换，效率不高。</li>
+<li><strong>不适合大规模数据：</strong> 选择排序的性能不如一些更高效的排序算法，如快速排序、归并排序等，特别是在数据规模较大的情况下。</li>
+</ol>
+<hr>
+<h2>堆排序</h2>
+<ul>
+<li>堆排序是一种基于二叉堆数据结构的排序算法。它利用了堆的性质来进行排序，其中堆分为最大堆和最小堆两种类型。在最大堆中，父节点的值大于或等于其子节点的值；在最小堆中，父节点的值小于或等于其子节点的值。</li>
+</ul>
+<p><strong>代码实现：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">AdjustDwon</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">n</span>, <span class="pl-smi">int</span> <span class="pl-s1">root</span>)
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">parent</span> <span class="pl-c1">=</span> <span class="pl-s1">root</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">child</span> <span class="pl-c1">=</span> <span class="pl-s1">parent</span> <span class="pl-c1">*</span> <span class="pl-c1">2</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>;
+	<span class="pl-k">while</span> (<span class="pl-s1">child</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">n</span>)
+	{
+		<span class="pl-k">if</span> (<span class="pl-s1">child</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">n</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">a</span>[<span class="pl-s1">child</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>] <span class="pl-c1">&gt;</span> <span class="pl-s1">a</span>[<span class="pl-s1">child</span>])
+			<span class="pl-c1">++</span><span class="pl-s1">child</span>;
+
+		<span class="pl-k">if</span> (<span class="pl-s1">a</span>[<span class="pl-s1">child</span>] <span class="pl-c1">&gt;</span> <span class="pl-s1">a</span>[<span class="pl-s1">parent</span>])
+		{
+			<span class="pl-en">Swap</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-s1">child</span>], <span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-s1">parent</span>]);
+
+			<span class="pl-s1">parent</span> <span class="pl-c1">=</span> <span class="pl-s1">child</span>;
+			<span class="pl-s1">child</span> <span class="pl-c1">=</span> <span class="pl-s1">parent</span> <span class="pl-c1">*</span> <span class="pl-c1">2</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>;
+		}
+		<span class="pl-k">else</span>
+		{
+			<span class="pl-k">break</span>;
+		}
+	}
+}
+
+<span class="pl-smi">void</span> <span class="pl-en">HeapSort</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">n</span>)
+{
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> (<span class="pl-s1">n</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>) / <span class="pl-c1">2</span>; <span class="pl-s1">i</span> &gt;= <span class="pl-c1">0</span>; <span class="pl-s1">i</span><span class="pl-c1">--</span>)
+	{
+		<span class="pl-en">AdjustDwon</span>(<span class="pl-s1">a</span>, <span class="pl-s1">n</span>, <span class="pl-s1">i</span>);
+	}
+
+	<span class="pl-smi">int</span> <span class="pl-s1">end</span> <span class="pl-c1">=</span> <span class="pl-s1">n</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>;
+	<span class="pl-k">while</span> (<span class="pl-s1">end</span> <span class="pl-c1">&gt;</span> <span class="pl-c1">0</span>)
+	{
+		<span class="pl-en">Swap</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-c1">0</span>], <span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-s1">end</span>]);
+		<span class="pl-en">AdjustDwon</span>(<span class="pl-s1">a</span>, <span class="pl-s1">end</span>, <span class="pl-c1">0</span>);
+		<span class="pl-c1">--</span><span class="pl-s1">end</span>;
+	}
+}</pre></div>
+<p><strong>优点：</strong></p>
+<ol>
+<li><strong>稳定性：</strong> 堆排序是一种不稳定的排序算法，因为在构建初始堆和进行堆调整的过程中可能破坏相同元素的相对顺序。然而，如果对于相同的元素，可以使用索引来保持其相对顺序，就可以避免这个问题。</li>
+<li><strong>原地排序：</strong> 堆排序是一种原地排序算法，不需要额外的存储空间来存储待排序的数据，只需要常数级别的辅助空间。</li>
+<li><strong>时间复杂度：</strong> 堆排序的平均、最好和最坏情况下的时间复杂度都是 O(n log n)，其中 n 是待排序元素的数量。这使得堆排序在大数据集上表现良好。</li>
+</ol>
+<p><strong>缺点：</strong></p>
+<ol>
+<li><strong>非自适应性：</strong> 堆排序的时间复杂度在各种情况下都是 O(n log n)，无论输入数据的初始顺序如何。因此，它对于部分有序的数据或者小规模数据集的排序效率可能不如一些自适应性较强的算法。</li>
+<li><strong>不稳定：</strong> 在排序过程中，堆排序可能破坏相同元素的相对顺序，因此是一种不稳定的排序算法。如果对稳定性有要求，可能需要考虑其他算法。</li>
+<li><strong>不适用于链式存储结构：</strong> 堆排序通常需要对数组进行直接访问，而不适用于链式存储结构。因此，如果数据结构采用链表形式存储，需要将其转换为数组再进行排序，这可能引入额外的开销。</li>
+</ol>
+<hr>
+<h2>快速排序--交换排序</h2>
+<h3>三数取中</h3>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">GetMidi</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">left</span>, <span class="pl-smi">int</span> <span class="pl-s1">right</span>)
+{
+	<span class="pl-c">//int midi = (begin + end) / 2;</span>
+	<span class="pl-smi">int</span> <span class="pl-s1">mid</span> <span class="pl-c1">=</span> (<span class="pl-s1">left</span> <span class="pl-c1">+</span> <span class="pl-s1">right</span>) &gt;&gt; <span class="pl-c1">1</span>;
+	<span class="pl-k">if</span> (<span class="pl-s1">a</span>[<span class="pl-s1">left</span>] <span class="pl-c1">&lt;</span> <span class="pl-s1">a</span>[<span class="pl-s1">mid</span>])
+	{
+		<span class="pl-k">if</span> (<span class="pl-s1">a</span>[<span class="pl-s1">mid</span>] <span class="pl-c1">&lt;</span> <span class="pl-s1">a</span>[<span class="pl-s1">right</span>])
+			<span class="pl-k">return</span> <span class="pl-s1">mid</span>;
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (<span class="pl-s1">a</span>[<span class="pl-s1">left</span>] <span class="pl-c1">&gt;</span> <span class="pl-s1">a</span>[<span class="pl-s1">right</span>])
+			<span class="pl-k">return</span> <span class="pl-s1">left</span>;
+		<span class="pl-k">else</span>
+			<span class="pl-k">return</span> <span class="pl-s1">right</span>;
+	}
+	<span class="pl-k">else</span> <span class="pl-c">// a[left] &gt; a[mid]</span>
+	{
+		<span class="pl-k">if</span> (<span class="pl-s1">a</span>[<span class="pl-s1">mid</span>] <span class="pl-c1">&gt;</span> <span class="pl-s1">a</span>[<span class="pl-s1">right</span>])
+			<span class="pl-k">return</span> <span class="pl-s1">mid</span>;
+		<span class="pl-k">else</span> <span class="pl-k">if</span> (<span class="pl-s1">a</span>[<span class="pl-s1">left</span>] <span class="pl-c1">&lt;</span> <span class="pl-s1">a</span>[<span class="pl-s1">right</span>])
+			<span class="pl-k">return</span> <span class="pl-s1">left</span>;
+		<span class="pl-k">else</span>
+			<span class="pl-k">return</span> <span class="pl-s1">right</span>;
+	}
+}</pre></div>
+<h3>快速排序hoare版本</h3>
+<ul>
+<li>快速排序是一种常用的排序算法，Hoare版本是其中一种实现方式，由<a href="https://zh.wikipedia.org/wiki/%E6%9D%B1%E5%B0%BC%C2%B7%E9%9C%8D%E7%88%BE" rel="nofollow">Tony Hoare</a>提出。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7669e2119d9e462a1a42340eb37e9101450b97c4090e06ea65497bceaa2a49c9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33373762373263363563303034316138623931356463646162383937393433622e676966"><img src="https://camo.githubusercontent.com/7669e2119d9e462a1a42340eb37e9101450b97c4090e06ea65497bceaa2a49c9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33373762373263363563303034316138623931356463646162383937393433622e676966" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/377b72c65c0041a8b915dcdab897943b.gif" style="max-width: 100%;"></a></p>
+<p><strong>代码实现：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">PartSort1</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">begin</span>, <span class="pl-smi">int</span> <span class="pl-s1">end</span>)
+{
+	<span class="pl-c">// 三数取中</span>
+	<span class="pl-smi">int</span> <span class="pl-s1">midi</span> <span class="pl-c1">=</span> <span class="pl-en">GetMidi</span>(<span class="pl-s1">a</span>, <span class="pl-s1">begin</span>, <span class="pl-s1">end</span>);
+	<span class="pl-en">Swap</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-s1">midi</span>], <span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-s1">begin</span>]);
+
+	<span class="pl-c">// 要在最左边开始</span>
+	<span class="pl-smi">int</span> <span class="pl-s1">left</span> <span class="pl-c1">=</span> <span class="pl-s1">begin</span>, <span class="pl-s1">right</span> <span class="pl-c1">=</span> <span class="pl-s1">end</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">keyi</span> <span class="pl-c1">=</span> <span class="pl-s1">begin</span>;
+
+	<span class="pl-k">while</span> (<span class="pl-s1">left</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">right</span>)
+	{
+		<span class="pl-c">// 右边找小</span>
+		<span class="pl-k">while</span> (<span class="pl-s1">left</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">right</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">a</span>[<span class="pl-s1">right</span>] &gt;= <span class="pl-s1">a</span>[<span class="pl-s1">keyi</span>])
+		{
+			<span class="pl-c1">--</span><span class="pl-s1">right</span>;
+		}
+		<span class="pl-c">// 左边找大</span>
+		<span class="pl-k">while</span> (<span class="pl-s1">left</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">right</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">a</span>[<span class="pl-s1">left</span>] &lt;= <span class="pl-s1">a</span>[<span class="pl-s1">keyi</span>])
+		{
+			<span class="pl-c1">++</span><span class="pl-s1">left</span>;
+		}
+
+		<span class="pl-c">// 找到了，就交换</span>
+		<span class="pl-en">Swap</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-s1">left</span>], <span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-s1">right</span>]);
+	}
+
+	<span class="pl-c">// 交换的左边的和keyi，然后更新一下keyi</span>
+	<span class="pl-en">Swap</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-s1">left</span>], <span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-s1">keyi</span>]);
+	<span class="pl-k">return</span> <span class="pl-s1">left</span>;
+}
+
+<span class="pl-smi">void</span> <span class="pl-en">QuickSort</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">begin</span>, <span class="pl-smi">int</span> <span class="pl-s1">end</span>)
+{
+	<span class="pl-k">if</span> (<span class="pl-s1">begin</span> &gt;= <span class="pl-s1">end</span>)
+		<span class="pl-k">return</span>;
+
+	<span class="pl-c">// 小区间</span>
+	<span class="pl-k">if</span> (<span class="pl-s1">end</span> <span class="pl-c1">-</span> <span class="pl-s1">begin</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">10</span>)
+	{
+		<span class="pl-en">InsertSort</span>(<span class="pl-s1">a</span> <span class="pl-c1">+</span> <span class="pl-s1">begin</span>, <span class="pl-s1">end</span> <span class="pl-c1">-</span> <span class="pl-s1">begin</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>);
+	}
+	<span class="pl-k">else</span>
+	{
+		<span class="pl-smi">int</span> <span class="pl-s1">keyi</span> <span class="pl-c1">=</span> <span class="pl-en">PartSort1</span>(<span class="pl-s1">a</span>, <span class="pl-s1">begin</span>, <span class="pl-s1">end</span>);
+
+		<span class="pl-en">QuickSort</span>(<span class="pl-s1">a</span>, <span class="pl-s1">begin</span>, <span class="pl-s1">keyi</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>);
+		<span class="pl-en">QuickSort</span>(<span class="pl-s1">a</span>, <span class="pl-s1">keyi</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>, <span class="pl-s1">end</span>);
+	}
+}</pre></div>
+<p><strong>优点：</strong></p>
+<ol>
+<li><strong>原地排序：</strong> 快速排序是一种原地排序算法，不需要额外的空间来存储临时数据，只需要一个常数级的辅助空间。</li>
+<li><strong>平均情况下具有较好的性能：</strong> 在平均情况下，快速排序的时间复杂度为O(n log n)，这使得它在实践中具有较好的性能。</li>
+<li><strong>适用于大规模数据：</strong> 快速排序在处理大规模数据时通常表现良好，尤其是相对于一些平均时间复杂度较高的排序算法而言。</li>
+<li><strong>对基本有序的数据排序效果好：</strong> 在一些情况下，快速排序对基本有序的数据排序效果较好。</li>
+</ol>
+<p><strong>缺点：</strong></p>
+<ol>
+<li><strong>不稳定性：</strong> 快速排序是一种不稳定的排序算法，相等元素的相对位置可能发生变化，如果需要稳定性，可能需要额外的处理。</li>
+<li><strong>对于极端情况的性能：</strong> 在最坏情况下，即已经有序的序列，快速排序的时间复杂度为O(n^2)，这时性能可能较差。为了避免这种情况，通常会使用一些优化策略，比如随机化选择枢轴。</li>
+<li><strong>对于小规模数据性能较差：</strong> 在小规模数据的排序中，快速排序的递归调用会增加额外的开销，性能可能不如一些简单的排序算法，如插入排序。</li>
+</ol>
+<h3>快速排序挖坑法</h3>
+<ul>
+<li>快速排序的挖坑法（也称为Lomuto分区方案）是快速排序的一种实现方式。在挖坑法中，选择一个基准元素，通过不断交换元素将数组分成两个部分，左边的部分都小于基准元素，右边的部分都大于基准元素。接着，对左右两个部分分别递归进行同样的操作。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/cbd32bc36eb90aea585364dfce7e20ac40ca2dea9229caebd4b61b701405e8d9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37613132663830373036393134343736383039383461653633363063366536392e676966"><img src="https://camo.githubusercontent.com/cbd32bc36eb90aea585364dfce7e20ac40ca2dea9229caebd4b61b701405e8d9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37613132663830373036393134343736383039383461653633363063366536392e676966" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/7a12f8070691447680984ae6360c6e69.gif" style="max-width: 100%;"></a></p>
+<p><strong>代码实现：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">PartSort2</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">begin</span>, <span class="pl-smi">int</span> <span class="pl-s1">end</span>)
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">midi</span> <span class="pl-c1">=</span> <span class="pl-en">GetMidi</span>(<span class="pl-s1">a</span>, <span class="pl-s1">begin</span>, <span class="pl-s1">end</span>);
+	<span class="pl-en">Swap</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-s1">midi</span>], <span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-s1">begin</span>]);
+
+	<span class="pl-smi">int</span> <span class="pl-s1">key</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span>[<span class="pl-s1">begin</span>];
+	<span class="pl-smi">int</span> <span class="pl-s1">holei</span> <span class="pl-c1">=</span> <span class="pl-s1">begin</span>;
+
+	<span class="pl-k">while</span> (<span class="pl-s1">begin</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">end</span>)
+	{
+		<span class="pl-c">// 右边找小</span>
+		<span class="pl-k">while</span> (<span class="pl-s1">begin</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">end</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">a</span>[<span class="pl-s1">end</span>] &gt;= <span class="pl-s1">key</span>)
+		{
+			<span class="pl-c1">--</span><span class="pl-s1">end</span>;
+		}
+
+		<span class="pl-s1">a</span>[<span class="pl-s1">holei</span>] <span class="pl-c1">=</span> <span class="pl-s1">a</span>[<span class="pl-s1">end</span>];
+		<span class="pl-s1">holei</span> <span class="pl-c1">=</span> <span class="pl-s1">end</span>;
+
+		<span class="pl-c">// 左边找大</span>
+		<span class="pl-k">while</span> (<span class="pl-s1">begin</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">end</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">a</span>[<span class="pl-s1">begin</span>] &lt;= <span class="pl-s1">key</span>)
+		{
+			<span class="pl-c1">++</span><span class="pl-s1">begin</span>;
+		}
+		<span class="pl-s1">a</span>[<span class="pl-s1">holei</span>] <span class="pl-c1">=</span> <span class="pl-s1">a</span>[<span class="pl-s1">begin</span>];
+		<span class="pl-s1">holei</span> <span class="pl-c1">=</span> <span class="pl-s1">begin</span>;
+	}
+
+	<span class="pl-s1">a</span>[<span class="pl-s1">holei</span>] <span class="pl-c1">=</span> <span class="pl-s1">key</span>;
+	<span class="pl-k">return</span> <span class="pl-s1">holei</span>;
+}
+
+<span class="pl-smi">void</span> <span class="pl-en">QuickSort</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">begin</span>, <span class="pl-smi">int</span> <span class="pl-s1">end</span>)
+{
+	<span class="pl-k">if</span> (<span class="pl-s1">begin</span> &gt;= <span class="pl-s1">end</span>)
+		<span class="pl-k">return</span>;
+
+	<span class="pl-c">// 小区间</span>
+	<span class="pl-k">if</span> (<span class="pl-s1">end</span> <span class="pl-c1">-</span> <span class="pl-s1">begin</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">10</span>)
+	{
+		<span class="pl-en">InsertSort</span>(<span class="pl-s1">a</span> <span class="pl-c1">+</span> <span class="pl-s1">begin</span>, <span class="pl-s1">end</span> <span class="pl-c1">-</span> <span class="pl-s1">begin</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>);
+	}
+	<span class="pl-k">else</span>
+	{
+		<span class="pl-smi">int</span> <span class="pl-s1">keyi</span> <span class="pl-c1">=</span> <span class="pl-en">PartSort2</span>(<span class="pl-s1">a</span>, <span class="pl-s1">begin</span>, <span class="pl-s1">end</span>);
+
+		<span class="pl-en">QuickSort</span>(<span class="pl-s1">a</span>, <span class="pl-s1">begin</span>, <span class="pl-s1">keyi</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>);
+		<span class="pl-en">QuickSort</span>(<span class="pl-s1">a</span>, <span class="pl-s1">keyi</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>, <span class="pl-s1">end</span>);
+	}
+}</pre></div>
+<p><strong>优点：</strong></p>
+<ol>
+<li><strong>原地排序：</strong> 挖坑法是一种原地排序算法，不需要额外的空间来存储临时数据，只需要一个常数级的辅助空间。</li>
+<li><strong>简单直观：</strong> 挖坑法实现相对较简单，容易理解和实现，适用于教学和学习排序算法。</li>
+</ol>
+<p><strong>缺点：</strong></p>
+<ol>
+<li><strong>不稳定性：</strong> 挖坑法是一种不稳定的排序算法，相等元素的相对位置可能发生变化，如果需要稳定性，可能需要额外的处理。</li>
+<li><strong>最坏情况下的性能：</strong> 在最坏情况下，即已经有序的序列，挖坑法的性能可能较差。这时的时间复杂度为O(n^2)，因为每次分区只能使序列中的一个元素有序。</li>
+<li><strong>对于小规模数据性能较差：</strong> 在小规模数据的排序中，挖坑法的递归调用会增加额外的开销，性能可能不如一些简单的排序算法，如插入排序。</li>
+</ol>
+<h3>快速排序前后指针法</h3>
+<ul>
+<li>快速排序的前后指针法（也称为Hoare分区方案）是另一种实现方式。在这个方法中，通过两个指针从数组的两端分别向中间移动，交换不符合排序条件的元素，最终将数组分为两个部分，左边部分小于基准元素，右边部分大于基准元素。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d8e0130232ab42f6d1444dcda846641830c34719cd64569f84987220b5d536d1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39323836663764353064373534663431393538346666343835323231323461652e676966"><img src="https://camo.githubusercontent.com/d8e0130232ab42f6d1444dcda846641830c34719cd64569f84987220b5d536d1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f39323836663764353064373534663431393538346666343835323231323461652e676966" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/9286f7d50d754f419584ff48522124ae.gif" style="max-width: 100%;"></a></p>
+<p><strong>代码实现：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">int</span> <span class="pl-en">PartSort3</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">begin</span>, <span class="pl-smi">int</span> <span class="pl-s1">end</span>)
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">midi</span> <span class="pl-c1">=</span> <span class="pl-en">GetMidi</span>(<span class="pl-s1">a</span>, <span class="pl-s1">begin</span>, <span class="pl-s1">end</span>);
+	<span class="pl-en">Swap</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-s1">begin</span>], <span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-s1">midi</span>]);
+
+	<span class="pl-smi">int</span> <span class="pl-s1">prev</span> <span class="pl-c1">=</span> <span class="pl-s1">begin</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">cur</span> <span class="pl-c1">=</span> <span class="pl-s1">prev</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">keyi</span> <span class="pl-c1">=</span> <span class="pl-s1">begin</span>;
+	<span class="pl-k">while</span> (<span class="pl-s1">cur</span> &lt;= <span class="pl-s1">end</span>)
+	{
+		<span class="pl-k">if</span> (<span class="pl-s1">a</span>[<span class="pl-s1">cur</span>] <span class="pl-c1">&lt;</span> <span class="pl-s1">a</span>[<span class="pl-s1">keyi</span>] <span class="pl-c1">&amp;&amp;</span> <span class="pl-c1">++</span><span class="pl-s1">prev</span> <span class="pl-c1">!=</span> <span class="pl-s1">cur</span>)
+			<span class="pl-en">Swap</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-s1">prev</span>], <span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-s1">cur</span>]);
+
+		<span class="pl-c1">++</span><span class="pl-s1">cur</span>;
+	}
+
+	<span class="pl-en">Swap</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-s1">keyi</span>], <span class="pl-c1">&amp;</span><span class="pl-s1">a</span>[<span class="pl-s1">prev</span>]);
+	<span class="pl-s1">keyi</span> <span class="pl-c1">=</span> <span class="pl-s1">prev</span>;
+	<span class="pl-k">return</span> <span class="pl-s1">prev</span>;
+}
+
+<span class="pl-smi">void</span> <span class="pl-en">QuickSort</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">begin</span>, <span class="pl-smi">int</span> <span class="pl-s1">end</span>)
+{
+	<span class="pl-k">if</span> (<span class="pl-s1">begin</span> &gt;= <span class="pl-s1">end</span>)
+		<span class="pl-k">return</span>;
+
+	<span class="pl-c">// 小区间</span>
+	<span class="pl-k">if</span> (<span class="pl-s1">end</span> <span class="pl-c1">-</span> <span class="pl-s1">begin</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span> <span class="pl-c1">&lt;</span> <span class="pl-c1">10</span>)
+	{
+		<span class="pl-en">InsertSort</span>(<span class="pl-s1">a</span> <span class="pl-c1">+</span> <span class="pl-s1">begin</span>, <span class="pl-s1">end</span> <span class="pl-c1">-</span> <span class="pl-s1">begin</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>);
+	}
+	<span class="pl-k">else</span>
+	{
+		<span class="pl-smi">int</span> <span class="pl-s1">keyi</span> <span class="pl-c1">=</span> <span class="pl-en">PartSort3</span>(<span class="pl-s1">a</span>, <span class="pl-s1">begin</span>, <span class="pl-s1">end</span>);
+
+		<span class="pl-en">QuickSort</span>(<span class="pl-s1">a</span>, <span class="pl-s1">begin</span>, <span class="pl-s1">keyi</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>);
+		<span class="pl-en">QuickSort</span>(<span class="pl-s1">a</span>, <span class="pl-s1">keyi</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>, <span class="pl-s1">end</span>);
+	}
+}</pre></div>
+<p><strong>优点：</strong></p>
+<ol>
+<li><strong>原地排序：</strong> 前后指针法是一种原地排序算法，不需要额外的空间来存储临时数据，只需要一个常数级的辅助空间。</li>
+<li><strong>相对较好的性能：</strong> 在平均情况下，快速排序的前后指针法具有较好的性能，时间复杂度为O(n log n)。</li>
+<li><strong>不需要额外的空间：</strong> 与挖坑法相比，前后指针法在实际的操作中，不需要额外的元素用于填坑，从而减少了一些操作。</li>
+</ol>
+<p><strong>缺点：</strong></p>
+<ol>
+<li><strong>不稳定性：</strong> 前后指针法是一种不稳定的排序算法，相等元素的相对位置可能发生变化，如果需要稳定性，可能需要额外的处理。</li>
+<li><strong>最坏情况下的性能：</strong> 在最坏情况下，即已经有序的序列，前后指针法的性能可能较差。这时的时间复杂度为O(n^2)，因为每次分区只能使序列中的一个元素有序。</li>
+<li><strong>对于小规模数据性能较差：</strong> 在小规模数据的排序中，前后指针法的递归调用会增加额外的开销，性能可能不如一些简单的排序算法，如插入排序。</li>
+</ol>
+<hr>
+<h2>快速排序--非递归实现</h2>
+<ul>
+<li>我们这里使用栈来解决这个问题~~</li>
+<li>先入栈，然后再进行分割</li>
+<li><strong>注意：</strong> 如果是先入右后入左，那么出的时候就要先出左后出右</li>
+<li>栈不为空就继续，然后分割排左边和右边</li>
+</ul>
+<p><strong>代码实现：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span><span class="pl-s">"Stack.h"</span>
+<span class="pl-c">// 快速排序 非递归实现 </span>
+<span class="pl-smi">void</span> <span class="pl-en">QuickSortNonR</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">begin</span>, <span class="pl-smi">int</span> <span class="pl-s1">end</span>)
+{
+	<span class="pl-smi">ST</span> <span class="pl-s1">s</span>;
+	<span class="pl-en">StackInit</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">s</span>);
+	<span class="pl-c">// 先入右后入左</span>
+	<span class="pl-en">StackPush</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">s</span>, <span class="pl-s1">end</span>);
+	<span class="pl-en">StackPush</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">s</span>, <span class="pl-s1">begin</span>);
+
+	<span class="pl-k">while</span> (!<span class="pl-en">StackEmpty</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">s</span>))
+	{
+		<span class="pl-c">// 先出左后出右</span>
+		<span class="pl-smi">int</span> <span class="pl-s1">left</span> <span class="pl-c1">=</span> <span class="pl-en">StackTop</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">s</span>);
+		<span class="pl-en">StackPop</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">s</span>);
+		<span class="pl-smi">int</span> <span class="pl-s1">right</span> <span class="pl-c1">=</span> <span class="pl-en">StackTop</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">s</span>);
+		<span class="pl-en">StackPop</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">s</span>);
+
+		<span class="pl-c">// 排序</span>
+		<span class="pl-smi">int</span> <span class="pl-s1">keyi</span> <span class="pl-c1">=</span> <span class="pl-en">PartSort3</span>(<span class="pl-s1">a</span>, <span class="pl-s1">left</span>, <span class="pl-s1">right</span>);
+		<span class="pl-c">// [left keyi-1] keyi [keyi+1 right]</span>
+		<span class="pl-k">if</span> (<span class="pl-s1">left</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">keyi</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>)
+		{
+			<span class="pl-en">StackPush</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">s</span>, <span class="pl-s1">keyi</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>);
+			<span class="pl-en">StackPush</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">s</span>, <span class="pl-s1">left</span>);
+		}
+		<span class="pl-k">if</span> (<span class="pl-s1">keyi</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">right</span>)
+		{
+			<span class="pl-en">StackPush</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">s</span>, <span class="pl-s1">right</span>);
+			<span class="pl-en">StackPush</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">s</span>, <span class="pl-s1">keyi</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>);
+		}
+	}
+
+	<span class="pl-en">StackDestroy</span>(<span class="pl-c1">&amp;</span><span class="pl-s1">s</span>);
+}</pre></div>
+<hr>
+<h2>归并排序</h2>
+<ul>
+<li>归并排序（Merge Sort）是一种分治算法，它的基本思想是将待排序的数组分成两个相等大小的子数组，然后分别对这两个子数组进行排序，最后将排序好的子数组合并成一个有序的数组。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c5f4ad6814b916c3840f25b1014556b248b47aa04e498fc0010b0f3b36ab34e2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37306432663737316137313334616563383036303439303765396637343230362e676966"><img src="https://camo.githubusercontent.com/c5f4ad6814b916c3840f25b1014556b248b47aa04e498fc0010b0f3b36ab34e2/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f37306432663737316137313334616563383036303439303765396637343230362e676966" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/70d2f771a7134aec80604907e9f74206.gif" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d69e27666fe10aee80c9e2cd0da71d471b99a6b4358779ba2c123ca0e0ea0203/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31643534653330393635636134316132626466653138373336316331646536342e706e67"><img src="https://camo.githubusercontent.com/d69e27666fe10aee80c9e2cd0da71d471b99a6b4358779ba2c123ca0e0ea0203/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31643534653330393635636134316132626466653138373336316331646536342e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/1d54e30965ca41a2bdfe187361c1de64.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/c62699821e16d68f15599987261d92f175ee24bebf6048891dfbb64122f7fc5f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64326233303762356438396134313039616335303463656136396161616231382e706e67"><img src="https://camo.githubusercontent.com/c62699821e16d68f15599987261d92f175ee24bebf6048891dfbb64122f7fc5f/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f64326233303762356438396134313039616335303463656136396161616231382e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/d2b307b5d89a4109ac504cea69aaab18.png" style="max-width: 100%;"></a></p>
+<p><strong>代码实现：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">_MergeSort</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">begin</span>, <span class="pl-smi">int</span> <span class="pl-s1">end</span>, <span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">tmp</span>)
+{
+	<span class="pl-k">if</span> (<span class="pl-s1">begin</span> &gt;= <span class="pl-s1">end</span>)
+		<span class="pl-k">return</span>;
+
+	<span class="pl-c">// 分割  // 这里右移一位相当于 /2 </span>
+	<span class="pl-smi">int</span> <span class="pl-s1">mid</span> <span class="pl-c1">=</span> (<span class="pl-s1">begin</span> <span class="pl-c1">+</span> <span class="pl-s1">end</span>) &gt;&gt; <span class="pl-c1">1</span>; 
+	
+	<span class="pl-c">// 递归</span>
+	<span class="pl-en">_MergeSort</span>(<span class="pl-s1">a</span>, <span class="pl-s1">begin</span>, <span class="pl-s1">mid</span>, <span class="pl-s1">tmp</span>);
+	<span class="pl-en">_MergeSort</span>(<span class="pl-s1">a</span>, <span class="pl-s1">mid</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>, <span class="pl-s1">end</span>, <span class="pl-s1">tmp</span>);
+
+	<span class="pl-c">// [begin mid][mid+1 end]  归并</span>
+	<span class="pl-smi">int</span> <span class="pl-s1">begin1</span> <span class="pl-c1">=</span> <span class="pl-s1">begin</span>, <span class="pl-s1">end1</span> <span class="pl-c1">=</span> <span class="pl-s1">mid</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">begin2</span> <span class="pl-c1">=</span> <span class="pl-s1">mid</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>, <span class="pl-s1">end2</span> <span class="pl-c1">=</span> <span class="pl-s1">end</span>;
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-s1">begin</span>;
+
+	<span class="pl-k">while</span> (<span class="pl-s1">begin1</span> &lt;= <span class="pl-s1">end1</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">begin2</span> &lt;= <span class="pl-s1">end2</span>)
+	{
+		<span class="pl-k">if</span> (<span class="pl-s1">a</span>[<span class="pl-s1">begin1</span>] <span class="pl-c1">&lt;</span> <span class="pl-s1">a</span>[<span class="pl-s1">begin2</span>])
+		{
+			<span class="pl-s1">tmp</span>[<span class="pl-s1">i</span><span class="pl-c1">++</span>] <span class="pl-c1">=</span> <span class="pl-s1">a</span>[<span class="pl-s1">begin1</span><span class="pl-c1">++</span>];
+		}
+		<span class="pl-k">else</span>
+		{
+			<span class="pl-s1">tmp</span>[<span class="pl-s1">i</span><span class="pl-c1">++</span>] <span class="pl-c1">=</span> <span class="pl-s1">a</span>[<span class="pl-s1">begin2</span><span class="pl-c1">++</span>];
+		}
+	}
+
+	<span class="pl-k">while</span> (<span class="pl-s1">begin1</span> &lt;= <span class="pl-s1">end1</span>)
+	{
+		<span class="pl-s1">tmp</span>[<span class="pl-s1">i</span><span class="pl-c1">++</span>] <span class="pl-c1">=</span> <span class="pl-s1">a</span>[<span class="pl-s1">begin1</span><span class="pl-c1">++</span>];
+	}
+	<span class="pl-k">while</span> (<span class="pl-s1">begin2</span> &lt;= <span class="pl-s1">end2</span>)
+	{
+		<span class="pl-s1">tmp</span>[<span class="pl-s1">i</span><span class="pl-c1">++</span>] <span class="pl-c1">=</span> <span class="pl-s1">a</span>[<span class="pl-s1">begin2</span><span class="pl-c1">++</span>];
+	}
+
+	<span class="pl-c">// 拷贝回原数组</span>
+
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-s1">begin</span>; <span class="pl-s1">i</span> &lt;= <span class="pl-s1">end</span>; <span class="pl-c1">++</span><span class="pl-s1">i</span>)
+	{
+		<span class="pl-s1">a</span>[<span class="pl-s1">i</span>] <span class="pl-c1">=</span> <span class="pl-s1">tmp</span>[<span class="pl-s1">i</span>];
+	}
+
+	<span class="pl-c">//memcpy(a + begin, tmp + begin, sizeof(int) * (end - begin) + 1);</span>
+}
+
+<span class="pl-c">// 归并排序递归实现 </span>
+<span class="pl-smi">void</span> <span class="pl-en">MergeSort</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">n</span>)
+{
+	<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">tmp</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>) <span class="pl-c1">*</span> <span class="pl-s1">n</span>);
+	<span class="pl-k">if</span> (<span class="pl-s1">tmp</span> <span class="pl-c1">==</span> <span class="pl-c1">NULL</span>)
+	{
+		<span class="pl-en">perror</span>(<span class="pl-s">"malloc fail!\n"</span>);
+		<span class="pl-k">return</span>;
+	}
+
+	<span class="pl-en">_MergeSort</span>(<span class="pl-s1">a</span>, <span class="pl-c1">0</span>, <span class="pl-s1">n</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>, <span class="pl-s1">tmp</span>);
+
+	<span class="pl-en">free</span>(<span class="pl-s1">tmp</span>);
+}</pre></div>
+<p><strong>优点：</strong></p>
+<ol>
+<li><strong>稳定性：</strong> 归并排序是一种稳定的排序算法，即对于相等的元素，它们在排序后的相对位置保持不变。</li>
+<li><strong>适用于链表：</strong> 归并排序对于链表等非随机访问结构的数据也非常有效，因为它不涉及随机访问，只涉及指针操作。</li>
+<li><strong>适用于外部排序：</strong> 归并排序在外部排序（需要对外部存储进行排序的情况）中表现良好，因为它可以很容易地通过合并有序的外部文件来实现。</li>
+<li><strong>稳定的时间复杂度：</strong> 归并排序的时间复杂度是稳定的，不受输入数据的影响，总是O(n log n)。</li>
+</ol>
+<p><strong>缺点：</strong></p>
+<ol>
+<li><strong>额外空间需求：</strong> 归并排序需要额外的内存空间来存储临时数组，这使得它的空间复杂度相对较高，是O(n)。</li>
+<li><strong>非原地排序：</strong> 归并排序是一种非原地排序算法，即它需要额外的空间来存储临时数组，而不是在原始数组上进行排序。这对于内存受限的情况可能不太理想。</li>
+<li><strong>常数因子较大：</strong> 归并排序的常数因子较大，因此在实际应用中可能被一些其他排序算法（如快速排序）超越。</li>
+</ol>
+<hr>
+<h2>归并排序非递归实现</h2>
+<ul>
+<li>思想和上面的归并排序差不多~~</li>
+</ul>
+<p><strong>代码实现：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">MergeSortNonR</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">n</span>)
+{
+	<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">tmp</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>) <span class="pl-c1">*</span> <span class="pl-s1">n</span>);
+
+	<span class="pl-smi">int</span> <span class="pl-s1">gap</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>; <span class="pl-c">// 每组数据个数</span>
+	<span class="pl-k">while</span> (<span class="pl-s1">gap</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">n</span>)
+	{
+		<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">n</span>; <span class="pl-s1">i</span> <span class="pl-c1">+=</span> <span class="pl-c1">2</span> <span class="pl-c1">*</span> <span class="pl-s1">gap</span>)
+		{
+			<span class="pl-c">// [i, i+gap-1] [i+gap,i+2*gap-1]</span>
+			<span class="pl-smi">int</span> <span class="pl-s1">begin1</span> <span class="pl-c1">=</span> <span class="pl-s1">i</span>, <span class="pl-s1">end1</span> <span class="pl-c1">=</span> <span class="pl-s1">i</span> <span class="pl-c1">+</span> <span class="pl-s1">gap</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>;
+			<span class="pl-smi">int</span> <span class="pl-s1">begin2</span> <span class="pl-c1">=</span> <span class="pl-s1">i</span> <span class="pl-c1">+</span> <span class="pl-s1">gap</span>, <span class="pl-s1">end2</span> <span class="pl-c1">=</span> <span class="pl-s1">i</span> <span class="pl-c1">+</span> <span class="pl-c1">2</span> <span class="pl-c1">*</span> <span class="pl-s1">gap</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>;
+
+			<span class="pl-c">// 归并过程中右半区间可能就不存在</span>
+			<span class="pl-k">if</span> (<span class="pl-s1">begin2</span> &gt;= <span class="pl-s1">n</span>)
+				<span class="pl-k">break</span>;
+
+			<span class="pl-c">// 归并过程中右半区间算多了, 修正一下</span>
+			<span class="pl-k">if</span> (<span class="pl-s1">end2</span> &gt;= <span class="pl-s1">n</span>)
+			{
+				<span class="pl-s1">end2</span> <span class="pl-c1">=</span> <span class="pl-s1">n</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>;
+			}
+
+			<span class="pl-smi">int</span> <span class="pl-s1">index</span> <span class="pl-c1">=</span> <span class="pl-s1">i</span>;
+			<span class="pl-k">while</span> (<span class="pl-s1">begin1</span> &lt;= <span class="pl-s1">end1</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">begin2</span> &lt;= <span class="pl-s1">end2</span>)
+			{
+				<span class="pl-k">if</span> (<span class="pl-s1">a</span>[<span class="pl-s1">begin1</span>] <span class="pl-c1">&lt;</span> <span class="pl-s1">a</span>[<span class="pl-s1">begin2</span>])
+				{
+					<span class="pl-s1">tmp</span>[<span class="pl-s1">index</span><span class="pl-c1">++</span>] <span class="pl-c1">=</span> <span class="pl-s1">a</span>[<span class="pl-s1">begin1</span><span class="pl-c1">++</span>];
+				}
+				<span class="pl-k">else</span>
+				{
+					<span class="pl-s1">tmp</span>[<span class="pl-s1">index</span><span class="pl-c1">++</span>] <span class="pl-c1">=</span> <span class="pl-s1">a</span>[<span class="pl-s1">begin2</span><span class="pl-c1">++</span>];
+				}
+			}
+
+			<span class="pl-k">while</span> (<span class="pl-s1">begin1</span> &lt;= <span class="pl-s1">end1</span>)
+			{
+				<span class="pl-s1">tmp</span>[<span class="pl-s1">index</span><span class="pl-c1">++</span>] <span class="pl-c1">=</span> <span class="pl-s1">a</span>[<span class="pl-s1">begin1</span><span class="pl-c1">++</span>];
+			}
+
+			<span class="pl-k">while</span> (<span class="pl-s1">begin2</span> &lt;= <span class="pl-s1">end2</span>)
+			{
+				<span class="pl-s1">tmp</span>[<span class="pl-s1">index</span><span class="pl-c1">++</span>] <span class="pl-c1">=</span> <span class="pl-s1">a</span>[<span class="pl-s1">begin2</span><span class="pl-c1">++</span>];
+			}
+
+			<span class="pl-c">// 拷贝回去</span>
+			<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-s1">i</span>; <span class="pl-s1">j</span> &lt;= <span class="pl-s1">end2</span>; <span class="pl-c1">++</span><span class="pl-s1">j</span>)
+			{
+				<span class="pl-s1">a</span>[<span class="pl-s1">j</span>] <span class="pl-c1">=</span> <span class="pl-s1">tmp</span>[<span class="pl-s1">j</span>];
+			}
+		}
+		<span class="pl-s1">gap</span> *= <span class="pl-c1">2</span>;
+	}
+
+	<span class="pl-en">free</span>(<span class="pl-s1">tmp</span>);
+}</pre></div>
+<hr>
+<h2>非比较排序【计数排序】</h2>
+<ul>
+<li>计数排序（Counting Sort）是一种非比较性的整数排序算法，它通过确定每个元素在输出序列中的位置来实现排序。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/9877cee79a4c7877ca939774b32119e1dd9a4644784a31c55c4f4337474022f0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30666533653132376631353934393261386331386236626630373037353337312e676966"><img src="https://camo.githubusercontent.com/9877cee79a4c7877ca939774b32119e1dd9a4644784a31c55c4f4337474022f0/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f30666533653132376631353934393261386331386236626630373037353337312e676966" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/0fe3e127f159492a8c18b6bf07075371.gif" style="max-width: 100%;"></a></p>
+<p><strong>代码实现：</strong></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">CountSort</span>(<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">a</span>, <span class="pl-smi">int</span> <span class="pl-s1">n</span>)
+{
+	<span class="pl-smi">int</span> <span class="pl-s1">max</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span>[<span class="pl-c1">0</span>], <span class="pl-s1">min</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span>[<span class="pl-c1">0</span>];
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">n</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-k">if</span> (<span class="pl-s1">a</span>[<span class="pl-s1">i</span>] <span class="pl-c1">&gt;</span> <span class="pl-s1">max</span>)
+			<span class="pl-s1">max</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span>[<span class="pl-s1">i</span>];
+		<span class="pl-k">if</span> (<span class="pl-s1">a</span>[<span class="pl-s1">i</span>] <span class="pl-c1">&lt;</span> <span class="pl-s1">min</span>)
+			<span class="pl-s1">min</span> <span class="pl-c1">=</span> <span class="pl-s1">a</span>[<span class="pl-s1">i</span>];
+	}
+	<span class="pl-smi">int</span> <span class="pl-s1">range</span> <span class="pl-c1">=</span> <span class="pl-s1">max</span> <span class="pl-c1">-</span> <span class="pl-s1">min</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>;
+
+	<span class="pl-smi">int</span><span class="pl-c1">*</span> <span class="pl-s1">count</span> <span class="pl-c1">=</span> (<span class="pl-smi">int</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>) <span class="pl-c1">*</span> <span class="pl-s1">range</span>);
+	<span class="pl-k">if</span> (<span class="pl-s1">count</span> <span class="pl-c1">==</span> <span class="pl-c1">NULL</span>)
+	{
+		<span class="pl-en">perror</span>(<span class="pl-s">"malloc fail!\n"</span>);
+		<span class="pl-k">return</span>;
+	}
+
+	<span class="pl-en">memset</span>(<span class="pl-s1">count</span>, <span class="pl-c1">0</span>, <span class="pl-k">sizeof</span>(<span class="pl-smi">int</span>) <span class="pl-c1">*</span> <span class="pl-s1">range</span>);
+	<span class="pl-c">//统计次数</span>
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">n</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-s1">count</span>[<span class="pl-s1">a</span>[<span class="pl-s1">i</span>] <span class="pl-c1">-</span> <span class="pl-s1">min</span>]<span class="pl-c1">++</span>;
+	}
+
+	<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">j</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">j</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">range</span>; <span class="pl-s1">j</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-k">while</span> (<span class="pl-s1">count</span>[<span class="pl-s1">j</span>]<span class="pl-c1">--</span>)
+		{
+			<span class="pl-s1">a</span>[<span class="pl-s1">i</span><span class="pl-c1">++</span>] <span class="pl-c1">=</span> <span class="pl-s1">j</span> <span class="pl-c1">+</span> <span class="pl-s1">min</span>;
+		}
+	}
+
+	<span class="pl-en">free</span>(<span class="pl-s1">count</span>);
+}</pre></div>
+<p><strong>优点：</strong></p>
+<ol>
+<li><strong>线性时间复杂度：</strong> 计数排序是一种具有线性时间复杂度的排序算法，其时间复杂度为O(n + k)，其中n是输入元素的数量，k是输入范围的大小。在输入范围较小的情况下，计数排序通常比其他O(n log n)的排序算法更快。</li>
+<li><strong>稳定性：</strong> 计数排序是一种稳定的排序算法，即相等元素的相对顺序在排序后仍然保持不变。</li>
+<li><strong>适用于整数排序：</strong> 计数排序适用于整数排序，尤其是在知道输入范围不太大的情况下。它不依赖于比较操作，因此在某些情况下可能比基于比较的排序算法更高效。</li>
+</ol>
+<p><strong>缺点：</strong></p>
+<ol>
+<li><strong>空间复杂度：</strong> 计数排序的主要缺点是它需要额外的空间来存储计数数组。如果输入范围很大，可能需要较大的额外空间，这可能导致空间复杂度较高。</li>
+<li><strong>仅适用于整数：</strong> 计数排序仅适用于整数排序，因为它依赖于将元素映射到计数数组的索引。对于浮点数或其他数据类型，需要进行额外的转换。</li>
+<li><strong>对输入范围的限制：</strong> 计数排序要求输入的元素必须在已知范围内，否则需要进行范围的确定和调整，增加了实现的复杂性。</li>
+</ol>
+<hr>
+<h2>基数排序</h2>
+<ul>
+<li>基数排序是一种非比较性的排序算法，它根据关键字的每一位来排序数据。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7dd03549de9360395e26530a9fa62cc207de1de4959da73c502cf383da74b9d1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33653635323364323739373234393536616532313863313738366433643534662e676966"><img src="https://camo.githubusercontent.com/7dd03549de9360395e26530a9fa62cc207de1de4959da73c502cf383da74b9d1/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f33653635323364323739373234393536616532313863313738366433643534662e676966" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/3e6523d279724956ae218c1786d3d54f.gif" style="max-width: 100%;"></a></p>
+<p><strong>代码实现：</strong></p>
+<p>这里就先不实现，之后会开一个新文章来进行阐述，并且使用<code class="notranslate">C++</code>来写~~</p>
+<p><strong>优点：</strong></p>
+<ol>
+<li><strong>稳定性：</strong> 基数排序是一种稳定的排序算法，即相等元素的相对顺序在排序后保持不变。</li>
+<li><strong>适用范围广：</strong> 基数排序对于数据的分布没有特殊的要求，适用于各种数据类型，包括整数、字符串等。</li>
+<li><strong>适用于大量数据：</strong> 在某些情况下，基数排序的性能可能比一些常见的比较性排序算法（如快速排序、归并排序）更好，尤其是当数据量非常大时。</li>
+<li><strong>不受输入数据范围限制：</strong> 基数排序不受输入数据范围的限制，可以处理负数和小数。</li>
+</ol>
+<p><strong>缺点：</strong></p>
+<ol>
+<li><strong>空间复杂度较高：</strong> 基数排序的空间复杂度取决于数据的位数，如果数据位数很大，可能需要较大的辅助空间来存储中间结果。</li>
+<li><strong>不适用于小范围数据：</strong> 当数据范围比较小而位数较大时，基数排序可能不是最优选择，因为它需要较大的辅助空间。</li>
+<li><strong>只能处理正整数或字符串：</strong> 基数排序主要用于整数或字符串的排序，对于其他数据类型可能需要转换为整数或字符串形式，增加了额外的开销。</li>
+<li><strong>效率受制于位数：</strong> 基数排序的效率受制于位数，如果位数很大，可能需要进行多轮排序，导致时间复杂度较高。</li>
+</ol>
+<hr>
+<h2>排序算法复杂度及稳定性分析</h2>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b9325a5ff43f2f90957c62a21b32d6b246cb7f5c5b75b631043a72e1440cb447/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66343933616535626435326134656566623861623233363635636463343536632e706e67"><img src="https://camo.githubusercontent.com/b9325a5ff43f2f90957c62a21b32d6b246cb7f5c5b75b631043a72e1440cb447/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f66343933616535626435326134656566623861623233363635636463343536632e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/f493ae5bd52a4eefb8ab23665cdc456c.png" style="max-width: 100%;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5d0ceece72c6b943d74f140599daecde44a1c696da0c55ae82b5c157c3d4cb8c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31663962636561396663646234333433616234346565346165623038363232362e706e67"><img src="https://camo.githubusercontent.com/5d0ceece72c6b943d74f140599daecde44a1c696da0c55ae82b5c157c3d4cb8c/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f6469726563742f31663962636561396663646234333433616234346565346165623038363232362e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/direct/1f9bcea9fcdb4343ab44ee4aeb086226.png" style="max-width: 100%;"></a></p></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://xiaolinzi.eu.org">Shilin' Blog</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if("06/29/2024"!=""){
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

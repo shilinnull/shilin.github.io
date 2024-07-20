@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content=">顺序表遗留下来的问题：
+
+1. 中间/头部的插⼊删除，时间复杂度为O(N)
+2. 增容需要申请新空间，拷贝数据，释放旧空间。">
+<meta property="og:title" content="3. 【数据结构】单链表专题">
+<meta property="og:description" content=">顺序表遗留下来的问题：
+
+1. 中间/头部的插⼊删除，时间复杂度为O(N)
+2. 增容需要申请新空间，拷贝数据，释放旧空间。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/3.%20%E3%80%90-shu-ju-jie-gou-%E3%80%91-dan-lian-biao-zhuan-ti.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>3. 【数据结构】单链表专题</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">3. 【数据结构】单链表专题</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/53" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><blockquote>
+<p>顺序表遗留下来的问题：</p>
+</blockquote>
+<ol>
+<li>中间/头部的插⼊删除，时间复杂度为O(N)</li>
+<li>增容需要申请新空间，拷贝数据，释放旧空间。会有不小的消耗。</li>
+<li>增容⼀般是呈2倍的增长，势必会有⼀定的空间浪费。例如当前容量为100，满了以后增容到<br>
+200，我们再继续插入了5个数据，后⾯没有数据插入了，那么就浪费了95个数据空间。</li>
+</ol>
+<blockquote>
+<p>那么如何解决以上问题呢？</p>
+</blockquote>
+<hr>
+<blockquote>
+<p>那这个时候我们就要开始我们的链表专题了~~</p>
+</blockquote>
+<h2>链表的概念及结构</h2>
+<blockquote>
+<p>概念：链表是一种物理存储结构上非连续、非顺序的存储结构，数据元素的逻辑顺序是通过链表<br>
+中的指针链接次序实现的 。</p>
+</blockquote>
+<ul>
+<li>
+<p>链表的结构跟火车车厢相似，淡季时车次的车厢会相应减少，旺季时车次的车厢会额外增加几节。只需要将火车里的某节车厢去掉/加上，不会影响其他车厢，每节车厢都是独立存在的。</p>
+</li>
+<li>
+<p>车厢是独立存在的，且每节车厢都有车门。想象一下这样的场景，假设每节车厢的车门都是锁上的状态，需要不同的钥匙才能解锁，每次只能携带一把钥匙的情况下如何从车头走到车尾？<br>
+最简单的做法：每节车厢里都放一把下一节车厢的钥匙。</p>
+</li>
+</ul>
+<p>在链表里，每节“车厢”是什么样的呢？我们来看下面：</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e3450ed9cb3f7f92f2820053e6c1f7cea53154845dfbc85021e00678e2321f14/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f34653932643762313465323534323238393936306130396236356131663466302e706e67"><img src="https://camo.githubusercontent.com/e3450ed9cb3f7f92f2820053e6c1f7cea53154845dfbc85021e00678e2321f14/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f34653932643762313465323534323238393936306130396236356131663466302e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/4e92d7b14e2542289960a09b65a1f4f0.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>与顺序表不同的是，链表里的每节"车厢"都是独立申请下来的空间，我们称之为“结点/节点”</p>
+</li>
+<li>
+<p>节点的组成主要有两个部分：当前节点要保存的数据和保存下一个节点的地址（指针变量）。</p>
+</li>
+<li>
+<p>图中指针变量 plist保存的是第一个节点的地址，我们称plist此时“指向”第一个节点，如果我们希望plist“指向”第二个节点时，只需要修改plist保存的内容为0x0012FFA0。</p>
+</li>
+</ul>
+<blockquote>
+<p>为什么还需要指针变量来保存下一个节点的位置？</p>
+</blockquote>
+<ul>
+<li>链表中每个节点都是独立申请的（即需要插入数据时才去申请一块节点的空间），我们需要通过指针变量来保存下一个节点位置才能从当前节点找到下一个节点。</li>
+</ul>
+<p>结合前面学到的结构体知识，我们可以给出每个节点对应的结构体代码：</p>
+<p>假设当前保存的节点为整型：</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">struct</span> <span class="pl-smi">SListNode</span>
+{
+	<span class="pl-smi">int</span> <span class="pl-c1">val</span>;
+	<span class="pl-k">struct</span> <span class="pl-smi">SListNode</span><span class="pl-c1">*</span> <span class="pl-c1">next</span>;
+}</pre></div>
+<ul>
+<li>
+<p>当我们想要保存一个整型数据时，实际是向操作系统申请了一块内存，这个内存不仅要保存整型数据，也需要保存下一个节点的地址（当下一个节点为空时保存的地址为空）。</p>
+</li>
+<li>
+<p>当我们想要从第一个节点走到最后一个节点时，只需要在前一个节点拿上下一个节点的地址（下一个节点的钥匙）就可以了。</p>
+</li>
+</ul>
+<blockquote>
+<p>给定的链表结构中，如何实现节点从头到尾的打印？</p>
+</blockquote>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/f1aa64aa6fd79d895b05070241d5f694544d690512f8c0f38338761eb64056a6/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f66393730306264363133343034306639623039323132313432663637373739652e706e67"><img src="https://camo.githubusercontent.com/f1aa64aa6fd79d895b05070241d5f694544d690512f8c0f38338761eb64056a6/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f66393730306264363133343034306639623039323132313432663637373739652e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/f9700bd6134040f9b09212142f67779e.png" style="max-width: 100%;"></a></p>
+<p>思考：当我们想保存的数据类型为字符型、浮点型或者其他自定义的类型时，该如何修改？</p>
+<p>补充说明：<br>
+1、链式机构在逻辑上是连续的，在物理结构上不一定连续<br>
+2、节点一般是从堆上申请的<br>
+3、从堆上申请来的空间，是按照一定策略分配出来的，每次申请的空间可能连续，可能不连续</p>
+<h2>单链表的实现</h2>
+<p>我们老样子，先来定义结构体，要用的头文件引入~~</p>
+<h3>头文件</h3>
+<p><code class="notranslate">SList</code></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span><span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-k">#include</span><span class="pl-s">&lt;stdlib.h&gt;</span>
+<span class="pl-k">#include</span><span class="pl-s">&lt;assert.h&gt;</span>
+<span class="pl-k">#include</span><span class="pl-s">&lt;stdbool.h&gt;</span>
+
+<span class="pl-k">typedef</span> <span class="pl-smi">int</span> <span class="pl-smi">SLNDataType</span>;
+
+<span class="pl-k">typedef</span> <span class="pl-k">struct</span> <span class="pl-smi">SListNode</span>
+{
+	<span class="pl-smi">SLNDataType</span> <span class="pl-c1">val</span>;
+	<span class="pl-k">struct</span> <span class="pl-smi">SListNode</span><span class="pl-c1">*</span> <span class="pl-c1">next</span>;
+}<span class="pl-smi">SLNode</span>;</pre></div>
+<p>我们要实现哪些功能呢？</p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//打印</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLTPrint</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">phead</span>);
+
+<span class="pl-c">//尾插</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLTPushBack</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">pphead</span>, <span class="pl-smi">SLNDataType</span> <span class="pl-s1">x</span>);
+
+<span class="pl-c">//头插</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLTPushFront</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">pphead</span>, <span class="pl-smi">SLNDataType</span> <span class="pl-s1">x</span>);
+
+<span class="pl-c">//尾删</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLTPopBack</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">pphead</span>);
+
+<span class="pl-c">//头删</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLTPopFront</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">pphead</span>);
+
+<span class="pl-c">//查找</span>
+<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-en">SListFind</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">phead</span>, <span class="pl-smi">SLNDataType</span> <span class="pl-s1">x</span>);
+
+<span class="pl-c">//在指定位置之前插入数据</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLTInsert</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">pphead</span>, <span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">pos</span>, <span class="pl-smi">SLNDataType</span> <span class="pl-s1">x</span>);
+
+<span class="pl-c">//删除pos节点</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLTErase</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">pphead</span>, <span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">pos</span>);
+
+<span class="pl-c">//在指定位置之后插入数据</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLTInsertAfter</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">pos</span>, <span class="pl-smi">SLNDataType</span> <span class="pl-s1">x</span>);
+
+<span class="pl-c">//删除pos之后的节点</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLTEraseAfter</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">pos</span>);
+
+<span class="pl-c">//销毁链表</span>
+<span class="pl-smi">void</span> <span class="pl-en">SListDesTroy</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">pphead</span>);</pre></div>
+<blockquote>
+<p>好接下来我们开始实现~~</p>
+</blockquote>
+<p><code class="notranslate">SList.c</code></p>
+<h3>打印</h3>
+<ul>
+<li>这个很好实现，直接循环打印就可以</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">SLTPrint</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">phead</span>)
+{
+	<span class="pl-c">//将头节点的地址保存到cur中</span>
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">cur</span> <span class="pl-c1">=</span> <span class="pl-s1">phead</span>;
+	<span class="pl-k">while</span> (<span class="pl-s1">cur</span> <span class="pl-c1">!=</span> <span class="pl-c1">NULL</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d-&gt; "</span>, <span class="pl-s1">cur</span><span class="pl-c1">-&gt;</span><span class="pl-c1">val</span>);
+		<span class="pl-c">//cur是保存下一个节点的地址</span>
+		<span class="pl-s1">cur</span> <span class="pl-c1">=</span> <span class="pl-s1">cur</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+	}
+	<span class="pl-en">printf</span>(<span class="pl-s">"NULL\n"</span>);
+}</pre></div>
+<ul>
+<li>我们来测试一下，这里链表中什么都没有，我们可以自己手动创造几个数据</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-en">slttest1</span>()
+{
+	<span class="pl-c">//测试打印</span>
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">node1</span> <span class="pl-c1">=</span> (<span class="pl-smi">SLNode</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-s1">SLNode</span>));
+	<span class="pl-s1">node1</span><span class="pl-c1">-&gt;</span><span class="pl-c1">val</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span>;
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">node2</span> <span class="pl-c1">=</span> (<span class="pl-smi">SLNode</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-s1">SLNode</span>));
+	<span class="pl-s1">node2</span><span class="pl-c1">-&gt;</span><span class="pl-c1">val</span> <span class="pl-c1">=</span> <span class="pl-c1">2</span>;
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">node3</span> <span class="pl-c1">=</span> (<span class="pl-smi">SLNode</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-s1">SLNode</span>));
+	<span class="pl-s1">node3</span><span class="pl-c1">-&gt;</span><span class="pl-c1">val</span> <span class="pl-c1">=</span> <span class="pl-c1">3</span>;
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">node4</span> <span class="pl-c1">=</span> (<span class="pl-smi">SLNode</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-s1">SLNode</span>));
+	<span class="pl-s1">node4</span><span class="pl-c1">-&gt;</span><span class="pl-c1">val</span> <span class="pl-c1">=</span> <span class="pl-c1">4</span>;
+
+	<span class="pl-s1">node1</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-s1">node2</span>;
+	<span class="pl-s1">node2</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-s1">node3</span>;
+	<span class="pl-s1">node3</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-s1">node4</span>;
+	<span class="pl-s1">node4</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">plist</span> <span class="pl-c1">=</span> <span class="pl-s1">node1</span>;
+	<span class="pl-en">SLTPrint</span>(<span class="pl-s1">plist</span>);
+}</pre></div>
+<ul>
+<li>可以看到是可以打印出来的~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/a67b6ebe916a688475c00292b3e137185d9c61f11b01213c85f7afefbb4df8f6/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f31363531366438343564643034636339623264356333393037313636643135632e706e67"><img src="https://camo.githubusercontent.com/a67b6ebe916a688475c00292b3e137185d9c61f11b01213c85f7afefbb4df8f6/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f31363531366438343564643034636339623264356333393037313636643135632e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/16516d845dd04cc9b2d5c3907166d15c.png" style="max-width: 100%;"></a></p>
+<h3>尾插</h3>
+<ul>
+<li>这里的尾插是不是需要先申请空间，然后再将申请出来的空间赋值</li>
+<li>还需要先判断链表为不为空，如果是空，就将新开辟的空间赋给头</li>
+</ul>
+<p>下面是代码：</p>
+<ul>
+<li>扩容我们后面可能还要用，所以我们就给他分装成一个函数</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//开辟空间</span>
+<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-en">CreateNode</span>(<span class="pl-smi">SLNDataType</span> <span class="pl-s1">x</span>)
+{
+	<span class="pl-c">//malloc一个新的空间</span>
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">newnode</span> <span class="pl-c1">=</span> (<span class="pl-smi">SLNode</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-s1">SLNode</span>));
+	<span class="pl-k">if</span> (<span class="pl-s1">newnode</span> <span class="pl-c1">==</span> <span class="pl-c1">NULL</span>)
+	{
+		<span class="pl-en">perror</span>(<span class="pl-s">"malloc fail"</span>);
+		<span class="pl-en">exit</span>(<span class="pl-c1">-1</span>);
+	}
+	<span class="pl-c">//申请出来的空间直接赋值</span>
+	<span class="pl-s1">newnode</span><span class="pl-c1">-&gt;</span><span class="pl-c1">val</span> <span class="pl-c1">=</span> <span class="pl-s1">x</span>;
+	<span class="pl-c">//下一个next赋值为空</span>
+	<span class="pl-s1">newnode</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+	<span class="pl-c">//返回一个新的空间</span>
+	<span class="pl-k">return</span> <span class="pl-s1">newnode</span>;
+}</pre></div>
+<hr>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">SLTPushBack</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">pphead</span>, <span class="pl-smi">SLNDataType</span> <span class="pl-s1">x</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">pphead</span>);
+	<span class="pl-c">//这里申请空间</span>
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">newnode</span> <span class="pl-c1">=</span> <span class="pl-en">CreateNode</span>(<span class="pl-s1">x</span>);
+	<span class="pl-c">//判断头是否为空，如果为空，就将新开辟的空间赋给头</span>
+	<span class="pl-k">if</span> (<span class="pl-c1">*</span><span class="pl-s1">pphead</span> <span class="pl-c1">==</span> <span class="pl-c1">NULL</span>)
+	{
+		<span class="pl-c1">*</span><span class="pl-s1">pphead</span> <span class="pl-c1">=</span> <span class="pl-s1">newnode</span>;
+	}
+	<span class="pl-k">else</span>
+	{
+		<span class="pl-c">//将头指向变量尾</span>
+		<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">tail</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">pphead</span>;
+		<span class="pl-c">//找尾</span>
+		<span class="pl-k">while</span> (<span class="pl-s1">tail</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">!=</span> <span class="pl-c1">NULL</span>)
+		{
+			<span class="pl-c">//找到了尾然后继续</span>
+			<span class="pl-s1">tail</span> <span class="pl-c1">=</span> <span class="pl-s1">tail</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+		}
+		<span class="pl-c">//把那个返回的空间赋值给尾的next</span>
+		<span class="pl-s1">tail</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-s1">newnode</span>;
+	}
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/0ae3c40fa5433c4cc1a72e707ba2e91e87659d0e4bf9727fb5573787f2d28a3b/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f36613034323731616631313234313032396138396531376630383164633037332e706e67"><img src="https://camo.githubusercontent.com/0ae3c40fa5433c4cc1a72e707ba2e91e87659d0e4bf9727fb5573787f2d28a3b/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f36613034323731616631313234313032396138396531376630383164633037332e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/6a04271af11241029a89e17f081dc073.png" style="max-width: 100%;"></a></p>
+<h3>头插</h3>
+<ul>
+<li>这里先申请节点，然后让新的节点和头节点连接起来，最后再让新的节点成为头节点</li>
+<li>这里如果链表为空也是可以完成任务的~~</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">SLTPushFront</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">pphead</span>, <span class="pl-smi">SLNDataType</span> <span class="pl-s1">x</span>)
+{
+	<span class="pl-c">//申请节点</span>
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">newnode</span> <span class="pl-c1">=</span> <span class="pl-en">CreateNode</span>(<span class="pl-s1">x</span>);
+	<span class="pl-c">//让新节点跟头节点连接起来</span>
+	<span class="pl-s1">newnode</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">pphead</span>;
+	<span class="pl-c">//让新的节点成为头节点</span>
+	<span class="pl-c1">*</span><span class="pl-s1">pphead</span> <span class="pl-c1">=</span> <span class="pl-s1">newnode</span>;	
+}</pre></div>
+<ul>
+<li>可以看到，头插~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e0f93596623d71122a17631cd3a6365bdf9ff77d4c6e43f378117f15f94ddfa3/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f61343266373038366436653134313166383162333231626439663230366364362e706e67"><img src="https://camo.githubusercontent.com/e0f93596623d71122a17631cd3a6365bdf9ff77d4c6e43f378117f15f94ddfa3/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f61343266373038366436653134313166383162333231626439663230366364362e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/a42f7086d6e1411f81b321bd9f206cd6.png" style="max-width: 100%;"></a></p>
+<h3>尾删</h3>
+<ul>
+<li>首先找尾，然而找尾就要找到前一个节点，掷为空，然后再进行<code class="notranslate">free</code></li>
+<li>链表为空的时候不能尾删</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">SLTPopBack</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">pphead</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">pphead</span>);
+	<span class="pl-en">assert</span>(<span class="pl-c1">*</span><span class="pl-s1">pphead</span>);
+	<span class="pl-c">//当前链表只有一个节点的时候</span>
+	<span class="pl-k">if</span> ((<span class="pl-c1">*</span><span class="pl-s1">pphead</span>)<span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">==</span> <span class="pl-c1">NULL</span>)
+	{
+		<span class="pl-en">free</span>(<span class="pl-c1">*</span><span class="pl-s1">pphead</span>);
+		<span class="pl-c1">*</span><span class="pl-s1">pphead</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+	}
+	<span class="pl-k">else</span>
+	{
+		<span class="pl-c">//定义一个快慢指针</span>
+		<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">ptail</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">pphead</span>;
+		<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">prev</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+		<span class="pl-c">//ptail的next不等于NULL就一直找</span>
+		<span class="pl-k">while</span> (<span class="pl-s1">ptail</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">!=</span> <span class="pl-c1">NULL</span>)
+		{
+			<span class="pl-c">//将ptail的地址赋给慢指针prev</span>
+			<span class="pl-s1">prev</span> <span class="pl-c1">=</span> <span class="pl-s1">ptail</span>;
+			<span class="pl-c">//ptail继续往下找</span>
+			<span class="pl-s1">ptail</span> <span class="pl-c1">=</span> <span class="pl-s1">ptail</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+		}
+		<span class="pl-en">free</span>(<span class="pl-s1">ptail</span>);
+		<span class="pl-s1">prev</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+	}
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/d10410e84d99cde33768f6c0648dd763e511b04c2fb9da840f102b08d913600e/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f34303636343332303039363034626630383232626361616431306463396163652e706e67"><img src="https://camo.githubusercontent.com/d10410e84d99cde33768f6c0648dd763e511b04c2fb9da840f102b08d913600e/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f34303636343332303039363034626630383232626361616431306463396163652e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/4066432009604bf0822bcaad10dc9ace.png" style="max-width: 100%;"></a></p>
+<h3>头删</h3>
+<ul>
+<li>使用临时节点指向头节点</li>
+<li>然后将头节点指向新的头</li>
+<li>把临时指针指向的节点释放掉</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">SLTPopFront</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">pphead</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">pphead</span>);
+	<span class="pl-en">assert</span>(<span class="pl-c1">*</span><span class="pl-s1">pphead</span>);
+	<span class="pl-c">//定义一个临时指针，将第二个节点赋值给临时指针</span>
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">next</span> <span class="pl-c1">=</span> (<span class="pl-c1">*</span><span class="pl-s1">pphead</span>)<span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+	<span class="pl-c">//释放头节点</span>
+	<span class="pl-en">free</span>(<span class="pl-c1">*</span><span class="pl-s1">pphead</span>);
+	<span class="pl-c">//将临时节点变成头节点</span>
+	<span class="pl-c1">*</span><span class="pl-s1">pphead</span> <span class="pl-c1">=</span> <span class="pl-s1">next</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/b7b5cacb8854c58c89903d520b0277fe9515c21eb953505914d6f0c596984e50/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f37333430393731363864333034363533623366363362396164303136333262662e706e67"><img src="https://camo.githubusercontent.com/b7b5cacb8854c58c89903d520b0277fe9515c21eb953505914d6f0c596984e50/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f37333430393731363864333034363533623366363362396164303136333262662e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/734097168d304653b3f63b9ad01632bf.png" style="max-width: 100%;"></a></p>
+<h3>查找</h3>
+<ul>
+<li>这里我们传地址就是要保持接口的一致性</li>
+<li>所以我们这里写二级指针</li>
+<li>这里很简单，不再介绍</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-en">SListFind</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">pphead</span>, <span class="pl-smi">SLNDataType</span> <span class="pl-s1">x</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">phead</span>);
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">pcur</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">phead</span>;
+	<span class="pl-k">while</span> (<span class="pl-s1">pcur</span> <span class="pl-c1">!=</span> <span class="pl-c1">NULL</span>)
+	{
+		<span class="pl-k">if</span> (<span class="pl-s1">pcur</span><span class="pl-c1">-&gt;</span><span class="pl-c1">val</span> <span class="pl-c1">==</span> <span class="pl-s1">x</span>)
+		{
+			<span class="pl-k">return</span> <span class="pl-s1">pcur</span>;
+		}
+		<span class="pl-s1">pcur</span> <span class="pl-c1">=</span> <span class="pl-s1">pcur</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">NULL</span>;
+}</pre></div>
+<h3>在指定位置之前插入数据</h3>
+<ul>
+<li>在插入前，我们要向申请一块空间</li>
+<li>先找到要插入的地方前一个节点</li>
+<li>处理前一个和后一个的连接关系~~</li>
+<li>链表不能为空，pos也不能为空</li>
+<li>还要处理只有一个节点和只有一个节点的情况下，直接将新申请下来的节点赋给头</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">SLTInsert</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">pphead</span>, <span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">pos</span>, <span class="pl-smi">SLNDataType</span> <span class="pl-s1">x</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">pphead</span>);
+	<span class="pl-c">//链表不能为空，pos也不能为空</span>
+	<span class="pl-en">assert</span>(<span class="pl-s1">pos</span>);
+	<span class="pl-en">assert</span>(<span class="pl-c1">*</span><span class="pl-s1">pphead</span>);
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">node</span> <span class="pl-c1">=</span> <span class="pl-en">CreateNode</span>(<span class="pl-s1">x</span>);
+	<span class="pl-c">//处理只有一个节点和只有一个节点的情况下，直接将新申请下来的节点赋给头</span>
+	<span class="pl-k">if</span> ((<span class="pl-c1">*</span><span class="pl-s1">pphead</span>)<span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">==</span> <span class="pl-c1">NULL</span> <span class="pl-c1">||</span> <span class="pl-s1">pos</span> <span class="pl-c1">==</span> <span class="pl-c1">*</span><span class="pl-s1">pphead</span>)
+	{
+		<span class="pl-s1">node</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">pphead</span>;
+		<span class="pl-c1">*</span><span class="pl-s1">pphead</span> <span class="pl-c1">=</span> <span class="pl-s1">node</span>;
+		<span class="pl-k">return</span>;
+	}
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">prev</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">pphead</span>;
+	<span class="pl-c">//找pos的前一个节点</span>
+	<span class="pl-k">while</span> (<span class="pl-s1">prev</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">!=</span> <span class="pl-s1">pos</span>)
+	{
+		<span class="pl-s1">prev</span> <span class="pl-c1">=</span> <span class="pl-s1">prev</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+	}
+	<span class="pl-c">//连接</span>
+	<span class="pl-s1">node</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-s1">pos</span>;
+	<span class="pl-s1">prev</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-s1">node</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/272e37d53909e9ae82800ec717a119016eef5bbcf05c8d47ea1441c08ffd0065/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f36666162313536623561373634656135386238336563353230643366303438322e706e67"><img src="https://camo.githubusercontent.com/272e37d53909e9ae82800ec717a119016eef5bbcf05c8d47ea1441c08ffd0065/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f36666162313536623561373634656135386238336563353230643366303438322e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/6fab156b5a764ea58b83ec520d3f0482.png" style="max-width: 100%;"></a></p>
+<h3>在指定位置之后插入数据</h3>
+<ul>
+<li>这里可以直接申请空间后赋值，然后直接连接~~</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">SLTInsertAfter</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">pos</span>, <span class="pl-smi">SLNDataType</span> <span class="pl-s1">x</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">pos</span>);
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">node</span> <span class="pl-c1">=</span> <span class="pl-en">CreateNode</span>(<span class="pl-s1">x</span>);
+	<span class="pl-c">//连接</span>
+	<span class="pl-s1">node</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-s1">pos</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+	<span class="pl-s1">pos</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-s1">node</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e975e858c0a4121454a5ce2a38beadab2bf86147a48102a767eb5e2aba40996e/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f37383634303434643566623934633330393339333233383462303535336133632e706e67"><img src="https://camo.githubusercontent.com/e975e858c0a4121454a5ce2a38beadab2bf86147a48102a767eb5e2aba40996e/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f37383634303434643566623934633330393339333233383462303535336133632e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/7864044d5fb94c3093932384b0553a3c.png" style="max-width: 100%;"></a></p>
+<h3>删除pos节点</h3>
+<ul>
+<li>首先找到前一个节点，将next的指针指向下一个，再把pos的节点删除~~</li>
+<li>当也要判断pos是不是头</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">SLTErase</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">pphead</span>, <span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">pos</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">pphead</span>);
+	<span class="pl-en">assert</span>(<span class="pl-c1">*</span><span class="pl-s1">pphead</span>);
+	<span class="pl-en">assert</span>(<span class="pl-s1">pos</span>);
+	<span class="pl-c">//判断pos是不是头</span>
+	<span class="pl-k">if</span> (<span class="pl-s1">pos</span> <span class="pl-c1">==</span> <span class="pl-c1">*</span><span class="pl-s1">pphead</span>)
+	{
+		<span class="pl-c1">*</span><span class="pl-s1">pphead</span> <span class="pl-c1">=</span> (<span class="pl-c1">*</span><span class="pl-s1">pphead</span>)<span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+		<span class="pl-en">free</span>(<span class="pl-s1">pos</span>);
+		<span class="pl-k">return</span>;
+	}
+	<span class="pl-c">//找pos的前一个节点</span>
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">prev</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">pphead</span>;
+	<span class="pl-k">while</span> (<span class="pl-s1">prev</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">!=</span> <span class="pl-s1">pos</span>)
+	{
+		<span class="pl-s1">prev</span> <span class="pl-c1">=</span> <span class="pl-s1">prev</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+	}
+	<span class="pl-s1">prev</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-s1">pos</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+	<span class="pl-en">free</span>(<span class="pl-s1">pos</span>);
+	<span class="pl-s1">pos</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/3f802dfb549f6745dc316492b2de7e571be49c1e2e0ffa8dfa85b7018b7a79cd/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f38616633373634643136393334326333383630343737376631663638613034312e706e67"><img src="https://camo.githubusercontent.com/3f802dfb549f6745dc316492b2de7e571be49c1e2e0ffa8dfa85b7018b7a79cd/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f38616633373634643136393334326333383630343737376631663638613034312e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/8af3764d169342c38604777f1f68a041.png" style="max-width: 100%;"></a></p>
+<h3>删除pos之后的节点</h3>
+<ul>
+<li>首先要将pos的节点保存下来，然后改变pos的指向，最后释放</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">SLTEraseAfter</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">pos</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">pos</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">pos</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>);
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">del</span> <span class="pl-c1">=</span> <span class="pl-s1">pos</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+	<span class="pl-s1">pos</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-s1">del</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+	<span class="pl-en">free</span>(<span class="pl-s1">del</span>);
+	<span class="pl-s1">del</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/cce4c2485b7e5b7eb438d2ca0dc1c0a7303af48cfa0b74263896115fefff6440/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f32386538653538666134383934636664623863653331626436393536376633392e706e67"><img src="https://camo.githubusercontent.com/cce4c2485b7e5b7eb438d2ca0dc1c0a7303af48cfa0b74263896115fefff6440/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f32386538653538666134383934636664623863653331626436393536376633392e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/28e8e58fa4894cfdb8ce31bd69567f39.png" style="max-width: 100%;"></a></p>
+<h3>销毁链表</h3>
+<ul>
+<li>销毁节点之前，要把下一个节点保存起来，然后找下一个free，句许循环</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">SListDesTroy</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">pphead</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">pphead</span>);
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">pcur</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">pphead</span>;
+
+	<span class="pl-k">while</span> (<span class="pl-s1">pcur</span> <span class="pl-c1">!=</span> <span class="pl-c1">NULL</span>)
+	{
+		<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">next</span> <span class="pl-c1">=</span> <span class="pl-s1">pcur</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+		<span class="pl-en">free</span>(<span class="pl-s1">pcur</span>);
+		<span class="pl-s1">pcur</span> <span class="pl-c1">=</span> <span class="pl-s1">next</span>;
+	}
+	<span class="pl-c1">*</span><span class="pl-s1">pphead</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/5ea1c7fcb6d149edb5dfe8710ed35f7ad8b6444603fcd128029018a239a45636/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f33383738313862383339663734633934613732306466343366633634643430342e706e67"><img src="https://camo.githubusercontent.com/5ea1c7fcb6d149edb5dfe8710ed35f7ad8b6444603fcd128029018a239a45636/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f33383738313862383339663734633934613732306466343366633634643430342e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/387818b839f74c94a720df43fc64d404.png" style="max-width: 100%;"></a></p>
+<h2>源码</h2>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//打印</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLTPrint</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">phead</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">phead</span>);
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">end</span> <span class="pl-c1">=</span> <span class="pl-s1">phead</span>;
+	<span class="pl-k">while</span> (<span class="pl-s1">end</span> <span class="pl-c1">!=</span> <span class="pl-c1">NULL</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d-&gt;"</span>, <span class="pl-s1">end</span><span class="pl-c1">-&gt;</span><span class="pl-c1">val</span>);
+		<span class="pl-s1">end</span> <span class="pl-c1">=</span> <span class="pl-s1">end</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+	}
+	<span class="pl-en">printf</span>(<span class="pl-s">"NULL\n"</span>);
+}
+
+<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-en">CreateNode</span>(<span class="pl-smi">SLNDataType</span> <span class="pl-s1">x</span>)
+{
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">newnode</span> <span class="pl-c1">=</span> (<span class="pl-smi">SLNode</span><span class="pl-c1">*</span>)<span class="pl-en">malloc</span>(<span class="pl-k">sizeof</span>(<span class="pl-s1">SLNode</span>));
+	<span class="pl-k">if</span> (<span class="pl-s1">newnode</span> <span class="pl-c1">==</span> <span class="pl-c1">NULL</span>)
+	{
+		<span class="pl-en">perror</span>(<span class="pl-s">"malloc fail\n"</span>);
+		<span class="pl-k">return</span> <span class="pl-c1">-1</span>;
+	}
+	<span class="pl-s1">newnode</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+	<span class="pl-s1">newnode</span><span class="pl-c1">-&gt;</span><span class="pl-c1">val</span> <span class="pl-c1">=</span> <span class="pl-s1">x</span>;
+	<span class="pl-k">return</span> <span class="pl-s1">newnode</span>;
+}
+
+<span class="pl-c">//尾插</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLTPushBack</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">pphead</span>, <span class="pl-smi">SLNDataType</span> <span class="pl-s1">x</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">pphead</span>);
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">newnode</span> <span class="pl-c1">=</span> <span class="pl-en">CreateNode</span>(<span class="pl-s1">x</span>);
+	<span class="pl-k">if</span> (<span class="pl-c1">*</span><span class="pl-s1">pphead</span> <span class="pl-c1">==</span> <span class="pl-c1">NULL</span>)
+	{
+		<span class="pl-c1">*</span><span class="pl-s1">pphead</span> <span class="pl-c1">=</span> <span class="pl-s1">newnode</span>;
+	}
+	<span class="pl-k">else</span>
+	{
+		<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">tail</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">pphead</span>;
+		<span class="pl-k">while</span> (<span class="pl-s1">tail</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">!=</span> <span class="pl-c1">NULL</span>)
+		{
+			<span class="pl-s1">tail</span> <span class="pl-c1">=</span> <span class="pl-s1">tail</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+		}
+		<span class="pl-s1">tail</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-s1">newnode</span>;
+	}
+}
+
+<span class="pl-c">//头插</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLTPushFront</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">pphead</span>, <span class="pl-smi">SLNDataType</span> <span class="pl-s1">x</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">pphead</span>);
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">newnode</span> <span class="pl-c1">=</span> <span class="pl-en">CreateNode</span>(<span class="pl-s1">x</span>);
+	<span class="pl-k">if</span> (<span class="pl-c1">*</span><span class="pl-s1">pphead</span> <span class="pl-c1">==</span> <span class="pl-c1">NULL</span>)
+	{
+		<span class="pl-c1">*</span><span class="pl-s1">pphead</span> <span class="pl-c1">=</span> <span class="pl-s1">newnode</span>;
+	}
+	<span class="pl-k">else</span>
+	{
+		<span class="pl-s1">newnode</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">pphead</span>;
+		<span class="pl-c1">*</span><span class="pl-s1">pphead</span> <span class="pl-c1">=</span> <span class="pl-s1">newnode</span>;
+	}
+}
+
+<span class="pl-c">//尾删</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLTPopBack</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">pphead</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">pphead</span>);
+	<span class="pl-en">assert</span>(<span class="pl-c1">*</span><span class="pl-s1">pphead</span>);
+	<span class="pl-k">if</span> ((<span class="pl-c1">*</span><span class="pl-s1">pphead</span>)<span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">==</span> <span class="pl-c1">NULL</span>)
+	{
+		<span class="pl-en">free</span>(<span class="pl-c1">*</span><span class="pl-s1">pphead</span>);
+		<span class="pl-c1">*</span><span class="pl-s1">pphead</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+	}
+	<span class="pl-k">else</span>
+	{
+		<span class="pl-c">//定义一个快慢指针</span>
+		<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">ptail</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">pphead</span>;
+		<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">prev</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+		<span class="pl-c">//ptail的next不等于NULL就一直找</span>
+		<span class="pl-k">while</span> (<span class="pl-s1">ptail</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">!=</span> <span class="pl-c1">NULL</span>)
+		{
+			<span class="pl-c">//将ptail的地址赋给慢指针prev</span>
+			<span class="pl-s1">prev</span> <span class="pl-c1">=</span> <span class="pl-s1">ptail</span>;
+			<span class="pl-c">//ptail继续往下找</span>
+			<span class="pl-s1">ptail</span> <span class="pl-c1">=</span> <span class="pl-s1">ptail</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+		}
+		<span class="pl-en">free</span>(<span class="pl-s1">ptail</span>);
+		<span class="pl-s1">prev</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+	}
+	
+}
+
+<span class="pl-c">//头删</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLTPopFront</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">pphead</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">pphead</span>);
+	<span class="pl-en">assert</span>(<span class="pl-c1">*</span><span class="pl-s1">pphead</span>);
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">cur</span> <span class="pl-c1">=</span> (<span class="pl-c1">*</span><span class="pl-s1">pphead</span>)<span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;;
+	<span class="pl-en">free</span>(<span class="pl-c1">*</span><span class="pl-s1">pphead</span>);
+	<span class="pl-c1">*</span><span class="pl-s1">pphead</span> <span class="pl-c1">=</span> <span class="pl-s1">cur</span>;
+}
+
+<span class="pl-c">//查找</span>
+<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-en">SListFind</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">pphead</span>, <span class="pl-smi">SLNDataType</span> <span class="pl-s1">x</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">pphead</span>);
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">cur</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">pphead</span>;
+	<span class="pl-k">while</span> (<span class="pl-s1">cur</span> <span class="pl-c1">!=</span> <span class="pl-c1">NULL</span>)
+	{
+		<span class="pl-k">if</span> (<span class="pl-s1">cur</span><span class="pl-c1">-&gt;</span><span class="pl-c1">val</span> <span class="pl-c1">==</span> <span class="pl-s1">x</span>)
+		{
+			<span class="pl-k">return</span> <span class="pl-s1">cur</span>;
+		}
+		<span class="pl-s1">cur</span> <span class="pl-c1">=</span> <span class="pl-s1">cur</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+	}
+	<span class="pl-k">return</span> <span class="pl-c1">NULL</span>;
+}
+
+<span class="pl-c">//在指定位置之前插入数据</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLTInsert</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">pphead</span>, <span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">pos</span>, <span class="pl-smi">SLNDataType</span> <span class="pl-s1">x</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">pphead</span>);
+	<span class="pl-en">assert</span>(<span class="pl-s1">pos</span>);
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">newnode</span> <span class="pl-c1">=</span> <span class="pl-en">CreateNode</span>(<span class="pl-s1">x</span>);
+	<span class="pl-k">if</span> (<span class="pl-c1">*</span><span class="pl-s1">pphead</span> <span class="pl-c1">==</span> <span class="pl-c1">NULL</span> <span class="pl-c1">||</span> <span class="pl-s1">pos</span> <span class="pl-c1">==</span> <span class="pl-c1">*</span><span class="pl-s1">pphead</span>)
+	{
+		<span class="pl-s1">newnode</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">pphead</span>;
+		<span class="pl-c1">*</span><span class="pl-s1">pphead</span> <span class="pl-c1">=</span> <span class="pl-s1">newnode</span>;
+		<span class="pl-k">return</span>;
+	}
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">next</span> <span class="pl-c1">=</span> <span class="pl-s1">pos</span>;
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">prev</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">pphead</span>;
+	<span class="pl-k">while</span> (<span class="pl-s1">prev</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">!=</span> <span class="pl-s1">pos</span>)
+	{
+		<span class="pl-s1">prev</span> <span class="pl-c1">=</span> <span class="pl-s1">prev</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+	}
+	<span class="pl-s1">prev</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-s1">newnode</span>;
+	<span class="pl-s1">newnode</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-s1">next</span>;
+}
+
+<span class="pl-c">//删除pos节点</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLTErase</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">pphead</span>, <span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">pos</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">pphead</span>);
+	<span class="pl-en">assert</span>(<span class="pl-c1">*</span><span class="pl-s1">pphead</span>);
+	<span class="pl-en">assert</span>(<span class="pl-s1">pos</span>);
+	<span class="pl-k">if</span> (<span class="pl-c1">*</span><span class="pl-s1">pphead</span> <span class="pl-c1">==</span> <span class="pl-s1">pos</span>)
+	{
+		<span class="pl-en">free</span>(<span class="pl-c1">*</span><span class="pl-s1">pphead</span>);
+		<span class="pl-s1">pphead</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+		<span class="pl-k">return</span>;
+	}
+
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">next</span> <span class="pl-c1">=</span> <span class="pl-s1">pos</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">prev</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">pphead</span>;
+	<span class="pl-k">while</span> (<span class="pl-s1">prev</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">!=</span> <span class="pl-s1">pos</span>)
+	{
+		<span class="pl-s1">prev</span> <span class="pl-c1">=</span> <span class="pl-s1">prev</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+	}
+	<span class="pl-en">free</span>(<span class="pl-s1">pos</span>);
+	<span class="pl-s1">pos</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+	<span class="pl-s1">prev</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-s1">next</span>;
+}
+
+<span class="pl-c">//在指定位置之后插入数据</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLTInsertAfter</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">pos</span>, <span class="pl-smi">SLNDataType</span> <span class="pl-s1">x</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">pos</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">pos</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>);
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">newnode</span> <span class="pl-c1">=</span> <span class="pl-en">CreateNode</span>(<span class="pl-s1">x</span>);
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">cur</span> <span class="pl-c1">=</span> <span class="pl-s1">pos</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+	<span class="pl-s1">pos</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-s1">newnode</span>;
+	<span class="pl-s1">newnode</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-s1">cur</span>;
+}
+
+<span class="pl-c">//删除pos之后的节点</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLTEraseAfter</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">pos</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">pos</span>);
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">del</span> <span class="pl-c1">=</span> <span class="pl-s1">pos</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">cur</span> <span class="pl-c1">=</span> <span class="pl-s1">del</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+	<span class="pl-s1">pos</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span> <span class="pl-c1">=</span> <span class="pl-s1">cur</span>;
+	<span class="pl-en">free</span>(<span class="pl-s1">del</span>);
+	<span class="pl-s1">del</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+}
+
+<span class="pl-c">//销毁链表</span>
+<span class="pl-smi">void</span> <span class="pl-en">SListDesTroy</span>(<span class="pl-smi">SLNode</span><span class="pl-c1">*</span><span class="pl-c1">*</span> <span class="pl-s1">pphead</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">pphead</span>);
+	<span class="pl-en">assert</span>(<span class="pl-c1">*</span><span class="pl-s1">pphead</span>);
+	<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">pcur</span> <span class="pl-c1">=</span> <span class="pl-c1">*</span><span class="pl-s1">pphead</span>;
+	<span class="pl-k">if</span> (<span class="pl-s1">pcur</span> <span class="pl-c1">==</span> <span class="pl-c1">NULL</span>)
+	{
+		<span class="pl-smi">SLNode</span><span class="pl-c1">*</span> <span class="pl-s1">next</span> <span class="pl-c1">=</span> <span class="pl-s1">pcur</span><span class="pl-c1">-&gt;</span><span class="pl-c1">next</span>;
+		<span class="pl-en">free</span>(<span class="pl-s1">pcur</span>);
+		<span class="pl-s1">pcur</span> <span class="pl-c1">=</span> <span class="pl-s1">next</span>;
+	}
+	<span class="pl-c1">*</span><span class="pl-s1">pphead</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+}</pre></div></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://xiaolinzi.eu.org">Shilin' Blog</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if("06/29/2024"!=""){
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

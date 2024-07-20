@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark_colorblind" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/108561949?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="# 一、课前准备
+## 1. 目标
+
+- C语言语法基础到数据结构与算法，前面已经掌握并具备了扎实的C语言基础，为什么要学习数据结构课程？⸺ **通讯录项目**
+
+
+## 2. 需要的储备知识
+- 简单了解，通讯录具备增加、删除、修改、查找联系⼈等操作。">
+<meta property="og:title" content="2. 【数据结构】顺序表专题">
+<meta property="og:description" content="# 一、课前准备
+## 1. 目标
+
+- C语言语法基础到数据结构与算法，前面已经掌握并具备了扎实的C语言基础，为什么要学习数据结构课程？⸺ **通讯录项目**
+
+
+## 2. 需要的储备知识
+- 简单了解，通讯录具备增加、删除、修改、查找联系⼈等操作。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://xiaolinzi.eu.org/post/2.%20%E3%80%90-shu-ju-jie-gou-%E3%80%91-shun-xu-biao-zhuan-ti.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/108561949?v=4&size=64">
+<title>2. 【数据结构】顺序表专题</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">2. 【数据结构】顺序表专题</h1>
+<div class="title-right">
+    <a href="https://xiaolinzi.eu.org" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/shilinnull/shilinnull.github.io/issues/42" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h1>一、课前准备</h1>
+<h2>1. 目标</h2>
+<ul>
+<li>C语言语法基础到数据结构与算法，前面已经掌握并具备了扎实的C语言基础，为什么要学习数据结构课程？⸺ <strong>通讯录项目</strong></li>
+</ul>
+<h2>2. 需要的储备知识</h2>
+<ul>
+<li>简单了解，通讯录具备增加、删除、修改、查找联系⼈等操作。要想实现通讯录项目有两个技术关键:</li>
+<li>C语言语法基础</li>
+<li>数据结构之顺序表/链表</li>
+</ul>
+<h2>3. 数据结构相关概念</h2>
+<ul>
+<li>什么是数据结构？</li>
+</ul>
+<p>数据结构是由“数据”和“结构”两词组合而来。</p>
+<ul>
+<li>
+<p>什么是数据？<br>
+常见的数值1、2、3、4.....、教务系统里保存的用户信息（姓名、性别、年龄、学历等等）、网页肉眼可以看到的信息（文字、图片、视频等等），这些都是数据.</p>
+</li>
+<li>
+<p>什么是结构？<br>
+当我们想要使用大量使用同一类型的数据时，通过手动定义大量的独立的变量对于程序来说，可读性非常差，我们可以借助数组这样的数据结构将大量的数据组织在一起，结构也可以理解为组织数据的方式。<br>
+想要找到草原上名叫“咩咩”的羊很难，但是从羊圈里找到1号羊就很简单，羊圈这样的结构有效将羊群组织起来。</p>
+</li>
+<li>
+<p>概念：数据结构是计算机<strong>存储</strong>、<strong>组织数据</strong>的⽅式。数据结构是指相互之间存在⼀种或多种特定关系的数据元素的集合。数据结构反映数据的内部构成，即数据由那部分构成，以什么方式构成，以及数据元素之间呈现的结构。</p>
+</li>
+</ul>
+<p><strong>总结：</strong></p>
+<p>1）能够存储数据（如顺序表、链表等结构）<br>
+2）存储的数据能够⽅便查找</p>
+<hr>
+<ul>
+<li>通过数据结构，能够有效将数据组织和管理在⼀起。按照我们的方式任意对数据进行增删改查等操作。</li>
+</ul>
+<p>最基础的数据结构：数组</p>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/35b609ef36bb2a62013e357336065f26b71787d934dad3c2c6c3a8eb2353227d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36396134656131616230656334626330393236626130393932313633396566622e706e67"><img src="https://camo.githubusercontent.com/35b609ef36bb2a62013e357336065f26b71787d934dad3c2c6c3a8eb2353227d/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f36396134656131616230656334626330393236626130393932313633396566622e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/69a4ea1ab0ec4bc0926ba09921639efb.png" style="max-width: 100%;"></a></p>
+<p>【思考】有了数组，为什么还要学习其他的数据结构？<br>
+假定数组有10个空间，已经使用了5个，向数组中插⼊数据步骤：</p>
+<ul>
+<li>求数组的长度，求数组的有效数据个数，向下标为数据有效个数的位置插⼊数据（注意：这里是否要判断数组是否满了，满了还能继续插⼊吗）.....<br>
+假设数据量非常庞大，频繁的获取数组有效数据个数会影响程序执行效率。</li>
+</ul>
+<blockquote>
+<p>结论：最基础的数据结构能够提供的操作已经不能完全满足复杂算法实现</p>
+</blockquote>
+<h1>二、开始顺序表</h1>
+<h2>1. 顺序表的概念及结构</h2>
+<p><strong>线性表的概念：</strong></p>
+<ul>
+<li>线性表（linear list）是n个具有相同特性的数据元素的有限序列。 线性表是⼀种在实际中广泛使用的数据结构，常见的线性表：顺序表、链表、栈、队列、字符串... 线性表在逻辑上是线性结构，也就说是连续的⼀条直线。但是在物理结构上并不⼀定是连续的，线性表在物理上存储时，通常以数组和链式结构的形式存储。</li>
+<li>案例：蔬菜分为绿叶类、瓜类、菌菇类。线性表指的是具有部分相同特性的⼀类数据结构的集合如何理解逻辑结构和物理结构？</li>
+</ul>
+<h2>2. 顺序表分类</h2>
+<ul>
+<li>
+<p>顺序表和数组的区别</p>
+<ul>
+<li>顺序表的底层结构是数组,所以顺序表在逻辑结构上是线性的,在物理结构上也是线性的</li>
+<li>数组分为定长数组和动态数组</li>
+</ul>
+</li>
+<li>
+<p>顺序表分类</p>
+<ul>
+<li>静态顺序表</li>
+<li>动态顺序表</li>
+</ul>
+</li>
+<li>
+<p>概念:使用定长数组存储元素</p>
+</li>
+<li>
+<p>静态顺序表</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/8460627c703288d892402c98285d607deecab058104a56667bf97a2408913dab/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37363233393634366231356434303737623065323765366663653866633734612e706e67"><img src="https://camo.githubusercontent.com/8460627c703288d892402c98285d607deecab058104a56667bf97a2408913dab/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f37363233393634366231356434303737623065323765366663653866633734612e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/76239646b15d4077b0e27e6fce8fc74a.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>
+<p>静态顺序表缺陷：空间给少了不够用，给多了造成空间浪费</p>
+</li>
+<li>
+<p>动态顺序表</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e2907b2cb2021506cdf7a48f19c632c907ae1a009a923c5443402b10a80820e9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32343538366163346136373834613962393465386235643961396362356165662e706e67"><img src="https://camo.githubusercontent.com/e2907b2cb2021506cdf7a48f19c632c907ae1a009a923c5443402b10a80820e9/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32343538366163346136373834613962393465386235643961396362356165662e706e67" alt="在这里插入图片描述" data-canonical-src="https://img-blog.csdnimg.cn/24586ac4a6784a9b94e8b5d9a9cb5aef.png" style="max-width: 100%;"></a></p>
+<h2>3. 动态顺序表的实现</h2>
+<p>在我们实现顺序表的时候，首先定义出结构体，还有数据类型的定义</p>
+<p>头文件：<code class="notranslate">SeqList.h</code></p>
+<ul>
+<li>
+<p>其中<code class="notranslate">size</code>是记录多少个有效数据，为什么要定义这个<code class="notranslate">capacity</code>呢？因为是动态的顺序表，今天100的空间，明天200的空间，所以就是<code class="notranslate">capacity</code>空间有多大，空间容量~~</p>
+</li>
+<li>
+<p>我们可以看到我们当前的顺序表只能存储的是整形的数据，假如我把顺序表实现好了，我给其他人使用的时候，那我这里是整形，那能不能是char类型，double型...，我这里为什么一定要定义int类型？</p>
+</li>
+<li>
+<p>那么我们这里就要使用<code class="notranslate">typedef</code>来定义类型~~</p>
+</li>
+<li>
+<p>那我们也给这个结构体也重命名一个名字~~</p>
+</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#pragma</span> once
+<span class="pl-c">//头文件</span>
+<span class="pl-k">#include</span><span class="pl-s">&lt;stdio.h&gt;</span>
+
+<span class="pl-c">//数据类型的定义</span>
+<span class="pl-k">typedef</span> <span class="pl-smi">int</span> <span class="pl-smi">SLDataType</span>;
+
+<span class="pl-c">//结构体的定义</span>
+<span class="pl-k">typedef</span> <span class="pl-k">struct</span> <span class="pl-smi">SeqList</span>
+{
+	<span class="pl-smi">SLDataType</span><span class="pl-c1">*</span> <span class="pl-c1">a</span>;
+	<span class="pl-smi">int</span> <span class="pl-c1">size</span>;
+	<span class="pl-smi">int</span> <span class="pl-c1">capacity</span>;
+}<span class="pl-smi">SL</span>;</pre></div>
+<h3>初始化顺序表</h3>
+<p>函数的声明:<code class="notranslate">SeqList.h</code></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//初始化顺序表</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLInit</span>(<span class="pl-smi">SL</span> <span class="pl-s1">s</span>);</pre></div>
+<p>函数的实现:<code class="notranslate">SeqList.c</code></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//初始化顺序表</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLInit</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">capacity</span> <span class="pl-c1">=</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<ul>
+<li>这里需要指针来初始化~~</li>
+<li>可以看到已经初始化成功了~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/50032c46a8533c0ea8c46de46e112934f2aa05ed762b3e4419d633ffeb5cd53f/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f66356161326237386136636434613934613365376638346566343666343365312e706e67"><img src="https://camo.githubusercontent.com/50032c46a8533c0ea8c46de46e112934f2aa05ed762b3e4419d633ffeb5cd53f/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f66356161326237386136636434613934613365376638346566343666343365312e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/f5aa2b78a6cd4a94a3e7f84ef46f43e1.png" style="max-width: 100%;"></a></p>
+<blockquote>
+<p>有初始化顺序表就有销毁顺序表，接下来我们就来看看销毁顺序表是怎么完成的~~</p>
+</blockquote>
+<h3>顺序表的销毁</h3>
+<p>函数的声明:<code class="notranslate">SeqList.h</code></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//销毁顺序表</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLDestroy</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>);</pre></div>
+<p>函数的实现:<code class="notranslate">SeqList.c</code></p>
+<ul>
+<li>我们首先要判断这个顺序表为有没有开辟空间，如果没有开辟空间就不需要释放，开辟了再<code class="notranslate">free</code></li>
+<li>将顺序表连续的空间的首地址指向空，有效数据个数和容量均置为0。</li>
+<li>这里的ps有没有可能传过来的是<code class="notranslate">NULL</code>所以我们就需要断言~~</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">SeqListDestroy</span>(<span class="pl-smi">SeqList</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-en">free</span>(<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>);
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">capacity</span> <span class="pl-c1">=</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<hr>
+<p>这个时候就要实现顺序表的主体功能了~~</p>
+<h3>检查容量</h3>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">SLCheckCapacity</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-k">if</span> (<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span> <span class="pl-c1">==</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">capacity</span>) {
+		<span class="pl-smi">int</span> <span class="pl-s1">newCapacity</span> <span class="pl-c1">=</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">capacity</span> <span class="pl-c1">==</span> <span class="pl-c1">0</span> ? <span class="pl-c1">4</span> : <span class="pl-c1">2</span> <span class="pl-c1">*</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">capacity</span>;
+		<span class="pl-c">//空间不够，需要扩容</span>
+		<span class="pl-smi">SLDataType</span><span class="pl-c1">*</span> <span class="pl-s1">tmp</span> <span class="pl-c1">=</span> (<span class="pl-smi">SLDataType</span><span class="pl-c1">*</span>)<span class="pl-en">realloc</span>(<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>, <span class="pl-s1">newCapacity</span> <span class="pl-c1">*</span> <span class="pl-k">sizeof</span>(<span class="pl-s1">SLDataType</span>));
+		<span class="pl-k">if</span> (<span class="pl-s1">tmp</span> <span class="pl-c1">==</span> <span class="pl-c1">NULL</span>) {
+			<span class="pl-en">perror</span>(<span class="pl-s">"realloc fail!"</span>);
+			<span class="pl-k">return</span>;
+		}
+		<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span> <span class="pl-c1">=</span> <span class="pl-s1">tmp</span>;
+		<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">capacity</span> <span class="pl-c1">=</span> <span class="pl-s1">newCapacity</span>;
+	}
+}</pre></div>
+<h3>顺序表的尾插</h3>
+<ul>
+<li>尾插有两种情况</li>
+<li>第一种是空间足够可以直接插入</li>
+<li>第二种就是空间不够，需要先检查扩容，再插入</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/087fdb90b3e477a51b4777c3ad09e8d97fc5dbc80bfddef8214b52d03aba691e/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f37653634306232353161353634333533613362653961643338346634373066662e706e67"><img src="https://camo.githubusercontent.com/087fdb90b3e477a51b4777c3ad09e8d97fc5dbc80bfddef8214b52d03aba691e/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f37653634306232353161353634333533613362653961643338346634373066662e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/7e640b251a564353a3be9ad384f470ff.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>所以我们的做法是：</li>
+</ul>
+<ol>
+<li>判断顺序表是否有足够的空间，如果有，直接插入</li>
+<li>空间不够，需要扩容，扩容怎么扩？需要申请多少个空间？
+<ul>
+<li>增容：一般以2倍或者1.5倍进行扩容~~</li>
+</ul>
+</li>
+</ol>
+<p>函数的声明:<code class="notranslate">SeqList.h</code></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//尾插</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLPushBack</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>, <span class="pl-smi">SLDataType</span> <span class="pl-s1">x</span>);</pre></div>
+<p>函数的实现:<code class="notranslate">SeqList.c</code></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//尾插</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLPushBack</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>, <span class="pl-smi">SLDataType</span> <span class="pl-s1">x</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-en">SLCheckCapacity</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-c">//直接插入数据</span>
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span><span class="pl-c1">++</span>] <span class="pl-c1">=</span> <span class="pl-s1">x</span>;
+}</pre></div>
+<h3>顺序表的头插</h3>
+<ul>
+<li>头插也是需要顺序表的空间检查~~</li>
+<li>那么也是需要检查容量的，和上面代码一样了，我们就将上面的代码分装成一个函数，直接调用就可以了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/bda774b36fd3cdfd2a55f3d6a237d356e40fb5e5588a1c915a022f6f4976b514/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f31626532333463396264363434306337616566633130303261646431666561362e706e67"><img src="https://camo.githubusercontent.com/bda774b36fd3cdfd2a55f3d6a237d356e40fb5e5588a1c915a022f6f4976b514/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f31626532333463396264363434306337616566633130303261646431666561362e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/1be234c9bd6440c7aefc1002add1fea6.png" style="max-width: 100%;"></a></p>
+<p>函数的声明:<code class="notranslate">SeqList.h</code></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">SLPushFront</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>, <span class="pl-smi">SLDataType</span> <span class="pl-s1">x</span>);</pre></div>
+<p>函数的实现:<code class="notranslate">SeqList.c</code></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//头插</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLPushFront</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>, <span class="pl-smi">SLDataType</span> <span class="pl-s1">x</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-c">//判断空间是否足够，不够则扩容</span>
+	<span class="pl-en">SLCheckCapacity</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-c">//空间足够，历史数据后移一位</span>
+	<span class="pl-c">// 挪动数据</span>
+	<span class="pl-smi">int</span> <span class="pl-s1">end</span> <span class="pl-c1">=</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>;
+	<span class="pl-k">while</span> (<span class="pl-s1">end</span> &gt;= <span class="pl-c1">0</span>)
+	{
+		<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">end</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>] <span class="pl-c1">=</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">end</span>];
+		<span class="pl-c1">--</span><span class="pl-s1">end</span>;
+	}
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-c1">0</span>] <span class="pl-c1">=</span> <span class="pl-s1">x</span>;
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span><span class="pl-c1">++</span>;
+}</pre></div>
+<ul>
+<li>这个时候我们可以看到，已经头插进去了~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2cfcf1d27e20c5ea1d7da6b61c543e28dad3c1c104770b96c97d2c81144708f7/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f63323834313364303462356534323235616532643431633065333662393539612e706e67"><img src="https://camo.githubusercontent.com/2cfcf1d27e20c5ea1d7da6b61c543e28dad3c1c104770b96c97d2c81144708f7/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f63323834313364303462356534323235616532643431633065333662393539612e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/c28413d04b5e4225ae2d41c0e36b959a.png" style="max-width: 100%;"></a></p>
+<h3>顺序表的尾删</h3>
+<ul>
+<li>首先这里还要判断顺序表的有效数据是否为空</li>
+<li>这里我们再分装一个函数来判断是否为空</li>
+</ul>
+<p>函数的声明:<code class="notranslate">SeqList.h</code></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">bool</span> <span class="pl-en">SLIsEmpty</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>);</pre></div>
+<p>函数的声明:<code class="notranslate">SeqList.h</code></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">bool</span> <span class="pl-en">SLIsEmpty</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-k">return</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span> <span class="pl-c1">==</span> <span class="pl-c1">0</span>;
+}</pre></div>
+<hr>
+<ul>
+<li>尾删没有其他操作直接有效数据减减就可以了~~</li>
+</ul>
+<p>函数的声明:<code class="notranslate">SeqList.h</code></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">SLPopBack</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>);</pre></div>
+<p>函数的实现:<code class="notranslate">SeqList.c</code></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//尾删</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLPopBack</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-en">assert</span>(!<span class="pl-en">SLIsEmpty</span>(<span class="pl-s1">ps</span>));
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span><span class="pl-c1">--</span>;
+}</pre></div>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e1963e867c8509a23cfb97b46a274b2e7b7ee23d3bc05829ca92d8340e1641f5/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f34373835613039623034383034343035626566353731643739653033323834642e706e67"><img src="https://camo.githubusercontent.com/e1963e867c8509a23cfb97b46a274b2e7b7ee23d3bc05829ca92d8340e1641f5/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f34373835613039623034383034343035626566353731643739653033323834642e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/4785a09b04804405bef571d79e03284d.png" style="max-width: 100%;"></a></p>
+<hr>
+<h3>打印顺序表</h3>
+<p>函数的声明:<code class="notranslate">SeqList.h</code></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">SeqListPrint</span>(<span class="pl-smi">SeqList</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>);</pre></div>
+<p>函数的实现:<code class="notranslate">SeqList.c</code></p>
+<ul>
+<li>assert函数断言传过来的指针是否为空，若为空就直接结束程序 。</li>
+</ul>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">SeqListPrint</span>(<span class="pl-smi">SeqList</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span>]);
+	}
+	<span class="pl-en">printf</span>(<span class="pl-s">"\n"</span>);
+}</pre></div>
+<h3>顺序表的头删</h3>
+<ul>
+<li>需不需要先把第一个位置的数据置为默认值呢？
+<ul>
+<li>不需要，只需将后面的数据向左挪动一位，直接覆盖就可以了~~</li>
+</ul>
+</li>
+</ul>
+<p>函数的声明:<code class="notranslate">SeqList.h</code></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">SLPopFront</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>);</pre></div>
+<p>函数的实现:<code class="notranslate">SeqList.c</code></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//顺序表的头删</span>
+<span class="pl-c">//头删</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLPopFront</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-en">assert</span>(!<span class="pl-en">SLIsEmpty</span>(<span class="pl-s1">ps</span>)); 
+	<span class="pl-c">//让后面的数据往前挪动一位</span>
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span>] <span class="pl-c1">=</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>];
+	}
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span><span class="pl-c1">--</span>;
+}</pre></div>
+<ul>
+<li>可以看到头删已经成功了</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/86383c5c27d1428473b47c096a7a7d05245806dfac1524111f766ccfe0cb2187/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f37303634323765633934303434396333383264343037306635656236653237662e706e67"><img src="https://camo.githubusercontent.com/86383c5c27d1428473b47c096a7a7d05245806dfac1524111f766ccfe0cb2187/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f37303634323765633934303434396333383264343037306635656236653237662e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/706427ec940449c382d4070f5eb6e27f.png" style="max-width: 100%;"></a></p>
+<h3>在顺序表的指定位置插入数据</h3>
+<ul>
+<li>情况一：检查容量，容量足够，直接插入</li>
+<li>情况二：检查容量，容量不够，需要扩容，扩容完毕，直接插入</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/feb36d9106e0ee2901f8ec1421dc81fcae0b5b4a5bc63c99b49b94cad91a74d7/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f36653366333534646433393934643361386364336438653162316539396530622e706e67"><img src="https://camo.githubusercontent.com/feb36d9106e0ee2901f8ec1421dc81fcae0b5b4a5bc63c99b49b94cad91a74d7/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f36653366333534646433393934643361386364336438653162316539396530622e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/6e3f354dd3994d3a8cd3d8e1b1e99e0b.png" style="max-width: 100%;"></a></p>
+<p>函数的声明:<code class="notranslate">SeqList.h</code></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">SLInsert</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>, <span class="pl-smi">int</span> <span class="pl-s1">pos</span>, <span class="pl-smi">SLDataType</span> <span class="pl-s1">x</span>);</pre></div>
+<ul>
+<li>这里需要注意，pos要检查范围，不能不能负数和超出有效数据的范围~~</li>
+</ul>
+<p>函数的实现:<code class="notranslate">SeqList.c</code></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-c">//在顺序表pos位置插入x</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLInsert</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>, <span class="pl-smi">int</span> <span class="pl-s1">pos</span>, <span class="pl-smi">SLDataType</span> <span class="pl-s1">x</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-c">//需要限制范围</span>
+	<span class="pl-en">assert</span>(<span class="pl-s1">pos</span> &gt;= <span class="pl-c1">0</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">pos</span> &lt;= <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span>);
+	<span class="pl-c">//检查容量</span>
+	<span class="pl-en">SLCheckCapacity</span>(<span class="pl-s1">ps</span>);
+	
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span>; <span class="pl-s1">i</span> <span class="pl-c1">&gt;</span> <span class="pl-s1">pos</span>; <span class="pl-s1">i</span><span class="pl-c1">--</span>)
+	{
+		<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span>] <span class="pl-c1">=</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>];
+	}
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">pos</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>] <span class="pl-c1">=</span> <span class="pl-s1">x</span>;
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span><span class="pl-c1">++</span>;
+}</pre></div>
+<ul>
+<li>可以看到已经插入了~~</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/7f0822984bcaea3793c574f344bca919b1ed358c6959e433c40e66cba12d107a/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f31333932646565613438346234343532383239643266323562316130396331372e706e67"><img src="https://camo.githubusercontent.com/7f0822984bcaea3793c574f344bca919b1ed358c6959e433c40e66cba12d107a/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f31333932646565613438346234343532383239643266323562316130396331372e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/1392deea484b4452829d2f25b1a09c17.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>有了指定位置之前插入数据之后，就可以在头插尾插口中直接调用该函数即可~~</li>
+</ul>
+<hr>
+<h3>在顺序表的指定位置删除数据</h3>
+<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/79da776bb0c3a6cb47d9bd424531f4ae09c61242c27d9818314c466541147fbc/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f35383261306139643235633334366234626633323531343964663233366336652e706e67"><img src="https://camo.githubusercontent.com/79da776bb0c3a6cb47d9bd424531f4ae09c61242c27d9818314c466541147fbc/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f6469726563742f35383261306139643235633334366234626633323531343964663233366336652e706e67" alt="在这里插入图片描述" data-canonical-src="https://i-blog.csdnimg.cn/direct/582a0a9d25c346b4bf325149df236c6e.png" style="max-width: 100%;"></a></p>
+<p>函数的声明:<code class="notranslate">SeqList.h</code></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">SLErase</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>, <span class="pl-smi">int</span> <span class="pl-s1">pos</span>);</pre></div>
+<ul>
+<li>一样，需要先检查顺序表有没有有效数据，照样限制范围~~</li>
+</ul>
+<p>函数的实现:<code class="notranslate">SeqList.c</code></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">void</span> <span class="pl-en">SLErase</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>, <span class="pl-smi">int</span> <span class="pl-s1">pos</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-en">assert</span>(!<span class="pl-en">SLIsEmpty</span>(<span class="pl-s1">ps</span>));
+	<span class="pl-en">assert</span>(<span class="pl-s1">pos</span> &gt;= <span class="pl-c1">0</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">pos</span> &lt;= <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span>);
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-s1">pos</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span>] <span class="pl-c1">=</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>];
+	}
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span><span class="pl-c1">--</span>;
+}</pre></div>
+<h3>顺序表的查找</h3>
+<ul>
+<li>这里很简单直接遍历查找就可以了~~</li>
+</ul>
+<p>函数的声明:<code class="notranslate">SeqList.h</code></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">bool</span> <span class="pl-en">SLFind</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>, <span class="pl-smi">SLDataType</span> <span class="pl-s1">x</span>);</pre></div>
+<p>函数的实现:<code class="notranslate">SeqList.c</code></p>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-smi">bool</span> <span class="pl-en">SLFind</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>, <span class="pl-smi">SLDataType</span> <span class="pl-s1">x</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-en">assert</span>(!<span class="pl-en">SLIsEmpty</span>(<span class="pl-s1">ps</span>));
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-k">if</span> (<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span>] <span class="pl-c1">==</span> <span class="pl-s1">x</span>) 
+			<span class="pl-k">return</span> true;
+	}
+	<span class="pl-k">return</span> false;
+}</pre></div>
+<hr>
+<h2>源码~~</h2>
+<blockquote>
+<p><code class="notranslate">SepList.h</code></p>
+</blockquote>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#pragma</span> once
+
+<span class="pl-k">#include</span><span class="pl-s">&lt;stdio.h&gt;</span>
+<span class="pl-k">#include</span><span class="pl-s">&lt;stdlib.h&gt;</span>
+<span class="pl-k">#include</span><span class="pl-s">&lt;assert.h&gt;</span>
+<span class="pl-k">#include</span><span class="pl-s">&lt;stdbool.h&gt;</span>
+
+<span class="pl-c">//类型重命名</span>
+<span class="pl-k">typedef</span> <span class="pl-smi">int</span> <span class="pl-smi">SLDataType</span>;
+
+<span class="pl-c">//结构体的定义</span>
+<span class="pl-k">typedef</span> <span class="pl-k">struct</span> <span class="pl-smi">SeqList</span>
+{
+	<span class="pl-smi">SLDataType</span><span class="pl-c1">*</span> <span class="pl-c1">a</span>;
+	<span class="pl-smi">int</span> <span class="pl-c1">size</span>;<span class="pl-c">//记录多少个有效数据</span>
+	<span class="pl-smi">int</span> <span class="pl-c1">capacity</span>;<span class="pl-c">//空间容量</span>
+}<span class="pl-smi">SL</span>;
+
+
+<span class="pl-c">//初始化顺序表</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLInit</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>);
+
+<span class="pl-c">//销毁顺序表</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLDestroy</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>);
+
+<span class="pl-c">//尾插</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLPushBack</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>, <span class="pl-smi">SLDataType</span> <span class="pl-s1">x</span>);
+
+<span class="pl-c">//头插</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLPushFront</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>, <span class="pl-smi">SLDataType</span> <span class="pl-s1">x</span>);
+
+<span class="pl-c">//尾删</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLPopBack</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>);
+
+<span class="pl-c">//头删</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLPopFront</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>);
+
+<span class="pl-c">//打印顺序表</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLPrint</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>);
+
+<span class="pl-c">//判断是否为空</span>
+<span class="pl-smi">bool</span> <span class="pl-en">SLIsEmpty</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>);
+
+<span class="pl-c">//在任意位置之前插入</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLInsert</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>, <span class="pl-smi">int</span> <span class="pl-s1">pos</span>, <span class="pl-smi">SLDataType</span> <span class="pl-s1">x</span>);
+
+<span class="pl-c">//在任意位置之前删除</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLErase</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>, <span class="pl-smi">int</span> <span class="pl-s1">pos</span>);
+
+<span class="pl-c">//查找顺序表</span>
+<span class="pl-smi">bool</span> <span class="pl-en">SLFind</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>, <span class="pl-smi">SLDataType</span> <span class="pl-s1">x</span>);</pre></div>
+<blockquote>
+<p><code class="notranslate">SepList.c</code></p>
+</blockquote>
+<div class="highlight highlight-source-c"><pre class="notranslate"><span class="pl-k">#include</span><span class="pl-s">"SepList.h"</span>
+
+<span class="pl-c">//初始化顺序表</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLInit</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span> <span class="pl-c1">=</span> <span class="pl-c1">NULL</span>;
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">capacity</span> <span class="pl-c1">=</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+}
+
+<span class="pl-c">//销毁顺序表</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLDestroy</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>)
+{
+	<span class="pl-k">if</span>(<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>)
+		<span class="pl-en">free</span>(<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>);
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">capacity</span> <span class="pl-c1">=</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>;
+}
+
+<span class="pl-c">//检查容量</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLCheckCapacity</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-k">if</span> (<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span> <span class="pl-c1">==</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">capacity</span>) {
+		<span class="pl-smi">int</span> <span class="pl-s1">newCapacity</span> <span class="pl-c1">=</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">capacity</span> <span class="pl-c1">==</span> <span class="pl-c1">0</span> ? <span class="pl-c1">4</span> : <span class="pl-c1">2</span> <span class="pl-c1">*</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">capacity</span>;
+		<span class="pl-c">//空间不够，需要扩容</span>
+		<span class="pl-smi">SLDataType</span><span class="pl-c1">*</span> <span class="pl-s1">tmp</span> <span class="pl-c1">=</span> (<span class="pl-smi">SLDataType</span><span class="pl-c1">*</span>)<span class="pl-en">realloc</span>(<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>, <span class="pl-s1">newCapacity</span> <span class="pl-c1">*</span> <span class="pl-k">sizeof</span>(<span class="pl-s1">SLDataType</span>));
+		<span class="pl-k">if</span> (<span class="pl-s1">tmp</span> <span class="pl-c1">==</span> <span class="pl-c1">NULL</span>) {
+			<span class="pl-en">perror</span>(<span class="pl-s">"realloc fail!"</span>);
+			<span class="pl-k">return</span>;
+		}
+		<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span> <span class="pl-c1">=</span> <span class="pl-s1">tmp</span>;
+		<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">capacity</span> <span class="pl-c1">=</span> <span class="pl-s1">newCapacity</span>;
+	}
+}
+
+<span class="pl-c">//尾插</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLPushBack</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>, <span class="pl-smi">SLDataType</span> <span class="pl-s1">x</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-c">//判断空间够不够？</span>
+	<span class="pl-en">SLCheckCapacity</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-c">//直接插入数据</span>
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span><span class="pl-c1">++</span>] <span class="pl-c1">=</span> <span class="pl-s1">x</span>;
+}
+
+<span class="pl-c">//头插</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLPushFront</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>, <span class="pl-smi">SLDataType</span> <span class="pl-s1">x</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-c">//判断空间是否足够，不够则扩容</span>
+	<span class="pl-en">SLCheckCapacity</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-c">//空间足够，历史数据后移一位</span>
+	<span class="pl-c">// 挪动数据</span>
+	<span class="pl-smi">int</span> <span class="pl-s1">end</span> <span class="pl-c1">=</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>;
+	<span class="pl-k">while</span> (<span class="pl-s1">end</span> &gt;= <span class="pl-c1">0</span>)
+	{
+		<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">end</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>] <span class="pl-c1">=</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">end</span>];
+		<span class="pl-c1">--</span><span class="pl-s1">end</span>;
+	}
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-c1">0</span>] <span class="pl-c1">=</span> <span class="pl-s1">x</span>;
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span><span class="pl-c1">++</span>;
+}
+
+<span class="pl-c">//尾删</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLPopBack</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-en">assert</span>(!<span class="pl-en">SLIsEmpty</span>(<span class="pl-s1">ps</span>));
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span><span class="pl-c1">--</span>;
+}
+
+<span class="pl-c">//头删</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLPopFront</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-en">assert</span>(!<span class="pl-en">SLIsEmpty</span>(<span class="pl-s1">ps</span>));
+	<span class="pl-c">//让后面的数据往前挪动一位</span>
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span>] <span class="pl-c1">=</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>];
+	}
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span><span class="pl-c1">--</span>;
+}
+
+<span class="pl-c">//打印顺序表</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLPrint</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-en">assert</span>(!<span class="pl-en">SLIsEmpty</span>(<span class="pl-s1">ps</span>));
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-en">printf</span>(<span class="pl-s">"%d "</span>, <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span>]);
+	}
+	<span class="pl-en">printf</span>(<span class="pl-s">"\n"</span>);
+}
+
+<span class="pl-c">//判断空间是否为空</span>
+<span class="pl-smi">bool</span> <span class="pl-en">SLIsEmpty</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-k">return</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span> <span class="pl-c1">==</span> <span class="pl-c1">0</span>;
+}
+
+
+<span class="pl-c">//在任意位置之前插入</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLInsert</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>, <span class="pl-smi">int</span> <span class="pl-s1">pos</span>, <span class="pl-smi">SLDataType</span> <span class="pl-s1">x</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-c">//需要限制范围</span>
+	<span class="pl-en">assert</span>(<span class="pl-s1">pos</span> &gt;= <span class="pl-c1">0</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">pos</span> &lt;= <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span>);
+	<span class="pl-c">//检查容量</span>
+	<span class="pl-en">SLCheckCapacity</span>(<span class="pl-s1">ps</span>);
+	
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span>; <span class="pl-s1">i</span> <span class="pl-c1">&gt;</span> <span class="pl-s1">pos</span>; <span class="pl-s1">i</span><span class="pl-c1">--</span>)
+	{
+		<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span>] <span class="pl-c1">=</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>];
+	}
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">pos</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>] <span class="pl-c1">=</span> <span class="pl-s1">x</span>;
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span><span class="pl-c1">++</span>;
+}
+
+<span class="pl-c">//在任意位置之前删除</span>
+<span class="pl-smi">void</span> <span class="pl-en">SLErase</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>, <span class="pl-smi">int</span> <span class="pl-s1">pos</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-en">assert</span>(!<span class="pl-en">SLIsEmpty</span>(<span class="pl-s1">ps</span>));
+	<span class="pl-en">assert</span>(<span class="pl-s1">pos</span> &gt;= <span class="pl-c1">0</span> <span class="pl-c1">&amp;&amp;</span> <span class="pl-s1">pos</span> &lt;= <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span>);
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-s1">pos</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span> <span class="pl-c1">-</span> <span class="pl-c1">1</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span>] <span class="pl-c1">=</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span> <span class="pl-c1">+</span> <span class="pl-c1">1</span>];
+	}
+	<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span><span class="pl-c1">--</span>;
+}
+
+<span class="pl-c">//查找顺序表</span>
+<span class="pl-smi">bool</span> <span class="pl-en">SLFind</span>(<span class="pl-smi">SL</span><span class="pl-c1">*</span> <span class="pl-s1">ps</span>, <span class="pl-smi">SLDataType</span> <span class="pl-s1">x</span>)
+{
+	<span class="pl-en">assert</span>(<span class="pl-s1">ps</span>);
+	<span class="pl-k">for</span> (<span class="pl-smi">int</span> <span class="pl-s1">i</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>; <span class="pl-s1">i</span> <span class="pl-c1">&lt;</span> <span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">size</span>; <span class="pl-s1">i</span><span class="pl-c1">++</span>)
+	{
+		<span class="pl-k">if</span> (<span class="pl-s1">ps</span><span class="pl-c1">-&gt;</span><span class="pl-c1">a</span>[<span class="pl-s1">i</span>] <span class="pl-c1">==</span> <span class="pl-s1">x</span>) 
+			<span class="pl-k">return</span> true;
+	}
+	<span class="pl-k">return</span> false;
+}</pre></div></div>
+<div style="font-size:small;margin-top:8px;float:right;">❤️ 转载文章请注明出处，谢谢！❤️</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://xiaolinzi.eu.org">Shilin' Blog</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if("06/29/2024"!=""){
+    var startSite=new Date("06/29/2024");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","shilinnull/shilinnull.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>

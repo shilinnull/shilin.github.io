@@ -1,5 +1,12 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Shilin' Blog</title><link>https://xiaolinzi.eu.org</link><description>珍惜每一天~</description><copyright>Shilin' Blog</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/108561949?v=4&amp;size=64</url><title>avatar</title><link>https://xiaolinzi.eu.org</link></image><lastBuildDate>Sat, 20 Jul 2024 07:22:40 +0000</lastBuildDate><managingEditor>Shilin' Blog</managingEditor><ttl>60</ttl><webMaster>Shilin' Blog</webMaster><item><title>2. 【数据结构】顺序表专题</title><link>https://xiaolinzi.eu.org/post/2.%20%E3%80%90-shu-ju-jie-gou-%E3%80%91-shun-xu-biao-zhuan-ti.html</link><description># 一、课前准备&#13;
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Shilin' Blog</title><link>https://xiaolinzi.eu.org</link><description>珍惜每一天~</description><copyright>Shilin' Blog</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/108561949?v=4&amp;size=64</url><title>avatar</title><link>https://xiaolinzi.eu.org</link></image><lastBuildDate>Sat, 20 Jul 2024 07:23:23 +0000</lastBuildDate><managingEditor>Shilin' Blog</managingEditor><ttl>60</ttl><webMaster>Shilin' Blog</webMaster><item><title>4. 【数据结构】带头双向循环链表专题</title><link>https://xiaolinzi.eu.org/post/4.%20%E3%80%90-shu-ju-jie-gou-%E3%80%91-dai-tou-shuang-xiang-xun-huan-lian-biao-zhuan-ti.html</link><description>## 带头双向循环链表的结构&#13;
+&#13;
+&#13;
+![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/2299c09095914b738e095af0cc1a6b10.png)&#13;
+&#13;
+&#13;
+- 注意：这里的“带头”跟前面我们说的“头节点”是两个概念，实际前面的在单链表阶段称呼不严&#13;
+谨，但是为了同学们更好的理解就直接称为单链表的头节点。</description><guid isPermaLink="true">https://xiaolinzi.eu.org/post/4.%20%E3%80%90-shu-ju-jie-gou-%E3%80%91-dai-tou-shuang-xiang-xun-huan-lian-biao-zhuan-ti.html</guid><pubDate>Sat, 20 Jul 2024 07:22:47 +0000</pubDate></item><item><title>2. 【数据结构】顺序表专题</title><link>https://xiaolinzi.eu.org/post/2.%20%E3%80%90-shu-ju-jie-gou-%E3%80%91-shun-xu-biao-zhuan-ti.html</link><description># 一、课前准备&#13;
 ## 1. 目标&#13;
 &#13;
 - C语言语法基础到数据结构与算法，前面已经掌握并具备了扎实的C语言基础，为什么要学习数据结构课程？⸺ **通讯录项目**&#13;
